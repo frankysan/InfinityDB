@@ -2,6 +2,14 @@ import { getScenarios } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
+// Source-reviewed overview grouping: ITS 17 V0.2 contents (p. 2) and
+// ITS 18 2026.09.11 contents (p. 4) list the same five Direct Action missions.
+// Keep the classification season-scoped: Core Annihilation is not Direct Action.
+const GROUPED_ITS_COLLECTIONS = new Set(["its-17", "its-18"]);
+const DIRECT_ACTION_SCENARIOS = new Set([
+  "annihilation", "battleground", "cutthroat", "superiority", "uplink-center",
+]);
+
 const byId = (id) => document.getElementById(id);
 const elements = {
   count: byId("scenario-count"),
@@ -30,7 +38,7 @@ function supportedPointsLabel(points) {
   return (points || []).map((value) => `${value}`).join(" · ");
 }
 
-function renderScenario(item) {
+function renderScenario(item, headingTag = "h3") {
   const article = document.createElement("article");
   article.className = "surface surface--subtle surface--raised scenario-card";
 
@@ -40,7 +48,7 @@ function renderScenario(item) {
   const eyebrow = document.createElement("p");
   eyebrow.className = "eyebrow";
   eyebrow.textContent = item.publication?.collection_title || "Scenario";
-  const title = document.createElement("h3");
+  const title = document.createElement(headingTag);
   title.textContent = item.name;
   identity.append(eyebrow, title);
   const revision = document.createElement("span");
@@ -71,7 +79,6 @@ function renderScenario(item) {
   const params = new URLSearchParams();
   if (item.publication?.collection_id !== "n5-core") {
     params.set("collection", item.publication.collection_id);
-    params.set("revision", item.publication.revision);
   }
   link.href = `/scenarios/${encodeURIComponent(item.slug)}${params.size ? `?${params}` : ""}`;
   link.textContent = "Open scenario";
@@ -81,15 +88,47 @@ function renderScenario(item) {
   return article;
 }
 
+function scenarioGrid(items, headingTag = "h3") {
+  const grid = document.createElement("div");
+  grid.className = "scenario-grid";
+  grid.append(...items.map((item) => renderScenario(item, headingTag)));
+  return grid;
+}
+
+function scenarioSections(items) {
+  const collection = items[0]?.publication?.collection_id;
+  if (!GROUPED_ITS_COLLECTIONS.has(collection)
+      || !items.every((item) => item.publication?.collection_id === collection)) {
+    return [scenarioGrid(items)];
+  }
+
+  const groups = [
+    ["standard", "Standard scenarios", items.filter((item) => !DIRECT_ACTION_SCENARIOS.has(item.slug))],
+    ["direct-action", "Direct Action scenarios", items.filter((item) => DIRECT_ACTION_SCENARIOS.has(item.slug))],
+  ];
+  return groups.filter(([, , members]) => members.length).map(([id, title, members]) => {
+    const section = document.createElement("section");
+    section.className = "scenario-catalog-group";
+    const heading = document.createElement("h3");
+    heading.id = `scenario-group-${id}`;
+    heading.className = "detail-heading";
+    heading.textContent = title;
+    section.setAttribute("aria-labelledby", heading.id);
+    section.append(heading, scenarioGrid(members, "h4"));
+    return section;
+  });
+}
+
 function populateCollections(collections) {
   availableCollections = collections;
   const selected = selection.collection
-    ? collections.findIndex((item) => item.id === selection.collection && item.revision === selection.revision)
+    ? collections.findIndex((item) => item.id === selection.collection
+      && (!selection.revision || item.revision === selection.revision))
     : collections.findIndex((item) => item.id === "n5-core");
   const options = collections.map((item, index) => {
     const option = document.createElement("option");
     option.value = String(index);
-    option.textContent = `${item.title} · ${item.revision} (${item.scenario_count})`;
+    option.textContent = `${item.title} (${item.scenario_count})`;
     return option;
   });
   if (selected < 0) {
@@ -113,7 +152,6 @@ function changeCollection() {
   const params = new URLSearchParams();
   if (item.id !== "n5-core") {
     params.set("collection", item.id);
-    params.set("revision", item.revision);
   }
   window.location.assign(`/scenarios${params.size ? `?${params}` : ""}`);
 }
@@ -123,10 +161,10 @@ async function initialize() {
   try {
     const payload = await getScenarios(controller.signal, selection);
     populateCollections(payload.collections || []);
-    const items = payload.items || [];
+    const items = [...(payload.items || [])].sort((a, b) => a.name.localeCompare(b.name, "en"));
     elements.count.textContent = `${items.length} ${items.length === 1 ? "scenario" : "scenarios"}`;
     if (!items.length) return show(elements.empty);
-    elements.grid.replaceChildren(...items.map(renderScenario));
+    elements.grid.replaceChildren(...scenarioSections(items));
     show(elements.grid);
   } catch (error) {
     if (error.name === "AbortError") return;

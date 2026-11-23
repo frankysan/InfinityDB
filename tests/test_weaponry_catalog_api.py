@@ -546,7 +546,7 @@ def test_reviewed_weapon_source_prose_has_separate_modes_and_sources(
         if relation["direction"] == "outbound"
     }
     assert any(
-        citation["source_id"] == "wiki-en-20260926-200832"
+        citation["source_id"] == "wiki-en-20261116-075926"
         for citation in record["citations"]
     )
 
@@ -641,8 +641,8 @@ def test_activate_disco_ball_is_source_only_skill_with_working_weapon_link(
     assert "Conclusion Step" in record["summary"]
     assert any(c["source_id"] == "n5-core-v5.3-pdf" and c["page"] == 71
                for c in record["citations"])
-    assert any(c["source_id"] == "wiki-en-20260926-200832"
-               and c["member"] == "Activate_Disco_Ball"
+    assert any(c["source_id"] == "wiki-en-20261116-075926"
+               and c["member"] == "Activate_Disco_Ball.html"
                for c in record["citations"])
     disco = _weapon_rules(_weapon_detail(weaponry_app, "disco-baller"))[
         "weapon:disco-baller"
@@ -1957,8 +1957,8 @@ def test_symbiobomb_has_cited_weaponry_rules_without_fabricated_profile(
         if citation["source_id"] == "n5-core-v5.3-pdf"
     } == {("n5-core-v5.3-pdf", 74)}
     assert any(
-        citation["source_id"] == "wiki-en-20260926-200832"
-        and citation["member"] == "SymbioBomb"
+        citation["source_id"] == "wiki-en-20261116-075926"
+        and citation["member"] == "SymbioBomb__u_1d28ae8c0c0e.html"
         for citation in rule["citations"]
     )
     assert any(

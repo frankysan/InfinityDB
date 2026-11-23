@@ -43,59 +43,79 @@ const context = vm.createContext({
 });
 vm.runInContext(fs.readFileSync(source, "utf8").replace(/^import .*;$/gm, ""), context);
 
-const controller = new AbortController();
-context.item = {
+const item = {
   publication: {
-    collection_id: "its-18", revision: "2026.09.01",
+    collection_id: "its-18", revision: "2026.09.11",
     collection_title: "ITS Season 18: Overheat",
   },
 };
-context.availableContexts = ["official-tournament", "team-ops-extra"];
-context.controller = controller;
-const section = vm.runInContext(
-  "seasonPolicySection(item, availableContexts, controller)", context,
-);
-assert(section, "Season page must offer an explicit context selector");
-const select = section.children[2].children[0];
-const results = section.children[3];
-assert.equal(select.value, "", "Unselected season must not opt into tournament rules");
-assert.equal(requests.length, 0, "Unselected context must not fetch or apply policies");
-
-select.value = "official-tournament";
-select.dispatchEvent(new Event("change"));
-assert.equal(requests.length, 1);
-assert.equal(requests[0].season, "its-18");
-assert.equal(requests[0].revision, "2026.09.01");
-assert.equal(requests[0].mode, "official-tournament");
-
-select.value = "";
-select.dispatchEvent(new Event("change"));
-assert.equal(results.children.length, 0);
-requests[0].resolve({ items: [{
-  id: "its18-spec-ops-tournament",
-  title: "Season 18 restriction",
+const settle = () => new Promise((resolve) => setImmediate(resolve));
+const policy = (title) => ({
+  title,
   target: { recordId: "skill:infinity-spec-ops", name: "Infinity Spec-Ops" },
-  effect: { text: "Prohibited in tournament play" },
+  effect: { text: "Prohibited in this play context" },
   citations: [{
-    sourceId: "its-season-18-en-pdf", page: 26, section: "Spec-Ops",
-    sourceTitle: "ITS Season 18: Overheat (English)",
+    page: 27, section: "Spec-Ops",
     sourceUrl: "https://experience.corvusbelli.com/en/infinity/its-rules",
   }],
-}] });
-setImmediate(() => {
-  assert.equal(results.children.length, 0, "Late result may not reapply a cleared context");
-  assert.equal(requests.length, 1, "Clearing an opt-in never fetches a policy");
-  select.value = "team-ops-extra";
-  select.dispatchEvent(new Event("change"));
-  assert.equal(requests.length, 2);
-  controller.abort();
-  requests[1].resolve({ items: [] });
-  setImmediate(() => {
-    assert.notEqual(results.children[0]?.textContent,
-      "No additional ITS policy is published for this play context.",
-      "Aborted navigation may not render a late policy");
-    assert.equal(vm.runInContext("seasonPolicySection({publication:{collection_id:'n5-core'}}, availableContexts, controller)", context),
-      null, "Core page may not offer ITS policy selection");
-    fs.writeSync(1, "scenario ITS context selection: passed\\n");
-  });
+});
+
+async function run() {
+  context.item = item;
+  context.controller = new AbortController();
+  const section = vm.runInContext("seasonPolicySection(item, controller)", context);
+  assert.equal(section.hidden, true);
+  assert.equal(requests[0].mode, "");
+  requests[0].resolve({ contexts: ["official-tournament", "team-ops-extra", "empty-extra"] });
+  await settle();
+  assert.deepEqual(requests.slice(1).map(({ mode }) => mode),
+    ["official-tournament", "team-ops-extra", "empty-extra"]);
+  for (const request of requests) {
+    assert.equal(request.season, "its-18");
+    assert.equal(request.revision, "2026.09.11");
+    assert.equal(request.signal, context.controller.signal);
+  }
+
+  requests[1].resolve({ items: [policy("Tournament restriction"), policy("Second tournament rule")] });
+  requests[2].resolve({ items: [policy("TEAM-OPS restriction")] });
+  requests[3].resolve({ items: [] });
+  await settle();
+  assert.equal(section.hidden, false);
+  const [heading, tournament, extra] = section.children;
+  assert.equal(heading.textContent, "ITS tournament and Extra rules");
+  assert.equal(section.children.length, 3, "Only populated contexts get cards");
+  assert.equal(tournament.tag, "article");
+  assert.equal(tournament.children[0].textContent, "Official Tournament");
+  const tournamentBody = tournament.children[1];
+  assert.equal(tournamentBody.className, "surface-body");
+  assert.equal(tournamentBody.children[0].children[0].textContent, "Tournament restriction");
+  assert.equal(tournamentBody.children[1].children[0].textContent, "Second tournament rule");
+  assert.equal(extra.tag, "article");
+  assert.equal(extra.children[0].textContent, "TEAM-OPS Extra");
+  const extraBody = extra.children[1];
+  assert.equal(extraBody.className, "surface-body");
+  const [extraPolicy] = extraBody.children;
+  assert.equal(extraPolicy.children[0].textContent, "TEAM-OPS restriction");
+  assert.equal(extraPolicy.children[2].children[1].href, "/skills/infinity-spec-ops");
+  assert.match(extraPolicy.children[3].children[1].textContent, /p\. 27/);
+
+  context.controller = new AbortController();
+  const abandoned = vm.runInContext("seasonPolicySection(item, controller)", context);
+  requests[4].resolve({ contexts: ["team-ops-extra"] });
+  await settle();
+  context.controller.abort();
+  requests[5].resolve({ items: [policy("Late restriction")] });
+  await settle();
+  assert.equal(abandoned.hidden, true);
+  assert.equal(abandoned.children.length, 1);
+  assert.equal(vm.runInContext(
+    "seasonPolicySection({publication:{collection_id:'n5-core'}}, controller)", context,
+  ), null);
+  assert.equal(requests.length, 6);
+  fs.writeSync(1, "scenario ITS context cards: passed\n");
+}
+
+run().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
 });

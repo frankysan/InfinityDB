@@ -150,8 +150,14 @@ class SearchCatalog:
                         self.database, route, item["id"]
                     )
                 identifier = identifier or item["id"]
+                display_item = (
+                    {**item, "name": f"{item['name']} ({item['scenario']['name']})"}
+                    if route == "skills" and item.get("scenario") else item
+                )
                 results.append(
-                    self._result(domain, item, f"/{route}/{quote(str(identifier), safe='')}")
+                    self._result(
+                        domain, display_item, f"/{route}/{quote(str(identifier), safe='')}"
+                    )
                 )
 
         for item in self.glossary_catalog.embedded_entries():

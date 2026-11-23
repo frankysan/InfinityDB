@@ -29,6 +29,7 @@ if __package__:
         weapon_mode_identity as _mode_identity,
     )
     from .weapon_source_metadata import _metadata
+    from .wiki_archive_members import resolve_page_member
 else:  # Support direct execution from tools/research/.
     from report_output import require_new_audit_outputs, write_audit_text_or_exit
     from weapon_chart_source import WeaponChartAuditError
@@ -42,6 +43,7 @@ else:  # Support direct execution from tools/research/.
         weapon_mode_identity as _mode_identity,
     )
     from weapon_source_metadata import _metadata
+    from wiki_archive_members import resolve_page_member
 
 CHART_MEMBER = "Weapon_Chart"
 # Explicit source spellings, not a blanket singularization rule.
@@ -190,7 +192,7 @@ def reconcile(
 
 def audit(archive_path: Path, army_db: Path, curated_rules: Path) -> dict[str, Any]:
     with ZipFile(archive_path) as archive:
-        data = archive.read(CHART_MEMBER)
+        data = archive.read(resolve_page_member(archive, CHART_MEMBER))
     chart_rows = weapon_rows(data.decode("utf-8"))
     metadata, profile_count = _metadata(army_db)
     result = reconcile(chart_rows, metadata)

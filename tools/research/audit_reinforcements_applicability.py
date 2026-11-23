@@ -30,13 +30,13 @@ MANIFEST = ROOT / "config/validation/reinforcements-n5-applicability-review.json
 EXPECTED_REFERENCES = {
     "n5-core-v5.3-pdf": (
         "N5", "5.3", "data/pdf/rules/n5-rules-v5.3-en.pdf",
-        6, "game-mode-name-not-procedure", "n5-core-v5.3.json",
+        6, "game-mode-name-not-procedure", "data/curated/rules/n5-core-v5.3.json",
     ),
     "its-season-18-en-pdf": (
         "N5-ITS", "2026.09.01",
         "data/pdf/its/its-18-rules-v2026.09.01-en.pdf", 27,
         "current-extra-refers-to-unversioned-annex",
-        "n5-its-season-18-2026.09.01.json",
+        "data/curated/its/n5-its-season-18.json",
     ),
 }
 EXPECTED_LEGACY = {
@@ -169,14 +169,26 @@ def audit_applicability(
         source_id = row["sourceId"]
         if source_id in found or source_id not in EXPECTED_REFERENCES:
             raise SourceEvidenceError("Duplicate or unreviewed current source identity")
-        edition, version, relative, page, kind, curated_name = EXPECTED_REFERENCES[source_id]
+        edition, version, relative, page, kind, curated_path = EXPECTED_REFERENCES[source_id]
         if any(row[field] != expected for field, expected in (
             ("edition", edition), ("version", version),
             ("localPath", relative), ("page", page), ("evidenceKind", kind),
         )):
             raise SourceEvidenceError(f"Current source identity drift: {source_id}")
-        document = _load(source_root / "data/curated/rules" / curated_name)
-        catalog = [s for s in document["sources"] if s["id"] == source_id]
+        document = _load(source_root / curated_path)
+        if source_id == "its-season-18-en-pdf":
+            # The 2026.09.01 evidence remains pinned to its archived revision
+            # inside the maintained ITS source family, not a retired JSON file.
+            family = document.get("sourceFamily", {})
+            editions = family.get("historicalRevisions", [])
+            archived = [
+                item for item in editions
+                if item.get("revision") == version
+            ]
+            catalog = archived[0]["sources"] if len(archived) == 1 else []
+        else:
+            catalog = document["sources"]
+        catalog = [s for s in catalog if s["id"] == source_id]
         if len(catalog) != 1 or catalog[0].get("sha256") != row["sha256"]:
             raise SourceEvidenceError(
                 f"Current source pin differs from curated catalog: {source_id}"

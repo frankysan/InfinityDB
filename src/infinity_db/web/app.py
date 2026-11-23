@@ -111,7 +111,8 @@ class Application:
             fingerprints[candidate_rules_path.name] = rules_revision
         if self.publication_registry is not None:
             for season_id, manifest in self.publication_registry.season_manifest().items():
-                filename = f"{season_id.replace('-', '_')}.db"
+                assert season_databases is not None
+                filename = Path(season_databases[season_id]).name
                 if filename in fingerprints:
                     raise ValueError(f"Duplicate runtime database filename: {filename}")
                 fingerprints[filename] = manifest["sha256"]

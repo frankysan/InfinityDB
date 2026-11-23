@@ -141,7 +141,7 @@ def test_known_source_disclosures_normal_browser(
 
 @pytest.fixture(scope="module")
 def scenario_app() -> Callable[..., Any]:
-    """Serve the source-bound three-file runtime, not a standalone Rules-v10 export."""
+    """Serve the complete source-bound runtime database set."""
     return create_app_from_database_set(ROOT / "data/generated")
 
 
@@ -1623,8 +1623,8 @@ def test_label_vocabulary_sources_in_normal_browser(
         assert page.locator("html").get_attribute("data-theme") == theme
         text = citations.inner_text()
         assert "Label vocabulary sources:" in text
-        assert "Infinity Wiki snapshot (English) v20260926-200832, Labels" in text
-        assert "archived member Labels; link opens source site" in text
+        assert "Infinity Wiki snapshot (English) v20261116-075926, Labels" in text
+        assert "archived member Labels.html; link opens source site" in text
         assert "N5 Core Rules v5.3, p. 174" in text
         assert page.get_by_text(
             "These sources describe the Label vocabulary as a whole; "
@@ -2585,6 +2585,144 @@ def test_core_scenario_detail_error_recovers_after_valid_size_choice(
         page.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize(("season", "standard_count"), [("its-17", 11), ("its-18", 15)])
+def test_its_scenario_catalog_groups_standard_and_direct_action(
+    scenario_app: Callable[..., Any], chrome: Any,
+    width: int, season: str, standard_count: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/scenarios?collection={season}", wait_until="domcontentloaded")
+        catalog = page.locator("#scenario-grid")
+        catalog.wait_for(state="visible", timeout=30000)
+        assert catalog.locator(".scenario-catalog-group > h3").all_text_contents() == [
+            "Standard scenarios", "Direct Action scenarios",
+        ]
+        groups = catalog.locator(".scenario-catalog-group")
+        standard = groups.nth(0).locator(".scenario-card h4").all_text_contents()
+        direct = groups.nth(1).locator(".scenario-card h4").all_text_contents()
+        assert len(standard) == standard_count
+        assert standard == sorted(standard, key=str.casefold)
+        assert direct == [
+            "Annihilation", "Battleground", "Cutthroat", "Superiority", "Uplink Center",
+        ]
+        assert not set(standard) & set(direct)
+        assert page.locator("#scenario-count").inner_text() == f"{standard_count + 5} scenarios"
+        assert catalog.locator(".scenario-card-footer a").count() == standard_count + 5
+        assert all(
+            f"collection={season}" in url
+            for url in catalog.locator(".scenario-card-footer a").evaluate_all(
+                "(links) => links.map(link => link.href)"
+            )
+        )
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize(
+    ("season", "revision", "count"), [("its-17", "0.2", 16), ("its-18", "2026.09.11", 20)]
+)
+def test_all_its_scenario_setups_render_current_season(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    season: str, revision: str, count: int,
+) -> None:
+    """Exercise all six published setups, including season-local source notes."""
+    status, _, raw = wsgi_response(
+        release_scenario_app, f"{ORIGIN}/api/scenarios?collection={season}"
+    )
+    assert status == 200
+    items = json.loads(raw)["items"]
+    assert len(items) == count
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(
+        "sessionStorage.setItem('infinity-db-distance-unit', 'in');"
+        "sessionStorage.setItem('infinity-db-developer-mode', 'false');"
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    sizes = [(150, 3, 24, 32), (200, 4, 32, 48), (250, 5, 32, 48),
+             (300, 6, 48, 48), (350, 7, 48, 48), (400, 8, 48, 48)]
+    try:
+        for item in items:
+            slug = item["slug"]
+            page.goto(
+                f"{ORIGIN}/scenarios/{slug}?collection={season}&army_points=150",
+                wait_until="domcontentloaded",
+            )
+            select = page.locator("#scenario-army-points")
+            select.wait_for(state="visible", timeout=60000)
+            assert [option.get_attribute("value") for option in select.locator("option").all()] == [
+                "", "150", "200", "250", "300", "350", "400",
+            ], (season, slug)
+            for points, swc, table_width, table_height in sizes:
+                context = (season, slug, points, width)
+                if points != 150:
+                    select.select_option(str(points))
+                page.wait_for_function(
+                    """(points) => document.querySelector('#scenario-content')?.hidden === false
+                      && document.querySelector('.scenario-facts dd')?.textContent
+                          === String(points)
+                      && new URL(document.querySelector('img.scenario-map').src)
+                          .searchParams.get('army_points') === String(points)""",
+                    arg=points, timeout=30000,
+                )
+                status, _, raw = wsgi_response(
+                    release_scenario_app,
+                    f"{ORIGIN}/api/scenarios/{slug}?collection={season}&army_points={points}",
+                )
+                assert status == 200, context
+                detail = json.loads(raw)
+                assert detail["publication"]["revision"] == revision, context
+                assert f"v{revision}" in page.locator("#scenario-description").inner_text(), context
+                facts = page.locator(".scenario-setup-card .scenario-fact")
+                assert facts.nth(0).locator("dd").inner_text() == str(points), context
+                assert facts.nth(1).locator("dd").inner_text().splitlines()[0] == str(swc), context
+                assert facts.nth(2).locator("dd").inner_text() == (
+                    f"{table_width}″ × {table_height}″"
+                ), context
+                image = page.locator("img.scenario-map")
+                assert f"collection={season}" in image.get_attribute("src"), context
+                svg = _rendered_scenario_image(page)
+                assert svg.attrib["viewBox"] == f"0 0 {table_width} {table_height}", context
+                gate_note = page.locator(".scenario-map-placement-note").filter(
+                    has_text="Gate widths are schematic."
+                )
+                assert gate_note.is_visible() == (slug in {
+                    "critical-intervention", "last-launch",
+                }), context
+                assert page.locator(".scenario-objective:visible").count() == len(
+                    detail["objectives"]
+                ), context
+                assert page.locator(".scenario-citations a").count() >= 1, context
+                notes = page.locator(".scenario-source-issue")
+                expected_ids = {
+                    f"scenario-source-issue-{issue['id']}" for issue in detail["source_issues"]
+                }
+                assert set(notes.evaluate_all("(nodes) => nodes.map(node => node.id)")) == (
+                    expected_ids
+                ), context
+                assert notes.locator(".detail-copy:visible").count() == len(expected_ids), context
+                assert all(
+                    text.strip() for text in notes.locator(".detail-copy").all_text_contents()
+                ), context
+                assert not page.locator("#scenario-error").is_visible(), context
+                assert not page.locator(".scenario-provenance").is_visible(), context
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                ), context
+            assert not errors, (season, slug, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_core_scenario_catalog_keyboard_soft_navigation_and_back(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
@@ -2682,9 +2820,15 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
             assert setup.nth(2).locator("dd").inner_text() == (
                 f"{table_width}″ × {table_height}″"
             )
-            assert (setup.count() == 4) == has_minimum
+            assert setup.count() == (7 if has_minimum else 6)
             if has_minimum:
                 assert setup.nth(3).locator("dd").inner_text() == str(minimum)
+            for index, label in enumerate(
+                ("Classified Objectives", "Tactical Objectives", "HVTs"),
+                start=4 if has_minimum else 3,
+            ):
+                assert setup.nth(index).locator("dt").inner_text() == label
+                assert setup.nth(index).locator("dd").inner_text() == "Not used"
 
             svg = _rendered_scenario_image(page)
             assert svg.attrib["viewBox"] == f"0 0 {table_width} {table_height}"
@@ -3370,7 +3514,7 @@ def test_core_scenario_marker_sizes_are_visible_and_physically_fixed(
                 citation = marker.locator(".detail-source a")
                 assert citation.count() == 1
                 assert "ITS Season 18" in citation.inner_text()
-                assert "p. 17" in citation.inner_text()
+                assert "p. 18" in citation.inner_text()
                 assert page.evaluate(
                     "() => document.documentElement.scrollWidth <= innerWidth + 1"
                 ), (width, slug, unit)
@@ -3388,7 +3532,7 @@ def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
     route_browser_page(page, scenario_app, ORIGIN)
     page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}');")
     try:
-        page.goto(f"{ORIGIN}/scenarios/battleground?collection=its-18&revision=2026.09.01&army_points=300",
+        page.goto(f"{ORIGIN}/scenarios/battleground?collection=its-18&army_points=300",
                   wait_until="domcontentloaded")
         # A normal image element enables the browser's native Save Image As action.
         image = page.locator("img.scenario-map")
@@ -3451,7 +3595,7 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
             svg = _rendered_scenario_image(page)
             namespace = "{http://www.w3.org/2000/svg}"
             guides = svg.findall(f".//{namespace}g[@class='center-measurement']")
-            assert len(guides) == 8
+            assert len(guides) == 2
             assert len(svg.findall(f".//{namespace}rect[@class='scoring']")) == 4
             assert not any(
                 node.attrib.get("data-target", "").startswith("quadrant-")
@@ -3490,7 +3634,7 @@ def test_domination_embedded_map_emphasizes_console_center_placement(
         page.close()
 
 
-@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize("width", [1440, 770, 390])
 def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
 ) -> None:
@@ -3515,7 +3659,7 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
                 assert conflict.count() == 1
                 assert conflict.locator("dt").inner_text() == "SWC"
                 assert conflict.locator("dd").inner_text().startswith("6")
-                link = conflict.locator("a.scenario-swc-source-conflict")
+                link = setup.locator("a.scenario-swc-source-conflict")
                 assert link.count() == 1
                 assert "Official sources disagree" in link.inner_text()
                 assert link.get_attribute("href") == "#scenario-source-issue-350-point-swc"
@@ -3535,6 +3679,13 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
             else:
                 assert conflict.count() == 0
                 assert issue.count() == 0
+            assert setup.locator(".scenario-fact dt, .scenario-fact dd").evaluate_all(
+                """cells => cells.every(cell => {
+                  const range = document.createRange();
+                  range.selectNodeContents(cell);
+                  return range.getClientRects().length === 1;
+                })"""
+            ), (width, slug, points)
             assert page.evaluate(
                 "() => document.documentElement.scrollWidth <= innerWidth + 1"
             ), (width, slug, points)

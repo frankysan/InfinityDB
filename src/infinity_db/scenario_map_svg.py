@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from functools import lru_cache
 from html import escape
@@ -10,11 +11,14 @@ from typing import Literal
 
 from .scenario_geometry import (
     AreaSizeAnnotation,
+    CircleRegionElement,
     Coordinate,
     ElementEdgeDistanceAnnotation,
     LineElement,
     MarkerElement,
+    QuarterCircleElement,
     RectangleElement,
+    RulerAnnotation,
     ScenarioAnnotation,
     ScenarioElement,
     ScenarioGeometry,
@@ -30,6 +34,11 @@ _RENDERABLE_ELEMENT_STYLES = frozenset(
         "deployment-a",
         "deployment-b",
         "scoring",
+        "no-deploy",
+        "exclusion",
+        "influence",
+        "sector",
+        "sector-center",
         "objective",
         "guide",
         "measurement",
@@ -67,6 +76,75 @@ paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);stroke-wid
 font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weight:600}
 """
 
+# Optional ITS-only styling is omitted from historical Core and Battleground
+# SVGs to preserve their frozen byte-level publication identity.
+_NO_DEPLOY_CSS = """.no-deploy{fill:#f0c6c6;fill-opacity:.72;stroke:#aa7777;stroke-width:.09}
+svg[data-theme="dark"] .no-deploy{fill:#744647;stroke:#d5a7a7}
+"""
+_WIDE_GATE_CSS = """.wide-gate-wall{fill:none;stroke:#aa7777;stroke-width:.12}
+svg[data-theme="dark"] .wide-gate-wall{stroke:#d5a7a7}
+.wide-gate-label{fill:var(--color-scenario-map-text,#203b35);
+font-family:sans-serif;font-size:1.15px;font-weight:600;
+paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);
+stroke-width:.065;stroke-linejoin:round}
+.label#room-label,.label#launching-tower-label{font-size:1.4px}
+"""
+_EXCLUSION_CSS = """.exclusion{fill:url(#scenario-exclusion-hatch);
+stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
+"""
+_EXCLUSION_DEFS = """<defs><pattern id="scenario-exclusion-hatch"
+patternUnits="userSpaceOnUse" width="1.1" height="1.1" patternTransform="rotate(-45)">
+<rect width="1.1" height="1.1" fill="var(--color-scenario-map-deployment-b,#fee2e2)"
+fill-opacity=".7"/>
+<line x1=".2" y1="0" x2=".2" y2="1.1"
+stroke="var(--color-scenario-map-deployment-b-edge,#dc2626)" stroke-width=".28"
+stroke-opacity=".48"/></pattern></defs>
+"""
+_SPECIAL_ZONE_CSS = """.influence{fill:#d4c7f1;fill-opacity:.8;stroke:#7463a8;stroke-width:.10}
+.sector{fill:#b9c995;fill-opacity:.85;stroke:#667e47;stroke-width:.08}
+.sector-center{fill:#eee7b7;fill-opacity:.85;stroke:#9e9855;stroke-width:.08}
+svg[data-theme="dark"] .influence{fill:#51476b;stroke:#c0adf0}
+svg[data-theme="dark"] .sector{fill:#4b5b3e;stroke:#a6c083}
+svg[data-theme="dark"] .sector-center{fill:#6c6444;stroke:#d2c88b}
+"""
+_BEACON_MARKER_CSS = """.objective#beacon-a{fill:#cf4047;stroke:#8f1520}
+.objective#beacon-b{fill:#278ec4;stroke:#15577c}
+.objective[data-marker-type="console"]{fill:#84ca7a;stroke:#377735}
+svg[data-theme="dark"] .objective#beacon-a{fill:#ed8388;stroke:#f5b6b9}
+svg[data-theme="dark"] .objective#beacon-b{fill:#77c4ef;stroke:#c4eafd}
+svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
+"""
+_TRACKING_BEACON_CSS = """\
+.objective[data-marker-type="tracking-beacon"]{fill:#5f8ecc;stroke:#24568f}
+.objective[data-marker-type="console"]{fill:#84ca7a;stroke:#377735}
+svg[data-theme="dark"] .objective[data-marker-type="tracking-beacon"]{fill:#75b9ec;stroke:#c6e9ff}
+svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
+"""
+_ANTENNA_TECH_MARKER_CSS = """.objective[data-marker-type="antenna"]{fill:#f7c86a;stroke:#b97b09}
+.objective[data-marker-type="tech-coffin"]{fill:#a99ac5;stroke:#6d4d91}
+svg[data-theme="dark"] .objective[data-marker-type="antenna"]{fill:#97741e;stroke:#efd18d}
+svg[data-theme="dark"] .objective[data-marker-type="tech-coffin"]{fill:#725991;stroke:#dec9f1}
+"""
+_PROTOTYPE_PANOPLY_CSS = """\
+.objective[data-marker-type="prototype"]{fill:#da79a6;stroke:#a33e70}
+.objective[data-marker-type="panoply"]{fill:#64b7c0;stroke:#25757c}
+svg[data-theme="dark"] .objective[data-marker-type="prototype"]{fill:#a85988;stroke:#f2adce}
+svg[data-theme="dark"] .objective[data-marker-type="panoply"]{fill:#468b99;stroke:#b0e5ed}
+"""
+_EVACUATION_MARKER_CSS = """\
+.objective[data-marker-type="civilian"]{fill:#74c9e6;stroke:#237ca7}
+.objective[data-marker-type="console"]{fill:#84ca7a;stroke:#377735}
+svg[data-theme="dark"] .objective[data-marker-type="civilian"]{fill:#83d5eb;stroke:#b5efff}
+svg[data-theme="dark"] .objective[data-marker-type="console"]{fill:#6aa968;stroke:#b7ebb0}
+"""
+_DEFENSIVE_TURRET_CSS = """\
+.objective[data-marker-type="defensive-turret"]{fill:#718096;stroke:#334155}
+svg[data-theme="dark"] .objective[data-marker-type="defensive-turret"]{fill:#64748b;stroke:#cbd5e1}
+"""
+_RULER_CSS = """.placement-ruler{stroke-width:.11}
+.placement-ruler line{stroke-width:.11;stroke-dasharray:none}
+"""
+
 
 _THEME_TOKEN_RE = re.compile(r"(--color-scenario-map-[a-z-]+):\s*(#[0-9a-fA-F]{6});")
 
@@ -95,6 +173,50 @@ def _resolved(
     return resolve_coordinate(value, axis=axis, table=geometry.table)
 
 
+def _render_wide_gate_room(
+    room_id: str, style: str, x1: float, y1: float, x2: float, y2: float,
+) -> str:
+    """Render four centered, OPEN gates without claiming a source-defined width."""
+    mid_x, mid_y = (x1 + x2) / 2, (y1 + y2) / 2
+    half_gap = 1.0  # Schematic 2-inch gap only; neither ITS source specifies gate width.
+    left, right = mid_x - half_gap, mid_x + half_gap
+    top, bottom = mid_y - half_gap, mid_y + half_gap
+    segments = (
+        f"M{_number(x1)} {_number(y1)} H{_number(left)} "
+        f"M{_number(right)} {_number(y1)} H{_number(x2)} "
+        f"V{_number(top)} M{_number(x2)} {_number(bottom)} V{_number(y2)} "
+        f"H{_number(right)} M{_number(left)} {_number(y2)} H{_number(x1)} "
+        f"V{_number(bottom)} M{_number(x1)} {_number(top)} V{_number(y1)}"
+    )
+    # The Server's Antenna sits tangent to its lower-left corner. Leave room
+    # for that token while keeping the bottom label next to the centered gate.
+    bottom_label_x = mid_x + .65 if room_id == "server-room" else mid_x
+    labels = (
+        ("top", mid_x, y1 - .45, ""),
+        ("right", x2 + 1.2, mid_y,
+         f' transform="rotate(-90 {_number(x2 + 1.2)} {_number(mid_y)})"'),
+        ("bottom", bottom_label_x, y2 + 1.15, ""),
+        ("left", x1 - .55, mid_y,
+         f' transform="rotate(-90 {_number(x1 - .55)} {_number(mid_y)})"'),
+    )
+    gates = "\n".join(
+        f'<g id="{room_id}-gate-{side}" class="wide-gate" data-gate="wide" '
+        f'data-side="{side}" data-open="true" data-width-status="unspecified">'
+        f'<title>Wide Gate (open; width unspecified)</title>'
+        f'<text class="wide-gate-label" x="{_number(x)}" y="{_number(y)}" '
+        f'font-family="sans-serif" font-size="1.15" font-weight="600" '
+        f'fill="#203b35" text-anchor="middle"{rotation}>Wide Gate</text></g>'
+        for side, x, y, rotation in labels
+    )
+    return (
+        f'<rect id="{room_id}" class="{style}" x="{_number(x1)}" '
+        f'y="{_number(y1)}" width="{_number(x2 - x1)}" '
+        f'height="{_number(y2 - y1)}" style="stroke:none;fill-opacity:1"/>\n'
+        f'<path id="{room_id}-walls" class="wide-gate-wall" fill="none" '
+        f'stroke="#aa7777" stroke-width=".12" d="{segments}"/>\n{gates}'
+    )
+
+
 def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str:
     element_id = escape(element.id, quote=True)
     style = escape(element.style, quote=True)
@@ -104,9 +226,51 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         y1 = _resolved(geometry, element.y1, "y")
         x2 = _resolved(geometry, element.x2, "x")
         y2 = _resolved(geometry, element.y2, "y")
+        if (
+            element.id in {"server-room", "launching-tower"}
+            and element.style == "no-deploy"
+            and abs(x2 - x1 - 8) < 0.000001
+            and abs(y2 - y1 - 8) < 0.000001
+            and abs((x1 + x2) / 2 - geometry.table.width / 2) < 0.000001
+            and abs((y1 + y2) / 2 - geometry.table.height / 2) < 0.000001
+        ):
+            return _render_wide_gate_room(element_id, style, x1, y1, x2, y2)
         return (
             f'<rect id="{element_id}" class="{style}" x="{_number(x1)}" y="{_number(y1)}" '
             f'width="{_number(x2 - x1)}" height="{_number(y2 - y1)}"/>'
+        )
+
+    if isinstance(element, CircleRegionElement):
+        x = _resolved(geometry, element.x, "x")
+        y = _resolved(geometry, element.y, "y")
+        return (
+            f'<circle id="{element_id}" class="{style}" data-region-shape="circle" '
+            f'cx="{_number(x)}" cy="{_number(y)}" r="{_number(element.radius)}"/>'
+        )
+
+    if isinstance(element, QuarterCircleElement):
+        radius = _number(element.radius)
+        width = _number(geometry.table.width)
+        height = _number(geometry.table.height)
+        x_end = _number(geometry.table.width - element.radius)
+        y_end = _number(geometry.table.height - element.radius)
+        segments = {
+            "top-left": f"M0 0 L{radius} 0 A{radius} {radius} 0 0 1 0 {radius} Z",
+            "top-right": (
+                f"M{width} 0 L{x_end} 0 A{radius} {radius} 0 0 0 {width} {radius} Z"
+            ),
+            "bottom-left": (
+                f"M0 {height} L0 {y_end} A{radius} {radius} 0 0 1 {radius} {height} Z"
+            ),
+            "bottom-right": (
+                f"M{width} {height} L{width} {y_end} "
+                f"A{radius} {radius} 0 0 0 {x_end} {height} Z"
+            ),
+        }
+        return (
+            f'<path id="{element_id}" class="{style}" data-region-shape="quarter-circle" '
+            f'data-corner="{element.corner}" data-radius-inches="{radius}" '
+            f'd="{segments[element.corner]}"/>'
         )
 
     if isinstance(element, LineElement):
@@ -123,13 +287,23 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         x = _resolved(geometry, element.x, "x")
         y = _resolved(geometry, element.y, "y")
         marker_type = escape(element.marker_type, quote=True)
-        diameter_mm = marker_diameter_mm(element.marker_type)
-        if diameter_mm is None:
+        diameter_mm = marker_diameter_mm(element)
+        if diameter_mm is None and element.marker_type != "tracking-beacon":
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
                 f"marker type {element.marker_type!r}"
             )
-        radius = marker_radius_inches(element.marker_type)
+        if diameter_mm is None:
+            size_status = (
+                "conflicting-sources" if element.marker_type == "tracking-beacon"
+                else "unspecified"
+            )
+            return (
+                f'<circle id="{element_id}" class="{style}" data-marker-type="{marker_type}" '
+                f'data-physical-size="{size_status}" cx="{_number(x)}" '
+                f'cy="{_number(y)}" r=".3"/>'
+            )
+        radius = marker_radius_inches(element)
         assert radius is not None
         diameter = f' data-diameter-mm="{_number(diameter_mm)}"'
         return (
@@ -139,6 +313,19 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
 
     x = _resolved(geometry, element.x, "x")
     y = _resolved(geometry, element.y, "y")
+    if "\n" in element.text:
+        parts = element.text.split("\n")
+        spans = "".join(
+            f'<tspan x="{_number(x)}" dy="{"-.45" if index == 0 else "1.1"}em">'
+            f'{escape(part)}</tspan>'
+            for index, part in enumerate(parts)
+        )
+        accessible_label = escape(element.text.replace(chr(10), " "), quote=True)
+        return (
+            f'<text id="{element_id}" class="{style}" x="{_number(x)}" y="{_number(y)}" '
+            f'text-anchor="{element.align}" aria-label="{accessible_label}">'
+            f'{spans}</text>'
+        )
     return (
         f'<text id="{element_id}" class="{style}" x="{_number(x)}" y="{_number(y)}" '
         f'text-anchor="{element.align}">{escape(element.text)}</text>'
@@ -164,6 +351,46 @@ def _measurement_text(value: float, distance_unit: Literal["in", "cm"]) -> str:
     return f"{_number(value)}″"
 
 
+def _render_ruler(
+    geometry: ScenarioGeometry, ruler: RulerAnnotation,
+    text_scale: float, distance_unit: Literal["in", "cm"],
+) -> str:
+    """Draw an exact, unit-convertible placement guide without adding map geometry."""
+    x1 = _resolved(geometry, ruler.x1, "x")
+    y1 = _resolved(geometry, ruler.y1, "y")
+    x2 = _resolved(geometry, ruler.x2, "x")
+    y2 = _resolved(geometry, ruler.y2, "y")
+    length = math.hypot(x2 - x1, y2 - y1)
+    nx, ny = -(y2 - y1) / length, (x2 - x1) / length
+    x1 += ruler.offset * nx
+    y1 += ruler.offset * ny
+    x2 += ruler.offset * nx
+    y2 += ruler.offset * ny
+    tick = .25 * text_scale
+    label_x = (x1 + x2) / 2 - .95 * text_scale * nx
+    label_y = (y1 + y2) / 2 - .95 * text_scale * ny + .27 * text_scale
+    if abs(y2 - y1) < 0.000001 and x2 > x1 and ruler.offset > 0:
+        # An in-map guide below its measured objects must not put the
+        # distance text back over the marker or its surrounding region.
+        label_y = (y1 + y2) / 2 + 1.05 * text_scale
+    ruler_id = escape(ruler.id, quote=True)
+    display_distance = round(length, 3)
+    return (
+        f'<g id="{ruler_id}" class="measurement placement-ruler" '
+        f'data-distance-inches="{_number(display_distance)}" data-ruler-reference="positions">'
+        f'<line x1="{_number(x1)}" y1="{_number(y1)}" '
+        f'x2="{_number(x2)}" y2="{_number(y2)}"/>'
+        f'<line x1="{_number(x1 - tick * nx)}" y1="{_number(y1 - tick * ny)}" '
+        f'x2="{_number(x1 + tick * nx)}" y2="{_number(y1 + tick * ny)}"/>'
+        f'<line x1="{_number(x2 - tick * nx)}" y1="{_number(y2 - tick * ny)}" '
+        f'x2="{_number(x2 + tick * nx)}" y2="{_number(y2 + tick * ny)}"/>'
+        f'<text class="dimension-label" x="{_number(label_x)}" '
+        f'y="{_number(label_y)}" text-anchor="middle" '
+        f'data-distance-inches="{_number(display_distance)}">'
+        f'{_measurement_text(display_distance, distance_unit)}</text></g>'
+    )
+
+
 def _render_annotation(
     geometry: ScenarioGeometry,
     annotation: ScenarioAnnotation,
@@ -172,6 +399,8 @@ def _render_annotation(
     text_scale: float,
     distance_unit: Literal["in", "cm"],
 ) -> str:
+    if isinstance(annotation, RulerAnnotation):
+        return _render_ruler(geometry, annotation, text_scale, distance_unit)
     annotation_id = escape(annotation.id, quote=True)
     target_id = escape(annotation.target, quote=True)
 
@@ -362,7 +591,8 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
             )
         if (
             isinstance(element, MarkerElement)
-            and marker_diameter_mm(element.marker_type) is None
+            and marker_diameter_mm(element) is None
+            and element.marker_type != "tracking-beacon"
         ):
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -397,13 +627,15 @@ def render_scenario_map_svg(
     # Increase viewBox-space text on wider tables; at the same on-screen map width,
     # 48-inch maps should no longer render labels at half the size of 24-inch maps.
     text_scale = 1.0 + max(0.0, min(24.0, geometry.table.width - 24.0)) / 48.0
+    # Validate all four symmetric quadrants, but display placement distances
+    # for only their upper-left representative Console.
     center_consoles = _domination_console_centers(geometry)
     elements = "\n".join(
         (
             _render_console_center_guides(
                 geometry, center_consoles[element.id], text_scale, distance_unit
             ) + "\n"
-            if element.id in center_consoles else ""
+            if element.id == "console-q1" and element.id in center_consoles else ""
         ) + _render_element(geometry, element)
         for element in geometry.elements
     )
@@ -420,6 +652,60 @@ def render_scenario_map_svg(
     )
     if annotations:
         annotations += "\n"
+    styles = {element.style for element in geometry.elements}
+    has_exclusion = "exclusion" in styles
+    has_wide_gate_room = any(
+        isinstance(element, RectangleElement)
+        and element.id in {"server-room", "launching-tower"}
+        and element.style == "no-deploy"
+        for element in geometry.elements
+    )
+    has_special_zones = bool(styles & {"influence", "sector", "sector-center"})
+    has_rulers = any(isinstance(a, RulerAnnotation) for a in geometry.annotations)
+    has_tracking_beacon = any(
+        isinstance(element, MarkerElement) and element.marker_type == "tracking-beacon"
+        for element in geometry.elements
+    )
+    has_civilians = any(
+        isinstance(element, MarkerElement) and element.marker_type == "civilian"
+        for element in geometry.elements
+    )
+    has_beacons = any(
+        isinstance(element, MarkerElement) and element.marker_type == "beacon"
+        for element in geometry.elements
+    )
+    has_akial_antenna = any(
+        isinstance(element, MarkerElement)
+        and element.id in {"akial-antenna", "inhibitor-antenna"}
+        for element in geometry.elements
+    )
+    has_defensive_turret = any(
+        isinstance(element, MarkerElement) and element.marker_type == "defensive-turret"
+        for element in geometry.elements
+    )
+    has_tech_coffin = any(
+        isinstance(element, MarkerElement) and element.marker_type == "tech-coffin"
+        for element in geometry.elements
+    )
+    has_prototype_panoply = any(
+        isinstance(element, MarkerElement)
+        and element.marker_type in {"prototype", "panoply"}
+        for element in geometry.elements
+    )
+    extra_style = (
+        (_NO_DEPLOY_CSS if "no-deploy" in styles else "")
+        + (_WIDE_GATE_CSS if has_wide_gate_room else "")
+        + (_EXCLUSION_CSS if has_exclusion else "")
+        + (_SPECIAL_ZONE_CSS if has_special_zones else "")
+        + (_ANTENNA_TECH_MARKER_CSS if has_tech_coffin or has_akial_antenna else "")
+        + (_BEACON_MARKER_CSS if has_beacons else "")
+        + (_TRACKING_BEACON_CSS if has_tracking_beacon else "")
+        + (_EVACUATION_MARKER_CSS if has_civilians else "")
+        + (_PROTOTYPE_PANOPLY_CSS if has_prototype_panoply else "")
+        + (_DEFENSIVE_TURRET_CSS if has_defensive_turret else "")
+        + (_RULER_CSS if has_rulers else "")
+    )
+    defs = _EXCLUSION_DEFS if has_exclusion else ""
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
@@ -429,7 +715,8 @@ def render_scenario_map_svg(
         f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px;'
         f'{_theme_style(theme)}">\n'
         f'<title id="map-title">{title}</title>\n'
-        f'<style>{_STYLE_CSS}</style>\n'
+        f'<style>{_STYLE_CSS}{extra_style}</style>\n'
+        f'{defs}'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'
         f"{elements}"
         f"{annotations}"

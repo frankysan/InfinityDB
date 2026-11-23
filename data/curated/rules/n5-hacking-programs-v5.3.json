@@ -53,15 +53,15 @@
             "url": "https://experience.corvusbelli.com/en/infinity/resources"
         },
         {
-            "id": "wiki-en-20260926-200832",
+            "id": "wiki-en-20261116-075926",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
-            "version": "20260926-200832",
-            "acquiredAt": "2026-09-26T20:08:32+02:00",
-            "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
-            "sha256": "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987",
+            "version": "20261116-075926",
+            "acquiredAt": "2026-11-16T07:59:26+01:00",
+            "localPath": "data/wiki/WIKI-en 20261116-075926.zip",
+            "sha256": "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f",
             "language": "en",
-            "documentCount": 812,
+            "documentCount": 932,
             "url": "https://infinitythewiki.com/",
             "authority": "secondary"
         }
@@ -95,8 +95,8 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Assisted_Fire",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Assisted_Fire.html",
                     "heading": "Assisted Fire"
                 },
                 {
@@ -149,8 +149,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Carbonite",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Carbonite.html",
                     "heading": "Carbonite"
                 },
                 {
@@ -218,8 +218,8 @@
                     "section": "Firefight — Designated Landing Area"
                 },
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Controlled_Jump",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Controlled_Jump.html",
                     "heading": "Controlled Jump"
                 },
                 {
@@ -278,8 +278,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Cybermask",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Cybermask.html",
                     "heading": "Cybermask"
                 },
                 {
@@ -325,8 +325,8 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Enhanced_Reaction",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Enhanced_Reaction.html",
                     "heading": "Enhanced Reaction"
                 },
                 {
@@ -380,8 +380,8 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Fairy_Dust",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Fairy_Dust.html",
                     "heading": "Fairy Dust"
                 },
                 {
@@ -434,8 +434,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Oblivion",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Oblivion.html",
                     "heading": "Oblivion"
                 },
                 {
@@ -482,8 +482,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Spotlight",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Spotlight.html",
                     "heading": "Spotlight"
                 },
                 {
@@ -534,8 +534,8 @@
             ],
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Total_Control",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Total_Control.html",
                     "heading": "Total Control"
                 },
                 {
@@ -576,8 +576,8 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Trinity",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Trinity.html",
                     "heading": "Trinity"
                 },
                 {
@@ -625,8 +625,8 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "White_Noise",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "White_Noise.html",
                     "heading": "White Noise"
                 },
                 {
@@ -670,8 +670,8 @@
             },
             "citations": [
                 {
-                    "sourceId": "wiki-en-20260926-200832",
-                    "member": "Zero_Pain",
+                    "sourceId": "wiki-en-20261116-075926",
+                    "member": "Zero_Pain.html",
                     "heading": "Zero Pain"
                 },
                 {

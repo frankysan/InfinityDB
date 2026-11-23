@@ -56,8 +56,39 @@ EMBEDDED_WEAPON_RUNTIME_FILES = frozenset({ARMY_DATABASE_FILENAME, RULES_DATABAS
 # Explicit release registration; neither source names nor season defaults are
 # inferred from the contents of an operator-selected directory.
 SEASON_DATABASE_SOURCES = {
-    "its-18": ("its_18.db", "data/curated/rules/n5-its-season-18-2026.09.01.json"),
+    "its-18": ("its_18.db", "data/curated/its/n5-its-season-18.json"),
+    "its-17": ("its_17.db", "data/curated/its/n5-its-season-17.json"),
 }
+# Only explicitly registered seasons can consume a shared authoring library.
+# The library is a build input, not a runtime database dependency.
+SEASON_SHARED_LIBRARY_SOURCES: dict[str, str] = {
+    "its-17": "data/curated/its/shared/its17-scenarios-v1.json",
+}
+
+
+def season_shared_library_source(season: str) -> str | None:
+    """Return a registered, repository-relative shared library source."""
+    if set(SEASON_SHARED_LIBRARY_SOURCES) - set(SEASON_DATABASE_SOURCES):
+        raise ValueError("Shared ITS library registered for an unknown season")
+    source = SEASON_SHARED_LIBRARY_SOURCES.get(season)
+    if source is None:
+        return None
+    if not isinstance(source, str):
+        raise ValueError(f"Invalid shared ITS library source for {season!r}")
+    path = Path(source)
+    if (
+        path.is_absolute()
+        or "\\" in source
+        or path.suffix != ".json"
+        or path.as_posix() != source
+        or len(path.parts) < 5
+        or path.parts[:3] != ("data", "curated", "its")
+        or any(part in {"", ".", ".."} for part in path.parts)
+    ):
+        raise ValueError(f"Invalid shared ITS library source for {season!r}")
+    return source
+
+
 COMPLETE_RUNTIME_FILES = EMBEDDED_WEAPON_RUNTIME_FILES | frozenset(
     filename for filename, _source in SEASON_DATABASE_SOURCES.values()
 )
@@ -104,6 +135,8 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         raise ValueError(
             f"Complete embedded sets require Army schema v{COMPLETE_ARMY_SCHEMA_VERSION}"
         )
+    if require_complete and set(SEASON_SHARED_LIBRARY_SOURCES) - set(SEASON_DATABASE_SOURCES):
+        raise ValueError("Shared ITS library registered for an unknown season")
     registered_seasons = {
         season: directory / filename
         for season, (filename, _source) in SEASON_DATABASE_SOURCES.items()
@@ -150,6 +183,24 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
                     raise ValueError(
                         f"ITS database {season} does not match selected build source identity"
                     )
+                if require_complete:
+                    registered_library = season_shared_library_source(season)
+                    pinned = publication.get("sharedScenarioLibrary")
+                    if registered_library is None:
+                        if pinned is not None:
+                            raise ValueError(
+                                f"ITS database {season} has an unregistered shared library"
+                            )
+                    elif (
+                        not isinstance(pinned, dict)
+                        or pinned.get("sha256") != recorded_build_input_sha256(
+                            army_path, registered_library,
+                        )
+                    ):
+                        raise ValueError(
+                            f"ITS database {season} shared library provenance does not "
+                            "match the selected build inputs"
+                        )
 
     objects = rules.deployed_objects_payload(army_path)
     if objects is None or not objects["objects"]:
@@ -189,7 +240,8 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
     return {
         "layout": (
-            "v17-three-file" if require_complete and registered_seasons
+            "v17-four-file" if require_complete and len(registered_seasons) == 2
+            else "v17-three-file" if require_complete and registered_seasons
             else {
                 12: "v12-two-file", 13: "v13-two-file",
                 14: "v14-two-file", 15: "v15-two-file",

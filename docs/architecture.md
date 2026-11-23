@@ -114,11 +114,11 @@ read-only application/API and validated database models:
 - **Directly from a checkout (local or self-hosted).** Run
   `infinity-db build --compact`, then `infinity-db serve` from the repository
   root. One offline build produces the complete `data/generated/army.db`,
-  `rules_n5.db` and `its_18.db` set. Serving selects explicit `--db-dir`, then
+  `rules_n5.db`, `its_17.db` and `its_18.db` set. Serving selects explicit `--db-dir`, then
   `INFINITY_DB_DB_DIR`, then the working-directory-relative default. Production
   WSGI requires that single environment setting. An invalid selected set fails
   closed. Stop the service before rebuilding its selected directory.
-- **Docker for public internet serving.** The image copies those same three
+- **Docker for public internet serving.** The image copies those same four
   tracked databases directly into `/app/data/`, configured with
   `INFINITY_DB_DB_DIR=/app/data`. No host promotion directory, raw archive,
   curation or JSON publication is a serving dependency. Source/release checks
@@ -217,6 +217,37 @@ not in Army export or mutable match state. Publication uses a hybrid model: stab
 provenance, collection membership, and cross-domain references are relational; ordered and nested
 scenario structures remain validated typed payloads. Scenario identity, source revision, and
 collection/season membership remain independent.
+
+**Cross-season reuse (scenario/component/Skill build slices implemented for synthetic data):** Maintain a
+stable, versioned canonical definition for each genuinely shared scenario,
+scenario Skill, or component. ITS season membership references an exact
+definition version and retains its own applicable source citations and optional
+explicit, reviewed field overrides. Different seasons may use the same
+definition without maintaining duplicate curated mechanics; substantial changes
+produce a new definition version, not an implicit update to previous seasons.
+Reuse is selected by typed identity and verified semantic equivalence, never by
+matching display names. Distinguish **season-wide ITS Skills** from
+scenario-specific actions: ITS 18 defines CivEvac and Casevac as Common
+Skills, plus Team-Ops and Request a Tacball under the optional Team-Ops Extra.
+The Extra itself is not the same entity as the Team-Ops Special Skill, and
+Casevac State is not a second Skill. Season-wide definitions require a
+season/revision applicability binding even when no scenario references them;
+optional Extras retain explicit activation scope. This is now supported by
+the season-scoped Skill records and `sharedSeasonSkillBindings` build-time
+authoring path, without runtime inheritance or scenario-scoped placeholders.
+General ITS mechanics may be reused between seasons only after source-by-source comparison;
+context-specific requirements and outcomes stay scoped to their scenario
+or season.
+
+Extend the existing build-time scenario-component composition rather than
+introducing runtime cross-database inheritance. The selected season database
+still materializes its resolved, self-contained scenario and Skill payloads,
+even if that duplicates compiled SQLite bytes. Keep each season's independent
+publication validation, source provenance and current-revision selection, and
+retain existing scenario/Skill URLs as compatibility aliases when a definition
+becomes shared. Cross-season composition must be in place before curating ITS
+17 against ITS 18. The detailed authoring and override invariants belong in
+[the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
 
 Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
@@ -369,7 +400,7 @@ model, so generated databases remain replaceable release artifacts.
 
 Complete embedded-set application composition now has one explicit factory,
 `infinity_db.web.create_app_from_database_set`. It uses the shared database-set
-validator's complete mode before opening the selected three-file set.
+validator's complete mode before opening the selected four-file set.
 Current Army/Rules projections, matched recorded provenance and ITS season/core
 source identity are required; incomplete or stale sets fail before application
 creation. The CLI server and production WSGI use this path. The default

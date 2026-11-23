@@ -244,8 +244,12 @@ def test_scenario_list_api_exposes_current_publications_without_selecting_game_s
     assert payload["collections"] == [
         {"id": "n5-core", "revision": "5.3", "title": "N5 Core Scenarios", "scenario_count": 4},
         {
-            "id": "its-18", "revision": "2026.09.01",
-            "title": "ITS Season 18: Overheat", "scenario_count": 1,
+            "id": "its-17", "revision": "0.2",
+            "title": "ITS Season 17 Seekers", "scenario_count": 16,
+        },
+        {
+            "id": "its-18", "revision": "2026.09.11",
+            "title": "ITS Season 18: Overheat", "scenario_count": 20,
         },
     ]
     items = payload["items"]
@@ -288,6 +292,9 @@ def test_scenario_detail_api_requires_and_projects_exact_army_points(
     assert item["selected_army_points"] == 350
     assert item["setup"]["game_size"]["armyPoints"] == 350
     assert item["setup"]["game_size"]["swc"] == 6
+    assert item["setup"]["play_requirements"] == {
+        "classifiedObjectives": 0, "tacticalObjectives": 0, "hvts": 0,
+    }
     assert item["placement"]["configuration_id"] == "300-400-points"
     assert {issue["id"] for issue in item["source_issues"]} == {"350-point-swc"}
 
@@ -900,7 +907,7 @@ def test_scenario_selection_ignores_stale_requests() -> None:
     assert "scenario selection race: passed" in completed.stdout
 
 
-def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection() -> None:
+def test_scenario_its_context_cards_show_all_scoped_policies() -> None:
     node = shutil.which("node")
     if node is not None:
         command = [node]
@@ -923,7 +930,27 @@ def test_scenario_its_context_opt_in_never_applies_on_default_or_stale_selection
         timeout=15,
     )
     assert completed.returncode == 0, completed.stdout + completed.stderr
-    assert "scenario ITS context selection: passed" in completed.stdout
+    assert "scenario ITS context cards: passed" in completed.stdout
+
+
+def test_scenario_main_objective_set_selection_keeps_secondary_scoring_visible() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("Node.js is unavailable for scenario Main Objective selection")
+    root = Path(__file__).parents[1]
+    completed = subprocess.run(
+        [
+            node,
+            str(root / "tests" / "scenario_objective_harness.cjs"),
+            str(root / "src" / "infinity_db" / "web" / "static" / "scenario.js"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=15,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert "scenario Main Objective selection: passed" in completed.stdout
 
 
 def test_scenario_grid_can_shrink_to_narrow_viewports(scenario_app: Application) -> None:
@@ -971,10 +998,10 @@ def test_core_scenario_marker_sizes_are_source_cited_and_independent_of_game_siz
             "diameter_mm": diameter,
             "citation": {
                 "source_id": "its-season-18-en-pdf",
-                "source_title": "ITS Season 18: Overheat (English)",
-                "source_version": "2026.09.01",
+                "source_title": "ITS Season 18: Overheat (English, September hotfix)",
+                "source_version": "2026.09.11",
                 "source_url": "https://experience.corvusbelli.com/en/infinity/its-rules",
-                "page": 17,
+                "page": 18,
             },
         }])
         occurrences = [
@@ -1116,14 +1143,15 @@ def test_scenario_api_accepts_explicit_collection_revision_without_implicit_its_
     ]
     status, _, body = request(
         scenario_app, "/api/scenarios",
-        query="collection=its-18&revision=2026.09.01",
+        query="collection=its-18",
     )
     assert status == 200
     season_payload = json.loads(body)
-    assert [item["slug"] for item in season_payload["items"]] == ["battleground"]
-    assert [(row["id"], row["revision"]) for row in season_payload["collections"]] == [
-        ("n5-core", "5.3"), ("its-18", "2026.09.01"),
-    ]
+    assert len(season_payload["items"]) == 20
+    assert any(item["slug"] == "battleground" for item in season_payload["items"])
+    assert {(row["id"], row["revision"]) for row in season_payload["collections"]} == {
+        ("n5-core", "5.3"), ("its-17", "0.2"), ("its-18", "2026.09.11"),
+    }
     for query in (
         "collection=its-17&revision=2025.09.01",
         "collection=n5-core&revision=5.2",
@@ -1151,7 +1179,6 @@ def test_scenario_api_accepts_explicit_collection_revision_without_implicit_its_
 @pytest.mark.parametrize(
     "query",
     [
-        "collection=its-18",
         "revision=2026.09.01",
         "collection=its-18&revision=",
         "collection=ITS+18&revision=2026.09.01",
@@ -1265,12 +1292,12 @@ def test_battleground_its18_exact_public_scenario_detail_and_map(
     config: str,
     dimensions: tuple[int, int],
 ) -> None:
-    query=f"army_points={points}&collection=its-18&revision=2026.09.01"
+    query=f"army_points={points}&collection=its-18"
     status, _, body = request(scenario_app, "/api/scenarios/battleground", query=query)
     assert status == 200
     item=json.loads(body)
     assert item["publication"]["collection_id"] == "its-18"
-    assert item["publication"]["revision"] == "2026.09.01"
+    assert item["publication"]["revision"] == "2026.09.11"
     assert item["selected_army_points"] == points
     assert item["placement"]["configuration_id"] == config
     assert item["placement"]["geometry"]["table"]["width"] == dimensions[0]
@@ -1320,7 +1347,7 @@ def test_battleground_its18_is_never_returned_from_core_or_another_season(
         ("domination", "n5-core", "5.3", []),
         ("supplies", "n5-core", "5.3", ["faq-ruling:scenario-element-carrier-marker-state"]),
         ("firefight", "n5-core", "5.3", []),
-        ("battleground", "its-18", "2026.09.01", []),
+        ("battleground", "its-18", "2026.09.11", []),
     ],
 )
 def test_published_scenarios_keep_faq_applicability_separate_from_core_rules(

@@ -81,7 +81,7 @@ The historical **v1.0.x** release-evidence contract still requires all four.
 External branch-protection/rulesets may need adjustment if they previously
 required this workflow on every PR.
 
-Each job installs Python 3.11.9, **Playwright 1.64.1** and its selected browser,
+Each job installs the latest available Python 3.11 patch, **Playwright 1.64.1** and its selected browser,
 checks the embedded deployed objects matched to the tracked
 Army/Rules/ITS database set and serves that complete set
 using an ephemeral WSGI server. One shared portable cohort runs
@@ -504,7 +504,7 @@ images still require the complete tracked publication through deployment-smoke v
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-`army.db`, `rules_n5.db` and `its_18.db` set plus processed SVG assets, then runs
+`army.db`, `rules_n5.db`, `its_17.db` and `its_18.db` set plus processed SVG assets, then runs
 `scripts/verify-container-image.sh` with published-asset validation. The
 source/release gate requires the strict current schemas, shared provenance and
 recorded build-input freshness. Exact variants and reviewed Weapon citations are

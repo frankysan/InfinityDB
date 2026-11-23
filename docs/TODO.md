@@ -22,7 +22,7 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
@@ -45,6 +45,25 @@ Use these links to jump directly to a workstream:
   facts should enter the maintained reference. Retain reproducible source
   evidence without treating every unreviewed page or unresolved SRC issue as
   an implementation requirement.
+  The verified English/Spanish Wiki snapshots and histories from 2026-11-16
+  are available for explicit edition/revision comparison; their portable
+  member names were migrated into curated N5.3 after exact URL, heading,
+  and source revision identity verification.
+
+- [ ] **Acquisition + Data processing:** Retire the September/October 2026
+  Wiki ZIPs and their snapshot manifests once this migration is accepted.
+  - Completed: Repinned 109 current-page citations (unchanged MediaWiki revision
+    IDs and headings) and verified 116 curated `oldid` references. Migrated
+    active research readers, pinned tests and current documentation; rebuilt
+    the runtime database set. Retirement comparison found **zero missing**
+    older current-page/historical revision IDs or history page-name conflicts
+    in either language; the November 16 archives are revision-level supersets.
+  - Remaining: Final focused validation and a deliberate local cleanup of the
+    four old ZIPs, corresponding old manifests, and the superseded English
+    extracted history mirror. Preserve dated reports
+    as historical evidence; never silently delete or re-label their source
+    provenance. Future captures use the parameterized migration and retirement
+    comparison tools without introducing new hard-coded source-version logic.
 
 ### Source notation and rule references
 
@@ -68,6 +87,28 @@ Use these links to jump directly to a workstream:
   differences remain visible. Chromium acceptance covers reviewed pages
   at 1440/390/320 px, light/dark, keyboard and touch. Remaining: other
   chart rows/modes and publisher clarification of unresolved mismatches.
+
+### Source-family revision updates
+
+- [ ] **Acquisition + Data processing:** Implement a repeatable, reviewable
+  **Rules / FAQ / ITS revision intake and reconciliation workflow**, building
+  on the current ITS Season 18 source-family and per-fact revision model.
+  - [ ] Preserve each new official release as immutable source evidence with
+    exact revision identity, original bytes, hashes, language, citation
+    locations and trustworthy publication/effective-date provenance. Do not
+    infer publication dates from filenames or PDF metadata alone.
+  - [ ] Compare successive releases by stable fact identity; classify added,
+    modified, removed, unchanged, editorial-only and ambiguous/conflicting
+    facts. Generate deterministic, cited before/after reports for human review,
+    reusing unchanged facts rather than re-curating whole publications.
+  - [ ] Promote only reviewed changes, retaining superseded values, per-fact
+    revision applicability, citations and historical source provenance.
+    Validate current and historical projections, citation integrity, and
+    fail-closed handling of unresolved changes before publishing only the
+    latest applicable facts to players.
+  - [ ] Extend Rules and FAQ incrementally and exercise the same workflow on
+    future ITS revisions; share tooling where actual source-family needs
+    overlap. Historical browsing remains a separate, optional feature.
 
 ### Per-reference change history
 
@@ -170,6 +211,63 @@ Use these links to jump directly to a workstream:
   - [ ] Surface read-only workspace/claim/integration status in the monitor
     and verify real Linux refusal/race behavior before unattended use.
 
+### Release and deployment robustness
+
+**Project domain:** Project infrastructure
+
+- [ ] **Prevent recurrence of v1.1.0 release-process failures** without adding
+  another release-management system or routine full-suite gates. The 2026-11-16
+  release passed application/data/CI validation, but exposed late checklist
+  corrections, release-evidence/CI drift, noncritical image-pruning failure
+  and an incorrect production `1.1.0+dev` footer.
+  - [ ] **Make production version identity deterministic.** For a verified
+    release-tag checkout, derive and bake the version from the tag/package
+    identity rather than server worktree status; retain `+dev` for real
+    development builds. [PR #31](https://github.com/frankysan/InfinityDB/pull/31)
+    proposes changing source-checkout Git status handling, but that module
+    participates in the tracked runtime-database input fingerprint. Do not
+    merge that source-level change alone: it needs a matching database rebuild
+    during release preparation. The production build instead now pins display
+    identity to the exact tag/package version in `scripts/deploy.sh`.
+    Assert that the built image/footer and deployed public footer agree with
+    the release tag and `/api/version`, alongside snapshot/static revisions.
+  - [ ] **Make image retention cleanup non-fatal.** The v1.1.0 deploy tried
+    to remove an old `app-test-*` metrics-history image still referenced by
+    a test container. Skip and report tags used by *any* container (including
+    stopped or isolated-test containers); do not force-remove them, disturb
+    production/test stacks or fail an otherwise healthy deployment because
+    pruning could not complete. Keep the supported test-stack stop command
+    in the release procedure.
+  - [ ] **Prevent CI/evidence contract drift.** The release-evidence collector
+    rejected the green Source run because its expected matrix omitted both
+    pinned-determinism jobs; the immediate fix was [PR #30](https://github.com/frankysan/InfinityDB/pull/30).
+    Add a focused contract test against the maintained workflow job definitions,
+    including required successful build/reuse steps. Exercise candidate release
+    evidence after its hosted checks pass but *before* merge; still recollect
+    evidence on the exact final `main` SHA before tagging.
+  - [ ] **Consolidate isolated Docker acceptance probes.** Earlier
+    `releasing.md` commands used the wrong Caddy host and health port;
+    corrected to `localhost:8080/api/version` and the loopback metrics
+    listener `127.0.0.1:8081/health`. Reuse one small executable smoke
+    check for version, health, metrics and representative routes instead of
+    copying commands between documents.
+  - [ ] **Freeze release-facing content before costly acceptance.** Complete
+    changelog/README, version metadata, deployment instructions and release
+    tooling, then run cheap metadata/docs/tooling checks before the mandatory
+    full local suite and isolated Docker test. Preserve exact-SHA post-merge
+    CI and any selected cross-browser jobs; the additional browser dispatch
+    on the merge SHA is expected, not a failure. Avoid redundant reruns unless
+    the changed content invalidates the relevant evidence.
+  - [ ] Validate these focused improvements with release-evidence, version
+    and deployment-script regression tests, Ruff and appropriate hosted CI.
+    The implementation on `dev/v1.2.0` includes tag-derived display identity,
+    nonfatal/reference-aware pruning, pre-merge evidence checking, a shared
+    deployment HTTP probe, and updated release instructions. Focused Windows
+    tests and static checks passed; Linux pruning behavior, the tagged Docker
+    image path and hosted CI remain to be verified before closeout.
+    Keep detailed acceptance procedures in `docs/releasing.md` and
+    `docs/deployment.md`, not duplicated in this backlog.
+
 ### Performance, storage, and build tooling
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
@@ -250,6 +348,24 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 
 ### ITS, scenarios, and game tools
 
+ITS Seasons 17 (V0.2) and 18 (2026.09.11) have completed source audit,
+diagram and focused browser acceptance. All 36 season-mission definitions
+(216 setups) have been reviewed; known source discrepancies remain disclosed.
+See [release browser acceptance](its-season-database.md#release-browser-acceptance).
+Final-candidate acceptance is governed by [the release checklist](releasing.md).
+Season 16 Part II remains later scope.
+
+- [x] **Data processing: consolidate source-family curation.** ITS 18 now
+  uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
+  per-fact revision tags and historical field-level overrides. Its explicit
+  current 2026.09.11 projection produces the registered `its_18.db` alongside
+  the independently reviewed ITS 17 V0.2 publication.
+  Older explicit-revision links fail closed; the player-facing selector
+  chooses only a season. The original 2026.09.01 provenance and historical
+  Battleground/policy facts remain in the curated file for possible future
+  history browsing. Source-family projection, current-archive build and
+  revision isolation have focused regression coverage.
+
 - [ ] Build a versioned ITS reference library from material under
   `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
   from archived seasons.
@@ -278,15 +394,268 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 - [ ] Extend the existing core-scenario foundation with remaining ITS scenario
   list/detail coverage backed by versioned seasonal data; retain the already
   published Season 18 Battleground pilot.
-  - [ ] Curate the remaining Season 18 mission identities and complete
+  - [x] Curate the remaining Season 18 mission identities and complete
     source-backed definitions under the reviewed selected 2026.09.11 hotfix
     identity once its source promotion is accepted; retain
     `its-18@2026.09.01` for historically scoped results. Extend typed
     geometry, scoring and card/classified choices only where each mission
     needs them. Unpublished missions must fail closed.
-  - [ ] **Later seasons (after Season 18):** Add ITS Season 17 (the first full
-    season launched under N5) and ITS Season 16 Part II (the N5-compatible
-    revision), at minimum their scenario definitions and maps. Keep original
+    All twenty reviewed hotfix missions now have definitions and six-size maps.
+    Unresolved bilingual discrepancies remain explicit source issues;
+    visual browser acceptance is tracked separately.
+  - [ ] **Before ITS 17: finish cross-season scenario/Skill reuse.** The
+    optional pinned library resolves scenarios, components and shared Skill
+    definitions in synthetic independent ITS 17/18 builds, preserving source
+    review/citations and legacy Skill routes. Shared Skills now group by exact
+    identity in catalog/Search with fail-closed fact/version comparison. The
+    current ITS 18 curated facts and public semantics are unchanged; tracked
+    runtime databases were rebuilt for fingerprinted builder changes.
+    - [x] Integrate opt-in library-backed seasons with the complete-set build.
+      Explicit per-season library registration, matched input provenance and
+      deployment freshness checks fail closed. Synthetic ITS 17 confirms
+      pinning and standalone output. ITS 18 remains unchanged; exact source-family
+      tags and archived projections of imported scenarios retain regression tests.
+    - [ ] Add reviewed narrow overrides for scenario components and Skill
+      Requirements/Effects/Restrictions where suitable, rejecting conflicts.
+      - [x] Skill prose-array replacements are now scoped to exact scenario
+        actions. Intentional variants stay separate in catalog/Search.
+      - [x] Canonical scenario setup, geometry, objective and end-condition
+        components can now be referenced across multiple scenarios in a
+        pinned shared library, with per-scenario publication citations.
+        Synthetic tests cover one definition, two scenarios, isolated
+        source pages, and incompatible same-ID facts.
+      - [ ] Other scenario components still need reviewed, typed overrides
+        with a narrow field allowlist.
+    - [x] Curate and publish four globally defined ITS 18 Skills separately
+      from scenario-specific actions: CivEvac (pp. 22–23), Casevac (p. 25),
+      Team-Ops (p. 30), and Request a Tacball (pp. 30–31). Preserve exact
+      2026.09.11/2026.09.01 citations and season/Extra applicability. Team-Ops
+      is a distinct optional tournament Extra (p. 29) as well as a Special Skill.
+    - [x] Extend shared Skill authorship/publication to **season-level Skill
+      bindings** independent of scenario references. `sharedSeasonSkillBindings`
+      resolves a pinned shared-library Skill with season-specific citations,
+      review, revision, and optional Extra context; identical definitions
+      consolidate in the catalog/Search without inventing scenario IDs.
+    - [x] Curate Casevac State as its own season-scoped, source-cited State
+      with bidirectional links to the Casevac Skill. Preserve all activation,
+      movement, ARO, and automatic/voluntary cancellation rules plus
+      exact current/historical source citations.
+    - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
+      the published Evacuation/Outbreak contexts before moving real definitions.
+      Also review interaction with other season-wide Skills such as Casevac,
+      and preserve optional Team-Ops applicability. The three repeated ITS 18
+      action names have different Skill facts and must not be merged on name alone.
+      - [x] Initial official ITS 17 v0.2/v1.0.2 comparison: CivEvac and Casevac
+        have different declared Skill types from ITS 18; Outbreak changes
+        Alpha scoring and objective membership. ITS-only historical
+        `short-movement-skill` type support and synthetic cross-season
+        non-consolidation tests now preserve source semantics. An ITS 18
+        regression protects Outbreak's one-Infected CivEvac exception
+        separately from the global two-Civilian maximum. Source review
+        findings are recorded in docs/its-season-database.md.
+      - [x] Permit reviewed, differently versioned season-wide Skills from
+        one pinned library to publish separate routes, prioritizing the
+        newest season for the unqualified slug. Preserve source-specific
+        types and citations; same-version fact drift still fails closed.
+      - [x] Acquire and SHA-pin the official ITS 17 V0.2 English source
+        (105-page v1.0.2 download). Cross-check its 16 recurring
+        scenario names against all 20 ITS 18 missions; compare the
+        Evacuation maps/objectives and the distinct-version Battleground,
+        Superiority, Cutthroat and Outbreak scoring. Add source-reviewed
+        regression for Evacuation geometry and Battleground scoring.
+      - [x] Verify the canonical ignored ITS 17 English/Spanish V0.0,
+        V0.1 and V0.2 PDF set (six originals) and update the source
+        tools to the `local/data/pdf/legacy/its_17/` layout. Record V0.1
+        Casevac type changes in both languages and V0.2 Outbreak
+        introduction as revision-scoped source facts.
+      - [x] Curate a real ITS 17 V0.2 Evacuation membership against
+        reviewed English pp. 55–58 and Spanish pp. 50–53 in a
+        standalone source-pinned shared library. Preserve historical
+        citation pages, language ambiguities and original mission
+        action/scoring. The standalone three-map database builds
+        deterministically; do not register it for serving yet.
+      - [x] Source-review ITS 17 V0.2 Hardlock (EN pp. 59–62,
+        ES pp. 54–57), verifying scoring, all three maps, Pick Up
+        Beacon/Activate Console, Specialist Troops and endings against
+        ITS 18. Preserve the historical Console diameter wording and
+        bilingual ambiguities in a second independently pinned
+        definition. The ITS 17 V0.2 database is now independently registered.
+      - [x] Source-review ITS 17 V0.2 Uplink Center (EN pp. 93–96,
+        ES pp. 99–102) against ITS 18: four scoring objectives,
+        all three geometries, Antenna activation, Tech-Coffin control,
+        Operational Learning and end conditions. Retain historical
+        scenery diameter wording and the ES omission of 350 points
+        from the Antenna placement sentence; the source maps group it
+        with 300/400. Include a third pinned definition and standalone
+        tests without changing ITS 18.
+      - [x] Curate ITS 17 V0.2 Battleground (EN pp. 83–85,
+        ES pp. 88–90) as a separate historical definition with
+        1/3/4 OP Sector scoring and exclusive Key Ops 2/1 OP
+        alternatives. Reuse reviewed Sector geometry while updating
+        the map scoring labels; preserve Key Ops designation/Skills,
+        bilingual VH and Shasvastii discrepancies, and exact source
+        citations. No ITS 18 publication changes.
+      - [x] Source-review ITS 17 V0.2 Annihilation (EN pp. 81–82,
+        ES pp. 85–87): pin the six-size scoring table and
+        original maps, preserve English 1/3/4 OP survival bands
+        versus Spanish 3/4/4, both 350-point 275-point threshold
+        gaps and the 150-point English mixed-unit deployment
+        typo. Publish the fifth definition only in the isolated
+        historical authoring library, not ITS 18.
+      - [x] Materialize the reviewed ITS 17 historical authoring
+        source and pinned shared library into a dedicated
+        `local/work/its/its_17.db` SQLite file (initial five scenarios),
+        independent of `its_18.db` and `rules_n5.db`. Keep runtime
+        registration and `data/generated/its_17.db` publication deferred
+        until the season is ready to ship.
+      - [x] Review ITS 17 Cutthroat V0.2 (EN pp. 86–88,
+        ES pp. 91–93): preserve the two historical Key Ops objectives,
+        selection/Skills and English/Spanish Lieutenant and VH differences,
+        reuse only matching deployment geometry, and rebuild the separate
+        six-scenario `its_17.db` without changing ITS 18.
+      - [x] Review ITS 17 Superiority V0.2 (EN pp. 89–92,
+        ES pp. 94–98): preserve the historic 3-OP Console cap,
+        Dominant Key Ops bonus, selection requirements and language
+        discrepancies, while reusing matching Consoles/Quadrants and
+        Hack Consoles semantics. Rebuild `its_17.db` with seven
+        independent historical scenario records.
+      - [x] Source-review ITS 17 V0.2 Provisioning (EN pp. 72–76,
+        ES pp. 70–74): preserve 4-box scoring and all three diagrams,
+        restore historical equal-diameter Tech-Coffins, same-language
+        Player Token marking, enemy-Safe-Area pickup limits and
+        wholly-inside deposit requirements. Record EN base contact
+        versus ES Silhouette contact. Build the standalone
+        eight-scenario `its_17.db`, without publishing ITS 17.
+      - [x] Source-review ITS 17 V0.2 Area of Interest (EN pp. 77–80,
+        ES pp. 80–84): reuse the matching 3 + 3 + 3 + 1 OP
+        scoring and corner-table geometry. Preserve historical
+        Antenna diameter wording and five bilingual source issues:
+        Reinforcements suitability (EN YES / ES NO), Hacker ARO,
+        Shasvastii States, INTELCOM timing and Spanish
+        Connected/Activated wording. Rebuild the isolated
+        nine-scenario `its_17.db`; do not change ITS 18.
+      - [x] Source-review ITS 17 V0.2 Last Launch (EN pp. 63–67,
+        ES pp. 75–80): verify matching scoring and three diagrams,
+        including 4/8-inch ID Scanner offsets, three ID Skills, Tower
+        Domination, Peripherals and extraction. Preserve relative Token
+        diameters and four independently cited bilingual source issues.
+        Rebuild isolated ten-scenario `its_17.db`; keep ITS 18 unchanged.
+      - [x] Source-review ITS 17 V0.2 B-Pong (EN pp. 36–39,
+        ES pp. 38–41): verify matching 2 + 3 + 3 + 2 OP scoring, three
+        diagrams and both mission Skills. Both historical languages
+        measure relocation from the Beacon, require free Beacon contact
+        for Console Activation and limit successful activation per round.
+        Preserve relative scenery diameters and bilingual Magnetize /
+        Connected wording issues; rebuild isolated eleven-scenario
+        `its_17.db`, without changing ITS 18.
+      - [x] Source-review ITS 17 V0.2 Crossing Lines (EN pp. 51–54,
+        ES pp. 42–45): retain matching 3 + 3 + 2 + 2 OP scoring,
+        three split-deployment maps, central-strip limit, Antenna
+        action and end conditions. Preserve EN/ES central-strip
+        dimension discrepancy, Token type and Shasvastii wording,
+        and the unresolved HVT deployment implication. Rebuild
+        separate twelve-scenario `its_17.db` without ITS 18 changes.
+      - [x] Source-review ITS 17 V0.2 Corporate Appropriation (EN
+        pp. 40–44, ES pp. 32–37): retain source-confirmed Prototype,
+        Panoply and ADS scoring, three geometries and two typed scenario
+        Skills. Preserve token-relative sizes; track bilingual
+        Reinforcements, Capture and Baggage discrepancies. Rebuild
+        separate thirteen-scenario `its_17.db`; leave ITS 18 intact.
+      - [x] Source-review ITS 17 V0.2 Critical Intervention (EN
+        pp. 45–50, ES pp. 63–69): retain asymmetric printed scoring,
+        kill thresholds, three maps, turret profile and two typed
+        scenario Skills. Preserve historically token-relative scenery,
+        enemy-Model turret reactions, six source-local issues, and
+        the unnormalized Defender maximum. Rebuild isolated
+        fourteen-scenario `its_17.db`; leave ITS 18 unchanged.
+      - [x] Source-review ITS 17 V0.2 Outbreak (EN pp. 68–71,
+        ES pp. 46–49): retain the historical 1 OP Stabilize Alpha
+        objective and 1 OP CivEvac Alpha award separately from ITS 18's
+        2 OP CivEvac Alpha award and omitted Stabilize Alpha objective.
+        Pin bilingual placement measurements and independently rebuild
+        the fifteen-scenario `its_17.db`, without ITS 18 changes.
+      - [x] Source-review ITS 17 V0.2 Akial Interference (EN
+        pp. 31–35, ES pp. 58–62): retain the 10 OP distribution,
+        Common/Private Classified rules, four HVTs per player and
+        three deployment maps. Preserve Secure HVT and Secure
+        Treasure exclusion, token-relative Antenna sizing, two
+        independently cited Short Skills and the unresolved
+        one-Emission-versus-failed-retries source issue. Rebuild
+        isolated sixteen-scenario `its_17.db`; leave ITS 18 unchanged.
+      - [x] Compare ITS 17 V0.2's scenario inventory against all existing
+        memberships: the TOC contains exactly sixteen standard scenarios
+        and all sixteen are reviewed. Resilience Operations is a separate
+        tournament Extra, not another scenario membership.
+      - [x] Review and curate ITS 17 V0.2 CivEvac, Casevac and Casevac State
+        (EN pp. 17–21, ES pp. 18–22) as season-local standalone records.
+        Preserve the English Short Movement Skill declarations, the
+        distinct Spanish Basic Short Skill labels, the independent State
+        cancelation rules, bilingual citations and ITS 18 isolation.
+      - [x] Reconcile the original ITS 17 V0.2 global token diameter chart
+        (EN p. 13 / ES p. 14) against twelve reviewed scenario definitions.
+        Pin the chart pages in each affected season membership and shared
+        definition; resolve the erroneous unspecified-diameter claims while
+        preserving genuine EN/ES token-name differences. Test isolated
+        SQLite and keep ITS 18 unchanged.
+      - [x] Source-review Resilience Operations as an optional ITS 17
+        tournament Extra (EN pp. 96–104 / ES pp. 103–111), not a
+        seventeenth scenario. Curate typed deck choices, scoring,
+        deployment, Tactical Elements and glossary in its own
+        season-scoped Rule record and isolated SQLite projection.
+        Retain bilingual source inconsistencies and exclude unsupported
+        physical-card contents; leave ITS 18 unmodified.
+      - [x] Audit all four adjacent ITS 17 PDF revision pairs offline
+        (V0.0→V0.1 and V0.1→V0.2, EN/ES), using the six original SHA pins.
+        Source-review the Casevac declaration, Critical Intervention
+        Reinforcements, Spanish Corporate scoring, Crossing Lines
+        restriction and Resilience Operations reveal-timing chronology.
+        Record the introduced Outbreak mission and V0.2 page reflow,
+        without assuming the remaining historical facts are identical.
+      - [x] Preserve reviewed ITS 17 V0.0/V0.1 differences as
+        revision- and language-tagged `historicalEvidence` inside the
+        existing season source file: 11 facts, 44 original-page observations,
+        four pinned older editions. Include Critical Intervention's
+        Attacker-only Inhibitor and Armed Turret clarifications and Area of
+        Interest's Hacker opposition procedure. Validate fail-closed,
+        keep earlier editions unprojected and ITS 18 publication untouched.
+      - [x] Review and tag seven additional V0.0/V0.1 observations
+        (both languages): tournament bye scoring, 350-point tier SWC,
+        Akial shared objective timing, Corporate Prototype protection
+        and ownership terminology, Crossing Lines central-strip timing,
+        and Provisioning Supply Box pickup phrasing. Expand the same
+        review-only evidence to 18 aspects / 72 source observations and
+        support season-scoped facts without inventing scenario ownership.
+      - [x] Compare the V0.1→V0.2 Uplink Center 150-point
+        written Communication Antenna placement (4→6 in / 10→15 cm) and
+        Corporate Prototype collateral-Attack restriction against
+        all six pinned EN/ES originals. Tag V0.2 observations against
+        existing current source descriptors without duplicating pins;
+        explicitly verify the Outbreak V0.2 introduction. Historical
+        inventory was then 21 reviewed aspects / 92 observations;
+        preserve the V0.2-only SQLite projection.
+      - [x] Visually inspect the Uplink Center 150-point maps in all six
+        original PDFs. V0.0/V0.1 diagrams already say 6 in / 15 cm,
+        despite their 4 in / 10 cm prose; V0.2 corrects the prose
+        without changing graphical placement. Retain separate,
+        source-pinned written and graphical observations.
+      - [x] Visually compare Crossing Lines 150-/200–250-point maps
+        and deployment tables in six publisher-original EN/ES PDFs.
+        Record the persistent EN overlong 4 × 32 / 4 × 48 in
+        table entries separately from its correct 4 × 24 / 4 × 32 in
+        diagrams and the consistent ES text/maps. Historical inventory
+        now 23 reviewed aspects / 104 observations; no projection changes.
+      - [ ] Pin and review the complete ITS 17 source locally, including
+        the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
+        discrepancies, optional Extras (including Resilience Operations)
+        and reusable geometry/components. All six original PDFs are pinned;
+        do not infer cross-revision or cross-season equivalence.
+    - [x] Publish the sixteen reviewed ITS 17 V0.2 missions in a separate,
+      source- and library-pinned `its_17.db`, registered alongside ITS 18.
+      Preserve season-specific Skill/State identities and current revision selection;
+      continue presentation review independently for both seasons.
+  - [ ] **Later seasons:** Add ITS Season 16 Part II (the N5-compatible
+    revision); ITS Season 17 V0.2 is now registered with 16 missions.
+    Keep original
     Season 16 N4-era content distinct from Part II; preserve exact season,
     revision and source provenance. Consider season-specific rules and FAQ
     coverage after the scenario baseline, without delaying Season 18.

@@ -73,20 +73,27 @@ class PublicationRegistry:
         self._season_revisions: dict[str, str] = {}
         self._season_reports: dict[str, dict[str, Any]] = {}
         self._season_sources: dict[str, dict[str, dict[str, Any]]] = {}
-        for season_id, path in season_databases.items():
+        for registered, path in season_databases.items():
+            season_id, separator, pinned_revision = registered.partition("@")
             require_domain_slug(season_id, context="registered ITS season")
             if not season_id.startswith("its-"):
                 raise ValueError(f"Not an ITS publication domain: {season_id}")
             resolved = Path(path).resolve()
             report = inspect_its_database(resolved, core_revision=self.core_revision)
             identity = report["inputIdentity"]
-            if season_id != identity["seasonId"]:
-                raise ValueError(f"ITS filename/registration does not match {season_id}")
-            if season_id in self._season_paths:
-                raise ValueError(f"Duplicate registered ITS season: {season_id}")
-            self._season_paths[season_id] = resolved
-            self._season_revisions[season_id] = identity["seasonRevision"]
-            self._season_reports[season_id] = report
+            if season_id != identity["seasonId"] or (
+                separator and pinned_revision != identity["seasonRevision"]
+            ):
+                raise ValueError(f"ITS filename/registration does not match {registered}")
+            if registered in self._season_paths or any(
+                key.partition("@")[0] == season_id
+                and prior_revision == identity["seasonRevision"]
+                for key, prior_revision in self._season_revisions.items()
+            ):
+                raise ValueError(f"Duplicate registered ITS season/revision: {registered}")
+            self._season_paths[registered] = resolved
+            self._season_revisions[registered] = identity["seasonRevision"]
+            self._season_reports[registered] = report
             with closing(sqlite3.connect(resolved.as_uri() + "?mode=ro", uri=True)) as db:
                 descriptors = [
                     json.loads(row[0])
@@ -95,13 +102,15 @@ class PublicationRegistry:
                         (identity["sourceCollectionId"],),
                     )
                 ]
-            self._season_sources[season_id] = {
+            self._season_sources[registered] = {
                 descriptor["id"]: descriptor for descriptor in descriptors
             }
 
         # Validate cross-domain references at registration, before any HTTP read.
         # No policy is applied by default, but unresolved targets cannot be hosted.
-        for season_id, report in self._season_reports.items():
+        for report in self._season_reports.values():
+            season_id = report["inputIdentity"]["seasonId"]
+            revision = report["inputIdentity"]["seasonRevision"]
             for policy in report["policies"]:
                 target = PublicationReference("rules-n5", policy["target"])
                 if self.resolve(target) is None:
@@ -111,7 +120,7 @@ class PublicationRegistry:
                     )
             for scenario in report["scenarios"]:
                 selected = self.resolve(PublicationReference(
-                    season_id, scenario["id"], self._season_revisions[season_id],
+                    season_id, scenario["id"], revision,
                 ))
                 if selected is None:
                     raise ValueError(f"Missing registered ITS scenario: {scenario['id']}")
@@ -132,15 +141,69 @@ class PublicationRegistry:
                             f"{skill_id!r}"
                         )
 
+    def season_skill_entries(self) -> list[dict[str, Any]]:
+        """Return validated standalone Skills from the selected ITS publications."""
+        return self._season_rule_entries("skill")
+
+    def season_state_entries(self) -> list[dict[str, Any]]:
+        """Return source-cited season States without promoting them to N5 core."""
+        return self._season_rule_entries("state")
+
+    def season_rule_entries(self) -> list[dict[str, Any]]:
+        """Return reviewed season-local rules, including tournament Extras."""
+        return self._season_rule_entries("rule")
+
+    def _season_rule_entries(self, kind: str) -> list[dict[str, Any]]:
+        entries: list[dict[str, Any]] = []
+        for registered, report in self._season_reports.items():
+            identity = report["inputIdentity"]
+            season = identity["seasonId"]
+            sources = self._season_sources[registered]
+            with closing(sqlite3.connect(self._season_paths[registered].as_uri() + "?mode=ro",
+                                         uri=True)) as connection:
+                for (raw,) in connection.execute(
+                    "SELECT payload_json FROM records WHERE collection_id=? AND kind=? "
+                    "ORDER BY id", (identity["sourceCollectionId"], kind),
+                ):
+                    record = json.loads(raw)
+                    citations = []
+                    for pin in record["citations"]:
+                        source = sources[pin["sourceId"]]
+                        citations.append({
+                            "source_id": source["id"],
+                            "source_title": source["title"],
+                            "source_version": source["version"],
+                            "source_url": source.get("url"),
+                            "page": pin.get("page"),
+                            "section": pin.get("section"),
+                        })
+                    entries.append({
+                        "record": record,
+                        "citations": citations,
+                        "collection": season,
+                        "revision": identity["seasonRevision"],
+                    })
+        return entries
+
+
+    def _registered_key(self, season_id: str, revision: str) -> str | None:
+        """Resolve an exact season/revision; never substitute another revision."""
+        explicit = f"{season_id}@{revision}"
+        if self._season_revisions.get(explicit) == revision:
+            return explicit
+        if self._season_revisions.get(season_id) == revision:
+            return season_id
+        return None
+
     def resolve(self, reference: PublicationReference) -> dict[str, Any] | None:
         """Never search another owner or revision when the requested one is absent."""
         if reference.domain == "rules-n5":
             return self.rules_database.composed_record(reference.record_id)
-        path = self._season_paths.get(reference.domain)
-        if path is None:
+        key = self._registered_key(reference.domain, reference.revision or "")
+        if key is None:
             return None
         return select_its_scenario(
-            path, season_id=reference.domain,
+            self._season_paths[key], season_id=reference.domain,
             revision=reference.revision or "",
             scenario_id=reference.record_id,
         )
@@ -152,10 +215,11 @@ class PublicationRegistry:
         seasons may publish the same scenario slug without overwriting each other.
         """
         entries: list[tuple[dict[str, Any], dict[str, Any]]] = []
-        for season_id, report in self._season_reports.items():
+        for registered, report in self._season_reports.items():
+            season_id = report["inputIdentity"]["seasonId"]
             for scenario in report["scenarios"]:
                 selected = self.resolve(PublicationReference(
-                    season_id, scenario["id"], self._season_revisions[season_id],
+                    season_id, scenario["id"], self._season_revisions[registered],
                 ))
                 if selected is None:
                     raise ValueError(f"Missing ITS scenario: {scenario['id']}")
@@ -233,10 +297,11 @@ class PublicationRegistry:
 
     def has_season(self, season_id: str, revision: str) -> bool:
         """Whether this exact season and revision are registered for serving."""
-        return self._season_revisions.get(season_id) == revision
+        return self._registered_key(season_id, revision) is not None
 
     def source_citation(
         self, *, season_id: str, source_id: str, page: int,
+        revision: str | None = None,
     ) -> dict[str, Any] | None:
         """Resolve an external citation against a registered publication source.
 
@@ -244,7 +309,8 @@ class PublicationRegistry:
         Do not infer a new season or substitute another source when the requested
         provenance is absent.
         """
-        source = self._season_sources.get(season_id, {}).get(source_id)
+        key = season_id if revision is None else self._registered_key(season_id, revision)
+        source = self._season_sources.get(key or "", {}).get(source_id)
         if source is None:
             return None
         return {
@@ -260,9 +326,10 @@ class PublicationRegistry:
         require_domain_slug(season_id, context="ITS policy season")
         if not isinstance(revision, str) or not revision.strip() or revision.strip() != revision:
             raise ValueError("ITS policy selection requires an exact season revision")
-        if season_id not in self._season_reports or revision != self._season_revisions[season_id]:
+        key = self._registered_key(season_id, revision)
+        if key is None:
             return []
-        return sorted({policy["context"] for policy in self._season_reports[season_id]["policies"]})
+        return sorted({policy["context"] for policy in self._season_reports[key]["policies"]})
 
     def season_policies(
         self, *, season_id: str, revision: str, context: str,
@@ -277,9 +344,10 @@ class PublicationRegistry:
         require_domain_slug(context, context="ITS policy context")
         if not isinstance(revision, str) or not revision.strip() or revision.strip() != revision:
             raise ValueError("ITS policy selection requires an exact season revision")
-        path = self._season_paths.get(season_id)
-        if path is None or revision != self._season_revisions[season_id]:
+        key = self._registered_key(season_id, revision)
+        if key is None:
             return []
+        path = self._season_paths[key]
         policies = select_its_policies(
             path, season_id=season_id, revision=revision, context=context,
             target_id=target_id,
@@ -293,7 +361,7 @@ class PublicationRegistry:
                 raise ValueError(f"ITS policy {policy['id']!r} has an unknown N5 target")
             published = deepcopy(policy)
             for citation in published["citations"]:
-                source = self._season_sources[season_id].get(citation["sourceId"])
+                source = self._season_sources[key].get(citation["sourceId"])
                 if source is None:
                     raise ValueError(
                         f"ITS policy {policy['id']!r} has unknown source {citation['sourceId']!r}"
@@ -313,6 +381,9 @@ class PublicationRegistry:
                 "revision": self._season_revisions[season],
                 "sourceCollectionId": report["inputIdentity"]["sourceCollectionId"],
                 "sourceSha256": report["inputIdentity"]["sourceSha256"],
+                **({
+                    "sharedScenarioLibrary": report["inputIdentity"]["sharedScenarioLibrary"]
+                } if "sharedScenarioLibrary" in report["inputIdentity"] else {}),
                 "requiredCoreRulesRevision": self.core_revision,
                 "sha256": report["sha256"],
             }

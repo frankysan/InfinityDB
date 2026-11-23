@@ -68,6 +68,17 @@ def parse_scenario_definition_record(
     """Validate the typed v1 facts of one curated scenario definition record."""
 
     root = _object(record, "scenario record")
+    if isinstance(root.get("facts"), dict) and root["facts"].get("definitionVersion") == 1 and (
+        definitions is not None
+        and any(
+            "skillDefinition" in rule
+            for rule in root["facts"].get("mission", {}).get("rules", [])
+        )
+    ):
+        try:
+            root = compose_scenario_record(root, definitions)
+        except ValueError as exc:
+            raise ScenarioDefinitionError(str(exc)) from exc
     if isinstance(root.get("facts"), dict) and root["facts"].get("definitionVersion") == 2:
         if type(root["facts"]["definitionVersion"]) is not int or definitions is None:
             raise ScenarioDefinitionError(
@@ -97,7 +108,7 @@ def parse_scenario_definition_record(
     _only_keys(
         facts,
         {"definitionVersion", "configurations"},
-        {"relatedCategories", "mission", "componentSources"},
+        {"relatedCategories", "mission", "componentSources", "playRequirements", "eventContext"},
         "scenario record.facts",
     )
     if (
@@ -107,6 +118,33 @@ def parse_scenario_definition_record(
         raise ScenarioDefinitionError(
             f"scenario record.facts.definitionVersion must be {SCENARIO_DEFINITION_VERSION}"
         )
+
+    if "playRequirements" in facts:
+        context = "scenario record.facts.playRequirements"
+        requirements = _object(facts["playRequirements"], context)
+        _only_keys(
+            requirements,
+            {"classifiedObjectives", "tacticalObjectives", "hvts"},
+            {"sharedClassifiedObjectivesPerRound"},
+            context,
+        )
+        for key, count in requirements.items():
+            if type(count) is not int or count < 0:
+                raise ScenarioDefinitionError(f"{context}.{key} must be a non-negative integer")
+
+    if "eventContext" in facts:
+        context = "scenario record.facts.eventContext"
+        event = _object(facts["eventContext"], context)
+        _only_keys(event, {"reinforcements"}, {"tacticalSupportOptions"}, context)
+        suitability = _object(event["reinforcements"], f"{context}.reinforcements")
+        _only_keys(suitability, {"en", "es"}, set(), f"{context}.reinforcements")
+        for value in suitability.values():
+            if value not in ("suitable", "not-suitable", "not-declared"):
+                raise ScenarioDefinitionError(f"{context}: invalid Reinforcements declaration")
+        if "tacticalSupportOptions" in event:
+            count = event["tacticalSupportOptions"]
+            if type(count) is not int or count < 0:
+                raise ScenarioDefinitionError(f"{context}: invalid Tactical Support count")
 
     raw_configurations = facts.get("configurations")
     if not isinstance(raw_configurations, list) or not raw_configurations:

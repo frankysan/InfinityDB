@@ -1,4 +1,4 @@
-"""Verify the real checkout CLI server against the pinned P1 runtime baseline.
+"""Verify the real checkout CLI server against the maintained current runtime baseline.
 
 Launches an ephemeral loopback-only server and stops it even on failure.
 No database builds, writes to tracked files, external network calls or deployment.
@@ -19,9 +19,10 @@ from urllib.request import urlopen
 
 from infinity_db.database_set import validate_database_set
 from infinity_db.snapshot_revision import database_set_snapshot_revision
-from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
+from tools.runtime_semantic_baseline import capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CHECKOUT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json"
 LEGACY_FILES = ("deployed-objects.json", "variant-usage.json", "weapon-profile-sources.json")
 
 
@@ -42,7 +43,7 @@ def _get_json(origin: str, path: str) -> dict[str, Any]:
 
 
 def verify_checkout_server(
-    db_dir: Path | None = None, *, baseline: Path = DEFAULT_BASELINE,
+    db_dir: Path | None = None, *, baseline: Path = DEFAULT_CHECKOUT_BASELINE,
 ) -> int:
     """Prove CLI startup, health, exact DB revision and HTTP semantic parity."""
     selected = (db_dir if db_dir is not None else ROOT / "data/generated").resolve()
@@ -93,7 +94,7 @@ def verify_checkout_server(
             its = _get_json(
                 origin,
                 "/api/scenarios/battleground?army_points=300"
-                "&collection=its-18&revision=2026.09.01",
+                "&collection=its-18",
             )
             if (
                 its.get("publication", {}).get("collection_id") != "its-18"
@@ -151,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
         "--db-dir", type=Path,
         help="Explicit complete set (omit to test checkout's normal default)",
     )
-    parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
+    parser.add_argument("--baseline", type=Path, default=DEFAULT_CHECKOUT_BASELINE)
     args = parser.parse_args(argv)
     try:
         verify_checkout_server(args.db_dir, baseline=args.baseline)

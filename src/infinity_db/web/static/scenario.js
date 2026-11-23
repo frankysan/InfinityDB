@@ -24,7 +24,7 @@ const pageController = new AbortController();
 const summaryController = new AbortController();
 let detailController = null;
 let summary = null;
-let selectedPlayContext = "";
+let selectedMainObjectiveSet = "";
 const slug = decodeURIComponent(window.location.pathname.split("/").filter(Boolean).at(-1) || "");
 const initialShare = readShareState("scenario");
 const selectedPublication = {
@@ -50,7 +50,7 @@ function setSelectedArmyPoints(value, { replace = true } = {}) {
     {
       ...(value ? { army_points: String(value) } : {}),
       ...(selectedPublication.collection ? { collection: selectedPublication.collection } : {}),
-      ...(selectedPublication.revision ? { revision: selectedPublication.revision } : {}),
+      // Public share URLs select only the season. Historical revisions are not exposed.
     },
     { replace },
   );
@@ -133,6 +133,7 @@ function setupCard(item) {
   const table = geometry.table || {};
   const tableFact = fact("Table", "—");
   const swcFact = fact("SWC", String(gameSize.swc ?? "—"));
+  card.append(heading, facts);
   const swcIssue = (item.source_issues || []).find(
     (issue) => issue.status === "needs-verification"
       && issue.gameSizeField === "swc"
@@ -144,7 +145,10 @@ function setupCard(item) {
     link.className = "scenario-swc-source-conflict";
     link.href = `#scenario-source-issue-${swcIssue.id}`;
     link.textContent = "Official sources disagree — see source note";
-    swcFact.querySelector("dd")?.append(link);
+    const note = document.createElement("p");
+    note.className = "scenario-setup-note";
+    note.append(link);
+    card.append(note);
   }
   facts.append(
     fact("Army Points", String(item.selected_army_points)),
@@ -154,6 +158,50 @@ function setupCard(item) {
   if (gameSize.minimumVictoryPoints != null) {
     facts.append(fact("Minimum Victory Points", String(gameSize.minimumVictoryPoints)));
   }
+  const requirements = item.setup?.play_requirements;
+  if (requirements) {
+    const countLabel = (count) => count === 0 ? "Not used" : String(count);
+    const shared = requirements.sharedClassifiedObjectivesPerRound;
+    facts.append(fact("Classified Objectives", countLabel(requirements.classifiedObjectives)));
+    if (shared) facts.append(fact("Shared per round", String(shared)));
+    facts.append(
+      fact("Tactical Objectives", countLabel(requirements.tacticalObjectives)),
+      fact("HVTs", countLabel(requirements.hvts)),
+    );
+    const note = document.createElement("p");
+    note.className = "scenario-setup-note";
+    note.textContent = shared
+      ? "Counts are per player unless marked shared. Shared counts are the starting amount per round."
+      : "Objective and HVT counts are per player.";
+    card.append(note);
+  }
+  const event = item.setup?.event_context;
+  if (event) {
+    if (event.tacticalSupportOptions != null) {
+      const support = event.tacticalSupportOptions;
+      const row = fact("Tactical Support Options per player", support === 0 ? "Not used" : String(support));
+      if (support > 0 && item.tactical_support) {
+        const link = document.createElement("a");
+        link.href = "#scenario-tactical-support";
+        link.textContent = String(support);
+        row.querySelector("dd").replaceChildren(link);
+      }
+      facts.append(row);
+    }
+    const suitability = event.reinforcements;
+    const labels = {
+      suitable: "Suitable", "not-suitable": "Not suitable", "not-declared": "Not stated",
+    };
+    if (suitability.en === suitability.es) {
+      facts.append(fact("Reinforcements", labels[suitability.en]));
+    } else {
+      facts.append(fact("Reinforcements", "Source discrepancy"));
+      const note = document.createElement("p");
+      note.className = "scenario-setup-note";
+      note.textContent = `Reinforcements: English — ${labels[suitability.en]}; Spanish — ${labels[suitability.es]}.`;
+      card.append(note);
+    }
+  }
   // Table dimensions are derived from canonical inches, not marker footprint metadata.
   const tableValue = tableFact.querySelector("dd");
   if (tableValue && Number.isFinite(table.width) && Number.isFinite(table.height)) {
@@ -162,7 +210,6 @@ function setupCard(item) {
     tableValue.dataset.heightInches = String(table.height);
     tableValue.textContent = `${scenarioDistance(table.width)} × ${scenarioDistance(table.height)}`;
   }
-  card.append(heading, facts);
   return card;
 }
 
@@ -183,6 +230,22 @@ function mapCard(item) {
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
   figure.append(heading, image);
+  // The current ITS influence circles represent fixed Circular Template areas.
+  // Player-placed templates have no map footprint and state their size in the rules.
+  if ((item.placement?.geometry?.elements || []).some(
+    (element) => element.kind === "circle" && element.style === "influence"
+  )) {
+    const note = document.createElement("p");
+    note.className = "scenario-map-placement-note";
+    note.textContent = "Circular Template areas: 12 cm diameter each (footprints drawn to scale).";
+    figure.append(note);
+  }
+  if (["critical-intervention", "last-launch"].includes(item.slug)) {
+    const note = document.createElement("p");
+    note.className = "scenario-map-placement-note";
+    note.textContent = "The central room has a Wide Gate on each side. Gate widths are schematic.";
+    figure.append(note);
+  }
   if (item.slug === "domination" && item.publication?.collection_id === "n5-core") {
     const note = document.createElement("p");
     note.className = "scenario-map-placement-note";
@@ -199,19 +262,31 @@ function mapCard(item) {
     const dimensions = document.createElement("div");
     dimensions.className = "scenario-marker-dimensions";
     const title = document.createElement("h3");
-    title.textContent = "Physical marker sizes";
+    const schematic = markers.some((marker) => marker.diameter_mm == null);
+    title.textContent = schematic ? "Objective markers" : "Physical marker sizes";
     const list = document.createElement("ul");
     list.className = "detail-list";
     for (const marker of markers) {
       const row = document.createElement("li");
-      row.textContent = `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm diameter`;
+      row.textContent = marker.diameter_mm == null
+        ? `${marker.count} × ${marker.name} — ${marker.size_status === "source-conflict"
+          ? "conflicting physical sizes in official sources" : "physical size not specified"}`
+        : `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm ${marker.size_status === "token-or-model"
+          ? "token diameter (S2 Model alternative)"
+          : marker.size_status === "token-or-civilian-model"
+            ? "token diameter (Civilian Model alternative)" : "diameter"}`;
       list.append(row);
     }
     const note = document.createElement("p");
     note.className = "detail-source";
-    note.append("Physical token diameter, not scoring area or map scale · ");
-    // One shared source specifies the available Core marker types.
-    note.append(rulesCitationNode(markers[0].citation));
+    const measured = markers.find((marker) => marker.diameter_mm != null);
+    if (measured?.citation) {
+      note.append("Physical token diameter, not scoring area or map scale · ");
+      note.append(rulesCitationNode(measured.citation));
+    }
+    if (schematic) {
+      note.append(" Schematic markers indicate placement only where physical size is unknown or disputed; check mission rules and source issues.");
+    }
     dimensions.append(title, list, note);
     figure.append(dimensions);
   }
@@ -254,12 +329,26 @@ function conditionNode(condition) {
     }
     return node;
   }
+  if (kind === "element-status-any") {
+    const ids = condition.elementIds || [];
+    node.textContent = ids.every((id) => id.startsWith("console-"))
+      ? "Control at least one Console"
+      : ids.length === 1 && ids[0] === "tracking-beacon"
+        ? "Control the Tracking Beacon"
+        : `Control at least one of ${ids.length} scenario elements`;
+    return node;
+  }
   if (kind === "element-status-count") {
     const count = condition.elementIds?.length || 0;
     node.textContent = `For each ${condition.status} scenario element${count ? `, up to ${count}` : ""}`;
     return node;
   }
   if (kind === "element-status-comparison") {
+    if (condition.status === "activated"
+      && (condition.elementIds || []).every((id) => id.startsWith("console-"))) {
+      node.textContent = "Have more Activated Consoles than the opponent";
+      return node;
+    }
     node.textContent = condition.comparison === "all"
       ? `Control all ${condition.elementIds?.length || ""} scenario elements`.replace("  ", " ")
       : `Control more ${condition.status} scenario elements than the opponent`;
@@ -304,10 +393,81 @@ function objectiveCard(objective) {
 }
 
 function objectivesSection(item) {
-  const grid = document.createElement("div");
-  grid.className = "scenario-objective-grid";
-  grid.append(...(item.objectives || []).map(objectiveCard));
-  return section("Objectives", grid);
+  const objectives = item.objectives || [];
+  const selection = item.objective_selection;
+  if (!selection) {
+    const grid = document.createElement("div");
+    grid.className = "scenario-objective-grid";
+    grid.append(...objectives.map(objectiveCard));
+    return section("Objectives", grid);
+  }
+
+  const wrapper = section("Objectives");
+  const explanation = document.createElement("p");
+  explanation.className = "detail-copy";
+  explanation.textContent = "Each player chooses a different Main Objective. "
+    + "The player who chose Deployment selects first, when choosing Deployment; "
+    + "the opponent then chooses one of the remaining sets. "
+    + "Secondary and Classified Objectives apply regardless of the selected set.";
+  wrapper.append(explanation);
+
+  const label = document.createElement("label");
+  label.className = "scenario-objective-choice";
+  label.textContent = "View Main Objective ";
+  const select = document.createElement("select");
+  select.id = "scenario-main-objective-set";
+  const all = document.createElement("option");
+  all.value = "";
+  all.textContent = "Compare all three sets";
+  select.append(all);
+  for (const group of selection.sets) {
+    const option = document.createElement("option");
+    option.value = group.id;
+    option.textContent = group.name;
+    select.append(option);
+  }
+  select.value = selection.sets.some((group) => group.id === selectedMainObjectiveSet)
+    ? selectedMainObjectiveSet : "";
+  label.append(select);
+  wrapper.append(label);
+
+  const byId = new Map(objectives.map((objective) => [objective.id, objective]));
+  const selectedIds = new Set(selection.sets.flatMap((group) => group.objectiveIds));
+  const mainGroups = document.createElement("div");
+  mainGroups.className = "scenario-objective-sets";
+  for (const group of selection.sets) {
+    const region = document.createElement("section");
+    region.className = "scenario-objective-set";
+    region.dataset.objectiveSet = group.id;
+    const heading = document.createElement("h3");
+    heading.textContent = group.name;
+    const grid = document.createElement("div");
+    grid.className = "scenario-objective-grid";
+    grid.append(...group.objectiveIds.map((id) => objectiveCard(byId.get(id))));
+    region.append(heading, grid);
+    mainGroups.append(region);
+  }
+  const updateGroups = () => {
+    selectedMainObjectiveSet = select.value;
+    for (const region of mainGroups.children) {
+      region.hidden = !!select.value && region.dataset.objectiveSet !== select.value;
+    }
+  };
+  select.addEventListener("change", updateGroups);
+  updateGroups();
+  wrapper.append(mainGroups);
+
+  const other = objectives.filter((objective) => !selectedIds.has(objective.id));
+  if (other.length) {
+    const heading = document.createElement("h3");
+    heading.className = "scenario-secondary-heading";
+    heading.textContent = "Secondary and Classified Objectives";
+    const grid = document.createElement("div");
+    grid.className = "scenario-objective-grid";
+    grid.append(...other.map(objectiveCard));
+    wrapper.append(heading, grid);
+  }
+  return wrapper;
 }
 
 function inlineScenarioRuleArticle(inclusion) {
@@ -332,6 +492,14 @@ function rulesSection(item) {
   const cards = [];
   for (const inclusion of item.special_rules || []) {
     if (inclusion.rule) cards.push(rulesReferenceArticle(inclusion.rule, { includeApplicability: false }));
+    else if (inclusion.skill) {
+      const detailsLink = document.createElement("a");
+      detailsLink.href = `/skills/${encodeURIComponent(inclusion.skill.id.replace(/^skill:/, ""))}`;
+      detailsLink.textContent = "Skill details";
+      cards.push(rulesReferenceArticle(inclusion.skill, {
+        includeApplicability: false, headerContent: [detailsLink],
+      }));
+    }
     else cards.push(inlineScenarioRuleArticle(inclusion));
   }
   for (const skill of item.skills || []) cards.push(rulesReferenceArticle(skill, { includeApplicability: false }));
@@ -417,115 +585,150 @@ function provenanceSection(item) {
   return wrapper;
 }
 
-function seasonPolicySection(item, contexts, controller) {
-  if (!contexts?.length || item.publication?.collection_id === "n5-core") return null;
-  const wrapper = section("ITS tournament and Extra rules");
-  const explanation = document.createElement("p");
-  explanation.className = "detail-copy";
-  explanation.textContent = "These restrictions are not part of the N5 core rules. "
-    + "Select the play context used by your event or optional Extra to view them.";
-  const label = document.createElement("label");
-  label.className = "detail-copy";
-  label.textContent = "Play context ";
-  const select = document.createElement("select");
-  const defaultOption = document.createElement("option");
-  defaultOption.value = "";
-  defaultOption.textContent = "No tournament or Extra selected";
-  select.append(defaultOption);
-  for (const context of contexts) {
-    const option = document.createElement("option");
-    option.value = context;
-    option.textContent = context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-    select.append(option);
+function tacticalSupportSection(item) {
+  const support = item.tactical_support;
+  if (!support) return null;
+  const card = document.createElement("article");
+  card.id = "scenario-tactical-support";
+  card.className = "surface surface--subtle surface--clipped";
+  const title = document.createElement("h3");
+  title.className = "surface-titlebar surface-titlebar--subtle";
+  title.textContent = support.name;
+  const body = document.createElement("div");
+  body.className = "surface-body";
+  for (const paragraph of [...support.effects, ...support.restrictions]) {
+    const text = document.createElement("p");
+    text.className = "detail-copy";
+    text.textContent = paragraph;
+    body.append(text);
   }
-  select.value = contexts.includes(selectedPlayContext) ? selectedPlayContext : "";
-  label.append(select);
-  const results = document.createElement("div");
-  results.className = "detail-group";
-  let requestNumber = 0;
-  async function selectContext() {
-    const currentRequest = ++requestNumber;
-    const context = select.value;
-    selectedPlayContext = context;
-    results.replaceChildren();
-    if (!context) return;
-    const message = document.createElement("p");
-    message.className = "detail-source";
-    message.textContent = "Loading selected ITS rules…";
-    results.append(message);
-    try {
-      const payload = await getSeasonPolicies(
-        item.publication.collection_id, item.publication.revision, context, controller.signal,
-      );
-      if (controller.signal.aborted || currentRequest !== requestNumber) return;
-      results.replaceChildren();
-      for (const policy of payload.items || []) {
-        const card = document.createElement("article");
-        card.className = "surface surface--subtle detail-section";
-        const title = document.createElement("h3");
-        title.className = "surface-titlebar surface-titlebar--subtle";
-        title.textContent = policy.title;
-        const effect = document.createElement("p");
-        effect.className = "detail-copy";
-        effect.textContent = policy.effect.text;
-        const target = document.createElement("p");
-        target.className = "detail-copy";
-        const destination = policy.target.recordId.startsWith("skill:") ? "skills" : "rules";
-        const link = document.createElement("a");
-        link.href = `/${destination}/${encodeURIComponent(policy.target.recordId.split(":")[1])}`;
-        link.textContent = policy.target.name;
-        target.append("Applies to: ", link);
-        const source = document.createElement("p");
-        source.className = "detail-source";
-        source.append("Sources: ");
-        for (const [index, citation] of (policy.citations || []).entries()) {
-          if (index) source.append("; ");
-          const label = `${citation.sourceTitle || item.publication.collection_title}`
-            + `, p. ${citation.page} (${citation.section})`;
-          if (!citation.sourceUrl) {
-            source.append(label);
-            continue;
-          }
-          const link = document.createElement("a");
-          link.href = citation.sourceUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.textContent = label;
-          source.append(link);
-        }
-        card.append(title, effect, target, source);
-        results.append(card);
-      }
-      if (!(payload.items || []).length) {
-        const none = document.createElement("p");
-        none.className = "detail-copy";
-        none.textContent = "No additional ITS policy is published for this play context.";
-        results.append(none);
-      }
-    } catch (error) {
-      if (controller.signal.aborted || currentRequest !== requestNumber) return;
-      results.replaceChildren();
-      message.textContent = "The selected ITS rules could not be loaded.";
-      results.append(message);
-      console.error("Could not load ITS play-context rules", error);
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const option of support.options) {
+    const entry = document.createElement("li");
+    const label = document.createElement("strong");
+    label.textContent = option.name + ": ";
+    entry.append(label, option.effect, " — ", option.timing);
+    list.append(entry);
+  }
+  body.append(list);
+  for (const note of support.sourceNotes) {
+    const text = document.createElement("p");
+    text.className = "detail-copy";
+    text.textContent = note;
+    body.append(text);
+  }
+  const sources = document.createElement("p");
+  sources.className = "detail-source";
+  for (const [index, citation] of support.citations.entries()) {
+    if (index) sources.append(" · ");
+    sources.append(rulesCitationNode(citation));
+  }
+  body.append(sources);
+  card.append(title, body);
+  return section("Tactical Support", card);
+}
+
+function seasonPolicyDetails(policy, publication) {
+  const details = document.createElement("div");
+  const title = document.createElement("h4");
+  title.textContent = policy.title;
+  const effect = document.createElement("p");
+  effect.className = "detail-copy";
+  effect.textContent = policy.effect.text;
+  const target = document.createElement("p");
+  target.className = "detail-copy";
+  const destination = policy.target.recordId.startsWith("skill:") ? "skills" : "rules";
+  const link = document.createElement("a");
+  link.href = `/${destination}/${encodeURIComponent(policy.target.recordId.split(":")[1])}`;
+  link.textContent = policy.target.name;
+  target.append("Applies to: ", link);
+  const source = document.createElement("p");
+  source.className = "detail-source";
+  source.append("Sources: ");
+  for (const [index, citation] of (policy.citations || []).entries()) {
+    if (index) source.append("; ");
+    const label = `${citation.sourceTitle || publication.collection_title}`
+      + `, p. ${citation.page} (${citation.section})`;
+    if (!citation.sourceUrl) {
+      source.append(label);
+      continue;
     }
+    const link = document.createElement("a");
+    link.href = citation.sourceUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = label;
+    source.append(link);
   }
-  select.addEventListener("change", selectContext, { signal: controller.signal });
-  wrapper.append(explanation, label, results);
-  if (select.value) selectContext();
+  details.append(title, effect, target, source);
+  return details;
+}
+
+async function loadSeasonPolicyCards(publication, { signal }, wrapper) {
+  const { collection_id: season, revision } = publication;
+  try {
+    const { contexts = [] } = await getSeasonPolicies(season, revision, "", signal);
+    if (signal.aborted) return;
+    const cards = await Promise.all(contexts.map(async (context) => {
+      const card = document.createElement("article");
+      card.className = "surface surface--subtle surface--clipped";
+      const title = document.createElement("h3");
+      title.className = "surface-titlebar surface-titlebar--subtle";
+      title.textContent = context === "team-ops-extra" ? "TEAM-OPS Extra"
+        : context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+      const body = document.createElement("div");
+      body.className = "surface-body";
+      card.append(title, body);
+      try {
+        const { items = [] } = await getSeasonPolicies(season, revision, context, signal);
+        if (!items.length) return null;
+        body.append(...items.map((policy) => seasonPolicyDetails(policy, publication)));
+      } catch (error) {
+        if (signal.aborted) return null;
+        const message = document.createElement("p");
+        message.className = "detail-copy";
+        message.textContent = "The rules for this play context could not be loaded.";
+        body.append(message);
+        console.error("Could not load ITS play-context rules", error);
+      }
+      return card;
+    }));
+    if (signal.aborted) return;
+    const visibleCards = cards.filter(Boolean);
+    wrapper.append(...visibleCards);
+    wrapper.hidden = !visibleCards.length;
+  } catch (error) {
+    if (signal.aborted) return;
+    const message = document.createElement("p");
+    message.className = "detail-copy";
+    message.textContent = "ITS tournament and Extra rules could not be loaded.";
+    wrapper.append(message);
+    wrapper.hidden = false;
+    console.error("Could not list ITS play contexts", error);
+  }
+}
+
+function seasonPolicySection(item, controller) {
+  const publication = item.publication;
+  if (!publication?.collection_id || publication.collection_id === "n5-core") return null;
+  const wrapper = section("ITS tournament and Extra rules");
+  wrapper.hidden = true;
+  loadSeasonPolicyCards(publication, controller, wrapper);
   return wrapper;
 }
 
-function render(item, faqItems = [], policyContexts = [], controller = null) {
+function render(item, faqItems, controller) {
   updateDocumentIdentity(item);
   const placement = document.createElement("div");
   placement.className = "scenario-setup-grid";
   placement.append(setupCard(item), mapCard(item));
   const sections = [
     section("Setup", placement),
+    tacticalSupportSection(item),
     objectivesSection(item),
     rulesSection(item),
-    controller ? seasonPolicySection(item, policyContexts, controller) : null,
+    seasonPolicySection(item, controller),
     faqRulingsSection(faqItems),
     endSection(item),
     issuesSection(item),
@@ -544,7 +747,7 @@ async function loadDetail(points) {
   elements.status.textContent = `Loading ${points} Army Point setup.`;
   show(elements.status);
   try {
-    const [item, faq, policyOptions] = await Promise.all([
+    const [item, faq] = await Promise.all([
       getScenario(slug, points, controller.signal, selectedPublication),
       fetchReviewedFaqRulings(`scenario:${slug}`, {
         scenarioId: `scenario:${slug}`,
@@ -555,17 +758,9 @@ async function loadDetail(points) {
         if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
         return { items: [] };
       }),
-      selectedPublication.collection && selectedPublication.collection !== "n5-core"
-        ? getSeasonPolicies(
-          selectedPublication.collection, selectedPublication.revision, "", controller.signal,
-        ).catch((error) => {
-          if (error.name !== "AbortError") console.error("Could not list ITS contexts", error);
-          return { contexts: [] };
-        })
-        : Promise.resolve({ contexts: [] }),
     ]);
     if (controller.signal.aborted || pageController.signal.aborted) return;
-    render(item, faq.items || [], policyOptions.contexts || [], controller);
+    render(item, faq.items || [], controller);
   } catch (error) {
     if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;
@@ -604,6 +799,11 @@ async function initialize() {
       elements.errorMessage.textContent = "Scenario not found.";
       show(elements.error);
       return;
+    }
+    // Use the server's current revision for exact internal policy/FAQ requests.
+    // An explicitly supplied historical revision is still rejected by the API.
+    if (selectedPublication.collection && !selectedPublication.revision) {
+      selectedPublication.revision = summary.publication?.revision || "";
     }
     updateDocumentIdentity(summary);
     populatePoints(summary);

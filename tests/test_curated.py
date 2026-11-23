@@ -752,15 +752,15 @@ def test_load_curated_document_accepts_archived_wiki_citation(tmp_path: Path) ->
     document = valid_document()
     document["sources"] = [
         {
-            "id": "wiki-en-20260926-200832",
+            "id": "wiki-en-20261116-075926",
             "kind": "wiki",
             "title": "Infinity Wiki snapshot (English)",
-            "version": "20260926-200832",
-            "acquiredAt": "2026-09-26T20:08:32+02:00",
-            "localPath": "data/wiki/WIKI-en 20260926-200832.zip",
+            "version": "20261116-075926",
+            "acquiredAt": "2026-11-16T07:59:26+01:00",
+            "localPath": "data/wiki/WIKI-en 20261116-075926.zip",
             "sha256": "a" * 64,
             "language": "en",
-            "documentCount": 812,
+            "documentCount": 932,
             "url": "https://infinitythewiki.com/",
             "authority": "secondary",
         }
@@ -768,7 +768,7 @@ def test_load_curated_document_accepts_archived_wiki_citation(tmp_path: Path) ->
     document["vocabularySources"] = {"skillTypes": [], "labels": []}
     document["records"][0]["citations"] = [
         {
-            "sourceId": "wiki-en-20260926-200832",
+            "sourceId": "wiki-en-20261116-075926",
             "member": "Example",
             "heading": "Example",
         }
@@ -860,16 +860,16 @@ def test_checked_in_n5_collection_is_valid() -> None:
     assert sources["n5-core-v5.3-pdf"]["url"] == (
         "https://experience.corvusbelli.com/en/infinity/resources"
     )
-    wiki_source = sources["wiki-en-20260926-200832"]
-    assert wiki_source["localPath"] == "data/wiki/WIKI-en 20260926-200832.zip"
+    wiki_source = sources["wiki-en-20261116-075926"]
+    assert wiki_source["localPath"] == "data/wiki/WIKI-en 20261116-075926.zip"
     assert wiki_source["sha256"] == (
-        "c0fe18c165473e3f273efd58aa7ecb0ea0d94ee274189de9361aad175b3de987"
+        "6a89e4feb9ce08d1bd9dcf1ecec094b0fcd2aa928a99c253da47561acffed15f"
     )
-    assert wiki_source["documentCount"] == 812
+    assert wiki_source["documentCount"] == 932
     assert document["vocabularySources"]["skillTypes"][0]["member"] == (
-        "Skills_and_Equipment_Module"
+        "Skills_and_Equipment_Module__u_eee698f3fd7e.html"
     )
-    assert document["vocabularySources"]["labels"][0]["member"] == "Labels"
+    assert document["vocabularySources"]["labels"][0]["member"] == "Labels.html"
     assert "page" not in document["vocabularySources"]["skillTypes"][0]
     assert "page" not in document["vocabularySources"]["labels"][0]
     assert [skill_type["id"] for skill_type in document["skillTypes"]] == [
@@ -1052,8 +1052,8 @@ def test_rea037_armed_turret_silhouette_conflict_is_source_scoped() -> None:
         ("n5-core-v5.3-pdf", 195, None),
         ("n5-core-v5.3-es-pdf", 74, None),
         ("n5-core-v5.3-es-pdf", 203, None),
-        ("wiki-en-20260926-200832", None, "Armed_Turret"),
-        ("wiki-es-20261009-211304", None, "es/Torreta_Artillada"),
+        ("wiki-en-20261116-075926", None, "Armed_Turret.html"),
+        ("wiki-es-20261116-092640", None, "es/Torreta_Artillada.html"),
     }
 
 
@@ -3440,7 +3440,7 @@ def test_n5_speculative_attack_template_aro_sequence() -> None:
         "page": 48,
         "section": "Speculative Attack",
     }
-    assert record["citations"][1]["sourceId"] == "wiki-en-20260926-200832"
+    assert record["citations"][1]["sourceId"] == "wiki-en-20261116-075926"
     assert "trajectory" in facts["requirements"][1]
     assert "Burst 1" in facts["effects"][0]
     assert "-6 MOD" in facts["restrictions"][0]
@@ -3507,7 +3507,7 @@ def test_n5_suppressive_fire_aro_scope_and_g_jumper_exception() -> None:
         {"sourceId": "n5-core-v5.3-pdf", "page": 171,
          "section": "Suppressive Fire State"},
     ]
-    assert skill["citations"][2]["sourceId"] == "wiki-en-20260926-200832"
+    assert skill["citations"][2]["sourceId"] == "wiki-en-20261116-075926"
     assert facts["requirements"] == [
         "The user must select a Weapon with the "
         "[[trait:suppressive-fire|Suppressive Fire]] Trait."
@@ -3644,7 +3644,7 @@ def test_n5_alert_is_optional_automatic_conclusion_not_an_aro() -> None:
         "page": 77,
         "section": "Alert!",
     }
-    assert record["citations"][1]["sourceId"] == "wiki-en-20260926-200832"
+    assert record["citations"][1]["sourceId"] == "wiki-en-20261116-075926"
     assert any("Allied Trooper" in rule and "Zone of Control" in rule
                for rule in facts["requirements"])
     assert any("has not activated in the same Order" in rule
@@ -5446,7 +5446,7 @@ def test_n5_look_out_alerted_aro_is_dodge_only_and_conditional() -> None:
         "page": 81,
         "section": "Look Out!",
     }
-    assert skill["citations"][1]["sourceId"] == "wiki-en-20260926-200832"
+    assert skill["citations"][1]["sourceId"] == "wiki-en-20261116-075926"
     assert skill["relations"] == [
         {"type": "modifies-rolls-for", "recordId": "skill:dodge"}
     ]
@@ -5816,12 +5816,14 @@ def test_rea042_dodge_arm_modifier_preserves_pdf_and_wiki_disagreement() -> None
     references = {(c["sourceId"], c.get("page"), c.get("member")) for c in dodge["citations"]}
     assert ("n5-core-v5.3-pdf", 75, None) in references
     assert ("n5-core-v5.3-es-pdf", 75, None) in references
-    assert ("wiki-en-20260926-200832", None, "Template_Modifiers-explained") in references
     assert (
-        "wiki-es-20261009-211304", None, "es/Plantilla_Modifiers-explained"
+        "wiki-en-20261116-075926", None, "Template_Modifiers-explained__u_2c86ebf26d96.html"
     ) in references
-    spanish = next(s for s in doc["sources"] if s["id"] == "wiki-es-20261009-211304")
-    assert spanish["documentCount"] == 786
+    assert (
+        "wiki-es-20261116-092640", None, "es/Plantilla_Modifiers-explained__u_e581ed330fd9.html"
+    ) in references
+    spanish = next(s for s in doc["sources"] if s["id"] == "wiki-es-20261116-092640")
+    assert spanish["documentCount"] == 1146
     assert len(spanish["sha256"]) == 64
 
 

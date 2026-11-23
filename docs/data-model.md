@@ -9,10 +9,10 @@ migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this c
 contract.
 
 The complete serving runtime uses Army v31 in `army.db`, Rules v17 in
-`rules_n5.db` and ITS schema v2 in `its_18.db`. Structured references,
-source/citation identity and symbol mappings are embedded. Serving requires
-all three, validates the source-compatible ITS publication against the matched
-Army/Rules build and does not read build JSON.
+`rules_n5.db` and ITS schema v2 in `its_18.db` (current revision
+2026.09.11). Structured references, source/citation identity and symbol
+mappings are embedded. Serving requires all three, validates the current ITS
+publication against the matched Army/Rules build and does not read build JSON.
 The [data lifecycle](../data/README.md) owns current build/serve paths.
 Earlier schema/publication migration descriptions below are historical where
 they explicitly identify an older version. **Dated source-variant review notes** record the findings
@@ -54,9 +54,49 @@ flowchart TD
 ```
 
 The Army and N5 Rules databases remain separate because their sources,
-provenance and update cadences differ. Independently published ITS season
-data resides in `its_18.db`, with explicit revision and N5 compatibility
-validation at serving time.
+provenance and update cadences differ. The current ITS Season 18 publication
+resides in its own validated schema v2 database, with explicit current revision
+and N5 compatibility validation at serving time. Historical facts stay in the
+curated source family rather than a player-selectable historical database.
+
+### Accepted authoring direction: one source family, version-tagged facts
+
+For maintained curation, **prefer one file per logical source family** rather
+than a new curated file for every revision of that source. For example, ITS
+Season 18 is one source family even though its original and September hotfix
+PDFs have different exact byte identities. Source families do not merge
+independent authorities such as N5 core rules, the N5 FAQ and ITS.
+
+- Tag each maintained fact with the exact source revision(s) for which it was
+  reviewed. Use the smallest meaningful fact/field scope; a whole-record tag
+  alone is insufficient when only some mission rules, scoring, geometry or
+  citations change. Retain one shared fact when it is explicitly reviewed for
+  multiple revisions, and distinct tagged variants when its meaning differs.
+- Keep immutable upstream revision files and their source descriptors, dates,
+  languages, hashes and page citations separately identifiable within the
+  curated family. Each current fact's citation must resolve to the revision
+  supporting it; retaining historical evidence does not make it current.
+- Declare the **current revision** explicitly for each source family and
+  project only facts reviewed as applicable to that revision into the normal
+  publication. Reject overlapping incompatible variants, unreviewed carry-
+  forward and missing required current facts; never select a fact merely from
+  file order or the newest-looking timestamp. Stable logical IDs may span revisions.
+- **Player-facing behavior is latest-only.** Within a selected source family or
+  season, show its current revision automatically, not a list of revisions.
+  Preserve version tags, source provenance and superseded facts in curation
+  for possible later historical browsing, but do not require separately
+  selectable historical SQLite publications, API selectors or UI controls.
+  Historical replay is a separate future capability, not a prerequisite for
+  the source-family migration.
+
+This source-family model is implemented for ITS Season 18 by
+`data/curated/its/n5-its-season-18.json` and the deterministic
+`its_source_family` projector. Every current mission and event policy is
+revision-tagged; changed Battleground geometry, citations, review metadata and
+season-policy facts retain historical field overrides. The builder publishes
+only 2026.09.11 into `its_18.db`, while the original 2026.09.01 evidence and
+source-file hash remain preserved in curation. The public scenario selector
+chooses the season without a revision selector. Historical replay remains deferred.
 
 **Optional legacy-source annexes:** The `reinforcements-extra-n4-reference`
 collection is deliberately separate from `n5-core-v5.3`. Its three
@@ -3030,7 +3070,7 @@ to expose fourteen normalized conditions separately.
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
 **(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
 **(12, 14)**, **(13, 15)**, **(14, 16)**, **(15, 17)**,
-**(16, 18)** and **(17, 19)**. The current v1.1.0 runtime uses
+**(16, 18)** and **(17, 19)**. The current runtime uses
 v17/compatibility-19; the earlier v1.0.1 release used
 v10/compatibility-12. From v9 onward the validator checks fourteen
 Restrictions constraints, negative polarity, qualifiers and provenance;
@@ -3767,7 +3807,149 @@ The common deployment rows, standard Annihilation/Firefight geometry, three-roun
 ending, and minimum-VP ending are shared. Domination retains its explicit 350-point 6 SWC override.
 Objective definitions use the same reference mechanism; geometry titles come from the including
 scenario as presentation metadata. Unsupported fields and mismatched component kinds fail closed.
-References are collection-local; cross-collection historical/season selection remains future work.
+Ordinary component references are collection-local; an opt-in pinned library can now import versioned definitions and components into a season during its build. Historical browsing and real cross-season curation remain future work.
+
+### Accepted cross-season scenario and Skill reuse
+
+**Implemented first slice (synthetic fixtures only):** An optional, explicitly supplied
+shared scenario library expands exact `scenario:<id>` + version memberships
+before normal curated validation. The season pins the library SHA-256 and
+supplies its own citations and review, including citations for every imported
+component. Imported components use the existing `ScenarioComponents` resolver,
+now with optional version-pinned references. A limited override allowlist
+covers the scenario summary and individual `playRequirements` counts. The
+compiled scenario carries its library ID, selected definition version and
+original collection/season/source identities in `sharedDefinition`, while its
+published citations and sources remain season-owned. All bytes are materialized
+into the existing SQLite schema v2. Existing ITS 18 curation and runtime
+responses are unchanged; no real ITS 17 or shared Skill data has been migrated.
+
+**Implemented shared Skill slice (synthetic fixtures only):**
+`scenarioComponents` now also accepts a versioned `skill` component with
+`skillTypeIds` and structured `skillFacts`. A scenario action uses an exact
+`skillDefinition: {ref, version}` and retains its original scenario-local rule
+ID, name, paragraphs and optional source-page pins. Composition replaces the
+reference with checked Skill facts and `sharedSkill` identity/provenance before
+normal scenario validation. Shared libraries optionally declare reviewed
+`skills` and seasons independently declare `sharedSkillBindings` (version,
+applicable scenario IDs, reviewed source citations). The same library can build
+independent ITS 17/18 fixtures with different publication citations, including
+for a shared Skill; no runtime cross-database resolution is introduced.
+
+For genuinely shared pinned Skills, the Skill catalog and Search list one
+canonical typed identity with the applicable scenario/season bindings and
+combined citation evidence. The original season/scenario Skill URLs continue
+to resolve their context-specific records and work inside scenario cards.
+Identical names alone never trigger merging; differing Skill facts, types,
+versions or definition provenance fail closed. None of the 26 scenario action
+Skills has been migrated. The three repeated action names in ITS 18 have
+different structured facts and must not be merged by name.
+
+**Published ITS 18 season-wide Skills:** CivEvac (Common Basic Short Skill,
+pp. 22–23), Casevac (Common Short Skill, p. 25), Team-Ops (Automatic Special
+Skill, p. 30), and Request a Tacball (Attack Short Skill, pp. 30–31) are
+four independent `kind: skill` records in the existing ITS source and season
+SQLite schema v2. Exact source-family facts and revised page citations are
+preserved for 2026.09.01 (one page earlier), while only 2026.09.11 is served.
+Their `facts.applicability: {context, revision}` is `season` for CivEvac and
+Casevac, and `team-ops-extra` for Team-Ops and Request a Tacball.
+This identifies the *optional* tournament Extra rather than granting an
+unconditional Skill outside that Extra. CivEvac is also referenced by the
+Evacuation and Outbreak scenarios, but is not duplicated in their authored
+Skill action lists. Casevac State (pp. 25–26) is published separately as `state:casevac` in the
+ITS season's `records` table. Its State card and the Casevac Skill have
+bidirectional maintained-text links. Activation, simultaneous movement, ARO
+count, template attacks, carried-Trooper limitations and all automatic and
+voluntary cancellation conditions reside in the State facts. Archived ITS 18
+2026.09.01 citations remain p. 24–25; 2026.09.11 uses p. 25–26.
+The State belongs to ITS 18, never to the core Rules database.
+
+**Versioned source-family and scoped override acceptance (synthetic only):**
+A shared scenario imported through a season membership participates in the same
+`sourceFamily.factRevisions.records` map as a local scenario. The exact typed
+scenario ID stays tagged by revision, and historical field overrides still
+reconstruct the older projection. The importer preserves the original
+membership ordering. A focused fixture confirms current 2026.09.11 and
+archived 2026.09.01 Battleground output matches the local authored record,
+apart from the new shared-definition provenance.
+
+A `sharedSkillBindings` membership may supply an optional `overrides` array.
+Each item identifies one `scenarioId`, scenario-local `ruleId`, allowlisted
+`skillFacts.requirements`, `skillFacts.effects` or `skillFacts.restrictions`
+field, and a complete replacement `value` array of prose. The binding's
+independent source citations and review apply to those changes. Missing or
+unbound actions, duplicate edits, invalid types and unsupported fields fail
+closed. Variant Skill facts stay on the original context-specific Skill route
+and in Search, while unmodified shared facts retain a canonical Skill
+identity; names alone do not authorize consolidation. Generic scenario
+component payload overrides remain open. A pinned shared library can now
+also hold one `components` definition for a setup, geometry, objective
+or end condition, referenced from multiple scenarios by exact typed
+ID and version. The season composer coalesces identical definitions
+but retains each member scenario's own `componentCitations` in the
+compiled `componentSources`; a component's source pages never flow
+to another scenario merely because its payload is shared. Incompatible
+same-ID versions/payloads and missing per-scenario citations fail
+closed. Complete-set library registration
+is now opt-in via `SEASON_SHARED_LIBRARY_SOURCES`, with the referenced
+`data/curated/its/shared/*.json` bytes included in the matched build-input
+manifest. Independent season database outputs pin the raw library SHA-256;
+complete-set inspection and deployment checks reject missing, unregistered
+or mismatched libraries without needing that library at request time.
+
+**Remaining accepted direction:** Extend the existing explicit, build-time scenario composition to share
+**curated definitions** across ITS seasons and between scenarios, while
+preserving independent, fully materialized season databases. A reusable
+definition has a stable typed identity plus an explicitly pinned content
+version. Availability is a separate membership/applicability relation: a
+season's selected revision may reference a particular scenario definition,
+and a scenario may include reusable Skills or smaller components. Same-name
+actions do not establish semantic identity or authorize reuse. Retain one
+curated definition per genuinely shared mechanic, rather than independently
+maintaining the same rules text in each season's source material.
+
+A membership can apply narrowly scoped, reviewed overrides to explicitly
+identified components and fields (including Skill Requirements, Effects or
+Restrictions where supported). Resolve by stable typed component IDs, not
+list positions or display names. Validate the requested definition version,
+allowed override fields, conflicting edits, reference cycles, scenario/season
+applicability and resolved mission schema at build time; reject unresolved
+references instead of using a newest-version fallback. Small, supported
+variations belong in such overrides. A substantial semantic revision gets a
+new pinned definition version even when the logical scenario ID is unchanged.
+
+Publication membership retains **its own source citations, source revision
+and review evidence**, independently of the source that originally established
+the reusable definition. Shared mechanics are not automatically N5-core rules:
+ITS-specific definitions retain explicit ITS applicability and cannot leak
+into unrelated seasons or Army profile Skills. A separate,
+reviewed `sharedSeasonSkillBindings` array now supports exact
+`{id, version, name, summary, category, applicability, citations, review}`
+memberships without scenario IDs. The referenced `skills` library entry
+supplies `skillTypeIds` and `skillFacts`; each season selects a pinned
+definition version and retains its own citations, review, revision and
+`season` or `team-ops-extra` applicability. Optional tournament Extras
+do not make Team-Ops or Request a Tacball unconditional Skills.
+Resolved standalone Skills live in each season's own SQLite `records`
+table and are projected into catalog/Search; exact equivalent pinned Skills
+across seasons consolidate into one canonical identity with independent
+citations. Conflicting or unpinned same-version collisions fail closed. An
+explicit different pinned version from the same reviewed origin gets a
+season-qualified route instead, while the newest season retains the
+unqualified slug and both retain their own facts/citations. Compare
+actual ITS 17 facts before claiming cross-season equivalence. Existing
+scenario-specific Skill routes remain compatible.
+
+Materialize the complete resolved payload in each season's SQLite artifact,
+including the selected definition version and relevant provenance, so
+publication validation, read APIs and deployment do not depend on another
+season's database at runtime. Authoring should respect the existing
+one-source-family-per-logical-source preference and revision-tagged facts;
+sharing definitions does not combine independent official source histories.
+Only current applicable versions remain player-facing by default.
+The [architecture](architecture.md#scenario-domain) owns the design decision;
+the [ITS TODO](TODO.md#its-scenarios-and-game-tools) tracks implementation
+before adding actual ITS 17 coverage.
 
 **Scenario marker sizes** are a derived, read-only setup projection:
 `placement.marker_dimensions` enumerates only marker types actually present
@@ -3994,29 +4176,33 @@ currently exposes only modeled **current** publications; the existing
 `RulesDatabase.resolve_scenario_publication` historical membership lookup is not
 yet a historical compositional detail/map API.
 
-**Current publication boundary:** There are two current curated Scenario
-collections: `n5-core@5.3` (four Core missions) and
-`its-18@2026.09.01` (one reviewed ITS Season 18: Overheat mission,
-**Battleground**). The ITS mission is published through the same
-collection-aware catalog/detail and SVG map projection, using six supported
-Army Points sizes (150/200/250/300/350/400), a three-Sector end-of-game
-geometry/scoring model, and the English ITS source's printed pp. 121–123.
-`GET /api/scenarios?collection=its-18&revision=2026.09.01` returns
-Battleground; the default unqualified catalog remains the four N5 Core
-missions. Unknown exact collection/revision pairs remain empty or not found,
-rather than silently returning Core content.
+**Current publication boundary:** The selected Scenario collections are
+`n5-core@5.3` (four Core missions), `its-17@0.2` (sixteen missions), and
+`its-18@2026.09.11` (twenty September-hotfix missions). Each ITS publication
+supports six Army Points sizes (150/200/250/300/350/400) with source-cited
+maps and scoring. Superseded September 1 Battleground facts remain in the
+curated ITS 18 source family, not in the public runtime. Players select a
+season; an explicit current revision is accepted for internal references.
+The default unqualified catalog remains the four N5 Core missions. Unknown
+or superseded pairs yield empty results or HTTP 404 rather than falling back.
 
-Other Season 18 missions, including Crossing Lines, Akial Interference
-and Area of Interest, are **not** published as selectable/renderable scenario
-definitions. This bounded ITS publication does not imply a complete
-Season 18 library, historical-season UI, Classified Deck, or general
-tournament tooling, and does not expand the mandatory 1.0 scope beyond
-the four Core missions. Browser selection state uses the common versioned
-share-state token; legacy explicit `army_points` input remains readable.
-Broader geometry/element vocabularies remain post-1.0 work. The
+All 36 ITS season-mission entries are represented, with known bilingual
+source discrepancies disclosed. See the [season database acceptance](its-season-database.md#release-browser-acceptance).
+Classified Deck and general tournament tooling remain outside this scope.
+Browser selection state uses the common versioned share-state token; legacy
+explicit `army_points` input remains readable. The
 [Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)
 is recorded separately from the [release checklist](releasing.md#development-freeze-and-release-only-handoff);
 known source discrepancies retain their disclosed scope.
+
+Current scenarios can declare `facts.playRequirements` with non-negative
+per-player counts for `classifiedObjectives`, `tacticalObjectives`, and
+`hvts`. An optional `sharedClassifiedObjectivesPerRound` records the base
+shared count. The detail API projects this as `setup.play_requirements` and
+Forces and table displays zero as “Not used”. Older records without reviewed
+counts omit the summary. Counts are mission facts independent of scoring, with
+the standard ITS HVT and Tactical Objective scope sourced to ITS 18
+2026.09.11 pp. 35–38 and mission-specific counts to their mission sections.
 
 The implemented geometry v1 foundation is deliberately small and strict. A standalone document uses
 `InfinityDB scenario geometry` format version 1, canonical inch table dimensions, ordered unique
@@ -4039,9 +4225,11 @@ It also supports `element-edge-distance` annotations for markers and rectangles:
 displayed distance is derived from the target element's nearest physical boundary and selected table edge,
 while an optional signed offset controls only where the dimension line is drawn. Scenario source language
 such as “X inches from” is interpreted edge-to-edge unless the source explicitly names a center/reference
-point. `marker` stores a semantic center point with a stable `markerType`; per-instance radius is not
-duplicated in geometry because known marker types resolve to canonical marker metadata. That footprint is
-used when deriving marker clearances. Physical diameter is semantic when it defines the represented game object,
+point. `marker` stores a semantic center point with a stable `markerType`. Known marker types
+resolve to canonical marker metadata; an optional reviewed `diameterMm` records a source-specific
+footprint when no common type diameter exists. Currently only the historical 25 mm Tracking Beacon
+uses this field; ITS 18's disputed footprint stays unset. The same resolved diameter drives the SVG,
+catalog metadata, boundary validation and marker clearances. Physical diameter is semantic when it defines the represented game object,
 not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
 or scenery of the same diameter, indirectly making that canonical footprint part of the scenario rules.
 The ITS token-diameter table provides the explicit numeric dimensions used by the core fixtures:

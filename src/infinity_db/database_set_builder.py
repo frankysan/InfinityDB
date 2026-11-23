@@ -30,6 +30,7 @@ from .database.normalized_source import verified_normalized_generation
 from .database_set import (
     COMPLETE_RUNTIME_FILES,
     SEASON_DATABASE_SOURCES,
+    season_shared_library_source,
     validate_database_set,
 )
 from .deployed_object_builder import build_deployed_objects
@@ -140,6 +141,16 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
     )
 
 
+def _build_registered_seasons(stage: Path, root: Path, core_revision: str) -> None:
+    """Materialize every explicitly registered ITS season and its pinned library."""
+    for season, (filename, season_source) in SEASON_DATABASE_SOURCES.items():
+        relative_library = season_shared_library_source(season)
+        build_its_database(
+            root / season_source, stage / filename, core_revision=core_revision,
+            shared_library=(root / relative_library if relative_library is not None else None),
+        )
+
+
 def build_database_set(
     args: argparse.Namespace,
     build_army: Callable[[argparse.Namespace, dict[str, Any]], int],
@@ -150,6 +161,8 @@ def build_database_set(
     if args.no_verify:
         raise ValueError("Complete runtime builds cannot use --no-verify")
     root = root.resolve()
+    for season in SEASON_DATABASE_SOURCES:
+        season_shared_library_source(season)
     selected_manifest: Path | None = getattr(args, "snapshot_manifest", None)
     if selected_manifest is not None and args.source is None:
         raise ValueError("--snapshot-manifest requires an explicit Army ZIP source")
@@ -225,10 +238,7 @@ def build_database_set(
         from .rules_database import RulesDatabase
 
         core_revision = RulesDatabase(stage / "rules_n5.db").current_core_scenario_revision()
-        for _season, (filename, season_source) in SEASON_DATABASE_SOURCES.items():
-            build_its_database(
-                root / season_source, stage / filename, core_revision=core_revision,
-            )
+        _build_registered_seasons(stage, root, core_revision)
         result = validate_database_set(stage, require_complete=True)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):
             raise ValueError("Built runtime set does not match the selected build inputs")
@@ -249,7 +259,8 @@ def build_database_set(
         # are atomic; interruption leaves an invalid mixed set, recovered by rerun.
         for name in sorted(COMPLETE_RUNTIME_FILES):
             os.replace(stage / name, target / name)
-        for name in ("variant-usage.json", "weapon-profile-sources.json"):
+        for name in ("variant-usage.json", "weapon-profile-sources.json",
+                     "its_18_2026.09.11.db"):
             obsolete = target / name
             if obsolete.is_file() or obsolete.is_symlink():
                 obsolete.unlink()

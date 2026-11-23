@@ -288,6 +288,16 @@ function render(skill) {
   const sections = document.createElement("section");
   sections.className = "detail-group usage-section-group";
   const children = [];
+  if (skill.scenario) {
+    const context = document.createElement("p");
+    context.className = "detail-copy";
+    context.append("Scenario-specific Skill for ");
+    const scenarioLink = document.createElement("a");
+    scenarioLink.href = `/scenarios/${encodeURIComponent(skill.scenario.slug)}?collection=${encodeURIComponent(skill.scenario.collection)}&army_points=300`;
+    scenarioLink.textContent = skill.scenario.name;
+    context.append(scenarioLink);
+    children.push(context);
+  }
   if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
   const variantRules = gameplayVariantRules(variants);
   if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));

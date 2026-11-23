@@ -13,13 +13,12 @@ from tools.runtime_semantic_baseline import (
     DEFAULT_BASELINE,
     BaselineError,
     _artifact_identity,
-    _digest,
-    _json,
     capture,
     check,
     main,
     semantic_payload,
 )
+from tools.verify_checkout_server import DEFAULT_CHECKOUT_BASELINE
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -123,35 +122,68 @@ def test_guard_rejects_duplicate_or_missing_requests() -> None:
         check(expected, shortened)
 
 
-def test_released_data_matches_pinned_p1_baseline() -> None:
-    fixture = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
+def test_reviewed_p1_to_v12_baseline_migration_changes_only_approved_routes() -> None:
+    old = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
+    current = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.json")
+        .read_text(encoding="utf-8")
+    )
+    old_rows = {row["path"]: row for row in old["probes"]}
+    new_rows = {row["path"]: row for row in current["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    # Historical P1 evidence remains intact. This exact scope pins the known
+    # catalogue, Repeater, ITS revision-list and approved JS route migrations;
+    # unrelated routes must retain their original P1 semantic identity.
+    assert {
+        path for path, row in old_rows.items() if row != new_rows[path]
+    } == {
+        "/api/skills",
+        "/api/equipment",
+        "/api/scenarios",
+        "/api/scenarios?collection=its-18&revision=2026.09.01",
+        "/api/weapons/akrylat-kanone",
+        "/static/api.js",
+    }
+    assert old_rows["/static/api.js"]["markers"] == [
+        'getJson("/static/restrictions-reference.json"'
+    ]
+    assert new_rows["/static/api.js"]["markers"] == [
+        'getJson("/api/restrictions/chart"'
+    ]
+
+
+def test_reviewed_its_release_baseline_changes_only_affected_routes() -> None:
+    earlier = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json")
+        .read_text(encoding="utf-8")
+    )
+    release = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    old_rows = {row["path"]: row for row in earlier["probes"]}
+    new_rows = {row["path"]: row for row in release["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    assert {path for path in old_rows if old_rows[path] != new_rows[path]} == {
+        "/api/skills",
+        "/api/scenarios",
+        "/api/scenarios?collection=its-18",
+        "/api/scenarios/battleground?army_points=300&collection=its-18",
+    }
+
+
+def test_released_data_matches_pinned_current_its_semantic_baseline() -> None:
+    assert DEFAULT_CHECKOUT_BASELINE != DEFAULT_BASELINE
+    fixture = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    paths = {probe["path"] for probe in fixture["probes"]}
+    assert len(paths) == 41
+    assert "/api/scenarios?collection=its-18" in paths
+    assert not any("revision=2026.09.01" in path for path in paths)
     army = ROOT / "data/generated/army.db"
     rules = ROOT / "data/generated/rules_n5.db"
-    # P3 requires the registered ITS database for the explicitly selected
-    # Season 18 probes; an unregistered Rules-only app must fail closed.
     app = create_app_from_database_set(ROOT / "data/generated")
     observed = capture(
         app,
         paths=tuple(row["path"] for row in fixture["probes"]),
         artifacts=_artifact_identity(army, rules),
     )
-    # The reviewed KISS! (Repeater) loadout adds one new logical Unit to
-    # the Repeater catalogue use count. Retain the original P1 baseline:
-    # removing exactly that addition must reproduce its pinned equipment hash.
-    equipment = _json(app, "/api/equipment")
-    prior_equipment = deepcopy(equipment)
-    repeater = next(
-        item for item in prior_equipment["items"] if item.get("slug") == "repeater"
-    )
-    assert repeater["use_count"] >= 1
-    repeater["use_count"] -= 1
-    expected_equipment_probe = next(
-        probe for probe in fixture["probes"] if probe["path"] == "/api/equipment"
-    )
-    assert _digest(semantic_payload(prior_equipment)) == (
-        expected_equipment_probe["semanticSha256"]
-    ), "Equipment catalog differs beyond the reviewed KISS! Repeater addition"
-    expected_equipment_probe["semanticSha256"] = _digest(semantic_payload(equipment))
     assert check(fixture, observed) == len(fixture["probes"])
 
 

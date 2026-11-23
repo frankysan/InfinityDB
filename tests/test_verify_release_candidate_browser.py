@@ -177,7 +177,7 @@ def test_release_gate_rejects_invalid_its_before_network_or_browser(
     elif invalid == "source":
         from infinity_db.its_season_database import build_its_database
 
-        source = ROOT / "data/curated/rules/n5-its-season-18-2026.09.01.json"
+        source = ROOT / "data/curated/its/n5-its-season-18.json"
         other_source = directory / "different-source.json"
         other_source.write_bytes(source.read_bytes() + b"\n")
         build_its_database(other_source, its)

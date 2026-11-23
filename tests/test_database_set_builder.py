@@ -48,7 +48,9 @@ def project(
         "pyproject.toml",
         "src/sample.py",
         "data/curated/rules/sample.json",
-        "data/curated/rules/n5-its-season-18-2026.09.01.json",
+        "data/curated/its/n5-its-season-18.json",
+        "data/curated/its/n5-its-season-17.json",
+        "data/curated/its/shared/its17-scenarios-v1.json",
         "data/manifests/symbol-publication.json",
         "src/infinity_db/web/static/restrictions-reference.json",
         "config/catalogs/equipment-presentation-encodings.json",
@@ -63,9 +65,16 @@ def project(
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}", encoding="utf-8")
+    for name in (
+        "n5-its-season-18.json", "n5-its-season-17.json",
+    ):
+        shutil.copyfile(
+            RELEASE.parent.parent / "data/curated/its" / name,
+            root / "data/curated/its" / name,
+        )
     shutil.copyfile(
-        RELEASE.parent.parent / "data/curated/rules/n5-its-season-18-2026.09.01.json",
-        root / "data/curated/rules/n5-its-season-18-2026.09.01.json",
+        RELEASE.parent.parent / "data/curated/its/shared/its17-scenarios-v1.json",
+        root / "data/curated/its/shared/its17-scenarios-v1.json",
     )
     shutil.copyfile(
         RELEASE.parent.parent / "config/catalogs/equipment-presentation-encodings.json",
@@ -313,8 +322,9 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v17-three-file"
-    assert first["seasons"]["its-18"]["revision"] == "2026.09.01"
+    assert first["layout"] == "v17-four-file"
+    assert first["seasons"]["its-17"]["revision"] == "0.2"
+    assert first["seasons"]["its-18"]["revision"] == "2026.09.11"
     assert first["restrictionChartRows"] == 6
     assert first["traitWikiLinks"] == 33
     assert first["combinedSavingRollProfiles"] == 6

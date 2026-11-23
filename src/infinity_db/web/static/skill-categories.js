@@ -6,6 +6,7 @@ export function skillCategoryToken(category) {
       "deployment-skill": "deployment",
       "basic-short-skill": "basic-short",
       "short-skill": "short",
+      "short-movement-skill": "short",
       "long-skill": "long",
       aro: "aro",
     }[id];

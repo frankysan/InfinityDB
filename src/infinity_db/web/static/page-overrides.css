@@ -785,11 +785,22 @@ html:not([data-developer-mode="true"])
   width: min(100%, 400px);
 }
 
+.scenario-list {
+  padding: 20px 24px 28px;
+}
+
+.scenario-catalog-group + .scenario-catalog-group {
+  margin-top: 28px;
+}
+
+.scenario-catalog-group > .detail-heading {
+  margin: 0 0 14px;
+}
+
 .scenario-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 14px;
-  padding: 20px 24px 28px;
 }
 
 .scenario-card {
@@ -807,7 +818,7 @@ html:not([data-developer-mode="true"])
   gap: 12px;
 }
 
-.scenario-card-header h3 {
+.scenario-card-header :is(h3, h4) {
   margin: 0;
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
@@ -930,6 +941,15 @@ html:not([data-developer-mode="true"])
   border-top: 1px solid var(--color-border-subtle);
 }
 
+.scenario-setup-card .scenario-fact {
+  grid-template-columns: minmax(max-content, 1fr) max-content;
+  gap: 12px;
+}
+
+.scenario-setup-card .scenario-fact dd {
+  white-space: nowrap;
+}
+
 .scenario-fact:first-child {
   border-top: 0;
 }
@@ -958,8 +978,6 @@ html:not([data-developer-mode="true"])
 }
 
 .scenario-swc-source-conflict {
-  display: block;
-  margin-top: 4px;
   color: var(--color-status-warning-text);
   font-family: var(--font-family-body);
   font-size: var(--font-size-xs);
@@ -974,6 +992,7 @@ html:not([data-developer-mode="true"])
   margin: 0;
 }
 
+.scenario-setup-note,
 .scenario-map-placement-note {
   margin: 0;
   padding: 10px 16px 12px;
@@ -1090,6 +1109,45 @@ svg.scenario-map .label {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
 }
 
+.scenario-objective-choice {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  margin: 12px 0 20px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.scenario-objective-choice select {
+  width: min(100%, 320px);
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+.scenario-objective-sets {
+  display: grid;
+  gap: 20px;
+}
+
+.scenario-objective-set[hidden] {
+  display: none;
+}
+
+.scenario-objective-set > h3,
+.scenario-secondary-heading {
+  margin: 0 0 10px;
+  font-size: var(--font-size-base);
+}
+
+.scenario-secondary-heading {
+  margin-top: 24px;
+}
+
 .scenario-objective > .surface-titlebar h3 {
   margin: 0;
   font-size: var(--font-size-base);
@@ -1149,7 +1207,7 @@ svg.scenario-map .label {
 }
 
 @media (max-width: 760px) {
-  .scenario-grid {
+  .scenario-list {
     padding-inline: 18px;
   }
 

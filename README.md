@@ -1,13 +1,14 @@
 # InfinityDB
 
 InfinityDB is a read-only Infinity reference for exploring Units, profiles,
-Equipment, Skills, Weapons, core Scenarios, and relationships across Armies. It combines
+Equipment, Skills, Weapons, Core and ITS Scenarios, and relationships across Armies. It combines
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.1.0** (2026-11-15). See the
-[release notes](docs/CHANGELOG.md#110---2026-11-15) for changes and upgrade
-considerations, and the [deployment guide](docs/deployment.md) for updates.
+Current release: **1.2.0** (2026-11-23). See the
+[release notes](docs/CHANGELOG.md#120---2026-11-23)
+for changes and upgrade considerations, and the
+[deployment guide](docs/deployment.md) for updates.
 
 ## Guiding principles
 
@@ -68,6 +69,17 @@ its application metrics.
   catalogs, including reviewed current weapons not yet used by an Army Unit,
   with reverse Unit usage links where that relationship applies. Search and filter state
   uses compact self-contained share links while legacy explicit query parameters remain readable.
+- Provides independently selectable ITS Season 17 V0.2 (16 reviewed scenarios)
+  and Season 18 September-hotfix (20 reviewed scenarios), including
+  Battleground, Annihilation, Crossing Lines,
+  Double Bind, The Dig, Cutthroat, Superiority, Uplink Center, Hardlock,
+  B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning,
+  Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation, Outbreak
+  and Critical Intervention, with game-size deployment maps, scoring,
+  reviewed source citations, and explicit Double Bind Main Objective choices.
+  All twenty Season 18 and sixteen Season 17 missions are represented;
+  earlier revisions remain preserved as research evidence, and known source
+  discrepancies are disclosed on the relevant scenario pages.
 - Includes global search and a federated Glossary across player-facing reference domains, with
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
@@ -91,7 +103,7 @@ its application metrics.
   reference presents 17 reviewed objects in individual cards, retaining disputed
   or unknown attributes and verified delivery/Unit-use context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
-  and a separately selectable ITS Season 18 Battleground pilot. Explicit
+  and independently selectable ITS Season 17/18 missions. Explicit
   Army Points selection, structured setup/objectives/scoring, scenario Rules
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs
@@ -188,7 +200,7 @@ Docker deployment** for internet serving. See
 [architecture](docs/architecture.md#runtime-targets) and
 [deployment](docs/deployment.md) for the separate contracts.
 
-A clean checkout includes the three tracked runtime databases and processed graphics.
+A clean checkout includes the four tracked runtime databases and processed graphics.
 Without a local rebuild, the development server uses the complete SQLite set:
 
 ```powershell
@@ -203,14 +215,14 @@ infinity-db serve
 ```
 
 The offline build validates and replaces the complete tracked set in
-`data/generated/`: `army.db`, `rules_n5.db` and `its_18.db`. Stop a server
+`data/generated/`: `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`. Stop a server
 before rebuilding its selected directory and restart after success. A failed
 build before replacement preserves the previous set; rerun an interrupted replacement.
 
 `serve --db-dir PATH` selects another complete directory. Otherwise serving
 uses `INFINITY_DB_DB_DIR`, then `data/generated/` relative to the working
 directory. Missing or incompatible files fail startup. Production WSGI requires
-`INFINITY_DB_DB_DIR` explicitly. Both hosting targets use the same three
+`INFINITY_DB_DB_DIR` explicitly. Both hosting targets use the same four
 databases; Docker copies them directly into its immutable image.
 
 Open <http://127.0.0.1:8000> on the development machine. The development server
@@ -224,8 +236,8 @@ Army acquisition runs explicitly in the standalone
 [InfinityDB-army-acquisition](https://github.com/frankysan/InfinityDB-army-acquisition)
 repository, not through an in-tree downloader. Its output is an immutable
 `JSON YYYYMMDD-HHMMSS.zip` with matching snapshot provenance JSON.
-Place the verified handoff under `data/raw/` and
-`data/manifests/snapshots/` respectively, then run
+Place the verified handoff under `local/data/raw/army/` and
+`local/data/manifests/snapshots/` respectively, then run
 `infinity-db build --compact` and `infinity-db serve` in InfinityDB.
 The normal offline build never fetches data. See the
 [snapshot provenance and handoff contract](data/README.md#cross-repository-acquisition-handoff-p53).
@@ -241,8 +253,8 @@ lists the source auditors that also support an explicit physical PDF layout.
 
 The normal `infinity-db build --compact` includes curated Rules, reviewed
 deployed objects, exact variants, Weapon citations and maintained reference facts
-in the complete SQLite set. ITS Season 18 is published separately in
-`its_18.db`. No JSON sidecar is required to serve the built set.
+in the complete SQLite set. ITS Seasons 17 and 18 are published separately in
+`its_17.db` and `its_18.db`. No JSON sidecar is required to serve the built set.
 
 For independent Rules-export development, `infinity-db build-rules` writes a
 standalone v10 database under ignored `local/work/build/rules-standalone.db`.

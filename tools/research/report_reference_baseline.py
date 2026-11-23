@@ -3078,10 +3078,16 @@ def _is_current_rule_citation_source(
     if identifier == "its-season-18-en-pdf":
         return version == "2026.09.01"
     if source.get("kind") == "wiki":
-        if identifier in {
-            "wiki-en-20260926-200832", "wiki-es-20261009-211304",
-        }:
-            return bool(source.get("sha256")) and version.startswith("2026")
+        capture = re.fullmatch(r"wiki-(en|es)-(\d{8}-\d{6})", identifier)
+        if capture:
+            language, timestamp = capture.groups()
+            return (
+                version == timestamp
+                and source.get("language") == language
+                and source.get("localPath") == f"data/wiki/WIKI-{language} {timestamp}.zip"
+                and isinstance(source.get("sha256"), str)
+                and re.fullmatch(r"[0-9a-f]{64}", source["sha256"]) is not None
+            )
         return version.startswith("N5.3")
     return False
 

@@ -1,0 +1,2593 @@
+{
+  "format": "InfinityDB curated reference",
+  "formatVersion": 23,
+  "collection": {
+    "id": "its-season-17-v0.2",
+    "title": "ITS Season 17 Seekers V0.2 (sixteen reviewed scenarios)",
+    "domain": "its",
+    "status": "archived",
+    "effectiveFrom": "2026-03-09",
+    "authority": "primary"
+  },
+  "scenarioCollection": {
+    "id": "its-17",
+    "title": "ITS Season 17 Seekers",
+    "revision": "0.2",
+    "members": [
+      {
+        "scenarioId": "scenario:evacuation",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 55,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 56,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 57,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 58,
+              "section": "Evacuation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 50,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 51,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 52,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 53,
+              "section": "Evacuación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:hardlock",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 59,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 60,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 61,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 62,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 54,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 55,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 56,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 57,
+              "section": "Hardlock"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:uplink-center",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 93,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 94,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 95,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 96,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 99,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 100,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 101,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 102,
+              "section": "Uplink Center"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:battleground",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 83,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 84,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 85,
+              "section": "Battleground"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 88,
+              "section": "Campo de Batalla"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 89,
+              "section": "Campo de Batalla"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 90,
+              "section": "Campo de Batalla"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:annihilation",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 81,
+              "section": "Annihilation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 82,
+              "section": "Annihilation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 85,
+              "section": "Aniquilación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 86,
+              "section": "Aniquilación"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 87,
+              "section": "Aniquilación"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:cutthroat",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 86,
+              "section": "Cutthroat"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 87,
+              "section": "Cutthroat"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 88,
+              "section": "Cutthroat"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 91,
+              "section": "Degüello"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 92,
+              "section": "Degüello"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 93,
+              "section": "Degüello"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:superiority",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 89,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 90,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 91,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 92,
+              "section": "Superiority"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 94,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 95,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 96,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 97,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 98,
+              "section": "Superioridad"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:provisioning",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 72,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 73,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 74,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 75,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 76,
+              "section": "Provisioning"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 70,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 71,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 72,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 73,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 74,
+              "section": "Reabastecimiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:area-of-interest",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 77,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 78,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 79,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 80,
+              "section": "Area of Interest"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 80,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 81,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 82,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 83,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 84,
+              "section": "Área de Interés"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:last-launch",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 63,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 64,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 65,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 66,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 67,
+              "section": "Last Launch"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 75,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 76,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 77,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 78,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 79,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 80,
+              "section": "Último Lanzamiento"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:b-pong",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 36,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 37,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 38,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 39,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 38,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 39,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 40,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 41,
+              "section": "B-Pong"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:crossing-lines",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 51,
+              "section": "Crossing Lines"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 52,
+              "section": "Crossing Lines"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 53,
+              "section": "Crossing Lines"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 54,
+              "section": "Crossing Lines"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 42,
+              "section": "Cruce de Líneas"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 43,
+              "section": "Cruce de Líneas"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 44,
+              "section": "Cruce de Líneas"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 45,
+              "section": "Cruce de Líneas"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 26,
+              "section": "High Value Target (HVT) Model"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 27,
+              "section": "High Value Target (HVT) Model"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 27,
+              "section": "Miniatura HVT"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 28,
+              "section": "Miniatura HVT"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:corporate-appropriation",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 40,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 41,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 42,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 43,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 44,
+              "section": "Corporate Appropriation"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 32,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 33,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 34,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 35,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 36,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 37,
+              "section": "Apropiación Corporativa"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:critical-intervention",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 45,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 46,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 47,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 48,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 49,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 50,
+              "section": "Critical Intervention"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 63,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 64,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 65,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 66,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 67,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 68,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 69,
+              "section": "Intervención Crítica"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:outbreak",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 68,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 69,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 70,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 71,
+              "section": "Outbreak"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 46,
+              "section": "Estallido"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 47,
+              "section": "Estallido"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 48,
+              "section": "Estallido"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 49,
+              "section": "Estallido"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      },
+      {
+        "scenarioId": "scenario:akial-interference",
+        "sharedDefinition": {
+          "version": "its17-v0.2",
+          "citations": [
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 31,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 32,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 33,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 34,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 35,
+              "section": "Akial Interference"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 58,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 59,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 60,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 61,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 62,
+              "section": "Interferencia Akial"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 13,
+              "section": "Diameter of ITS Tokens"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 14,
+              "section": "Diámetro de los Tokens ITS"
+            }
+          ],
+          "review": {
+            "status": "reviewed",
+            "reviewedOn": "2026-11-18"
+          },
+          "componentCitations": {},
+          "overrides": []
+        }
+      }
+    ]
+  },
+  "vocabularySources": {
+    "skillTypes": [],
+    "labels": []
+  },
+  "skillTypes": [
+    {
+      "id": "automatic",
+      "name": "Automatic Skills",
+      "labels": [
+        "Automatic Skill",
+        "Automatic Skills"
+      ],
+      "descriptions": {
+        "singular": "An Automatic Skill can be employed without expending an Order or ARO.",
+        "plural": "Automatic Skills can be employed without expending an Order or ARO."
+      }
+    },
+    {
+      "id": "basic-short-skill",
+      "name": "Basic Short Skills",
+      "labels": [
+        "Basic Short Skill",
+        "Basic Short Skills"
+      ],
+      "descriptions": {
+        "singular": "A Basic Short Skill expends one Basic Short Skill.",
+        "plural": "Basic Short Skills expend one Basic Short Skill."
+      }
+    },
+    {
+      "id": "short-skill",
+      "name": "Short Skills",
+      "labels": [
+        "Short Skill",
+        "Short Skills"
+      ],
+      "descriptions": {
+        "singular": "A Short Skill expends one Short Skill.",
+        "plural": "Short Skills expend one Short Skill."
+      }
+    },
+    {
+      "id": "short-movement-skill",
+      "name": "Short Movement Skills",
+      "labels": [
+        "Short Movement Skill",
+        "Short Movement Skills"
+      ],
+      "descriptions": {
+        "singular": "A Short Movement Skill expends one Short Movement Skill.",
+        "plural": "Short Movement Skills expend one Short Movement Skill each."
+      }
+    }
+  ],
+  "labels": [],
+  "sources": [
+    {
+      "id": "its-season-17-v0.2-en-pdf",
+      "kind": "pdf",
+      "title": "ITS 17 Seekers V0.2 (English)",
+      "version": "0.2",
+      "publishedDate": "2026-03-09",
+      "authority": "primary",
+      "pageCount": 105,
+      "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.2-en.pdf",
+      "sha256": "73a184b80535f23499000bb81112d95168c12f970fa14a30050a95ec51cdfe71",
+      "url": "https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-en-v1.0.2.pdf"
+    },
+    {
+      "id": "its-season-17-v0.2-es-pdf",
+      "kind": "pdf",
+      "title": "ITS 17 Seekers V0.2 (Spanish)",
+      "version": "0.2",
+      "publishedDate": "2026-03-09",
+      "authority": "primary",
+      "pageCount": 112,
+      "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.2-es.pdf",
+      "sha256": "d202d7e3373852204b848fa8eee3bbc19000695cec0296c9882e7d0f3a030457",
+      "url": "https://downloads.corvusbelli.com/infinity/organized-play/its-rules-season-17-es-v1.0.2.pdf"
+    }
+  ],
+  "seasonPolicies": [],
+  "records": [
+    {
+      "id": "skill:civevac",
+      "kind": "skill",
+      "name": "CivEvac",
+      "summary": "ITS 17 Optional Scenario Common Short Movement Skill: control a Civilian after a WIP Roll and keep them in Silhouette contact.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "common-skill",
+        "typeIds": [
+          "short-movement-skill"
+        ],
+        "sourceLabels": ["Optional","Scenario"],
+        "requirements": [
+          "Only a Model may use CivEvac; a Marker declaring it is automatically revealed.",
+          "The Trooper must be in or reach Silhouette contact with the Civilian. The Civilian must not be in Silhouette contact with an enemy Model or already have a CivEvac Token.",
+          "The Trooper may not already control two Civilians, have Impetuous (including through Frenzy), possess Peripheral, be a REM or VH, perform a Coordinated Order or belong to a Fireteam."
+        ],
+        "effects": [
+          "On a successful WIP+3 Roll, the Trooper CivEvacs the Civilian and places a CivEvac Token. Failed attempts can be retried by expending another Short Skill for each attempt.",
+          "The Civilian remains in Silhouette contact with the controlling Trooper and must be placeable there at the end of movement; no Trooper can CivEvac more than two Civilians.",
+          "The Civilian remains on the table even when the controlling Trooper enters a Null State.",
+          "CivEvac ends at the end of the Order if the controller becomes Isolated, Immobilized or Null, joins a Fireteam, becomes a Marker or gains Impetuous; remove the CivEvac Token.",
+          "The controller may voluntarily end CivEvac on activation by an Order or ARO without a Roll. Leave the Civilian on a horizontal surface.",
+          "A Hostile Civilian receives no +3 MOD to the CivEvac WIP Roll and is identified with a Hostile Token."
+        ],
+        "restrictions": [
+          "CivEvac is an Optional, Scenario Common Skill, not an automatic extraction action."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "0.2"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 17,
+          "section": "CivEvac: Requirements and Effects"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 18,
+          "section": "CivEvac: Effects and Cancelation"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 18,
+          "section": "CivEvac: Requisitos y Efectos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 19,
+          "section": "CivEvac: Efectos y Cancelación"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    },
+    {
+      "id": "skill:casevac",
+      "kind": "skill",
+      "name": "Casevac",
+      "summary": "ITS 17 Optional Common Short Movement Skill: carry an allied Stunned, Immobilized or Unconscious Trooper.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "common-skill",
+        "typeIds": [
+          "short-movement-skill"
+        ],
+        "sourceLabels": ["Optional"],
+        "requirements": [
+          "Only Models may use Casevac. Declaring Casevac reveals any Marker.",
+          "The carrier must be in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B) or Unconscious State, unless a Scenario Special Rule modifies this.",
+          "The carrier must have PH equal to or greater than the carried Trooper's PH; Baggage removes this requirement."
+        ],
+        "effects": [
+          "Casevac activates [[state:casevac|Casevac State]] for the carrier and the carried allied Trooper. Its movement, ARO and cancellation rules are defined by that State."
+        ],
+        "restrictions": [
+          "A carried Trooper cannot declare or perform its own Orders or AROs while [[state:casevac|Casevac State]] applies."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "0.2"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 19,
+          "section": "Casevac Common Skill"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 20,
+          "section": "Casevac State"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 20,
+          "section": "Casevac: Requisitos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 21,
+          "section": "Casevac: Requisitos y Efectos"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    },
+    {
+      "id": "state:casevac",
+      "kind": "state",
+      "name": "Casevac State",
+      "aliases": [
+        "Casevac"
+      ],
+      "summary": "ITS 17 State entered through [[skill:casevac|Casevac]]: a carrier moves an allied Stunned, Immobilized or Unconscious Trooper in Silhouette contact.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "state",
+        "requirements": [
+          "Activate this State with [[skill:casevac|Casevac]] while in Silhouette contact with an allied Trooper in Stunned, Immobilized (IMM-A or IMM-B) or Unconscious State. The carrier needs PH at least equal to the target's PH, except when Baggage waives it; Scenario Special Rules may modify the target requirement."
+        ],
+        "effects": [
+          "The carrier and carried Trooper activate together with one Order or ARO and move simultaneously in Silhouette contact, using the carrier's MOV values.",
+          "The carried Trooper cannot declare or perform Orders or AROs; only the carrier does so.",
+          "Together, both Troopers provoke only one ARO from each eligible enemy within LoF or ZoC.",
+          "Template Weapon Attacks against either Trooper use the Template Weapons Into Close Combat rule.",
+          "The carried Trooper does not block LoF and does not contribute the +1 B MOD in Close Combat.",
+          "Casevac State automatically ends if the carrier declares any Skill other than Cautious Movement, Climb, Dodge, Jump, Reset or a Short Movement Skill.",
+          "It also ends if the carrier is activated in the Impetuous Phase, enters an Immobilized or Null State or another canceling State, or becomes a Marker (including Camouflaged, Impersonation or Holoecho).",
+          "It ends when the carried Trooper recovers from Immobilized (IMM-A or IMM-B), Stunned or Unconscious State.",
+          "The carrier may end it voluntarily by spending a Short Skill of an Order, without a Roll."
+        ],
+        "restrictions": [
+          "Unless a Scenario Special Rule states otherwise, a carrier may carry at most one Immobilized, Stunned or Unconscious Trooper."
+        ],
+        "applicability": {
+          "context": "season",
+          "revision": "0.2"
+        }
+      },
+      "labelIds": [],
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 20,
+          "section": "Casevac State: Activation, Effects and Cancelation"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 21,
+          "section": "Casevac State: Cancelation"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 21,
+          "section": "Estado Casevac: Activación y Efectos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 22,
+          "section": "Estado Casevac: Cancelación"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    },
+    {
+      "id": "rule:tactical-support",
+      "kind": "rule",
+      "name": "Tactical Support",
+      "summary": "ITS 17 mission-selected support bonuses drawn from the symbol-bearing Tactical Objective cards.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "tactical-support",
+          "revision": "0.2"
+        },
+        "effects": [
+          "After selecting an Army List, each player removes the four symbol-free cards (King of the Hill, Central Control, Z Domination and N Domination) from their own Tactical Objective Deck, shuffles it in front of their opponent and draws the mission-specified number of cards.",
+          "Tactical Support options are Open Information and provide bonuses rather than additional scoring objectives."
+        ],
+        "restrictions": [
+          "A recipient must be deployed on the table as a Model, not in Hidden Deployment or a Marker State, and must remain on the table as a Model. Irregular Troopers, REMs and VHs are ineligible."
+        ],
+        "options": [
+          {
+            "name": "Single-use reroll",
+            "effect": "Apply the ReRoll MOD to a Skill with the Scenario Label; one use.",
+            "timing": "After a failed Roll."
+          },
+          {
+            "name": "Single-use automatic success",
+            "effect": "Automatically succeed at a Roll for a Skill with the Scenario Label; one use.",
+            "timing": "Before the Roll."
+          },
+          {
+            "name": "Specialist reroll",
+            "effect": "A chosen Specialist gains ReRoll for Scenario-labelled Skills.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Wildcard",
+            "effect": "Choose any other Tactical Support effect.",
+            "timing": "When the card is drawn."
+          },
+          {
+            "name": "Sensor",
+            "effect": "A chosen Specialist gains Sensor.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Specialist Operative",
+            "effect": "A chosen eligible Trooper gains Specialist Operative.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "MediKit",
+            "effect": "A chosen Specialist gains a MediKit.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "GizmoKit",
+            "effect": "A chosen Specialist gains a GizmoKit.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Cancel enemy support",
+            "effect": "Cancel one opposing Tactical Support option.",
+            "timing": "EN: end of Deployment in Initiative order; ES: when the card is drawn."
+          },
+          {
+            "name": "Blitzen",
+            "effect": "A chosen Specialist gains a Blitzen.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Adhesive Launcher Rifle",
+            "effect": "A chosen Specialist gains an Adhesive Launcher Rifle.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Initiative bonus",
+            "effect": "The Lieutenant receives WIP +1 for the Initiative Roll.",
+            "timing": "During the Initiative Roll."
+          }
+        ],
+        "sourceNotes": [
+          "The cancellation timing differs between EN p. 29 and ES p. 30; neither timing is silently substituted for the other.",
+          "For the ongoing Specialist reroll, EN p. 28 describes Scenario-labelled Skills generally; ES p. 29 specifically describes WIP Rolls for those Skills."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 27,
+          "section": "Tactical Support"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 28,
+          "section": "Tactical Support"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 29,
+          "section": "Tactical Support"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 28,
+          "section": "Apoyos Tácticos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 29,
+          "section": "Apoyos Tácticos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 30,
+          "section": "Apoyos Tácticos"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-23"
+      }
+    },
+    {
+      "id": "rule:resilience-operations",
+      "kind": "rule",
+      "name": "Resilience Operations",
+      "summary": "Optional ITS Season 17 tournament Extra using Tactical Objective and Battle Condition decks in place of standard ITS missions and Classified Objectives. This is an alternate event format, not a standard scenario.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "resilience-operations-extra",
+          "revision": "0.2"
+        },
+        "tacticalObjectives": {
+          "draw": 4,
+          "discard": 1,
+          "maxPointsPerCard": 3,
+          "completionMinimum": 1,
+          "moreCompletedBonus": 1,
+          "commandTokenRedraw": 1,
+          "revealPerRound": 1,
+          "priorityTargetFirst": true,
+          "privateUntilRevealed": true
+        },
+        "battleConditions": {
+          "draw": 2,
+          "discard": 1,
+          "appliesToBoth": true,
+          "wholeGame": true,
+          "duplicateResolution": "second-player-redraws",
+          "stackMovementBonuses": false
+        },
+        "gameSizes": [
+          {
+            "armyPoints": 150,
+            "swc": 3,
+            "tableWidthIn": 24,
+            "tableHeightIn": 32,
+            "deploymentDepthIn": 8
+          },
+          {
+            "armyPoints": 200,
+            "swc": 4,
+            "tableWidthIn": 32,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 250,
+            "swc": 5,
+            "tableWidthIn": 32,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 300,
+            "swc": 6,
+            "tableWidthIn": 48,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 350,
+            "swc": 7,
+            "tableWidthIn": 48,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 400,
+            "swc": 8,
+            "tableWidthIn": 48,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          }
+        ],
+        "tacticalElements": [
+          {
+            "id": "beacons",
+            "quantity": "2 per player (4 total)",
+            "placement": "Before deployment, fully within each player's Deployment Zone and in Silhouette contact with its boundary. The player who kept Deployment places theirs first.",
+            "rules": [
+              "Beacon Token or matching 25 mm scenery (EN p. 13, ES p. 14).",
+              "ARM 4, BTS 4, STR 3, S2; GizmoKit (PH=10).",
+              "Only Anti-materiel Weapons may damage a Beacon; Engineer or GizmoKit can repair it; remove when STR reaches zero.",
+              "Troopers may not deploy in Silhouette contact with a Beacon."
+            ]
+          },
+          {
+            "id": "hvts",
+            "quantity": "4 per player (8 total)",
+            "placement": "Before deployment, entirely within the area extending 4 inches from that player's Deployment Zone (ES: 10 cm). The player who kept Deployment places theirs first.",
+            "rules": [
+              "Follow ITS Civilian rules except this placement; Troopers may not deploy in Silhouette contact with an HVT.",
+              "Normal HVT: CC 6, BS 5, PH 10, WIP 11, S2; the English MOV is '--' but the Spanish profile prints 10-10 (cm).",
+              "A Battle Condition may specify hostile/reactive HVTs: MOV 4-4 inches (ES 10-10 cm), CC 6, BS 8, PH 11, WIP 11, ARM 1, BTS 0, VITA 1, S2; Stun Pistol."
+            ]
+          },
+          {
+            "id": "beepers",
+            "quantity": "1 per Trooper; each Specialist Trooper has 1 additional Beeper",
+            "placement": "Deploy using the Place Deployable Skill, not as part of a Coordinated Order; represented by a Player A/B Token or an S2 Model/scenery.",
+            "rules": [
+              "ARM 2, BTS 0, STR 1, S2; destroyed at STR 0 or less.",
+              "Player A/B Token diameter is 25 mm (EN p. 13 / ES p. 14).",
+              "Beepers can be damaged by Attacks."
+            ]
+          },
+          {
+            "id": "objectives",
+            "quantity": "3 per player (6 total)",
+            "placement": "Before deployment, wholly within an 8-inch (ES: 20 cm) band from the table centerline in that player's half. The player who kept Deployment places theirs first.",
+            "rules": [
+              "Objective Token or matching 40 mm scenery (EN p. 13 / ES p. 14).",
+              "No deployment in Silhouette contact with an Objective."
+            ]
+          },
+          {
+            "id": "f13-defensive-turrets",
+            "quantity": "Only when specified by a Battle Condition",
+            "placement": "Not initially deployed by default; place according to the selected Battle Condition card.",
+            "rules": [
+              "ARM 2, BTS 3, STR 1, S2; CC 5, BS 10; 360-degree Visor, Total Reaction, Combi Rifle and PARA (-3) CCW.",
+              "Respond with BS or CC Attack to Orders by active enemy Models (not Markers) in LoF or Silhouette contact.",
+              "Defensive Turret Token diameter 25 mm (EN p. 13 / ES p. 14), or an S2 Model/scenery; remove at STR 0 or less."
+            ]
+          }
+        ],
+        "glossary": [
+          {
+            "id": "capture",
+            "text": "Capture Tactical Element is an Attack Short Skill without a Roll. It requires Silhouette contact with a Null-State Model carrying an Element, an allied Trooper carrying one, or an uncarried Element."
+          },
+          {
+            "id": "captured-elements",
+            "text": "Only Models may carry; normally one Element per Model, two with Baggage. Keep the Token on the table in Silhouette contact with its carrier; drop it when the carrier enters/is in a Null State. Carried Elements do not block movement or LoF."
+          },
+          {
+            "id": "control",
+            "text": "A Tactical Element is Controlled if the player alone has a non-Null Trooper Model (not Marker) in Silhouette contact, with no enemy Trooper Model in contact."
+          },
+          {
+            "id": "dominate",
+            "text": "Dominate a Quadrant/Sector by having more Victory Points in it than the opponent. More than half a Trooper's base must be inside; count non-Null Models/Markers including Proxies and Peripherals, not weapon Tokens or fake Holoechoes. Non-Null Baggage adds 20 VP."
+          },
+          {
+            "id": "killing",
+            "text": "Enemy Troopers count as Killed on entering Dead State, being in a Null State at game end, or not being deployed as a Model or Marker at game end."
+          },
+          {
+            "id": "subjugate",
+            "text": "Subjugate a Quadrant/Sector if the player alone has a non-Null Trooper Model (not Marker) with more than half its base inside, and no enemy Trooper inside."
+          }
+        ],
+        "effects": [
+          "Replace the normal ITS Scenario and Classified Deck with the Tactical Objective and Battle Condition decks; ordinary ITS tournament rules otherwise apply.",
+          "After learning the opposing Faction but before Army List selection, each player draws four Tactical Objective cards, discards one and may spend one Command Token to swap a selected card for a new draw. Selected cards apply only to their owner and remain Private Information until revealed, unless otherwise stated.",
+          "Reveal one chosen Tactical Objective simultaneously each Game Round; Priority Target must be revealed first if selected. Show all selected cards to the opponent at game end.",
+          "After Initiative and before Deployment, each player draws two Battle Conditions and discards one; reveal and apply in Initiative order. When identical, the second-turn player discards and redraws.",
+          "Battle Conditions affect both players all game; if multiple conditions grant Movement Bonuses, use only one.",
+          "Sides deploy on opposite table edges. The game ends after the third Game Round, or at the end of a player's Turn if they began their Active Turn in Retreat!. Place all Tactical Elements except conditional F-13 Turrets before deployment."
+        ],
+        "restrictions": [
+          "Not selectable as an ordinary ITS scenario; the 16-member historical scenarioCollection does not contain this Extra.",
+          "The pinned PDFs describe the Tactical Objective and Battle Condition selection process, not the complete contents of either physical deck. No unavailable card text or derived card-specific points are claimed."
+        ],
+        "sourceNotes": [
+          "First reveal timing changed in English V0.1: V0.0 EN p. 63 and V0.0/V0.1 ES p. 62 place it after Deployment, before Round 1; V0.1 EN p. 63 changes to the beginning of Round 1. V0.2 EN p. 97 retains the newer timing, while V0.2 ES p. 104 retains the earlier timing. The sequence diagrams place reveal after Deployment; the bilingual difference remains unresolved.",
+          "EN p. 100 prints normal HVT MOV '--', while ES p. 107 prints 10-10 (cm). The conflicting profile is not normalized.",
+          "ES p. 106 explicitly says a failed Beacon repair Roll does not reduce STR; EN p. 99 does not state that additional clause.",
+          "EN p. 103 calls Baggage a Special Skill for captured Element capacity, but the same page calls it Equipment for Dominate; ES pp. 110-111 uses Equipment. Preserve the source inconsistency."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 96,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 97,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 98,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 99,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 100,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 101,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 102,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 103,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 104,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 103,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 104,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 105,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 106,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 107,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 108,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 109,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 110,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 111,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 13,
+          "section": "Diameter of ITS Tokens"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 14,
+          "section": "Diámetro de los Tokens ITS"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-19"
+      }
+    }
+  ],
+  "historicalEvidence": {
+    "mode": "review-only-not-projected",
+    "sources": [
+      {
+        "id": "its-season-17-v0.0-en-pdf",
+        "revision": "0.0",
+        "language": "en",
+        "sha256": "93de3ce8f9090edf86acf1db00e2d1dac6f2f44a9898e4bd8a98d991d308c812",
+        "pageCount": 68,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.0-en.pdf"
+      },
+      {
+        "id": "its-season-17-v0.0-es-pdf",
+        "revision": "0.0",
+        "language": "es",
+        "sha256": "5a8ef31491e9e22e4e9b8a8f8c526a3adafac5abf4ab11e999b730d3e5a67d38",
+        "pageCount": 67,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.0-es.pdf"
+      },
+      {
+        "id": "its-season-17-v0.1-en-pdf",
+        "revision": "0.1",
+        "language": "en",
+        "sha256": "1384eddb24affec3c16243d70d627d94c3bfe1250bec053647b08e30b837dd35",
+        "pageCount": 68,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.1-en.pdf"
+      },
+      {
+        "id": "its-season-17-v0.1-es-pdf",
+        "revision": "0.1",
+        "language": "es",
+        "sha256": "0edea2f3f1df41e6e341d188e7ab767faf236601c28b01b2469a534117c4ba89",
+        "pageCount": 67,
+        "localPath": "data/pdf/legacy/its_17/its-rules-season-17-v0.1-es.pdf"
+      }
+    ],
+    "facts": [
+      {
+        "id": "casevac-declaration-type",
+        "recordId": "skill:casevac",
+        "aspect": "skill-declaration",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 14,
+            "value": "short-skill"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 14,
+            "value": "habilidad-corta"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 14,
+            "value": "short-movement-skill"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 14,
+            "value": "habilidad-corta-basica"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "critical-intervention-reinforcements",
+        "recordId": "scenario:critical-intervention",
+        "aspect": "reinforcements-suitability",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 30,
+            "value": "yes"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 37,
+            "value": "no"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 30,
+            "value": "no"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 37,
+            "value": "no"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-appropriation-panoply-scoring",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "panoply-comparison-objective",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 27,
+            "value": "one-objective-point"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 21,
+            "value": "not-stated-in-main-objectives"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 27,
+            "value": "one-objective-point"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 21,
+            "value": "one-objective-point"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "critical-intervention-inhibitor-unlock",
+        "recordId": "scenario:critical-intervention",
+        "aspect": "unlock-console-role-restriction",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 33,
+            "value": "not-explicitly-limited-to-attacker"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 40,
+            "value": "not-explicitly-limited-to-attacker"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 33,
+            "value": "attacker-only"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 40,
+            "value": "attacker-only"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "critical-intervention-turret-reaction",
+        "recordId": "scenario:critical-intervention",
+        "aspect": "defense-system-turret-response",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 32,
+            "value": "defender-deployable-weapons"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 39,
+            "value": "defender-deployable-weapons"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 32,
+            "value": "react-to-active-enemy-model-orders-not-markers"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 39,
+            "value": "react-to-active-enemy-model-orders-not-markers"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "area-of-interest-scenario-name",
+        "recordId": "scenario:area-of-interest",
+        "aspect": "scenario-title",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 48,
+            "value": "zone-of-interest"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 47,
+            "value": "zona-de-interes"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 48,
+            "value": "area-of-interest"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 47,
+            "value": "area-de-interes"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "area-of-interest-hacker-opposition",
+        "recordId": "scenario:area-of-interest",
+        "aspect": "communication-antenna-hacker-response",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 49,
+            "value": "enemy-hacker-face-to-face-wip-roll"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 48,
+            "value": "enemy-hacker-face-to-face-wip-roll"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 49,
+            "value": "enemy-hacker-may-declare-aro-face-to-face-wip-roll"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 48,
+            "value": "select-enemy-hacker-for-aro-face-to-face-wip-roll"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-secure-objective-exclusions",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "secure-hvt-and-treasure-exclusions",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 36,
+            "value": "not-explicitly-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 28,
+            "value": "not-explicitly-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 36,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 28,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "akial-interference-secure-objective-exclusions",
+        "recordId": "scenario:akial-interference",
+        "aspect": "secure-hvt-and-treasure-exclusions",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 23,
+            "value": "only-secure-hvt-explicitly-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 36,
+            "value": "only-secure-hvt-explicitly-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 23,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 36,
+            "value": "secure-hvt-and-secure-treasure-excluded"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "resilience-operations-first-reveal",
+        "recordId": "rule:resilience-operations",
+        "aspect": "first-round-tactical-objective-reveal",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 63,
+            "value": "after-deployment-before-round-one"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 62,
+            "value": "after-deployment-before-round-one"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 63,
+            "value": "beginning-of-round-one"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 62,
+            "value": "after-deployment-before-round-one"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "outbreak-scenario-introduction",
+        "recordId": "scenario:outbreak",
+        "aspect": "scenario-inventory",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 2,
+            "value": "not-listed-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 2,
+            "value": "added-as-scenario"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 2,
+            "value": "added-as-scenario"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "tournament-bye-points",
+        "seasonId": "its-17",
+        "aspect": "bye-award",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 8,
+            "value": "3-tournament-points"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 8,
+            "value": "3-tournament-points"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 8,
+            "value": "4-tournament-points"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 8,
+            "value": "4-tournament-points"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "tournament-350-point-swc",
+        "seasonId": "its-17",
+        "aspect": "army-list-swc-350",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 9,
+            "value": "5-swc"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 9,
+            "value": "7-swc"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 9,
+            "value": "7-swc"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 9,
+            "value": "7-swc"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "akial-common-objective-completion-window",
+        "recordId": "scenario:akial-interference",
+        "aspect": "shared-common-objective-completion-window",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 22,
+            "value": "same-player-turn"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 35,
+            "value": "same-player-turn"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 22,
+            "value": "same-game-round"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 35,
+            "value": "same-game-round"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-prototype-first-round-attack-exception",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "prototype-first-round-attack-restriction",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 28,
+            "value": "no-pick-up-prototype-exception-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 22,
+            "value": "no-pick-up-prototype-exception-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 28,
+            "value": "pick-up-prototype-exception-explicit"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 22,
+            "value": "pick-up-prototype-exception-explicit"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-prototype-possession-terminology",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "prototype-possession-rule-term",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 28,
+            "value": "controlling-enemy-prototype"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 22,
+            "value": "controlar-prototipo-enemigo"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 28,
+            "value": "capturing-enemy-prototype"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 22,
+            "value": "capturar-prototipo-enemigo"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-central-strip-deployment-timing",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "central-strip-75-point-deployment-timing",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 35,
+            "value": "75-point-limit-phase-unspecified"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 28,
+            "value": "75-point-limit-phase-unspecified"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 35,
+            "value": "75-point-limit-during-deployment-phase"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 28,
+            "value": "75-point-limit-during-deployment-phase"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "provisioning-supply-box-pickup-wording",
+        "recordId": "scenario:provisioning",
+        "aspect": "supply-box-unheld-token-wording",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 46,
+            "value": "unaccompanied-supply-box-token"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 42,
+            "value": "token-de-supply-box-solitario"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 46,
+            "value": "supply-box-not-being-carried"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 42,
+            "value": "token-de-supply-box-solitario"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "uplink-center-150-point-antenna-offset",
+        "recordId": "scenario:uplink-center",
+        "aspect": "communication-antenna-150-point-written-rule-distance-from-edge",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 61,
+            "value": "4-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 60,
+            "value": "10-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 61,
+            "value": "4-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 60,
+            "value": "10-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 94,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 100,
+            "value": "15-cm-from-table-edge"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "corporate-prototype-collateral-attack-restriction",
+        "recordId": "scenario:corporate-appropriation",
+        "aspect": "prototype-collateral-targeting-restriction",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 28,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 22,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 28,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 22,
+            "value": "collateral-attack-restriction-not-stated"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 41,
+            "value": "cannot-target-if-attack-affects-allied-or-enemy-troopers"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 33,
+            "value": "cannot-target-if-attack-affects-allied-or-enemy-troopers"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "uplink-center-150-point-antenna-map-offset",
+        "recordId": "scenario:uplink-center",
+        "aspect": "communication-antenna-150-point-printed-map-distance-from-edge",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 60,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 59,
+            "value": "15-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 60,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 59,
+            "value": "15-cm-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 93,
+            "value": "6-inches-from-table-edge"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 99,
+            "value": "15-cm-from-table-edge"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-central-strip-written-table",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "central-strip-150-and-200-250-written-table-size",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 34,
+            "value": "150-4x32in-200-250-4x48in"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 34,
+            "value": "150-4x32in-200-250-4x48in"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 51,
+            "value": "150-4x32in-200-250-4x48in"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 42,
+            "value": "150-10x60cm-200-250-10x80cm"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      },
+      {
+        "id": "crossing-lines-central-strip-printed-maps",
+        "recordId": "scenario:crossing-lines",
+        "aspect": "central-strip-150-and-200-250-printed-map-size",
+        "observations": [
+          {
+            "sourceId": "its-season-17-v0.0-en-pdf",
+            "page": 34,
+            "value": "150-4x24in-200-250-4x32in"
+          },
+          {
+            "sourceId": "its-season-17-v0.0-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-en-pdf",
+            "page": 34,
+            "value": "150-4x24in-200-250-4x32in"
+          },
+          {
+            "sourceId": "its-season-17-v0.1-es-pdf",
+            "page": 27,
+            "value": "150-10x60cm-200-250-10x80cm"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 52,
+            "value": "150-4x24in-200-250-4x32in"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 43,
+            "value": "150-10x60cm-200-250-10x80cm"
+          }
+        ],
+        "review": {
+          "status": "reviewed",
+          "reviewedOn": "2026-11-19"
+        }
+      }
+    ]
+  },
+  "sharedScenarioLibrary": {
+    "id": "its17-scenarios",
+    "sha256": "2ec197dc1f8a449b3fcabb90ea45d8709f9160c7c601c6ef78984c775b00f182"
+  }
+}

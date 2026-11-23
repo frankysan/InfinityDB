@@ -1840,8 +1840,8 @@ See REA-045 in `docs/rules-explanation-audit-1.0.md`.
 
 Sources: N5.3 English pp. 70, 186; Spanish p. 195; captured official Army
 metadata from 2026-09-10 through 2026-09-29; English Wiki capture
-`WIKI-en 20260926-200832` (Weapon Chart, Armed Turret, E/M Ammunition);
-Spanish Wiki capture `WIKI-es 20261009-211304` (Tabla de Armas);
+`WIKI-en 20261116-075926` (Weapon Chart, Armed Turret, E/M Ammunition);
+Spanish Wiki capture `WIKI-es 20261116-092640` (Tabla de Armas);
 English/Spanish N5 FAQ v0.1.
 
 ### RS-SE-ROLL-001 — Skill-to-Skill roll effects use `modifies-rolls-for`
@@ -2364,6 +2364,16 @@ independently against each target. One Dodge Roll is compared separately against
 each incoming Impact Template Attack. Targetless and Speculative Attack retain
 their expressly scoped placement exceptions.
 
+**Physical template dimensions (distinct from rules text):** The canonical
+Circular Template has an exact **12 cm diameter**, provided as a physical
+template specification rather than a numeric dimension explicitly stated in
+the reviewed rules. This is the basis for InfinityDB's Circular Template
+size labels and fixed map footprints (6 cm radius, converted using
+25.4 mm per physical inch), not a quotation from an ITS or N5 PDF. The Small
+and Large Teardrop Templates have no independently established exact
+outline dimensions here; do not infer their length, width or area from
+their names or schematic depictions.
+
 The [V1S-034 follow-up](https://github.com/frankysan/InfinityDB/blob/add22806258f0d7616fe251e6d77485939de4ce3/docs/v1.0-source-coverage-audit.md#template-and-base-ammunition-follow-up-v1s-034-2026-11-04)
 records exact source members and pending source/API/browser acceptance.
 
@@ -2824,7 +2834,7 @@ pages <https://infinitythewiki.com/Combined_Ammunition>,
 <https://infinitythewiki.com/Ammunition_Summary_Chart>.
 
 Sources: N5 v5.3 Ammunition definitions, curated Wiki snapshot
-`wiki-en-20260926-200832` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
+`wiki-en-20261116-075926` (Normal, Shock, Stun, Smoke, Eclipse); current N5.3
 Wiki pages <https://infinitythewiki.com/N>,
 <https://infinitythewiki.com/SHOCK>,
 <https://infinitythewiki.com/Stun_Ammunition>,
@@ -3352,7 +3362,7 @@ Attribute override for individual Weapon profiles from either wording.
 
 Sources:
 
-- Curated Wiki snapshot `wiki-en-20260926-200832`: AP, DA, E/M, EXP, PARA,
+- Curated Wiki snapshot `wiki-en-20261116-075926`: AP, DA, E/M, EXP, PARA,
   and T2 Ammunition.
 - Current N5.3 Wiki: <https://infinitythewiki.com/EXP>,
   <https://infinitythewiki.com/Paralysis_(PARA)_Ammunition>, and

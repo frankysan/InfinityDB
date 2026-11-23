@@ -168,9 +168,10 @@ def test_maintained_supplies_definition_owns_all_core_map_configurations() -> No
             "deployment-a",
             "deployment-b",
         }
+        # The symmetric right marker retains its physical offset, but only
+        # the left helper is drawn to avoid redundant map measurements.
         assert {(annotation.target, annotation.edge) for annotation in point_offsets} == {
             ("supply-box-left", "left"),
-            ("supply-box-right", "right"),
         }
 
 
@@ -676,7 +677,11 @@ def test_domination_retains_control_eligibility_and_console_interaction_rules(
             ["quadrant-1"],
             "incompatible scoring element",
         ),
-        (("objectives", 1, "awards", 0, "condition", "status"), "destroyed", "one of"),
+        (
+            ("objectives", 1, "awards", 0, "condition", "status"),
+            "destroyed",
+            "requires an Antenna marker",
+        ),
         (("objectives", 1, "aggregation"), "exclusive", "per-element awards require cumulative"),
         (("endConditions", 1, "finishAt"), "immediate", "Tactical Phase/Player Turn"),
         (("sourceIssues", 0, "gameSizeField"), "unimplemented", "one of"),

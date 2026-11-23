@@ -16,24 +16,30 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     all_releases = load_release_notes()
     releases = tuple(release for release in all_releases if release.released_on is not None)
 
-    assert releases[0].version == "1.1.0"
-    assert releases[0].released_on == date(2026, 11, 15)
+    assert releases[0].version == "1.2.0"
+    assert releases[0].released_on == date(2026, 11, 23)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("Expanded Unit Explorer" in item for item in releases[0].player_summary)
+    assert any("ITS Season 17" in item and "ITS Season 18" in item
+               for item in releases[0].player_summary)
     assert [section.heading for section in releases[0].detail_sections] == [
         "Added", "Changed", "Fixed", "Upgrade notes",
     ]
     assert all(release.version is not None for release in releases)
 
-    prior = releases[1]
-    assert prior.version == "1.0.1"
+    release_110 = next(release for release in releases if release.version == "1.1.0")
+    assert release_110.released_on == date(2026, 11, 15)
+    assert any("Expanded Unit Explorer" in item for item in release_110.player_summary)
+    assert [section.heading for section in release_110.detail_sections] == [
+        "Added", "Changed", "Fixed", "Upgrade notes",
+    ]
+
+    prior = next(release for release in releases if release.version == "1.0.1")
     assert prior.released_on == date(2026, 11, 9)
     assert any(
         "Added the ability to save scenario maps" in item
         for item in prior.player_summary
     )
-    previous = releases[2]
-    assert previous.version == "1.0.0"
+    previous = next(release for release in releases if release.version == "1.0.0")
     assert previous.released_on == date(2026, 11, 7)
     assert any("Expanded the N5.3 reference" in item for item in previous.player_summary)
 
