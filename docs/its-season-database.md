@@ -891,8 +891,8 @@ PDF images (not only extracted text) with curated table dimensions, zone
 ownership and boundaries, fixed marker centers and all six game-size
 bindings. All four local source PDFs match their registered SHA-256 pins.
 
-Verified in both ITS 17 V0.2 and ITS 18 2026.09.11, covering 54 distinct
-layouts and 108 game-size setups:
+Verified in ITS 17 V0.2 and ITS 18 2026.09.11, covering 69 distinct
+layouts and 138 game-size setups (both seasons unless noted):
 
 - **B-Pong:** ITS 17 EN p. 37 / ES p. 39; ITS 18 EN p. 59 / ES p. 59.
   Rear zones 12/16/16 inches, Exclusion half-widths 2/4/4 inches,
@@ -932,10 +932,21 @@ layouts and 108 game-size setups:
   Top-left A and bottom-right B quarter-circle zones (12/20/24-inch radii),
   central Communication Antenna; Areas of Interest are player-placed.
 
-All eighteen reviewed season-mission definitions have correct 150/200/250/
+- **Corporate Appropriation:** ITS 17 EN p. 41 / ES p. 33; ITS 18 EN p. 54 /
+  ES p. 52. Rear zones 8/12/12 inches, Exclusion half-width 4 inches,
+  quarter-width Prototypes and central Panoplies on the front zone boundaries.
+- **Neutralization (ITS 18 only):** EN/ES p. 105. Rear zones 8/12/12 inches,
+  Exclusion half-width 4 inches, two centerline Tech Boxes each 4 inches
+  from table center, and four Antennas on the front zone boundaries
+  4 inches from the lateral edges. Existing 12 cm Circular Template
+  footprints remain centered on their respective Antennas.
+- **Akial Interference:** ITS 17 EN p. 32 / ES p. 59; ITS 18 EN/ES p. 92.
+  Rear zones 8/12/12 inches and central Akial Antenna.
+
+All twenty-three reviewed season-mission definitions have correct 150/200/250/
 300/350/400-point configuration bindings and 3/4/5/6/7/8 SWC (ITS 18
 EN p. 17; ITS 17 mission force tables). No geometry changes required in
-these batches. Remaining diagram review: 18 season-mission definitions (108
+these batches. Remaining diagram review: 13 season-mission definitions (78
 setups); browser acceptance and runtime validation are separate steps.
 
 All twenty missions are published for the current 2026.09.11 revision:

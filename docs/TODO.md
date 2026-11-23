@@ -375,9 +375,10 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     complete visual or bilingual acceptance pass. Do not invent answers to
     documented official-source conflicts. Bilingual diagram review completed
     for B-Pong, Crossing Lines, Evacuation, Hardlock, Critical Intervention,
-    Last Launch, Outbreak, Provisioning and Area of Interest in both seasons
-    (54 layouts / 108 setups); remaining 18 season-mission definitions
-    (108 setups). See [release diagram acceptance](its-season-database.md#release-diagram-acceptance).
+    Last Launch, Outbreak, Provisioning, Area of Interest, Corporate
+    Appropriation and Akial Interference in both seasons, plus Neutralization
+    in ITS 18 (69 layouts / 138 setups); remaining 13 season-mission
+    definitions (78 setups). See [release diagram acceptance](its-season-database.md#release-diagram-acceptance).
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
