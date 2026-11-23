@@ -103,13 +103,13 @@ def _marker_dimensions(
 ) -> list[dict[str, Any]]:
     """Project marker counts and *physical* footprints from canonical geometry."""
     parsed = parse_scenario_geometry(geometry)
-    counts: dict[str, int] = {}
+    counts: dict[tuple[str, float | None], int] = {}
     for element in parsed.elements:
         if isinstance(element, MarkerElement):
-            counts[element.marker_type] = counts.get(element.marker_type, 0) + 1
+            key = (element.marker_type, marker_diameter_mm(element))
+            counts[key] = counts.get(key, 0) + 1
     result: list[dict[str, Any]] = []
-    for marker_type, count in counts.items():
-        diameter = marker_diameter_mm(marker_type)
+    for (marker_type, diameter), count in counts.items():
         label = _MARKER_LABELS.get(marker_type)
         if label is None or (
             diameter is None
@@ -123,12 +123,14 @@ def _marker_dimensions(
             "diameter_mm": diameter,
             "citation": dict(source_citation) if diameter is not None else None,
         }
-        if marker_type == "tracking-beacon":
-            # EN p. 60: 40 mm; ES p. 59: 25 mm. No agreed physical footprint.
+        if marker_type == "tracking-beacon" and diameter is None:
+            # ITS 18 EN p. 60: 40 mm; ES p. 59: 25 mm. No agreed footprint.
             entry["size_status"] = "source-conflict"
         elif marker_type == "defensive-turret":
             # The cited 25 mm is the token option; the mission also permits an S2 Model.
             entry["size_status"] = "token-or-model"
+        elif marker_type == "civilian":
+            entry["size_status"] = "token-or-civilian-model"
         result.append(entry)
     return result
 

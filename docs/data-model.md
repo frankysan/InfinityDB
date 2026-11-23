@@ -4227,9 +4227,11 @@ It also supports `element-edge-distance` annotations for markers and rectangles:
 displayed distance is derived from the target element's nearest physical boundary and selected table edge,
 while an optional signed offset controls only where the dimension line is drawn. Scenario source language
 such as “X inches from” is interpreted edge-to-edge unless the source explicitly names a center/reference
-point. `marker` stores a semantic center point with a stable `markerType`; per-instance radius is not
-duplicated in geometry because known marker types resolve to canonical marker metadata. That footprint is
-used when deriving marker clearances. Physical diameter is semantic when it defines the represented game object,
+point. `marker` stores a semantic center point with a stable `markerType`. Known marker types
+resolve to canonical marker metadata; an optional reviewed `diameterMm` records a source-specific
+footprint when no common type diameter exists. Currently only the historical 25 mm Tracking Beacon
+uses this field; ITS 18's disputed footprint stays unset. The same resolved diameter drives the SVG,
+catalog metadata, boundary validation and marker clearances. Physical diameter is semantic when it defines the represented game object,
 not merely SVG styling. N5.3 Domination requires each Console to be represented by a Console A Marker
 or scenery of the same diameter, indirectly making that canonical footprint part of the scenario rules.
 The ITS token-diameter table provides the explicit numeric dimensions used by the core fixtures:

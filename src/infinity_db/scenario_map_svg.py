@@ -283,7 +283,7 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
         x = _resolved(geometry, element.x, "x")
         y = _resolved(geometry, element.y, "y")
         marker_type = escape(element.marker_type, quote=True)
-        diameter_mm = marker_diameter_mm(element.marker_type)
+        diameter_mm = marker_diameter_mm(element)
         if diameter_mm is None and element.marker_type != "tracking-beacon":
             raise ScenarioMapRenderError(
                 "scenario SVG renderer v1 has no canonical marker metadata for "
@@ -299,7 +299,7 @@ def _render_element(geometry: ScenarioGeometry, element: ScenarioElement) -> str
                 f'data-physical-size="{size_status}" cx="{_number(x)}" '
                 f'cy="{_number(y)}" r=".3"/>'
             )
-        radius = marker_radius_inches(element.marker_type)
+        radius = marker_radius_inches(element)
         assert radius is not None
         diameter = f' data-diameter-mm="{_number(diameter_mm)}"'
         return (
@@ -587,7 +587,7 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
             )
         if (
             isinstance(element, MarkerElement)
-            and marker_diameter_mm(element.marker_type) is None
+            and marker_diameter_mm(element) is None
             and element.marker_type != "tracking-beacon"
         ):
             raise ScenarioMapRenderError(

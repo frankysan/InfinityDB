@@ -368,17 +368,6 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
   and all 16 ITS 17 EN mission chapters (V0.2, pp. 31–96), with comparison
   against curated objectives, setup, special rules and Skill definitions and
   targeted Spanish verification. Resolve these findings before release:
-  - [ ] **Season-specific marker footprints.** ITS 17 B-Pong's 25 mm Beacon
-    is confirmed by its mission (EN p. 37) and chart (EN p. 13 / ES p. 14);
-    the shared tracking-beacon rendering/catalog code currently applies
-    ITS 18's size conflict to both seasons. Correct the historical geometry
-    and metadata, retaining ITS 18's documented conflict.
-  - [ ] **Stale physical-size prose.** Reconcile Evacuation's ITS 18 civilian
-    text with its 25 mm Player A/B Token alternative (EN pp. 18, 89) and
-    Critical Intervention's turret text in both seasons with the 25 mm
-    Defensive Turret chart entries (ITS 17 EN p. 13; ITS 18 EN p. 18).
-    Distinguish model alternatives and unspecified placement clearances
-    from known token diameters.
   - [ ] **Remaining release acceptance.** Independently verify source diagram
     details and all published game-size setups; review rendered mission
     pages at relevant breakpoints, cross-season source-issue visibility,

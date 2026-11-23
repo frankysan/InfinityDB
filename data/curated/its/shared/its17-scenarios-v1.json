@@ -267,7 +267,7 @@
                 "name": "Civilians",
                 "paragraphs": [
                   "Four Civilians begin at the positions indicated on each game-size map. Each must be on an accessible point of the table, not on top of or inside scenery or buildings; terrain placement must allow this.",
-                  "Use suitable civilian/HVT Models or Player A/B Tokens as the source permits. ITS 17 V0.2 EN p. 13 / ES p. 14 sets Player A/B Tokens at 25 mm, but does not prescribe Civilian Model base sizes; map symbols indicate center positions only.",
+                  "Use suitable civilian/HVT Models or Player A/B Tokens as the source permits. ITS 17 V0.2 EN p. 13 / ES p. 14 sets Player A/B Tokens at 25 mm, but does not prescribe Civilian Model base sizes. The map depicts the Token option at its physical diameter, centered on each published position.",
                   "Civilians may be CivEvaced under the applicable CivEvac rules. Extraction is a separate successful Scenario Skill, not automatic from being CivEvaced."
                 ]
               },
@@ -9691,6 +9691,7 @@
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "tracking-beacon",
+                    "diameterMm": 25,
                     "x": 12,
                     "y": 16
                   },
@@ -9826,6 +9827,7 @@
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "tracking-beacon",
+                    "diameterMm": 25,
                     "x": 16,
                     "y": 24
                   },
@@ -9962,6 +9964,7 @@
                     "kind": "marker",
                     "style": "objective",
                     "markerType": "tracking-beacon",
+                    "diameterMm": 25,
                     "x": 24,
                     "y": 24
                   },
@@ -12798,7 +12801,7 @@
                 "id": "defense-system",
                 "name": "Server Room Defense System",
                 "paragraphs": [
-                  "Two Armed Turrets in different Server Room corners are represented by Defensive Turret A/B Tokens or Models/scenery of matching Silhouette (ITS 17 EN p. 48 / ES pp. 66–67). Turret positions are schematic; no footprint or corner clearance is specified.",
+                  "Two Armed Turrets in different Server Room corners are represented by Defensive Turret A/B Tokens or S2 Models/scenery (ITS 17 EN p. 48 / ES pp. 66–67). The Token diameter is 25 mm (EN p. 13 / ES p. 14); the map depicts that footprint. The exact corner clearance is not specified, so the turret positions are schematic.",
                   "When active, the Server Room Defense System reacts with BS or CC Attacks to Orders declared by active enemy Models (not Markers) in Line of Fire or Silhouette contact. Both ITS 17 languages say 'enemy Models', not specifically Attacker Models.",
                   "Both originals print CC 5, BS 10, WIP 11, ARM 2, BTS 3, STR 1, S 2, 360° Visor, Total Reaction, Combi Rifle, and PARA CC Weapon (-3). MOV and PH have no printed values."
                 ]

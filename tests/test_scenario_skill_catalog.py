@@ -100,6 +100,42 @@ def test_mission_event_context(app, its17_app, season):
         assert "EN:" in cancel["timing"] and "ES:" in cancel["timing"]
 
 
+@pytest.mark.parametrize("season", ["its-17", "its-18"])
+def test_season_specific_marker_dimensions(app, its17_app, season):
+    selected_app = its17_app if season == "its-17" else app
+    page = 13 if season == "its-17" else 18
+    source = "its-season-17-v0.2-en-pdf" if season == "its-17" else "its-season-18-en-pdf"
+    for slug, marker_type, count in (
+        ("b-pong", "tracking-beacon", 1),
+        ("evacuation", "civilian", 4),
+        ("critical-intervention", "defensive-turret", 2),
+    ):
+        for points in (150, 200, 250, 300, 350, 400):
+            status, mission = _get(
+                selected_app, f"/api/scenarios/{slug}?collection={season}&army_points={points}",
+            )
+            assert status == 200
+            marker = next(
+                m for m in mission["placement"]["marker_dimensions"]
+                if m["marker_type"] == marker_type
+            )
+            assert marker["count"] == count
+            if slug == "b-pong" and season == "its-18":
+                assert marker["diameter_mm"] is None
+                assert marker["size_status"] == "source-conflict"
+                assert marker["citation"] is None
+            else:
+                assert marker["diameter_mm"] == 25
+                assert marker["citation"]["page"] == page
+                assert marker["citation"]["source_id"] == source
+                if slug == "evacuation":
+                    assert marker["size_status"] == "token-or-civilian-model"
+                elif slug == "critical-intervention":
+                    assert marker["size_status"] == "token-or-model"
+                else:
+                    assert "size_status" not in marker
+
+
 def test_scenario_skills_listed_with_context_and_source(app):
     status, payload = _get(app, "/api/skills")
     assert status == 200

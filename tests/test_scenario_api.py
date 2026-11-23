@@ -244,6 +244,10 @@ def test_scenario_list_api_exposes_current_publications_without_selecting_game_s
     assert payload["collections"] == [
         {"id": "n5-core", "revision": "5.3", "title": "N5 Core Scenarios", "scenario_count": 4},
         {
+            "id": "its-17", "revision": "0.2",
+            "title": "ITS Season 17 Seekers", "scenario_count": 16,
+        },
+        {
             "id": "its-18", "revision": "2026.09.11",
             "title": "ITS Season 18: Overheat", "scenario_count": 20,
         },
@@ -1146,7 +1150,7 @@ def test_scenario_api_accepts_explicit_collection_revision_without_implicit_its_
     assert len(season_payload["items"]) == 20
     assert any(item["slug"] == "battleground" for item in season_payload["items"])
     assert {(row["id"], row["revision"]) for row in season_payload["collections"]} == {
-        ("n5-core", "5.3"), ("its-18", "2026.09.11"),
+        ("n5-core", "5.3"), ("its-17", "0.2"), ("its-18", "2026.09.11"),
     }
     for query in (
         "collection=its-17&revision=2025.09.01",

@@ -266,7 +266,9 @@ function mapCard(item) {
         ? `${marker.count} × ${marker.name} — ${marker.size_status === "source-conflict"
           ? "conflicting physical sizes in official sources" : "physical size not specified"}`
         : `${marker.count} × ${marker.name} — ${marker.diameter_mm} mm ${marker.size_status === "token-or-model"
-          ? "token diameter (S2 Model alternative)" : "diameter"}`;
+          ? "token diameter (S2 Model alternative)"
+          : marker.size_status === "token-or-civilian-model"
+            ? "token diameter (Civilian Model alternative)" : "diameter"}`;
       list.append(row);
     }
     const note = document.createElement("p");

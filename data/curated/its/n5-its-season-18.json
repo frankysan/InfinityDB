@@ -11110,7 +11110,7 @@
               "name": "Civilians",
               "paragraphs": [
                 "Four Civilians begin at the positions indicated on each game-size map. Each must be on an accessible point of the table, not on top of or inside scenery or buildings; terrain placement must allow this.",
-                "Use suitable civilian/HVT Models or Player A/B Tokens as the source permits. The source does not assign a fixed physical base diameter to the Civilian figures or Tokens, so map symbols indicate center positions only.",
+                "Use suitable civilian/HVT Models or Player A/B Tokens as permitted by EN p. 89. The ITS 18 chart (EN p. 18) specifies 25 mm for Player A/B Tokens, not a mandatory Civilian Model base diameter. The map depicts the Token option at its physical diameter, centered on each published position.",
                 "Civilians may be CivEvaced under the applicable CivEvac rules. Extraction is a separate successful Scenario Skill, not automatic from being CivEvaced."
               ]
             },
@@ -18553,7 +18553,7 @@
               "id": "defense-system",
               "name": "Server Room Defense System",
               "paragraphs": [
-                "Two Armed Turrets (Defensive Turret A/B Tokens, or equivalent scenery/Models of the appropriate Silhouette) occupy separate corners inside the Server Room. Their diagram positions are schematic; no precise turret diameter or center-to-corner clearance is published.",
+                "Two Armed Turrets (Defensive Turret A/B Tokens, or S2 Models/scenery) occupy different corners inside the Server Room (EN pp. 100–101). The Token diameter is 25 mm (EN p. 18); the map depicts that footprint. The exact corner clearance is not specified, so the turret positions are schematic.",
                 "When the Defense System is active, the Armed Turrets respond with BS Attack or CC Attack to Orders declared by the Attacker's active Models, not Markers, that are in their Line of Fire or Silhouette contact.",
                 "English p.101 lists an Armed Turret profile of CC 5, BS 10, WIP 11, ARM 2, BTS 3, STR 1 and Silhouette 2, with 360° Visor, Total Reaction, Combi Rifle and PARA CC Weapon (-3). MOV and PH have no printed values.",
                 "The Spanish p.101 table prints the STR-equivalent field as a dash, whereas English specifies STR 1. This is a source inconsistency; the English profile is recorded without fabricating a Spanish value."

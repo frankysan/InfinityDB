@@ -29,6 +29,7 @@ AFFECTED: dict[str, dict[str, tuple[str, ...]]] = {
     "corporate-appropriation": {"panoplies": ("40 mm",)},
     "critical-intervention": {
         "data-console": ("40 mm",), "inhibitor-antenna": ("40 mm",),
+        "defense-system": ("25 mm", "S2 Models"),
     },
     "akial-interference": {"akial-antenna": ("40 mm",)},
 }
@@ -51,14 +52,20 @@ def test_chart_pins_every_affected_its17_scenario_and_preserves_other_members() 
     assert AFFECTED.keys() <= members.keys()
     assert len(AFFECTED) == 12
     for slug in AFFECTED:
-        pins = members[slug]["sharedDefinition"]["citations"][-2:]
+        pins = [
+            pin for pin in members[slug]["sharedDefinition"]["citations"]
+            if (pin["sourceId"], pin["page"]) in PINS
+        ]
         assert [(row["sourceId"], row["page"]) for row in pins] == PINS
         assert [row["section"] for row in pins] == [
             "Diameter of ITS Tokens", "Diámetro de los Tokens ITS",
         ]
         original = next(d for d in library["definitions"]
                         if d["id"] == f"scenario:{slug}")
-        assert original["record"]["citations"][-2:] == pins
+        assert [
+            pin for pin in original["record"]["citations"]
+            if (pin["sourceId"], pin["page"]) in PINS
+        ] == pins
         assert original["origin"]["seasonId"] == "its-17"
 
 

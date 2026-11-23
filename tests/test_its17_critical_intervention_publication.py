@@ -146,6 +146,11 @@ def test_its17_critical_intervention_preserves_historical_differences() -> None:
     assert "40 mm" in current["inhibitor-antenna"]["paragraphs"][0]
     assert "enemy Models" in old_rules["defense-system"]["paragraphs"][1]
     assert "Attacker's active Models" in current["defense-system"]["paragraphs"][1]
+    for rules in (old_rules, current):
+        footprint = rules["defense-system"]["paragraphs"][0]
+        assert "25 mm" in footprint
+        assert "S2 Models" in footprint
+        assert "corner clearance is not specified" in footprint
     assert "Both originals" in old_rules["defense-system"]["paragraphs"][2]
     assert "STR 1" in old_rules["defense-system"]["paragraphs"][2]
     assert "STR 1" in current["defense-system"]["paragraphs"][3]

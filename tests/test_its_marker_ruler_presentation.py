@@ -12,6 +12,8 @@ import pytest
 from infinity_db.scenario_geometry import (
     CIRCULAR_TEMPLATE_DIAMETER_CM,
     CIRCULAR_TEMPLATE_RADIUS_INCHES,
+    MarkerElement,
+    ScenarioGeometryError,
     marker_diameter_mm,
     marker_radius_inches,
     parse_scenario_geometry,
@@ -185,8 +187,56 @@ def test_its_token_chart_has_canonical_size_for_each_fixed_footprint() -> None:
     }.items():
         assert marker_diameter_mm(marker) == size_mm
 
-    # B-Pong Tracking Beacon has a documented EN/ES size disagreement.
+    # ITS 18 B-Pong has a documented EN/ES size disagreement.
     assert marker_diameter_mm("tracking-beacon") is None
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+@pytest.mark.parametrize("theme", ["light", "dark"])
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_b_pong_beacon_footprint_is_season_specific(
+    source: Path, theme: Literal["light", "dark"], distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    record = next(row for row in records if row["id"] == "scenario:b-pong")
+    for configuration in record["facts"]["configurations"]:
+        geometry = parse_scenario_geometry(configuration["geometry"])
+        beacon = next(
+            element for element in geometry.elements
+            if isinstance(element, MarkerElement) and element.id == "tracking-beacon"
+        )
+        svg = ElementTree.fromstring(
+            render_scenario_map_svg(geometry, theme=theme, distance_unit=distance_unit)
+        )
+        circle = next(node for node in svg.iter() if node.get("id") == "tracking-beacon")
+        assert circle.get("data-marker-type") == "tracking-beacon"
+        if source == ITS17_SHARED:
+            assert marker_diameter_mm(beacon) == 25
+            assert marker_radius_inches(beacon) == pytest.approx(25 / 50.8)
+            assert circle.get("data-diameter-mm") == "25"
+            assert circle.get("data-physical-size") is None
+            assert float(circle.attrib["r"]) == pytest.approx(25 / 50.8, abs=0.0005)
+        else:
+            assert marker_diameter_mm(beacon) is None
+            assert circle.get("data-diameter-mm") is None
+            assert circle.get("data-physical-size") == "conflicting-sources"
+
+
+@pytest.mark.parametrize("diameter", [0, -25, 40, True, "25"])
+def test_unreviewed_tracking_beacon_geometry_diameter_is_rejected(diameter: object) -> None:
+    document = json.loads(ITS17_SHARED.read_text(encoding="utf-8"))
+    record = next(
+        row["record"] for row in document["definitions"] if row["id"] == "scenario:b-pong"
+    )
+    geometry = record["facts"]["configurations"][0]["geometry"]
+    beacon = next(e for e in geometry["elements"] if e["id"] == "tracking-beacon")
+    beacon["diameterMm"] = diameter
+    with pytest.raises(ScenarioGeometryError, match="diameterMm"):
+        parse_scenario_geometry(geometry)
 
 
 @pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
@@ -500,13 +550,16 @@ def test_marker_placement_rulers_measure_markers_without_overlaying_them(
         for configuration in record["facts"]["configurations"]:
             geometry = configuration["geometry"]
             markers = [e for e in geometry["elements"] if e["kind"] == "marker"]
-            for marker in markers:
-                diameter = marker_diameter_mm(marker["markerType"])
-                if marker["markerType"] == "tracking-beacon":
+            parsed = parse_scenario_geometry(geometry)
+            for element in parsed.elements:
+                if not isinstance(element, MarkerElement):
+                    continue
+                diameter = marker_diameter_mm(element)
+                if element.marker_type == "tracking-beacon" and source == ITS18:
                     assert diameter is None
                 else:
                     assert diameter is not None, (
-                        record["name"], configuration["id"], marker["markerType"]
+                        record["name"], configuration["id"], element.marker_type
                     )
             placement = [
                 a for a in geometry.get("annotations", [])

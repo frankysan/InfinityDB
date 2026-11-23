@@ -20,7 +20,8 @@ CIRCULAR_TEMPLATE_RADIUS_INCHES = CIRCULAR_TEMPLATE_DIAMETER_CM * 10 / (2 * _MM_
 
 # ITS 17 V0.2 p. 13 and ITS 18 2026.09.11 p. 18 define these
 # token diameters. Civilian markers use the 25 mm Civilian/CivEvac
-# footprint; B-Pong's conflicting Tracking Beacon sources remain unmeasured.
+# footprint. Tracking Beacon has no global diameter because ITS 18 conflicts;
+# ITS 17 B-Pong supplies its reviewed 25 mm diameter in geometry.
 _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE = {
     "console": 40.0,
     "beacon": 25.0,
@@ -108,6 +109,7 @@ class MarkerElement:
     marker_type: str
     x: Coordinate
     y: Coordinate
+    diameter_mm: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,16 +185,20 @@ class ScenarioGeometry:
     annotations: tuple[ScenarioAnnotation, ...]
 
 
-def marker_diameter_mm(marker_type: str) -> float | None:
-    """Return the canonical physical diameter for a known scenario marker type."""
+def marker_diameter_mm(marker: str | MarkerElement) -> float | None:
+    """Resolve the reviewed instance diameter, falling back to canonical type metadata."""
 
-    return _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE.get(marker_type)
+    if isinstance(marker, MarkerElement):
+        if marker.diameter_mm is not None:
+            return marker.diameter_mm
+        marker = marker.marker_type
+    return _CANONICAL_MARKER_DIAMETER_MM_BY_TYPE.get(marker)
 
 
-def marker_radius_inches(marker_type: str) -> float | None:
-    """Return the canonical physical radius in geometry units for a known marker."""
+def marker_radius_inches(marker: str | MarkerElement) -> float | None:
+    """Return the physical radius in geometry units for a known marker."""
 
-    diameter_mm = marker_diameter_mm(marker_type)
+    diameter_mm = marker_diameter_mm(marker)
     if diameter_mm is None:
         return None
     return diameter_mm / _MM_PER_INCH / 2.0
@@ -329,13 +335,22 @@ def _parse_element(value: Any, index: int) -> ScenarioElement:
 
     if kind == "marker":
         required = common_required | {"markerType", "x", "y"}
-        _only_keys(raw, required, set(), context)
+        _only_keys(raw, required, {"diameterMm"}, context)
+        marker_type = _element_id(raw.get("markerType"), f"{context}.markerType")
+        diameter = None
+        if "diameterMm" in raw:
+            diameter = _positive_number(raw["diameterMm"], f"{context}.diameterMm")
+            if marker_type != "tracking-beacon" or diameter != 25:
+                raise ScenarioGeometryError(
+                    f"{context}.diameterMm must describe a reviewed Tracking Beacon footprint"
+                )
         return MarkerElement(
             id=_element_id(raw.get("id"), f"{context}.id"),
             style=_style(raw.get("style"), f"{context}.style"),
-            marker_type=_element_id(raw.get("markerType"), f"{context}.markerType"),
+            marker_type=marker_type,
             x=_coordinate(raw.get("x"), "x", f"{context}.x"),
             y=_coordinate(raw.get("y"), "y", f"{context}.y"),
+            diameter_mm=diameter,
         )
 
     if kind == "label":
@@ -456,7 +471,7 @@ def element_bounds(
             resolve_coordinate(element.y2, axis="y", table=table),
         )
 
-    radius = marker_radius_inches(element.marker_type)
+    radius = marker_radius_inches(element)
     if radius is None:
         raise ScenarioGeometryError(
             "element boundary distance requires canonical marker metadata for "
@@ -522,7 +537,7 @@ def _validate_resolved_geometry(geometry: ScenarioGeometry) -> None:
         elif isinstance(element, MarkerElement):
             resolved(element.x, "x", f"{context}.x")
             resolved(element.y, "y", f"{context}.y")
-            radius = marker_radius_inches(element.marker_type)
+            radius = marker_radius_inches(element)
             if radius is not None:
                 x1, y1, x2, y2 = element_bounds(element, table=table)
                 if x1 < 0 or y1 < 0 or x2 > table.width or y2 > table.height:

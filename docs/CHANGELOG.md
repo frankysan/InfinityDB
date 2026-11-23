@@ -22,7 +22,10 @@ are not retroactively relabeled.
   followed by Direct Action scenarios for both ITS 17 and 18. ITS tournament and Extra rules have separate
   cards, and physical marker sizes now include the source-chart 25 mm Defensive
   Turret Token (distinct from its S2 Model option), 25 mm Civilians, and
-  Hardlock's Beacon.
+  Hardlock's Beacon. ITS 17 B-Pong now renders its verified 25 mm Tracking
+  Beacon to scale; ITS 18 retains its EN/ES diameter conflict. Evacuation and
+  Critical Intervention distinguish 25 mm Token footprints from Model
+  alternatives and unspecified placement clearances.
   Scenario-map rulers now keep labels clear of centerline markers and shaded
   regions in ITS 17/18. Double Bind, B-Pong and Crossing Lines have improved
   guide spacing, alongside the earlier Neutralization ruler separation.

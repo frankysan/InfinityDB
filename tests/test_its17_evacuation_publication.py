@@ -99,6 +99,14 @@ def test_real_its17_evacuation_build_is_standalone_and_source_local(
 
     current = load_curated_document(ITS18)
     original = next(item for item in current["records"] if item["id"] == record["id"])
+    modern_civilians = next(
+        rule for rule in original["facts"]["mission"]["rules"] if rule["id"] == "civilians"
+    )
+    for rule in (rules["civilians"], modern_civilians):
+        text = " ".join(rule["paragraphs"])
+        assert "25 mm" in text and "Player A/B Tokens" in text
+        assert "Model base" in text
+        assert "physical diameter" in text
     # All typed objectives, end conditions, geometries and operational
     # Skills match both reviewed originals; only the edited prose and
     # source-owned metadata differ between versions.

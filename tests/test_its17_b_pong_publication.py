@@ -75,7 +75,14 @@ def test_its17_b_pong_scoring_skills_and_map_geometry() -> None:
     assert original["mission"]["objectives"] == modern["mission"]["objectives"]
     assert original["mission"]["endConditions"] == modern["mission"]["endConditions"]
     assert original["mission"]["gameSizes"] == modern["mission"]["gameSizes"]
-    assert original["configurations"] == modern["configurations"]
+    # Same placements, but only ITS 17 has an undisputed physical footprint.
+    from copy import deepcopy
+
+    historical_configs = deepcopy(original["configurations"])
+    for config in historical_configs:
+        beacon = next(e for e in config["geometry"]["elements"] if e["id"] == "tracking-beacon")
+        assert beacon.pop("diameterMm") == 25
+    assert historical_configs == modern["configurations"]
     assert {
         o["id"]: o["maximumPoints"] for o in original["mission"]["objectives"]
     } == {
