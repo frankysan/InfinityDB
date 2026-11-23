@@ -46,7 +46,9 @@ are not retroactively relabeled.
   HVTs each player uses.
 - Corrected ITS 18 Crossing Lines' Shasvastii Domination rule and disclosed
   the bilingual discrepancy. ITS 17 Outbreak now uses its historical Infected
-  separation rule and explicitly excludes Secure Treasure.
+  separation rule and explicitly excludes Secure Treasure. ITS 17 Crossing
+  Lines now requires one HVT per player under the season's general deployment
+  rule, unlike ITS 18's explicit HVT exclusion.
 - Scenario-specific Skills share normal Skill cards, appear under their own
   `/skills` category, and are searchable with scenario-specific destinations.
   All 31 ITS 18 and 22 ITS 17 actions now have structured Requirements and

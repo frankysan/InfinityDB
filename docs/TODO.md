@@ -368,11 +368,6 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
   and all 16 ITS 17 EN mission chapters (V0.2, pp. 31–96), with comparison
   against curated objectives, setup, special rules and Skill definitions and
   targeted Spanish verification. Resolve these findings before release:
-  - [ ] **Historical HVT count.** Reconcile ITS 17 Crossing Lines'
-    provisional zero-HVT count with compulsory HVT deployment in the general
-    ITS 17 rules (EN pp. 26–27). The mission disables Secure HVT and Secure
-    Treasure (EN p. 54 / ES p. 45), not HVT Model deployment itself.
-    Preserve the source distinction from ITS 18.
   - [ ] **Historical Tactical Support.** Publish ITS 17 per-player option
     counts, selection rules and effects (EN pp. 27–29), distinct from
     Tactical Objectives: B-Pong (p. 36), Evacuation (p. 55), Last Launch

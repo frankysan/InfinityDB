@@ -10080,7 +10080,7 @@
           "playRequirements": {
             "classifiedObjectives": 0,
             "tacticalObjectives": 0,
-            "hvts": 0
+            "hvts": 1
           },
           "configurations": [
             {
@@ -10977,7 +10977,7 @@
                 "name": "Secure HVT and Secure Treasure not used",
                 "paragraphs": [
                   "There are no Classified Objectives in ITS 17 Crossing Lines. The mission explicitly does not apply Secure HVT or Secure Treasure (EN p. 54 / ES p. 45).",
-                  "Unlike ITS 18, ITS 17 does not explicitly say that the HVT Model must not be deployed or that the Classified Deck is not used. The zero-HVT play-context projection is retained provisionally and this source gap is recorded for verification."
+                  "Unlike ITS 18, ITS 17 does not explicitly exclude HVT Model deployment. Under the general ITS 17 HVT rules (EN pp. 26–27 / ES pp. 27–28), each player deploys one HVT at the beginning of their Deployment Phase. Secure HVT and Secure Treasure remain unavailable."
                 ]
               }
             ],
@@ -11056,7 +11056,7 @@
                 ],
                 "objectiveId": "dominate-both-dead-zones",
                 "status": "needs-verification",
-                "description": "ITS 17 EN p. 54 / ES p. 45 disable Secure HVT and Secure Treasure but do not explicitly prohibit HVT Model deployment. The no-HVT play-context count follows the existing edition's schema and needs source verification; ITS 18's explicit no-HVT/no-Classified-Deck clause cannot be attributed to ITS 17."
+                "description": "ITS 17 EN p. 54 / ES p. 45 disable Secure HVT and Secure Treasure but do not exclude HVT Model deployment. The general one-HVT requirement (EN pp. 26–27 / ES pp. 27–28) therefore applies unless officially clarified otherwise. ITS 18's explicit no-HVT clause is not attributed to ITS 17."
               }
             ]
           }
@@ -11111,6 +11111,26 @@
             "sourceId": "its-season-17-v0.2-es-pdf",
             "page": 14,
             "section": "Diámetro de los Tokens ITS"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 26,
+            "section": "High Value Target (HVT) Model"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-en-pdf",
+            "page": 27,
+            "section": "High Value Target (HVT) Model"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 27,
+            "section": "Miniatura HVT"
+          },
+          {
+            "sourceId": "its-season-17-v0.2-es-pdf",
+            "page": 28,
+            "section": "Miniatura HVT"
           }
         ],
         "review": {

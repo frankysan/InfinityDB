@@ -742,6 +742,26 @@
               "sourceId": "its-season-17-v0.2-es-pdf",
               "page": 14,
               "section": "Diámetro de los Tokens ITS"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 26,
+              "section": "High Value Target (HVT) Model"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-en-pdf",
+              "page": 27,
+              "section": "High Value Target (HVT) Model"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 27,
+              "section": "Miniatura HVT"
+            },
+            {
+              "sourceId": "its-season-17-v0.2-es-pdf",
+              "page": 28,
+              "section": "Miniatura HVT"
             }
           ],
           "review": {
@@ -2437,6 +2457,6 @@
   },
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "9933ce70cbc418154a9f96f18fc9ce68c453825d7b4008ef83945d2250cb2f46"
+    "sha256": "c85d650d1be4d94a0f6f8bcd5f8ac815c3897b7fe6c9d93f58915bbbd8d3458e"
   }
 }

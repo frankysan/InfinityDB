@@ -444,7 +444,9 @@ The EN table gives an inconsistent longer central-strip length for
 widths. EN p. 53 counts Shasvastii-Embryo or other non-Null States whereas
 ES p. 44 says Normal or Unconscious. EN/ES p. 54/45 exclude Secure HVT
 and Secure Treasure, but do **not** expressly exclude HVT Model deployment
-as ITS 18 does; the no-HVT setup count therefore remains provisional.
+as ITS 18 does. The general compulsory deployment rule (EN pp. 26–27 /
+ES pp. 27–28) therefore applies: one HVT per player. The missing explicit
+mission exception remains a source note, not grounds for a zero count.
 These four source issues are recorded with ITS 17 provenance.
 
 Corporate Appropriation V0.2 EN pp. **40–44** and ES pp. **32–37**

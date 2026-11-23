@@ -59,7 +59,7 @@ def test_its17_crossing_lines_is_independently_source_pinned() -> None:
     assert [(c["sourceId"], c["page"]) for c in binding["citations"]] == [
         *((EN, page) for page in (51, 52, 53, 54)),
         *((ES, page) for page in (42, 43, 44, 45)),
-        (EN, 13), (ES, 14),
+        (EN, 13), (ES, 14), (EN, 26), (EN, 27), (ES, 27), (ES, 28),
     ]
 
 
@@ -70,8 +70,9 @@ def test_its17_crossing_lines_scoring_geometry_and_specialist_skill() -> None:
     assert historical["scope"]["seasons"] == ["its-17"]
     assert historical["sharedDefinition"]["origin"]["seasonId"] == "its-17"
     assert facts["playRequirements"] == {
-        "classifiedObjectives": 0, "tacticalObjectives": 0, "hvts": 0,
+        "classifiedObjectives": 0, "tacticalObjectives": 0, "hvts": 1,
     }
+    assert latest["playRequirements"]["hvts"] == 0
     assert facts["mission"]["objectives"] == latest["mission"]["objectives"]
     assert facts["mission"]["endConditions"] == latest["mission"]["endConditions"]
     assert facts["mission"]["gameSizes"] == latest["mission"]["gameSizes"]
@@ -120,7 +121,7 @@ def test_its17_crossing_lines_keeps_own_bilingual_source_issues() -> None:
     assert "Shasvastii-Embryo" in rules["dominate-zo"]["paragraphs"][2]
     assert "Unconscious" in rules["dominate-zo"]["paragraphs"][2]
     assert "Secure Treasure" in rules["no-hvt-classified"]["paragraphs"][0]
-    assert "does not explicitly" in rules["no-hvt-classified"]["paragraphs"][1]
+    assert "each player deploys one HVT" in rules["no-hvt-classified"]["paragraphs"][1]
     assert "Secure Treasure" not in modern["no-hvt-classified"]["paragraphs"][0]
     issues = {
         item["id"]: item for item in historical["facts"]["mission"]["sourceIssues"]
@@ -140,7 +141,9 @@ def test_its17_crossing_lines_keeps_own_bilingual_source_issues() -> None:
     assert all(issue["armyPoints"] == SIZES for issue in issues.values())
     assert all(issue["status"] == "needs-verification" for issue in issues.values())
     assert all("ITS 17" in issue["description"] for issue in issues.values())
-    assert current["facts"]["mission"]["sourceIssues"] == []
+    assert {issue["id"] for issue in current["facts"]["mission"]["sourceIssues"]} == {
+        "its18-crossing-lines-shasvastii-states-en-es",
+    }
 
 
 def test_its17_crossing_lines_build_stays_season_local(tmp_path: Path) -> None:
