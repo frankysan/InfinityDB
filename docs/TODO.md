@@ -375,8 +375,10 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     complete visual or bilingual acceptance pass. Do not invent answers to
     documented official-source conflicts. Bilingual source diagram review is
     complete (36 season-mission definitions, 108 layouts / 216 setups).
-    Browser acceptance and runtime verification remain. See
-    [release diagram acceptance](its-season-database.md#release-diagram-acceptance).
+    Automated browser checks passed for all 216 setups at desktop and
+    mobile widths (432 combinations), as did current runtime verification.
+    Manual visual spot checks and final-candidate validation remain. See
+    [release browser acceptance](its-season-database.md#release-browser-acceptance).
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed

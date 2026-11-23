@@ -141,7 +141,7 @@ def test_known_source_disclosures_normal_browser(
 
 @pytest.fixture(scope="module")
 def scenario_app() -> Callable[..., Any]:
-    """Serve the source-bound three-file runtime, not a standalone Rules-v10 export."""
+    """Serve the complete source-bound runtime database set."""
     return create_app_from_database_set(ROOT / "data/generated")
 
 
@@ -2625,6 +2625,98 @@ def test_its_scenario_catalog_groups_standard_and_direct_action(
         page.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize(
+    ("season", "revision", "count"), [("its-17", "0.2", 16), ("its-18", "2026.09.11", 20)]
+)
+def test_all_its_scenario_setups_render_current_season(
+    release_scenario_app: Callable[..., Any], chrome: Any, width: int,
+    season: str, revision: str, count: int,
+) -> None:
+    """Exercise all six published setups, including season-local source notes."""
+    status, _, raw = wsgi_response(
+        release_scenario_app, f"{ORIGIN}/api/scenarios?collection={season}"
+    )
+    assert status == 200
+    items = json.loads(raw)["items"]
+    assert len(items) == count
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, release_scenario_app, ORIGIN)
+    page.add_init_script(
+        "sessionStorage.setItem('infinity-db-distance-unit', 'in');"
+        "sessionStorage.setItem('infinity-db-developer-mode', 'false');"
+    )
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    sizes = [(150, 3, 24, 32), (200, 4, 32, 48), (250, 5, 32, 48),
+             (300, 6, 48, 48), (350, 7, 48, 48), (400, 8, 48, 48)]
+    try:
+        for item in items:
+            slug = item["slug"]
+            page.goto(
+                f"{ORIGIN}/scenarios/{slug}?collection={season}&army_points=150",
+                wait_until="domcontentloaded",
+            )
+            select = page.locator("#scenario-army-points")
+            select.wait_for(state="visible", timeout=60000)
+            assert [option.get_attribute("value") for option in select.locator("option").all()] == [
+                "", "150", "200", "250", "300", "350", "400",
+            ], (season, slug)
+            for points, swc, table_width, table_height in sizes:
+                context = (season, slug, points, width)
+                if points != 150:
+                    select.select_option(str(points))
+                page.wait_for_function(
+                    """(points) => document.querySelector('#scenario-content')?.hidden === false
+                      && document.querySelector('.scenario-facts dd')?.textContent
+                          === String(points)
+                      && new URL(document.querySelector('img.scenario-map').src)
+                          .searchParams.get('army_points') === String(points)""",
+                    arg=points, timeout=30000,
+                )
+                status, _, raw = wsgi_response(
+                    release_scenario_app,
+                    f"{ORIGIN}/api/scenarios/{slug}?collection={season}&army_points={points}",
+                )
+                assert status == 200, context
+                detail = json.loads(raw)
+                assert detail["publication"]["revision"] == revision, context
+                assert f"v{revision}" in page.locator("#scenario-description").inner_text(), context
+                facts = page.locator(".scenario-setup-card .scenario-fact")
+                assert facts.nth(0).locator("dd").inner_text() == str(points), context
+                assert facts.nth(1).locator("dd").inner_text().splitlines()[0] == str(swc), context
+                assert facts.nth(2).locator("dd").inner_text() == (
+                    f"{table_width}″ × {table_height}″"
+                ), context
+                image = page.locator("img.scenario-map")
+                assert f"collection={season}" in image.get_attribute("src"), context
+                svg = _rendered_scenario_image(page)
+                assert svg.attrib["viewBox"] == f"0 0 {table_width} {table_height}", context
+                assert page.locator(".scenario-objective:visible").count() == len(
+                    detail["objectives"]
+                ), context
+                assert page.locator(".scenario-citations a").count() >= 1, context
+                notes = page.locator(".scenario-source-issue")
+                expected_ids = {
+                    f"scenario-source-issue-{issue['id']}" for issue in detail["source_issues"]
+                }
+                assert set(notes.evaluate_all("(nodes) => nodes.map(node => node.id)")) == (
+                    expected_ids
+                ), context
+                assert notes.locator(".detail-copy:visible").count() == len(expected_ids), context
+                assert all(
+                    text.strip() for text in notes.locator(".detail-copy").all_text_contents()
+                ), context
+                assert not page.locator("#scenario-error").is_visible(), context
+                assert not page.locator(".scenario-provenance").is_visible(), context
+                assert page.evaluate(
+                    "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                ), context
+            assert not errors, (season, slug, errors)
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_core_scenario_catalog_keyboard_soft_navigation_and_back(
     scenario_app: Callable[..., Any], chrome: Any, width: int,
@@ -3428,7 +3520,7 @@ def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
     route_browser_page(page, scenario_app, ORIGIN)
     page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}');")
     try:
-        page.goto(f"{ORIGIN}/scenarios/battleground?collection=its-18&revision=2026.09.01&army_points=300",
+        page.goto(f"{ORIGIN}/scenarios/battleground?collection=its-18&army_points=300",
                   wait_until="domcontentloaded")
         # A normal image element enables the browser's native Save Image As action.
         image = page.locator("img.scenario-map")

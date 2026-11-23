@@ -976,8 +976,22 @@ layouts and 216 game-size setups (both seasons unless noted):
 All 36 reviewed season-mission definitions have correct 150/200/250/
 300/350/400-point configuration bindings and 3/4/5/6/7/8 SWC (ITS 18
 EN p. 17; ITS 17 mission force tables). No geometry changes required in
-these batches. Source diagram acceptance is complete; browser acceptance
-and runtime validation are separate steps.
+these batches. Source diagram acceptance is complete.
+
+### Release browser acceptance
+
+On 2026-11-23, the four-file runtime passed the focused Chromium review
+of all 36 season-mission definitions at all six Army Point values, at
+1440 px and 390 px widths (432 setup/viewport combinations). The regression
+checks season identity, SWC, table dimensions, loaded SVG, visible objectives
+and season-local source notes, citations, hidden developer provenance and
+page-level overflow. Both catalog groups and the map theme/unit-switching
+checks passed. The latter now selects the current season rather than its
+retained, unpublished original revision. All 16 focused test cases passed.
+Deployment artifact verification also passed for the unchanged runtime set
+(808 published and 807 browser-referenced SVGs, reviewed citations and data).
+Manual visual spot checks of rendered pages and final-candidate release
+validation remain separate from this automated browser coverage.
 
 All twenty missions are published for the current 2026.09.11 revision:
 
