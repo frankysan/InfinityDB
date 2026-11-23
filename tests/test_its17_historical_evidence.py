@@ -187,7 +187,7 @@ def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
         assert db.execute("SELECT COUNT(*) FROM scenario_sets").fetchone()[0] == 1
         assert db.execute("SELECT COUNT(*) FROM sources").fetchone()[0] == 2
         rows = db.execute("SELECT payload_json FROM records").fetchall()
-        assert len(rows) == 20
+        assert len(rows) == len(EXPECTED_ITS17_SCENARIO_IDS) + 5  # Season records.
         assert all("historicalEvidence" not in row[0] for row in rows)
 
 

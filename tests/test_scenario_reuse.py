@@ -605,11 +605,11 @@ def test_library_registration_cannot_activate_an_unregistered_season(
     from infinity_db import database_set
 
     monkeypatch.setitem(
-        database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-17",
+        database_set.SEASON_SHARED_LIBRARY_SOURCES, "its-16",
         "data/curated/its/shared/synthetic-library.json",
     )
     with pytest.raises(ValueError, match="unknown season"):
-        database_set.season_shared_library_source("its-18")
+        database_set.season_shared_library_source("its-16")
 
 
 def test_shared_component_versions_and_reference_cycles_are_checked() -> None:

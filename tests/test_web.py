@@ -5376,10 +5376,14 @@ def test_states_page_and_rules_backed_api_are_served(app: Callable, tmp_path: Pa
     assert status == 200
     items = json.loads(body)["items"]
     states = {item["id"]: item for item in items}
-    assert len(states) == len(items) == 25
+    assert len(states) == len(items) == 26
     assert len([item for item in items if "season" not in item]) == 24
     its_states = {item["id"]: item for item in items if "season" in item}
-    assert set(its_states) == {"casevac"}
+    assert set(its_states) == {"casevac", "its-17-casevac"}
+    assert its_states["its-17-casevac"]["season"] == {
+        "collection": "its-17", "revision": "0.2",
+    }
+    assert its_states["its-17-casevac"]["name"] == "Casevac State"
     assert its_states["casevac"]["season"] == {
         "collection": "its-18", "revision": "2026.09.11",
     }

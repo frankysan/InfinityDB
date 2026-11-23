@@ -72,7 +72,15 @@ def test_uplink_review_matches_six_sizes_and_preserves_historical_ambiguity() ->
     old_rules = {rule["id"]: rule for rule in old_facts["mission"]["rules"]}
     current_rules = {rule["id"]: rule for rule in current_facts["mission"]["rules"]}
     for rule_id in current_rules.keys() - {"deployment-and-objectives"}:
-        assert old_rules[rule_id] == current_rules[rule_id]
+        assert "skillCitations" not in old_rules[rule_id]
+        assert old_rules[rule_id] == {
+            key: value for key, value in current_rules[rule_id].items()
+            if key != "skillCitations"
+        }
+        if "skillCitations" in current_rules[rule_id]:
+            assert {c["sourceId"] for c in current_rules[rule_id]["skillCitations"]} == {
+                "its-season-18-en-pdf", "its-season-18-es-pdf",
+            }
     source_text = " ".join(
         paragraph for rule in old_rules.values() for paragraph in rule["paragraphs"]
     )

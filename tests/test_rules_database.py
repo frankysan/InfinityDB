@@ -733,7 +733,6 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
             ("dimension", "deployment-a"),
             ("dimension", "deployment-b"),
             ("element-edge-distance", "supply-box-left"),
-            ("element-edge-distance", "supply-box-right"),
         }
         firefight_row = connection.execute(
             "SELECT kind, facts_json FROM records WHERE id = 'scenario:firefight'"

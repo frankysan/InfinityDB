@@ -168,9 +168,10 @@ def test_maintained_supplies_definition_owns_all_core_map_configurations() -> No
             "deployment-a",
             "deployment-b",
         }
+        # The symmetric right marker retains its physical offset, but only
+        # the left helper is drawn to avoid redundant map measurements.
         assert {(annotation.target, annotation.edge) for annotation in point_offsets} == {
             ("supply-box-left", "left"),
-            ("supply-box-right", "right"),
         }
 
 

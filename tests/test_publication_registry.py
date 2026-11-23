@@ -397,10 +397,10 @@ def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
                 assert status == 200
                 combined.update(len(body).to_bytes(8, "big"))
                 combined.update(body)
-    # Current reviewed ITS 18 after source hotfix and scenario Skill cards.
+    # Current reviewed ITS 18 after the v1.2 mission and diagram audit.
     # Length-prefixed six canonical JSON payloads and 24 SVG byte streams;
     # compare this digest after any intentional public contract change.
     assert combined.hexdigest() == (
-        "240ad88a87ceb23afdee797331e5b2ce"
-        "4515a2dd33fe8b0f233dd9c7b589781e"
+        "18e69afec2f326e5cbc4f774e5b87b226"
+        "8553b96ee8438e8a9c5d318750e1028"
     )

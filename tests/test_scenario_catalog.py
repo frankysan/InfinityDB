@@ -311,7 +311,6 @@ def test_scenario_detail_filters_point_specific_source_issues(
         if annotation["kind"] == "element-edge-distance"
     } == {
         ("element-edge-distance", "supply-box-left", "left"),
-        ("element-edge-distance", "supply-box-right", "right"),
     }
 
 

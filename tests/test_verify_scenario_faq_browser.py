@@ -2820,9 +2820,15 @@ def test_all_24_core_scenario_setups_render_source_backed_browser_contract(
             assert setup.nth(2).locator("dd").inner_text() == (
                 f"{table_width}″ × {table_height}″"
             )
-            assert (setup.count() == 4) == has_minimum
+            assert setup.count() == (7 if has_minimum else 6)
             if has_minimum:
                 assert setup.nth(3).locator("dd").inner_text() == str(minimum)
+            for index, label in enumerate(
+                ("Classified Objectives", "Tactical Objectives", "HVTs"),
+                start=4 if has_minimum else 3,
+            ):
+                assert setup.nth(index).locator("dt").inner_text() == label
+                assert setup.nth(index).locator("dd").inner_text() == "Not used"
 
             svg = _rendered_scenario_image(page)
             assert svg.attrib["viewBox"] == f"0 0 {table_width} {table_height}"
@@ -3508,7 +3514,7 @@ def test_core_scenario_marker_sizes_are_visible_and_physically_fixed(
                 citation = marker.locator(".detail-source a")
                 assert citation.count() == 1
                 assert "ITS Season 18" in citation.inner_text()
-                assert "p. 17" in citation.inner_text()
+                assert "p. 18" in citation.inner_text()
                 assert page.evaluate(
                     "() => document.documentElement.scrollWidth <= innerWidth + 1"
                 ), (width, slug, unit)

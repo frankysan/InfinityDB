@@ -103,7 +103,14 @@ def test_superiority_reuses_reviewed_skills_and_notes_source_differences() -> No
         "quadrants-zo", "shasvastii", "baggage", "hack-consoles",
         "specialist-troops", "operational-learning", "hvt-and-classified-deck",
     ):
-        assert rules[name] == current_rules[name]
+        assert "skillCitations" not in rules[name]
+        assert rules[name] == {
+            key: value for key, value in current_rules[name].items() if key != "skillCitations"
+        }
+        if "skillCitations" in current_rules[name]:
+            assert {c["sourceId"] for c in current_rules[name]["skillCitations"]} == {
+                "its-season-18-en-pdf", "its-season-18-es-pdf",
+            }
     assert "40 mm" in " ".join(rules["consoles"]["paragraphs"])
     assert "EN p. 13 / ES p. 14" in rules["consoles"]["paragraphs"][0]
     assert "40 mm" in " ".join(current_rules["consoles"]["paragraphs"])

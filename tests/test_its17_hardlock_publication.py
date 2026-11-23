@@ -75,7 +75,18 @@ def test_its17_hardlock_preserves_verified_scoring_geometry_and_source_differenc
     historical_rules = {rule["id"]: rule for rule in historical["facts"]["mission"]["rules"]}
     current_rules = {rule["id"]: rule for rule in current["facts"]["mission"]["rules"]}
     for rule_id in ("pick-up-beacon", "activate-console", "specialist-troops"):
-        assert historical_rules[rule_id] == current_rules[rule_id]
+        historical_rule = historical_rules[rule_id]
+        current_rule = current_rules[rule_id]
+        # ITS 18 has action-page citations; historical Skills use their own
+        # mission citations, never ITS 18 source IDs.
+        assert "skillCitations" not in historical_rule
+        assert historical_rule == {
+            key: value for key, value in current_rule.items() if key != "skillCitations"
+        }
+        if "skillCitations" in current_rule:
+            assert {c["sourceId"] for c in current_rule["skillCitations"]} == {
+                "its-season-18-en-pdf", "its-season-18-es-pdf",
+            }
 
     positions = {
         configuration["id"]: {
