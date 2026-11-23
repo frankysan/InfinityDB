@@ -348,9 +348,9 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 
 ### ITS, scenarios, and game tools
 
-**v1.2.0 priority:** Complete source-cited ITS Season 18 publication,
-including browser-level visual review and documented unresolved source
-discrepancies. Season 17 and Season 16 Part II remain later scope.
+**v1.2.0 priority:** Complete source-cited ITS Season 18 and published
+Season 17 V0.2 scenario acceptance, including browser-level visual review
+and documented unresolved source discrepancies. Season 16 Part II remains later scope.
 
 **Published 2026.09.11 hotfix coverage (2026-11-17):** All twenty reviewed
 missions have source-cited scoring, rules and game-size maps. The player
@@ -362,6 +362,58 @@ Objective sets. Map zoning and placement rulers have been reviewed in both
 source languages, with unresolved source issues identified explicitly.
 In-browser visual acceptance at relevant breakpoints is still open. See the
 [ITS season database](its-season-database.md#published-20260911-hotfix-curation).
+
+- [ ] **Data processing + Web backend + Web frontend: Scenario release audit (2026-11-23).**
+  First pass reviewed all 20 ITS 18 EN mission chapters (2026.09.11, pp. 49–142)
+  and all 16 ITS 17 EN mission chapters (V0.2, pp. 31–96), with comparison
+  against curated objectives, setup, special rules and Skill definitions and
+  targeted Spanish verification. Resolve these findings before release:
+  - [ ] **Gameplay corrections.** ITS 18 Crossing Lines: EN p. 64 counts
+    Shasvastii-Embryo or non-Null States; ES p. 64 names Normal or
+    Unconscious. Correct the current rule text and record the bilingual issue
+    with season-local evidence. ITS 17 Outbreak: EN p. 69 / ES p. 47 require
+    8-inch / 20-cm separation between the two player-placed Infected, not
+    from all other Infected as in ITS 18 EN p. 84. Also restore the explicit
+    Secure Treasure exclusion (ITS 17 EN p. 71 / ES p. 49).
+  - [ ] **Historical HVT count.** Reconcile ITS 17 Crossing Lines'
+    provisional zero-HVT count with compulsory HVT deployment in the general
+    ITS 17 rules (EN pp. 26–27). The mission disables Secure HVT and Secure
+    Treasure (EN p. 54 / ES p. 45), not HVT Model deployment itself.
+    Preserve the source distinction from ITS 18.
+  - [ ] **Scenario Skill coverage.** Separate Double Bind's Activate Antenna
+    (Destroyed) from ordinary Activate Antenna (ITS 18 EN p. 75);
+    publish The Dig's Neutralize Hyperthermal Tech (p. 80), Corporate
+    Appropriation's Use Panoplies (p. 57), Neutralization's Extract
+    Hyperthermal Tech (p. 106), and Pick Up Supply Boxes (ITS 18 EN p. 112
+    and ITS 17 EN p. 74) as independent Attack/Scenario Short Skills.
+    Preserve distinct requirements, effects, citations and season variants;
+    check Skill catalog, detail and Search coverage.
+  - [ ] **Historical Tactical Support.** Publish ITS 17 per-player option
+    counts, selection rules and effects (EN pp. 27–29), distinct from
+    Tactical Objectives: B-Pong (p. 36), Evacuation (p. 55), Last Launch
+    (p. 63) each 2; Critical Intervention (p. 45), Hardlock (p. 59),
+    Provisioning (p. 72) each 1; all other published missions 0.
+  - [ ] **Reinforcements context.** Consistently present source-declared
+    suitability in mission setup rather than relying on summaries. Review
+    mission headers for both seasons and preserve language discrepancies;
+    do not treat an absent suitability label as an explicit prohibition.
+  - [ ] **Season-specific marker footprints.** ITS 17 B-Pong's 25 mm Beacon
+    is confirmed by its mission (EN p. 37) and chart (EN p. 13 / ES p. 14);
+    the shared tracking-beacon rendering/catalog code currently applies
+    ITS 18's size conflict to both seasons. Correct the historical geometry
+    and metadata, retaining ITS 18's documented conflict.
+  - [ ] **Stale physical-size prose.** Reconcile Evacuation's ITS 18 civilian
+    text with its 25 mm Player A/B Token alternative (EN pp. 18, 89) and
+    Critical Intervention's turret text in both seasons with the 25 mm
+    Defensive Turret chart entries (ITS 17 EN p. 13; ITS 18 EN p. 18).
+    Distinguish model alternatives and unspecified placement clearances
+    from known token diameters.
+  - [ ] **Remaining release acceptance.** Independently verify source diagram
+    details and all published game-size setups; review rendered mission
+    pages at relevant breakpoints, cross-season source-issue visibility,
+    and rebuilt runtime database publication. The text audit is not a
+    complete visual or bilingual acceptance pass. Do not invent answers to
+    documented official-source conflicts.
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
