@@ -240,6 +240,12 @@ function mapCard(item) {
     note.textContent = "Circular Template areas: 12 cm diameter each (footprints drawn to scale).";
     figure.append(note);
   }
+  if (["critical-intervention", "last-launch"].includes(item.slug)) {
+    const note = document.createElement("p");
+    note.className = "scenario-map-placement-note";
+    note.textContent = "The central room has a Wide Gate on each side. Gate widths are schematic.";
+    figure.append(note);
+  }
   if (item.slug === "domination" && item.publication?.collection_id === "n5-core") {
     const note = document.createElement("p");
     note.className = "scenario-map-placement-note";

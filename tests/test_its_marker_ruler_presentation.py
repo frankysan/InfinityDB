@@ -276,6 +276,8 @@ def test_central_room_has_four_schematic_wide_gates_and_width_below(
         svg = ElementTree.fromstring(render_scenario_map_svg(
             parse_scenario_geometry(geometry), distance_unit=distance_unit,
         ))
+        room_node = next(e for e in svg.iter() if e.get("id") == room_id)
+        assert room_node.get("style") == "stroke:none;fill-opacity:1"
         walls = next(e for e in svg.iter() if e.get("id") == room_id + "-walls")
         assert walls.get("fill") == "none"
         assert walls.get("d", "").count("M") == 5  # Four gaps in the closed perimeter.
@@ -292,6 +294,12 @@ def test_central_room_has_four_schematic_wide_gates_and_width_below(
             gate_label = gate.find(f"{SVG_NS}text")
             assert gate_label is not None
             assert gate_label.text == "Wide Gate"
+            assert gate_label.get("font-size") == "1.15"
+            if side == "bottom":
+                offset = .65 if room_id == "server-room" else 0
+                assert float(gate_label.get("x", "nan")) == pytest.approx(
+                    (room["x1"] + room["x2"]) / 2 + offset
+                )
             # The visible gap is illustrative, never a measured game dimension.
             assert gate.get("data-diameter-mm") is None
 

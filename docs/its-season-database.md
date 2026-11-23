@@ -990,8 +990,17 @@ checks passed. The latter now selects the current season rather than its
 retained, unpublished original revision. All 16 focused test cases passed.
 Deployment artifact verification also passed for the unchanged runtime set
 (808 published and 807 browser-referenced SVGs, reviewed citations and data).
-Manual visual spot checks of rendered pages and final-candidate release
-validation remain separate from this automated browser coverage.
+Visual spot checks on 2026-11-23 used actual Chromium screenshots of
+Double Bind, Critical Intervention, The Dig, Battleground, Hardlock,
+B-Pong and Last Launch at desktop (1440 px) and mobile (390/320 px)
+widths. The reviewed cards, objectives, scoring regions, source notes
+and Skill Labels remain readable. The central-room maps now distinguish
+the room from overlapping hatching, use larger gate labels and compact
+room titles, and keep the Server's lower gate label clear of the Antenna.
+The map card explains the four open gates and schematic widths.
+Geometry and physical token sizes are unchanged. The repaired room maps
+were visually checked in light and dark themes. Final-candidate release
+validation remains separate from these focused acceptance checks.
 
 All twenty missions are published for the current 2026.09.11 revision:
 

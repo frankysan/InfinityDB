@@ -84,9 +84,10 @@ svg[data-theme="dark"] .no-deploy{fill:#744647;stroke:#d5a7a7}
 _WIDE_GATE_CSS = """.wide-gate-wall{fill:none;stroke:#aa7777;stroke-width:.12}
 svg[data-theme="dark"] .wide-gate-wall{stroke:#d5a7a7}
 .wide-gate-label{fill:var(--color-scenario-map-text,#203b35);
-font-family:sans-serif;font-size:.72px;font-weight:600;
+font-family:sans-serif;font-size:1.15px;font-weight:600;
 paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);
 stroke-width:.065;stroke-linejoin:round}
+.label#room-label,.label#launching-tower-label{font-size:1.4px}
 """
 _EXCLUSION_CSS = """.exclusion{fill:url(#scenario-exclusion-hatch);
 stroke:var(--color-scenario-map-deployment-b-edge,#dc2626);stroke-width:.09}
@@ -187,11 +188,14 @@ def _render_wide_gate_room(
         f"H{_number(right)} M{_number(left)} {_number(y2)} H{_number(x1)} "
         f"V{_number(bottom)} M{_number(x1)} {_number(top)} V{_number(y1)}"
     )
+    # The Server's Antenna sits tangent to its lower-left corner. Leave room
+    # for that token while keeping the bottom label next to the centered gate.
+    bottom_label_x = mid_x + .65 if room_id == "server-room" else mid_x
     labels = (
         ("top", mid_x, y1 - .45, ""),
-        ("right", x2 + .55, mid_y,
-         f' transform="rotate(-90 {_number(x2 + .55)} {_number(mid_y)})"'),
-        ("bottom", mid_x, y2 + .72, ""),
+        ("right", x2 + 1.2, mid_y,
+         f' transform="rotate(-90 {_number(x2 + 1.2)} {_number(mid_y)})"'),
+        ("bottom", bottom_label_x, y2 + 1.15, ""),
         ("left", x1 - .55, mid_y,
          f' transform="rotate(-90 {_number(x1 - .55)} {_number(mid_y)})"'),
     )
@@ -200,14 +204,14 @@ def _render_wide_gate_room(
         f'data-side="{side}" data-open="true" data-width-status="unspecified">'
         f'<title>Wide Gate (open; width unspecified)</title>'
         f'<text class="wide-gate-label" x="{_number(x)}" y="{_number(y)}" '
-        f'font-family="sans-serif" font-size=".72" font-weight="600" '
+        f'font-family="sans-serif" font-size="1.15" font-weight="600" '
         f'fill="#203b35" text-anchor="middle"{rotation}>Wide Gate</text></g>'
         for side, x, y, rotation in labels
     )
     return (
         f'<rect id="{room_id}" class="{style}" x="{_number(x1)}" '
         f'y="{_number(y1)}" width="{_number(x2 - x1)}" '
-        f'height="{_number(y2 - y1)}" style="stroke:none"/>\n'
+        f'height="{_number(y2 - y1)}" style="stroke:none;fill-opacity:1"/>\n'
         f'<path id="{room_id}-walls" class="wide-gate-wall" fill="none" '
         f'stroke="#aa7777" stroke-width=".12" d="{segments}"/>\n{gates}'
     )

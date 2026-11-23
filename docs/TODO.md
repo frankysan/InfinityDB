@@ -360,8 +360,8 @@ the curated source-family file, not a separately selectable runtime database.
 The browser exposes typed objectives and Double Bind's alternative Main
 Objective sets. Map zoning and placement rulers have been reviewed in both
 source languages, with unresolved source issues identified explicitly.
-In-browser visual acceptance at relevant breakpoints is still open. See the
-[ITS season database](its-season-database.md#published-20260911-hotfix-curation).
+Automated browser acceptance and representative visual spot checks are
+complete. See [release browser acceptance](its-season-database.md#release-browser-acceptance).
 
 - [ ] **Data processing + Web backend + Web frontend: Scenario release audit (2026-11-23).**
   First pass reviewed all 20 ITS 18 EN mission chapters (2026.09.11, pp. 49–142)
@@ -377,8 +377,9 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     complete (36 season-mission definitions, 108 layouts / 216 setups).
     Automated browser checks passed for all 216 setups at desktop and
     mobile widths (432 combinations), as did current runtime verification.
-    Manual visual spot checks and final-candidate validation remain. See
-    [release browser acceptance](its-season-database.md#release-browser-acceptance).
+    Representative visual spot checks are complete, including corrected
+    central-room map presentation. Final-candidate release validation
+    remains. See [release browser acceptance](its-season-database.md#release-browser-acceptance).
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed

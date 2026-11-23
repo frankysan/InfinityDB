@@ -2692,6 +2692,12 @@ def test_all_its_scenario_setups_render_current_season(
                 assert f"collection={season}" in image.get_attribute("src"), context
                 svg = _rendered_scenario_image(page)
                 assert svg.attrib["viewBox"] == f"0 0 {table_width} {table_height}", context
+                gate_note = page.locator(".scenario-map-placement-note").filter(
+                    has_text="Gate widths are schematic."
+                )
+                assert gate_note.is_visible() == (slug in {
+                    "critical-intervention", "last-launch",
+                }), context
                 assert page.locator(".scenario-objective:visible").count() == len(
                     detail["objectives"]
                 ), context
