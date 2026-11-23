@@ -4,11 +4,11 @@
 
 A released InfinityDB checkout is self-contained for runtime deployment. Its
 tracked Git revision supplies the application, the complete `army.db`,
-`rules_n5.db` and `its_18.db` runtime set, processed SVGs and the validated
+`rules_n5.db`, `its_17.db` and `its_18.db` runtime set, processed SVGs and the validated
 `data/manifests/symbol-publication.json` manifest. Variant usage, Weapon-profile
 provenance, deployed objects and season publications are embedded in the
 selected databases; no historical JSON publication sidecars are needed at
-runtime. The production image copies the three tracked databases directly,
+runtime. The production image copies the four tracked databases directly,
 without an intermediate schema-specific bundle. See
 [deployment](deployment.md#deploy-or-update).
 Raw Army/wiki/PDF/source-symbol archives and symbol-processing workspaces are

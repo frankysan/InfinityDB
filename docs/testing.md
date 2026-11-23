@@ -95,7 +95,7 @@ matched build/source provenance. A missing or invalid ITS database blocks the
 gate before network/browser work. Changes to the local selected set or static
 fingerprint during the check also block acceptance.
 
-Use one `--db-dir` containing the three runtime databases; its default is the
+Use one `--db-dir` containing the four runtime databases; its default is the
 checkout's `data/generated/`. The former individual `--army-db`/`--rules-db`
 selectors and two-path Python API are retired for this gate. Other research
 tools and explicit low-level fixture APIs retain their independently documented
@@ -632,13 +632,18 @@ The P1.3 historical semantic baseline remains immutable at
 `tests/fixtures/runtime-semantic-baseline-v1.json`; the initial v1.2 migration
 snapshot remains at `tests/fixtures/runtime-semantic-baseline-v1.2.json`.
 Their regression test permits exactly six reviewed route migrations. The
-maintained latest-only ITS 17/18 runtime snapshot is
-`tests/fixtures/runtime-semantic-baseline-v1.2-current.json`, with 41 pinned
-routes. `tools.verify_checkout_server` uses this current snapshot by default;
+maintained v1.2.0 release snapshot is
+`tests/fixtures/runtime-semantic-baseline-v1.2-release.json`, with the same
+41 pinned routes as the earlier latest-only ITS snapshot
+`tests/fixtures/runtime-semantic-baseline-v1.2-current.json`. Only the Skill
+catalog, both scenario catalog probes and the current ITS 18 Battleground
+detail changed after the season/mission and Skill publication work; all other
+37 probes, including Battleground SVG bytes, retain their earlier identity.
+The historical fixtures are unchanged. `tools.verify_checkout_server` uses this current snapshot by default;
 explicit `--baseline` still permits historical comparisons when appropriate.
 Use
-`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2-current.json`
-for the current selected three-file runtime; `--identical-artifacts` additionally
+`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2-release.json`
+for the current selected four-file runtime; `--identical-artifacts` additionally
 requires byte-identical artifact metadata. A future baseline may be freshly
 captured with `--capture --db-dir` to a **new** path, never overwriting the
 reviewed fixtures. This protects source/citation semantics and current
@@ -665,7 +670,7 @@ serving defaults or establish visual-browser, Docker or release acceptance.
 `infinity-db database-health --db-dir PATH --json` checks one explicit
 supported runtime directory with full SQLite integrity and either
 embedded source-paired facts or older matched JSON publications. The
-[data lifecycle](../data/README.md) owns the current three-file contract and the limits of this check. The command operates offline,
+[data lifecycle](../data/README.md) owns the current four-file contract and the limits of this check. The command operates offline,
 does not require a raw archive, and reports unhealthy/missing data without
 creating files or selecting another runtime directory.
 

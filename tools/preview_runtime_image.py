@@ -15,7 +15,7 @@ from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_s
 from tools.runtime_semantic_baseline import capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
-CURRENT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json"
+CURRENT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json"
 
 _IMAGE_VERIFY = """
 from pathlib import Path

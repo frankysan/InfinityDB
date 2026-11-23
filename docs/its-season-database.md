@@ -21,7 +21,7 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   (`f002d279f711c5ac27e87cc3e91686beb85ec4e42aa7a740e2cebab1c4b2bbab`)
   and its reviewed Battleground/policy facts are preserved inside this file.
 - **Current publication:** `its-season-18-2026.09.11`, season `its-18`,
-  effective 2026-09-24 and published in `its_18.db`. **No historical ITS
+  effective 2026-09-24 and published in `its_18.db`. **No superseded ITS 18 revision
   database or player-facing revision selection is maintained.**
 - **Required core revision:** N5 `5.3`, recorded as an explicit compatibility
   declaration. Complete-set validation resolves ITS dependencies against the
@@ -1379,8 +1379,8 @@ From the repository root, with the project virtual environment:
 The standalone developer tool still defaults to the ignored
 `local/work/its/its_18.db` and cannot overwrite the tracked runtime artifact.
 Use `infinity-db build --compact` to regenerate the complete
-`army.db` / `rules_n5.db` / `its_18.db` set. The builder validates
-all three outputs and their cross-publication references, then replaces the
+`army.db` / `rules_n5.db` / `its_17.db` / `its_18.db` set. The builder validates
+all four outputs and their cross-publication references, then replaces the
 selected files. A changed or invalid source before replacement preserves
 the previous outputs. Identical builds produce byte-identical SQLite data.
 

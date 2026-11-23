@@ -3070,7 +3070,7 @@ to expose fourteen normalized conditions separately.
 `RulesDatabase.validate()` accepts the exact schema / compatibility pairs
 **(8, 10)**, **(9, 11)**, **(10, 12)**, **(11, 13)**,
 **(12, 14)**, **(13, 15)**, **(14, 16)**, **(15, 17)**,
-**(16, 18)** and **(17, 19)**. The current v1.1.0 runtime uses
+**(16, 18)** and **(17, 19)**. The current runtime uses
 v17/compatibility-19; the earlier v1.0.1 release used
 v10/compatibility-12. From v9 onward the validator checks fourteen
 Restrictions constraints, negative polarity, qualifiers and provenance;
@@ -4177,20 +4177,18 @@ currently exposes only modeled **current** publications; the existing
 yet a historical compositional detail/map API.
 
 **Current publication boundary:** The selected Scenario collections are
-`n5-core@5.3` (four Core missions), `its-18@2026.09.01` (the historical
-Battleground pilot), and `its-18@2026.09.11` (twenty separately reviewed
-September-hotfix missions). Each ITS publication supports six Army Points
-sizes (150/200/250/300/350/400) with source-cited maps and scoring. The
-original Battleground retains its own three-Sector mission semantics and
-English source citations from pp. 121–123; hotfix missions do not overwrite it.
-An exact collection/revision pair selects its own membership. The default
-unqualified catalog remains the four N5 Core missions. Unknown pairs yield
-empty results or HTTP 404, rather than silently falling back to Core.
+`n5-core@5.3` (four Core missions), `its-17@0.2` (sixteen missions), and
+`its-18@2026.09.11` (twenty September-hotfix missions). Each ITS publication
+supports six Army Points sizes (150/200/250/300/350/400) with source-cited
+maps and scoring. Superseded September 1 Battleground facts remain in the
+curated ITS 18 source family, not in the public runtime. Players select a
+season; an explicit current revision is accepted for internal references.
+The default unqualified catalog remains the four N5 Core missions. Unknown
+or superseded pairs yield empty results or HTTP 404 rather than falling back.
 
-All twenty Season 18 hotfix missions are represented; this does not imply
-fully reconciled bilingual source inconsistencies, a complete multi-season
-ITS library, historical-season UI, Classified Deck, or general tournament
-tooling. Browser visual acceptance remains open.
+All 36 ITS season-mission entries are represented, with known bilingual
+source discrepancies disclosed. See the [season database acceptance](its-season-database.md#release-browser-acceptance).
+Classified Deck and general tournament tooling remain outside this scope.
 Browser selection state uses the common versioned share-state token; legacy
 explicit `army_points` input remains readable. The
 [Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)

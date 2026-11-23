@@ -22,7 +22,7 @@ from infinity_db.snapshot_revision import database_set_snapshot_revision
 from tools.runtime_semantic_baseline import capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CHECKOUT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json"
+DEFAULT_CHECKOUT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json"
 LEGACY_FILES = ("deployed-objects.json", "variant-usage.json", "weapon-profile-sources.json")
 
 

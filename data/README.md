@@ -167,14 +167,14 @@ the retired source roots.
 - `curated/snapshot-notes/` — source-controlled, human-authored descriptions,
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
-- `generated/` — three tracked runtime databases: `army.db`
-  (Army v31/compatibility 40), `rules_n5.db` (Rules v17), and
-  `its_18.db` (ITS v2, current 2026.09.11). Exact variants, reviewed
-  Weapon citations, deployed objects, Restrictions, and symbol mappings
-  remain embedded in Army/Rules. The ITS database publishes twenty reviewed
-  current missions and the source-cited tournament/Extra policies. Historical
-  Battleground facts and source identity remain in
-  `curated/its/n5-its-season-18.json` rather than a second runtime database.
+- `generated/` — four tracked runtime databases: `army.db`
+  (Army v31/compatibility 40), `rules_n5.db` (Rules v17),
+  `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
+  Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
+  and symbol mappings remain embedded in Army/Rules. The ITS databases
+  publish season-specific missions and applicable tournament/Extra policies.
+  Superseded ITS 18 Battleground facts and source identity remain in
+  `curated/its/n5-its-season-18.json`, not a selectable older revision.
   See [ITS season database](../docs/its-season-database.md).
 
 **Complete runtime build:** `infinity-db build --compact` selects the latest
@@ -265,7 +265,7 @@ exist for independent development commands; they are not serving dependencies.
 **Selected runtime health:** `infinity-db database-health --db-dir PATH`
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
-`army.db`, `rules_n5.db` and `its_18.db`,
+`army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
 Army v31 / Rules v17 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
@@ -356,7 +356,7 @@ Raw inputs, generated acquisition/build provenance, and intermediate outputs sta
 source control so machine-local snapshot state does not obscure code changes.
 For the private Linux worker, [Syncthing-staged development assets](../docs/syncthing-assets.md)
 defines the separate source staging and explicit, verified checkout activation procedure.
-The tracked `army.db`, `rules_n5.db` and `its_18.db` are release artifacts:
+The tracked `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db` are release artifacts:
 a tagged checkout includes exactly what production serves. Their embedded
 projections bind reviewed source relationships and common build provenance;
 runtime JSON sidecars are not release inputs. Rebuild the complete set from pinned source

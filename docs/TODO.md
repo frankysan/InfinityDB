@@ -348,38 +348,12 @@ The implemented artifact lifecycle is described in [data guidance](../data/READM
 
 ### ITS, scenarios, and game tools
 
-**v1.2.0 priority:** Complete source-cited ITS Season 18 and published
-Season 17 V0.2 scenario acceptance, including browser-level visual review
-and documented unresolved source discrepancies. Season 16 Part II remains later scope.
-
-**Published 2026.09.11 hotfix coverage (2026-11-17):** All twenty reviewed
-missions have source-cited scoring, rules and game-size maps. The player
-selects **ITS Season 18**; the application serves only its current 2026.09.11
-revision. The original 2026.09.01 Battleground evidence remains preserved in
-the curated source-family file, not a separately selectable runtime database.
-The browser exposes typed objectives and Double Bind's alternative Main
-Objective sets. Map zoning and placement rulers have been reviewed in both
-source languages, with unresolved source issues identified explicitly.
-Automated browser acceptance and representative visual spot checks are
-complete. See [release browser acceptance](its-season-database.md#release-browser-acceptance).
-
-- [ ] **Data processing + Web backend + Web frontend: Scenario release audit (2026-11-23).**
-  First pass reviewed all 20 ITS 18 EN mission chapters (2026.09.11, pp. 49–142)
-  and all 16 ITS 17 EN mission chapters (V0.2, pp. 31–96), with comparison
-  against curated objectives, setup, special rules and Skill definitions and
-  targeted Spanish verification. Resolve these findings before release:
-  - [ ] **Remaining release acceptance.** Independently verify source diagram
-    details and all published game-size setups; review rendered mission
-    pages at relevant breakpoints, cross-season source-issue visibility,
-    and rebuilt runtime database publication. The text audit is not a
-    complete visual or bilingual acceptance pass. Do not invent answers to
-    documented official-source conflicts. Bilingual source diagram review is
-    complete (36 season-mission definitions, 108 layouts / 216 setups).
-    Automated browser checks passed for all 216 setups at desktop and
-    mobile widths (432 combinations), as did current runtime verification.
-    Representative visual spot checks are complete, including corrected
-    central-room map presentation. Final-candidate release validation
-    remains. See [release browser acceptance](its-season-database.md#release-browser-acceptance).
+ITS Seasons 17 (V0.2) and 18 (2026.09.11) have completed source audit,
+diagram and focused browser acceptance. All 36 season-mission definitions
+(216 setups) have been reviewed; known source discrepancies remain disclosed.
+See [release browser acceptance](its-season-database.md#release-browser-acceptance).
+Final-candidate acceptance is governed by [the release checklist](releasing.md).
+Season 16 Part II remains later scope.
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed

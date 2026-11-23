@@ -148,6 +148,7 @@ release/audit narrative belongs in the changelog and Git history.
 
 - `data/generated/army.db`: tracked Army-derived application runtime database.
 - `data/generated/rules_n5.db`: tracked curated-rules runtime database.
+- `data/generated/its_17.db` and `its_18.db`: current published revisions of the two ITS seasons.
 - Army v31 and Rules v17 embed exact variants, reviewed Weapon citations,
   deployed objects, maintained reference facts and symbol mappings/hashes.
 - Build-only raw Army exports and intermediate JSON belong in ignored
@@ -156,10 +157,10 @@ release/audit narrative belongs in the changelog and Git history.
   contract and Army source binding; normal serving uses embedded mappings/hashes.
 - Raw Army/wiki/PDF/source-symbol archives and detailed build state remain local.
 
-One complete offline `infinity-db build --compact` produces both tracked files.
+One complete offline `infinity-db build --compact` produces all four tracked databases.
 `serve --db-dir` selects an alternate set; `INFINITY_DB_DB_DIR` precedes the
 default working-directory-relative `data/generated/`. WSGI requires that
-environment setting. Docker copies the same pair directly. See
+environment setting. Docker copies the same set directly. See
 [data lifecycle](../data/README.md) for the canonical contract.
 
 ## Army/application identity invariants

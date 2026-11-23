@@ -504,7 +504,7 @@ images still require the complete tracked publication through deployment-smoke v
 ## Deployment smoke
 
 `.github/workflows/deployment-smoke.yml` builds the production container directly from the tracked
-`army.db`, `rules_n5.db` and `its_18.db` set plus processed SVG assets, then runs
+`army.db`, `rules_n5.db`, `its_17.db` and `its_18.db` set plus processed SVG assets, then runs
 `scripts/verify-container-image.sh` with published-asset validation. The
 source/release gate requires the strict current schemas, shared provenance and
 recorded build-input freshness. Exact variants and reviewed Weapon citations are

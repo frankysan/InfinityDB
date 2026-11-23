@@ -8,72 +8,34 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
-## [1.2.0] - Unreleased
+## [1.2.0] - 2026-11-23
 
 ### Player summary
 
-- Added all twenty source-cited ITS Season 18 missions from the September hotfix
-  revision, with game-size maps and scoring. The original September 1
-  Battleground publication remains separately selectable.
-- Double Bind now distinguishes its three alternative Main Objective sets;
-  players can compare them or focus on one while Secondary and Classified
-  Objectives stay visible.
-- Scenario lists are alphabetical within sections, with ITS Standard scenarios
-  followed by Direct Action scenarios for both ITS 17 and 18. ITS tournament and Extra rules have separate
-  cards, and physical marker sizes now include the source-chart 25 mm Defensive
-  Turret Token (distinct from its S2 Model option), 25 mm Civilians, and
-  Hardlock's Beacon. ITS 17 B-Pong now renders its verified 25 mm Tracking
-  Beacon to scale; ITS 18 retains its EN/ES diameter conflict. Evacuation and
-  Critical Intervention distinguish 25 mm Token footprints from Model
-  alternatives and unspecified placement clearances.
-  Scenario-map rulers now keep labels clear of centerline markers and shaded
-  regions in ITS 17/18. Double Bind, B-Pong and Crossing Lines have improved
-  guide spacing, alongside the earlier Neutralization ruler separation.
-  Crossing Lines also gains an Antenna placement guide at every game size
-  (6, 8 or 12 inches from either side edge). Removed redundant rulers
-  measuring exact table-center marker positions and duplicate mirrored
-  distances throughout ITS 17 and 18, retaining informative placement
-  and zone dimensions. Core N5 Domination now uses one representative
-  pair of Console-center guides rather than eight repeated guides per map;
-  Supplies shows one of the two mirrored Supply Box offsets.
-- Circular Template Areas now explicitly show their 12 cm diameter in ITS 17/18
-  mission rules. The fixed Double Bind and Neutralization Circular Template
-  zones now render at the exact physical 6 cm radius, rather than the
-  earlier oversized 2.5-inch schematic radius; player-placed zones retain
-  their stated 12 cm diameter without invented locations. Critical Intervention
-  now places the 40 mm Inhibitor Antenna tangent below the Server Room,
-  with both left edges aligned, in both seasons. The central 8-inch rooms
-  in Critical Intervention and Last Launch now have four labeled Wide Gate
-  openings and a width ruler below each room; gate widths remain schematic.
-- Scenario setup lists how many Classified Objectives, Tactical Objectives, and
-  HVTs each player uses. ITS 17 setup also lists Tactical Support options per
-  player and links to the historical selection rules and all twelve effects.
-  Both seasons show their declared Reinforcements suitability, distinguishing
-  absent labels from explicit exclusions and bilingual discrepancies.
-- Corrected ITS 18 Crossing Lines' Shasvastii Domination rule and disclosed
-  the bilingual discrepancy. ITS 17 Outbreak now uses its historical Infected
-  separation rule and explicitly excludes Secure Treasure. ITS 17 Crossing
-  Lines now requires one HVT per player under the season's general deployment
-  rule, unlike ITS 18's explicit HVT exclusion.
-- Scenario-specific Skills share normal Skill cards, appear under their own
-  `/skills` category, and are searchable with scenario-specific destinations.
-  All 31 ITS 18 and 22 ITS 17 actions now have structured Requirements and
-  Effects, with source caveats preserved. Restored missing actions in Double
-  Bind, The Dig, Corporate Appropriation, Neutralization and Provisioning. Core N5 scenario Skills are also listed
-  with their scenario context and exact N5 citations. Redundant Skill-type
-  suffixes are omitted from scenario Skill names; badges identify the type.
+- Added the complete ITS Season 17 (16 missions) and ITS Season 18 (20 missions)
+  catalogs, with source-cited scoring, deployment maps for six game sizes and
+  season-specific rules. Select the season; each uses its current revision.
+- Grouped scenarios alphabetically by Standard and Direct Action. Setup cards
+  show objective and HVT counts, Reinforcements suitability and applicable
+  Tactical Support options. Double Bind offers its alternative Main Objective sets.
+- Improved scenario maps with distinct zones, clearer placement rulers, exact
+  marker and Circular Template sizes, and four Wide Gates on central rooms.
+- Added searchable scenario-specific and season-wide Skills, with standard
+  Requirements, Effects, declaration types and Labels, and season-specific
+  Casevac States.
+- Corrected mission-specific scoring, placement, objective and Skill details;
+  known differences in the official sources are disclosed on the relevant pages.
 
 ### Added
 
 - **Data processing + Web backend + Web frontend:** Published the September
-  2026 ITS Season 18 hotfix as a separately selected season revision, alongside
-  the preserved September 1 Battleground. Added Crossing Lines, Double Bind,
+  2026 ITS Season 18 hotfix as the current selectable publication. Added Crossing Lines, Double Bind,
   The Dig, Annihilation, Cutthroat, Superiority, Uplink Center, Hardlock and
   B-Pong, Akial Interference, Evacuation, Neutralization, Provisioning and
   Area of Interest, Data-Harvest, Last Launch, Corporate Appropriation,
   Outbreak and Critical Intervention, with reviewed source citations, scoring, geometry,
-  special rules and source discrepancies;
-  retained Battleground in both versions.
+  special rules and source discrepancies. Historical September 1 Battleground
+  facts remain preserved in the curated source family, not the public selector.
   Double Bind exposes mutually exclusive Main Objective sets in the scenario
   viewer, and the shared map renderer supports circular and corner deployment
   geometry. Exclusion Zones have diagonal hatching, Antenna Zones of Influence
@@ -109,8 +71,77 @@ are not retroactively relabeled.
   with Attacker/Defender roles, an 8-inch Server Room, Inhibitor
   Antenna, schematic defensive Turrets, asymmetric scoring and INTELCOM.
   Both language editions print a 12-OP Defender total; it is preserved
-  as a source issue rather than silently capped at 10. Unresolved
-  bilingual discrepancies and browser visual acceptance remain open.
+  as a source issue rather than silently capped at 10. Known bilingual
+  discrepancies remain disclosed.
+
+- **Data processing + Web backend + Web frontend:** Published all sixteen
+  ITS Season 17 V0.2 missions as an independent season, with scoring, geometry,
+  rules and citations appropriate to that season. Added its Tactical Support
+  selection rules and twelve effects, Resilience Operations Extra, and historical
+  CivEvac and Casevac Skills and Casevac State. Same-named scenarios and Skills
+  retain season-specific meanings; for example, Outbreak's Alpha Infected scoring
+  differs between seasons, and CivEvac/Casevac retain their historical Short
+  Movement Skill declarations. ITS 18 also includes Team-Ops and Request a Tacball
+  scoped to the Team-Ops Extra.
+- **Data processing + Web backend + Web frontend:** Added Scenario-specific Skills
+  to the normal Skill catalog and Search, with direct context links and reviewed
+  Requirements and Effects for all 31 ITS 18 and 22 ITS 17 scenario actions.
+  Added missing actions in Double Bind, The Dig, Corporate Appropriation,
+  Neutralization and Provisioning, and exposed Core scenario Skills with their
+  exact N5 citations. Skill cards show their source-declared Labels (including
+  Attack and Scenario) and declaration types without duplicating type suffixes.
+
+### Changed
+
+- **Web frontend:** Scenario catalogs are alphabetical within Standard and
+  Direct Action groups. Scenario setup shows per-player Classified Objectives,
+  Tactical Objectives and HVT counts (including explicit non-use), shared
+  Classified counts where relevant, ITS 17 Tactical Support options and both
+  seasons' Reinforcements suitability. Tournament and Extra rules have separate
+  padded cards. Absent suitability labels and bilingual discrepancies remain
+  distinct from explicit exclusions.
+- **Web backend + Web frontend:** Improved the downloadable scenario maps.
+  Physical marker descriptions
+  distinguish 25 mm Defensive Turret Tokens from S2 Models, 25 mm Civilians and
+  Hardlock's Beacon. Evacuation and Critical Intervention preserve unspecified
+  placement clearances. ITS 17 B-Pong renders its verified 25 mm Tracking Beacon
+  to scale, while ITS 18 retains the official diameter conflict. Placement rulers
+  are clearer in Double Bind, B-Pong, Crossing Lines and Neutralization; Crossing
+  Lines shows Antenna offsets of 6, 8 or 12 inches for the relevant table.
+  Removed redundant center and mirrored measurements, including in Core N5
+  Domination and Supplies.
+- **Data processing + Web backend:** Consolidated ITS 18 revision history into
+  one source family and introduced versioned reusable scenario and Skill
+  definitions with exact season-local citations and reviewed overrides.
+  Unchanged material can be reused without conflating different season rules.
+  Superseded revisions remain internal evidence rather than selectable publications.
+
+### Fixed
+
+- **Data processing + Web backend:** Circular Template Areas explicitly use a
+  12 cm diameter. The fixed Double Bind and Neutralization footprints use
+  a physical radius of 6 cm rather than a schematic 2.5 inches; player-placed
+  zones retain their size without invented coordinates. Critical Intervention's
+  40 mm Inhibitor Antenna is tangent below the Server Room with the left edges
+  aligned. Critical Intervention and Last Launch show four Wide Gate openings
+  and a ruler beneath their central 8-inch rooms; gate widths are schematic.
+  Room and gate labels are clearer and avoid adjacent markers.
+- **Data processing:** Corrected ITS 18 Crossing Lines' Shasvastii Domination
+  wording and disclosed the source discrepancy. ITS 17 Outbreak uses its
+  historical Infected separation rule and excludes Secure Treasure.
+  ITS 17 Crossing Lines requires one HVT per player under its deployment rule,
+  unlike ITS 18's explicit exclusion.
+- **Deployment:** Tagged production images use the release version rather than
+  a development worktree suffix. Image cleanup skips tags referenced by running
+  or stopped containers, without failing an otherwise healthy deployment.
+
+### Upgrade notes
+
+- **Data processing + Deployment:** The required runtime set now consists of
+  `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`. Upgrade the complete
+  source-matched set together. The standard offline builder and release image
+  include all four files; older three-file directories do not satisfy current
+  startup validation. Rollback uses the matching retained release image.
 
 ## [1.1.0] - 2026-11-15
 

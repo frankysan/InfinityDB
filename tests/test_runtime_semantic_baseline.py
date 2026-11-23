@@ -152,6 +152,23 @@ def test_reviewed_p1_to_v12_baseline_migration_changes_only_approved_routes() ->
     ]
 
 
+def test_reviewed_its_release_baseline_changes_only_affected_routes() -> None:
+    earlier = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json")
+        .read_text(encoding="utf-8")
+    )
+    release = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    old_rows = {row["path"]: row for row in earlier["probes"]}
+    new_rows = {row["path"]: row for row in release["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    assert {path for path in old_rows if old_rows[path] != new_rows[path]} == {
+        "/api/skills",
+        "/api/scenarios",
+        "/api/scenarios?collection=its-18",
+        "/api/scenarios/battleground?army_points=300&collection=its-18",
+    }
+
+
 def test_released_data_matches_pinned_current_its_semantic_baseline() -> None:
     assert DEFAULT_CHECKOUT_BASELINE != DEFAULT_BASELINE
     fixture = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))

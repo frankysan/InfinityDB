@@ -114,11 +114,11 @@ read-only application/API and validated database models:
 - **Directly from a checkout (local or self-hosted).** Run
   `infinity-db build --compact`, then `infinity-db serve` from the repository
   root. One offline build produces the complete `data/generated/army.db`,
-  `rules_n5.db` and `its_18.db` set. Serving selects explicit `--db-dir`, then
+  `rules_n5.db`, `its_17.db` and `its_18.db` set. Serving selects explicit `--db-dir`, then
   `INFINITY_DB_DB_DIR`, then the working-directory-relative default. Production
   WSGI requires that single environment setting. An invalid selected set fails
   closed. Stop the service before rebuilding its selected directory.
-- **Docker for public internet serving.** The image copies those same three
+- **Docker for public internet serving.** The image copies those same four
   tracked databases directly into `/app/data/`, configured with
   `INFINITY_DB_DB_DIR=/app/data`. No host promotion directory, raw archive,
   curation or JSON publication is a serving dependency. Source/release checks
