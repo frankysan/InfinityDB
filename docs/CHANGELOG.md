@@ -49,8 +49,9 @@ are not retroactively relabeled.
   separation rule and explicitly excludes Secure Treasure.
 - Scenario-specific Skills share normal Skill cards, appear under their own
   `/skills` category, and are searchable with scenario-specific destinations.
-  All 26 current ITS actions now have structured Requirements and Effects,
-  with source caveats preserved. Core N5 scenario Skills are also listed
+  All 31 ITS 18 and 22 ITS 17 actions now have structured Requirements and
+  Effects, with source caveats preserved. Restored missing actions in Double
+  Bind, The Dig, Corporate Appropriation, Neutralization and Provisioning. Core N5 scenario Skills are also listed
   with their scenario context and exact N5 citations. Redundant Skill-type
   suffixes are omitted from scenario Skill names; badges identify the type.
 

@@ -373,14 +373,6 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     ITS 17 rules (EN pp. 26–27). The mission disables Secure HVT and Secure
     Treasure (EN p. 54 / ES p. 45), not HVT Model deployment itself.
     Preserve the source distinction from ITS 18.
-  - [ ] **Scenario Skill coverage.** Separate Double Bind's Activate Antenna
-    (Destroyed) from ordinary Activate Antenna (ITS 18 EN p. 75);
-    publish The Dig's Neutralize Hyperthermal Tech (p. 80), Corporate
-    Appropriation's Use Panoplies (p. 57), Neutralization's Extract
-    Hyperthermal Tech (p. 106), and Pick Up Supply Boxes (ITS 18 EN p. 112
-    and ITS 17 EN p. 74) as independent Attack/Scenario Short Skills.
-    Preserve distinct requirements, effects, citations and season variants;
-    check Skill catalog, detail and Search coverage.
   - [ ] **Historical Tactical Support.** Publish ITS 17 per-player option
     counts, selection rules and effects (EN pp. 27–29), distinct from
     Tactical Objectives: B-Pong (p. 36), Evacuation (p. 55), Last Launch

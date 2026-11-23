@@ -980,7 +980,7 @@ def test_neutralization_score_caps_regions_and_exact_source_geometry() -> None:
         "status": "controlled", "comparison": "greater",
     }
     rules = {r["id"]: " ".join(r["paragraphs"]) for r in mission["rules"]}
-    assert "Normal WIP Roll" in rules["hyperthermal-tech-boxes"]
+    assert "Normal WIP Roll" in rules["extract-hyperthermal-tech"]
     assert "do not state a per-Box extraction limit" in rules["hyperthermal-tech-boxes"]
     assert "two if it has Baggage" in rules["hyperthermal-tech-tokens"]
     assert "Marker States" in rules["hyperthermal-tech-tokens"]
@@ -1562,8 +1562,8 @@ def test_corporate_appropriation_prototype_outcomes_panoplies_and_geometry() -> 
     assert "without a Roll" in rules["pick-up-prototype"]
     assert "unless possessing Baggage" in rules["common-prototype-rules"]
     assert "non-Null Model" in rules["capture-prototype"]
-    assert "Booty Troops" in rules["panoplies"]
-    assert "Unloaded State" in rules["panoplies"]
+    assert "Booty Troops" in rules["use-panoply"]
+    assert "Unloaded State" in rules["use-panoply"]
     assert "20: TAG" in rules["panoply-chart"]
     assert "Peripheral (Servant)" in rules["specialist-troops"]
     assert [end["id"] for end in mission["endConditions"]] == [

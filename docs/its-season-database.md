@@ -36,16 +36,18 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   automatically; explicit older revision links still fail closed without
   silently displaying replacement facts. Historical revision browsing remains deferred.
 - **Scenario Skills:** Mission rules with `skillTypeIds` and `skillFacts`
-  project to standard Skill cards, `/skills` and Search. All 26 reviewed ITS 18
-  actions have structured Requirements and Effects, with optional Restrictions,
+  project to standard Skill cards, `/skills` and Search. All 31 reviewed ITS 18
+  and 22 ITS 17 actions have structured Requirements and Effects, with optional Restrictions,
   Clarifications and Source context. Original mission paragraphs and action
   titles remain available for provenance and compatibility. Public Skill names
   omit redundant terminal `(Short Skill)` and `(Long Skill)` labels because
   their typed badges convey that classification. Their public IDs include the
   season and scenario, so same-named actions are not conflated. Optional
   `skillCitations` now pin the exact English and Spanish action pages for
-  all 26 ITS 18 actions, reviewed against the SHA-matched 2026.09.11 source
-  PDFs. Source-specific `sourceLabels` are projected through the standard
+  all 31 ITS 18 actions, reviewed against the SHA-matched 2026.09.11 source
+  PDFs. Double Bind's intact and destroyed Antenna actions are separate Skills;
+  Provisioning pickup retains the season-specific Safe Area requirements.
+  Source-specific `sourceLabels` are projected through the standard
   Skill badge row: all reviewed ITS 17/18 scenario actions show **Attack** and
   **Scenario**, while season-wide Skills retain their own printed qualifiers
   (such as Optional or Obligatory). Matching N5 Labels link to their canonical

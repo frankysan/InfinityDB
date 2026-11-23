@@ -2953,12 +2953,11 @@
               "sourceLabels": ["Attack", "Scenario"],
               "skillFacts": {
                 "requirements": [
-                  "A Specialist Troop in Silhouette contact with an Antenna can activate it.",
-                  "A Hacker fully inside the Zone of Influence of a destroyed Antenna can instead activate that Antenna."
+                  "Only Specialist Troops in Silhouette contact with an Antenna may declare this Skill."
                 ],
                 "effects": [
-                  "Make a Normal WIP Roll to activate an Antenna. Success establishes the player's ownership; an opponent can activate it later to replace that ownership.",
-                  "A Hacker activating a destroyed Antenna from its Zone of Influence instead makes a Normal WIP-3 Roll."
+                  "Make a Normal WIP Roll to activate the Antenna. Failed attempts may be repeated by spending another Short Skill.",
+                  "The opponent can activate an already Activated Antenna, replacing its previous ownership. Mark the Activation with a Player A or B Token."
                 ],
                 "restrictions": [],
                 "clarifications": [],
@@ -2969,8 +2968,33 @@
                 {"sourceId": "its-season-18-es-pdf", "page": 75}
               ],
               "paragraphs": [
-                "Specialist Troops in Silhouette contact with an Antenna can activate it with a Normal WIP Roll. Success sets that player's ownership; the opponent can activate it later to replace ownership.",
-                "A Hacker fully inside the Zone of Influence of a destroyed Antenna can activate the destroyed Antenna with a Normal WIP-3 Roll."
+                "Specialist Troops in Silhouette contact with an Antenna can activate it with a Normal WIP Roll. Failed Rolls can be retried with another Short Skill. Success sets that player's ownership; the opponent can activate it later to replace ownership. Mark the Activation with a Player Token."
+              ]
+            },
+            {
+              "id": "activate-antenna-destroyed",
+              "name": "Activate Antenna (Destroyed)",
+              "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
+              "skillFacts": {
+                "requirements": [
+                  "Only Troopers with the Hacker Special Skill may declare this Skill.",
+                  "The Trooper must be entirely inside the Zone of Influence of a Destroyed Antenna."
+                ],
+                "effects": [
+                  "Make a Normal WIP-3 Roll to activate the Antenna. Failed attempts may be repeated by spending another Short Skill.",
+                  "Mark the Activation with a Player A or B Token."
+                ],
+                "restrictions": [],
+                "clarifications": [],
+                "sourceNotes": []
+              },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 75},
+                {"sourceId": "its-season-18-es-pdf", "page": 76}
+              ],
+              "paragraphs": [
+                "A Hacker fully inside the Zone of Influence of a destroyed Antenna can activate it with a Normal WIP-3 Roll. Failed Rolls can be retried with another Short Skill. Mark the Activation with a Player Token."
               ]
             },
             {
@@ -3709,6 +3733,23 @@
             {
               "id": "neutralize-hyperthermal-tech",
               "name": "Neutralize Hyperthermal Tech (Short Skill)",
+              "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
+              "skillFacts": {
+                "requirements": [
+                  "Any Trooper in Silhouette contact with an Analyzed Hyperthermal Tech bearing their own Player Token may declare this Skill."
+                ],
+                "effects": [
+                  "Neutralize the Hyperthermal Tech without a Roll and remove its Token from the table."
+                ],
+                "restrictions": [],
+                "clarifications": [],
+                "sourceNotes": []
+              },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 80},
+                {"sourceId": "its-season-18-es-pdf", "page": 80}
+              ],
               "paragraphs": [
                 "Any Trooper in Silhouette contact with an Analyzed Hyperthermal Tech carrying their own Player Token may Neutralize it without a Roll; remove that Tech Token from the table."
               ]
@@ -11978,8 +12019,35 @@
               "name": "Hyperthermal Tech Boxes",
               "paragraphs": [
                 "Two Hyperthermal Tech Boxes are positioned on the table centerline, as shown on the map. Each is represented by a Tech-Coffin Token or a 40 mm scenery piece.",
-                "A Specialist Troop in base contact with a Hyperthermal Tech Box may declare Extract Hyperthermal Tech (Attack, Scenario Short Skill). On a successful Normal WIP Roll, place one Hyperthermal Tech Token beside that Trooper; failed Rolls may be retried by spending another Short Skill.",
                 "The sources specify two Boxes and award up to four Neutralized Techs, but do not state a per-Box extraction limit or how depletion works. No one-use limit or starting Token inventory is inferred."
+              ]
+            },
+            {
+              "id": "extract-hyperthermal-tech",
+              "name": "Extract Hyperthermal Tech",
+              "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
+              "skillFacts": {
+                "requirements": [
+                  "Only a Specialist Troop in contact with a Hyperthermal Tech Box may declare this Skill."
+                ],
+                "effects": [
+                  "Make a Normal WIP Roll to Extract and pick up one Hyperthermal Tech. Place its Token beside the Trooper on success.",
+                  "Failed attempts may be repeated by spending another Short Skill."
+                ],
+                "restrictions": [],
+                "clarifications": [],
+                "sourceNotes": [
+                  "English p. 106 requires base contact; Spanish p. 107 requires Silhouette contact.",
+                  "Neither source specifies a per-Box extraction limit or depletion procedure."
+                ]
+              },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 106},
+                {"sourceId": "its-season-18-es-pdf", "page": 107}
+              ],
+              "paragraphs": [
+                "A Specialist Troop in contact with a Hyperthermal Tech Box (EN base contact / ES Silhouette contact) may make a Normal WIP Roll to Extract and pick up one Hyperthermal Tech. On success, place its Token beside the Trooper. Failed Rolls may be retried by spending another Short Skill."
               ]
             },
             {
@@ -13073,6 +13141,29 @@
             {
               "id": "pickup-supply-boxes",
               "name": "Pick Up Supply Boxes (Short Skill)",
+              "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
+              "skillFacts": {
+                "requirements": [
+                  "The Trooper must be in Silhouette contact with an unattended Supply Box Token or an allied Trooper in Normal State carrying a Supply Box.",
+                  "A Box in a Safe Area requires a Specialist Troop under the English text; Spanish specifies the opponent's Safe Area."
+                ],
+                "effects": [
+                  "Pick up a Supply Box without a Roll outside the stricter Safe Area case. Keep the Token in Silhouette contact with its carrier.",
+                  "In the applicable Safe Area, the Specialist Troop must succeed at a Normal WIP-3 Roll."
+                ],
+                "restrictions": [
+                  "Follow the Common Supply Box Rules."
+                ],
+                "clarifications": [],
+                "sourceNotes": [
+                  "English p. 112 applies the Specialist and WIP-3 requirements to any Safe Area; Spanish p. 112 names the opponent's Safe Area."
+                ]
+              },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 112},
+                {"sourceId": "its-season-18-es-pdf", "page": 112}
+              ],
               "paragraphs": [
                 "A Trooper in Silhouette contact with an uncarried Supply Box, or an allied Trooper in Normal State carrying it, may pick it up without a Roll outside the stricter Safe Area case. The usual Supply Box carrying rules apply.",
                 "Only Specialist Troops may recover Boxes from an enemy Safe Area; picking up such a Box requires a Normal WIP-3 Roll. The English text extends its Specialist/WIP-3 wording to a Box in any Safe Area, while Spanish specifically names the opponent's Safe Area."
@@ -16468,6 +16559,35 @@
               "name": "Panoplies",
               "paragraphs": [
                 "There are two 40 mm Panoplies represented by Objective Tokens or scenery. One is on each side of the table, on the Deployment Zone boundary at the table's lateral center.",
+                "The Use Panoplies Scenario Skill governs equipment acquisition and cancellation of Unloaded State."
+              ]
+            },
+            {
+              "id": "use-panoply",
+              "name": "Use Panoplies",
+              "skillTypeIds": ["short-skill"],
+              "sourceLabels": ["Attack", "Scenario"],
+              "skillFacts": {
+                "requirements": [
+                  "The Trooper must be in Silhouette contact with a Panoply."
+                ],
+                "effects": [
+                  "Succeed at a Normal WIP Roll to gain D-Charges or, at the player's choice, roll on the Panoply Chart for a different weapon or equipment item.",
+                  "Troopers with Booty or another Skill that grants this exception need no WIP Roll.",
+                  "Reroll a Panoply Chart result if the Trooper already has that item.",
+                  "A Trooper in Silhouette contact with a Panoply may spend one Short Skill to cancel Unloaded State."
+                ],
+                "restrictions": [
+                  "After a successful acquisition, the same Trooper cannot use that Panoply again."
+                ],
+                "clarifications": [],
+                "sourceNotes": []
+              },
+              "skillCitations": [
+                {"sourceId": "its-season-18-en-pdf", "page": 57},
+                {"sourceId": "its-season-18-es-pdf", "page": 56}
+              ],
+              "paragraphs": [
                 "A Trooper in Silhouette contact with a Panoply may spend one Attack, Scenario Short Skill. On a successful Normal WIP Roll, take D-Charges or roll on the Panoply Chart for a different weapon or item. Booty Troops and Troops with an applicable Skill need no WIP Roll.",
                 "After a successful acquisition the same Trooper cannot use that Panoply again. A rolled item already possessed can be rerolled. A Trooper in contact may instead spend one Short Skill to cancel their Unloaded State."
               ]

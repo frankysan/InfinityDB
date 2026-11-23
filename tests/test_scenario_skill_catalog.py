@@ -51,7 +51,7 @@ def test_scenario_skills_listed_with_context_and_source(app):
     assert status == 200
     items = [item for item in payload["items"]
              if item["category"] == "Scenario-specific Skills"]
-    assert len([item for item in items if item.get("scenario")]) == 28
+    assert len([item for item in items if item.get("scenario")]) == 33
     assert {"hack-consoles", "pick-up-supply-boxes"} <= {
         item["slug"] for item in items
     }
@@ -112,7 +112,7 @@ def test_its17_source_labels_are_visible_on_skill_cards(its17_app):
         item for item in catalog["items"]
         if item["slug"].startswith("its-17-") and item.get("scenario")
     ]
-    assert len(actions) == 21
+    assert len(actions) == 22
     for item in actions:
         status, detail = _get(its17_app, f"/api/skills/{item['slug']}")
         assert status == 200
@@ -142,7 +142,7 @@ def test_its18_source_labels_are_visible_on_every_skill_card(app):
         item for item in catalog["items"]
         if item["slug"].startswith("its-18-") and item.get("scenario")
     ]
-    assert len(actions) == 26
+    assert len(actions) == 31
     for item in actions:
         status, detail = _get(app, f"/api/skills/{item['slug']}")
         assert status == 200
@@ -247,7 +247,9 @@ def test_all_its18_scenario_actions_have_exact_bilingual_source_pages(app):
     expected = {
         "its-18-crossing-lines-activate-antenna": (65, 65),
         "its-18-double-bind-activate-antenna": (75, 75),
+        "its-18-double-bind-activate-antenna-destroyed": (75, 76),
         "its-18-the-dig-analyze-hyperthermal-tech": (80, 80),
+        "its-18-the-dig-neutralize-hyperthermal-tech": (80, 80),
         "its-18-superiority-hack-consoles": (137, 142),
         "its-18-uplink-center-activate-communication-antenna": (140, 145),
         "its-18-hardlock-pick-up-beacon": (50, 128),
@@ -258,7 +260,9 @@ def test_all_its18_scenario_actions_have_exact_bilingual_source_pages(app):
         "its-18-akial-interference-filter-signal": (96, 96),
         "its-18-evacuation-activate-extraction-console": (90, 90),
         "its-18-neutralization-pick-up-hyperthermal-tech": (107, 107),
+        "its-18-neutralization-extract-hyperthermal-tech": (106, 107),
         "its-18-provisioning-extract-supply-boxes": (112, 112),
+        "its-18-provisioning-pickup-supply-boxes": (112, 112),
         "its-18-area-of-interest-activate-communication-antenna": (122, 123),
         "its-18-data-harvest-extract-data-harvester": (68, 68),
         "its-18-data-harvest-pickup-data-harvester": (69, 69),
@@ -267,6 +271,7 @@ def test_all_its18_scenario_actions_have_exact_bilingual_source_pages(app):
         "its-18-last-launch-swap-id": (117, 118),
         "its-18-last-launch-extract-identified-trooper": (119, 120),
         "its-18-corporate-appropriation-pick-up-prototype": (55, 55),
+        "its-18-corporate-appropriation-use-panoply": (57, 56),
         "its-18-outbreak-stabilize-infected": (85, 85),
         "its-18-outbreak-scan-infected": (86, 86),
         "its-18-critical-intervention-extract-data-pack": (101, 102),
@@ -286,6 +291,61 @@ def test_all_its18_scenario_actions_have_exact_bilingual_source_pages(app):
             ("its-season-18-en-pdf", english_page),
             ("its-season-18-es-pdf", spanish_page),
         ], slug
+
+
+@pytest.mark.parametrize(("season", "scenario", "action", "query"), [
+    ("its-18", "double-bind", "activate-antenna-destroyed", "activate antenna"),
+    ("its-18", "the-dig", "neutralize-hyperthermal-tech", "neutralize hyperthermal tech"),
+    ("its-18", "neutralization", "extract-hyperthermal-tech", "extract hyperthermal tech"),
+    ("its-18", "corporate-appropriation", "use-panoply", "use panoplies"),
+    ("its-18", "provisioning", "pickup-supply-boxes", "pick up supply boxes"),
+    ("its-17", "provisioning", "pickup-supply-boxes", "pick up supply boxes"),
+])
+def test_restored_actions_have_cards_and_search_routes(
+    app, its17_app, season, scenario, action, query,
+):
+    selected_app = app if season == "its-18" else its17_app
+    slug = f"{season}-{scenario}-{action}"
+    status, detail = _get(selected_app, f"/api/skills/{slug}")
+    assert status == 200
+    rule = detail["rules"][0]
+    assert rule["facts"]["requirements"]
+    assert rule["facts"]["effects"]
+    assert [label["name"] for label in rule["labels"]] == ["Attack", "Scenario"]
+    assert rule["skill_types"][0]["id"] == "short-skill"
+    status, mission = _get(
+        selected_app, f"/api/scenarios/{scenario}?collection={season}&army_points=300",
+    )
+    assert status == 200
+    card = next(rule for rule in mission["special_rules"] if rule["id"] == action)
+    assert card["skill"]["id"] == f"skill:{slug}"
+    status, results = _get(selected_app, "/api/search?q=" + query.replace(" ", "%20"))
+    assert status == 200
+    assert f"/skills/{slug}" in {result["href"] for result in results["items"]}
+
+
+def test_destroyed_antenna_and_supply_pickup_variants_are_distinct(app, its17_app):
+    prefix = "/api/skills/its-18-double-bind-activate-antenna"
+    _, normal = _get(app, prefix)
+    _, destroyed = _get(app, prefix + "-destroyed")
+    intact = normal["rules"][0]["facts"]
+    wreck = destroyed["rules"][0]["facts"]
+    assert "Specialist Troops" in " ".join(intact["requirements"])
+    assert "WIP-3" not in " ".join(intact["effects"])
+    assert "Hacker" in " ".join(wreck["requirements"])
+    assert "entirely inside" in " ".join(wreck["requirements"])
+    assert "WIP-3" in " ".join(wreck["effects"])
+
+    _, current = _get(app, "/api/skills/its-18-provisioning-pickup-supply-boxes")
+    _, historic = _get(its17_app, "/api/skills/its-17-provisioning-pickup-supply-boxes")
+    modern = current["rules"][0]
+    old = historic["rules"][0]
+    assert "any Safe Area" in " ".join(modern["facts"]["sourceNotes"])
+    assert "enemy's Safe Area" in " ".join(old["facts"]["requirements"])
+    assert [(c["source_id"], c["page"]) for c in old["citations"]] == [
+        ("its-season-17-v0.2-en-pdf", 74),
+        ("its-season-17-v0.2-es-pdf", 72),
+    ]
 
 
 @pytest.mark.parametrize("mutation", ["no-requirements", "unexpected-fact", "orphan-facts"])

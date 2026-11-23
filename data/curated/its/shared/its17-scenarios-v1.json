@@ -6901,6 +6901,29 @@
               {
                 "id": "pickup-supply-boxes",
                 "name": "Pick Up Supply Boxes (Short Skill)",
+                "skillTypeIds": ["short-skill"],
+                "sourceLabels": ["Attack", "Scenario"],
+                "skillFacts": {
+                  "requirements": [
+                    "The Trooper must be in Silhouette contact with an unattended Supply Box Token or an allied Trooper in Normal State carrying a Supply Box.",
+                    "Only a Specialist Troop may pick up a Box from the enemy's Safe Area."
+                  ],
+                  "effects": [
+                    "Pick up a Supply Box without a Roll outside the enemy's Safe Area. Place the Token in Silhouette contact with its new carrier.",
+                    "In the enemy's Safe Area, the Specialist Troop must succeed at a Normal WIP-3 Roll."
+                  ],
+                  "restrictions": [
+                    "Follow the Common Supply Box Rules."
+                  ],
+                  "clarifications": [],
+                  "sourceNotes": [
+                    "Both ITS 17 V0.2 languages specify the opponent's Safe Area, unlike the broader ITS 18 English wording."
+                  ]
+                },
+                "skillCitations": [
+                  {"sourceId": "its-season-17-v0.2-en-pdf", "page": 74},
+                  {"sourceId": "its-season-17-v0.2-es-pdf", "page": 72}
+                ],
                 "paragraphs": [
                   "A Trooper in Silhouette contact with an uncarried Supply Box, or an allied Trooper in Normal State carrying it, may pick it up without a Roll outside the stricter Safe Area case. The usual Supply Box carrying rules apply.",
                   "If the Supply Box is in the enemy's Safe Area, only a Specialist Troop may pick it up, requiring a Normal WIP-3 Roll. Both ITS 17 editions specifically name the opposing player's Safe Area; do not apply the broader ITS 18 English 'any Safe Area' wording."
