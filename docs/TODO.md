@@ -373,12 +373,10 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     pages at relevant breakpoints, cross-season source-issue visibility,
     and rebuilt runtime database publication. The text audit is not a
     complete visual or bilingual acceptance pass. Do not invent answers to
-    documented official-source conflicts. Bilingual diagram review completed
-    for B-Pong, Crossing Lines, Evacuation, Hardlock, Critical Intervention,
-    Last Launch, Outbreak, Provisioning, Area of Interest, Corporate
-    Appropriation, Akial Interference, Annihilation, Cutthroat and Uplink Center
-    in both seasons, plus Neutralization in ITS 18 (87 layouts / 174 setups);
-    remaining 7 season-mission definitions (42 setups). See [release diagram acceptance](its-season-database.md#release-diagram-acceptance).
+    documented official-source conflicts. Bilingual source diagram review is
+    complete (36 season-mission definitions, 108 layouts / 216 setups).
+    Browser acceptance and runtime verification remain. See
+    [release diagram acceptance](its-season-database.md#release-diagram-acceptance).
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed

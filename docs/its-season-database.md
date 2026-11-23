@@ -891,8 +891,8 @@ PDF images (not only extracted text) with curated table dimensions, zone
 ownership and boundaries, fixed marker centers and all six game-size
 bindings. All four local source PDFs match their registered SHA-256 pins.
 
-Verified in ITS 17 V0.2 and ITS 18 2026.09.11, covering 87 distinct
-layouts and 174 game-size setups (both seasons unless noted):
+Verified in ITS 17 V0.2 and ITS 18 2026.09.11, covering 108 season-mission
+layouts and 216 game-size setups (both seasons unless noted):
 
 - **B-Pong:** ITS 17 EN p. 37 / ES p. 39; ITS 18 EN p. 59 / ES p. 59.
   Rear zones 12/16/16 inches, Exclusion half-widths 2/4/4 inches,
@@ -951,11 +951,33 @@ layouts and 174 game-size setups (both seasons unless noted):
 - **Uplink Center:** ITS 17 EN p. 93 / ES p. 99; ITS 18 EN p. 139 / ES p. 144.
   Rear zones 12/16/16 inches, central Tech-Coffin and quarter-width Antennas.
 
-All twenty-nine reviewed season-mission definitions have correct 150/200/250/
+- **Battleground:** ITS 17 EN p. 83 / ES p. 88; ITS 18 EN p. 129 /
+  ES p. 134. Rear zones 8/12/12 inches, three central full-width Sectors
+  each 4/8/8 inches deep, with 2-inch gaps to the deployments at 150 points.
+  Season-specific scoring labels remain distinct.
+- **Superiority:** ITS 17 EN p. 89 / ES p. 94; ITS 18 EN p. 135 /
+  ES p. 140. Rear zones 8/12/12 inches, four central Quadrants and centered
+  Consoles at 6/8/12 inches from the lateral edges and 12/18/18 inches from
+  the nearest rear edge. The upper source rulers measure Console placement,
+  not deployment depth.
+- **Double Bind (ITS 18 only):** EN/ES p. 73. Rear zones 8/12/12 inches,
+  4-inch Exclusion half-width, three centerline Antennas at quarter,
+  half and three-quarter width, each with a 12 cm Circular Template
+  footprint (EN/ES p. 76).
+- **The Dig (ITS 18 only):** EN/ES p. 79. Top-right A and bottom-left B
+  quarter-circle zones (12/20/24-inch radii), three diagonal Consoles
+  spaced 8/12/16 inches center-to-center. Six Hyperthermal Tech Tokens
+  remain player-placed, with 4-inch (150 points) or 8-inch separation.
+- **Data-Harvest (ITS 18 only):** EN/ES p. 67. Rear zones 8/12/12 inches,
+  three centerline Tech-Coffins (one central, outer markers 4 inches
+  from the lateral edges). Four Designated Zones are player-placed
+  Circular Templates (EN/ES p. 70), not fixed map elements.
+
+All 36 reviewed season-mission definitions have correct 150/200/250/
 300/350/400-point configuration bindings and 3/4/5/6/7/8 SWC (ITS 18
 EN p. 17; ITS 17 mission force tables). No geometry changes required in
-these batches. Remaining diagram review: 7 season-mission definitions (42
-setups); browser acceptance and runtime validation are separate steps.
+these batches. Source diagram acceptance is complete; browser acceptance
+and runtime validation are separate steps.
 
 All twenty missions are published for the current 2026.09.11 revision:
 
