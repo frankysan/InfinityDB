@@ -891,8 +891,8 @@ PDF images (not only extracted text) with curated table dimensions, zone
 ownership and boundaries, fixed marker centers and all six game-size
 bindings. All four local source PDFs match their registered SHA-256 pins.
 
-Verified in both ITS 17 V0.2 and ITS 18 2026.09.11, covering 36 distinct
-layouts and 72 game-size setups:
+Verified in both ITS 17 V0.2 and ITS 18 2026.09.11, covering 54 distinct
+layouts and 108 game-size setups:
 
 - **B-Pong:** ITS 17 EN p. 37 / ES p. 39; ITS 18 EN p. 59 / ES p. 59.
   Rear zones 12/16/16 inches, Exclusion half-widths 2/4/4 inches,
@@ -922,10 +922,20 @@ layouts and 72 game-size setups:
   Wide Gates and no deployment inside, central ID Checker and two centerline
   ID Scanners 4/8/8 inches from the nearest lateral edges.
 
-All twelve reviewed season-mission definitions have correct 150/200/250/
+- **Outbreak:** ITS 17 EN p. 69 / ES p. 47; ITS 18 EN/ES p. 84.
+  Top-right A and bottom-left B quarter-circle zones (12/20/24-inch radii),
+  central Alpha Infected; other Infected and Stabilization Zones player-placed.
+- **Provisioning:** ITS 17 EN p. 73 / ES p. 71; ITS 18 EN/ES p. 110.
+  Same corner deployments, three diagonal Tech-Coffins spaced 8/12/16 inches
+  center-to-center, and player-placed Safe Areas.
+- **Area of Interest:** ITS 17 EN p. 78 / ES p. 80; ITS 18 EN p. 121 / ES p. 122.
+  Top-left A and bottom-right B quarter-circle zones (12/20/24-inch radii),
+  central Communication Antenna; Areas of Interest are player-placed.
+
+All eighteen reviewed season-mission definitions have correct 150/200/250/
 300/350/400-point configuration bindings and 3/4/5/6/7/8 SWC (ITS 18
 EN p. 17; ITS 17 mission force tables). No geometry changes required in
-these batches. Remaining diagram review: 24 season-mission definitions (144
+these batches. Remaining diagram review: 18 season-mission definitions (108
 setups); browser acceptance and runtime validation are separate steps.
 
 All twenty missions are published for the current 2026.09.11 revision:
