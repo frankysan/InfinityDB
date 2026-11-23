@@ -891,8 +891,8 @@ PDF images (not only extracted text) with curated table dimensions, zone
 ownership and boundaries, fixed marker centers and all six game-size
 bindings. All four local source PDFs match their registered SHA-256 pins.
 
-Verified in both ITS 17 V0.2 and ITS 18 2026.09.11, covering 24 distinct
-layouts and 48 game-size setups:
+Verified in both ITS 17 V0.2 and ITS 18 2026.09.11, covering 36 distinct
+layouts and 72 game-size setups:
 
 - **B-Pong:** ITS 17 EN p. 37 / ES p. 39; ITS 18 EN p. 59 / ES p. 59.
   Rear zones 12/16/16 inches, Exclusion half-widths 2/4/4 inches,
@@ -912,10 +912,20 @@ layouts and 48 game-size setups:
   Rear zones 8/12/12 inches, owner Beacons centered on their front
   boundaries, three centerline Consoles with outer offsets 6/8/12 inches.
 
-All eight reviewed season-mission definitions have correct 150/200/250/
+- **Critical Intervention:** ITS 17 EN p. 46 / ES p. 64; ITS 18 EN/ES p. 98.
+  Rear zones 8/12/12 inches, central Attacker Exclusion half-width 4 inches,
+  8-inch Server Room, four open Wide Gates, opposing interior corner Turrets,
+  central Data Console and Inhibitor Antenna tangent to the southern wall.
+  Turret clearances and gate widths remain schematic.
+- **Last Launch:** ITS 17 EN p. 64 / ES p. 76; ITS 18 EN p. 115 / ES p. 116.
+  Rear zones 8/12/12 inches, central 8-inch Launching Tower with four open
+  Wide Gates and no deployment inside, central ID Checker and two centerline
+  ID Scanners 4/8/8 inches from the nearest lateral edges.
+
+All twelve reviewed season-mission definitions have correct 150/200/250/
 300/350/400-point configuration bindings and 3/4/5/6/7/8 SWC (ITS 18
 EN p. 17; ITS 17 mission force tables). No geometry changes required in
-this batch. Remaining diagram review: 28 season-mission definitions (168
+these batches. Remaining diagram review: 24 season-mission definitions (144
 setups); browser acceptance and runtime validation are separate steps.
 
 All twenty missions are published for the current 2026.09.11 revision:
