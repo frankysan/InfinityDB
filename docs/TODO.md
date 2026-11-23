@@ -373,7 +373,10 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
     pages at relevant breakpoints, cross-season source-issue visibility,
     and rebuilt runtime database publication. The text audit is not a
     complete visual or bilingual acceptance pass. Do not invent answers to
-    documented official-source conflicts.
+    documented official-source conflicts. Bilingual diagram review completed
+    for B-Pong, Crossing Lines, Evacuation and Hardlock in both seasons
+    (24 layouts / 48 setups); remaining 28 season-mission definitions
+    (168 setups). See [release diagram acceptance](its-season-database.md#release-diagram-acceptance).
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed

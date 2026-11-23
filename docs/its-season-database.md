@@ -884,6 +884,40 @@ The source files identify revision **2026.09.11**; September 24, 2026 is
 the documented hotfix announcement/availability date used for this collection,
 not a claim that every clause took effect individually on September 11.
 
+### Release diagram acceptance
+
+The independent bilingual diagram re-review for v1.2.0 compares the original
+PDF images (not only extracted text) with curated table dimensions, zone
+ownership and boundaries, fixed marker centers and all six game-size
+bindings. All four local source PDFs match their registered SHA-256 pins.
+
+Verified in both ITS 17 V0.2 and ITS 18 2026.09.11, covering 24 distinct
+layouts and 48 game-size setups:
+
+- **B-Pong:** ITS 17 EN p. 37 / ES p. 39; ITS 18 EN p. 59 / ES p. 59.
+  Rear zones 12/16/16 inches, Exclusion half-widths 2/4/4 inches,
+  central Beacon and quarter-width Consoles. The current diameter
+  conflict remains separate from the confirmed center position.
+- **Crossing Lines:** ITS 17 EN p. 52 / ES p. 43; ITS 18 EN/ES p. 64.
+  Rear zones 8/12/12 inches, exchanged 4-inch forward zones,
+  intervening Dead Zones, and centerline Antennas at 6/8/12 inches
+  from the nearest lateral edge. The historical table-width typo
+  remains disclosed; both diagrams support the maintained geometry.
+- **Evacuation:** ITS 17 EN p. 55 / ES p. 51; ITS 18 EN/ES p. 88.
+  Rear zones 8/12/12 inches; Civilians 6 inches from the lateral
+  edges and 12/16/16 inches from the rear edges; centerline Consoles
+  8/12/16 inches from the nearest lateral edge. The 25 mm Token
+  option does not prescribe a Model base size.
+- **Hardlock:** ITS 17 EN p. 60 / ES p. 55; ITS 18 EN p. 49 / ES p. 127.
+  Rear zones 8/12/12 inches, owner Beacons centered on their front
+  boundaries, three centerline Consoles with outer offsets 6/8/12 inches.
+
+All eight reviewed season-mission definitions have correct 150/200/250/
+300/350/400-point configuration bindings and 3/4/5/6/7/8 SWC (ITS 18
+EN p. 17; ITS 17 mission force tables). No geometry changes required in
+this batch. Remaining diagram review: 28 season-mission definitions (168
+setups); browser acceptance and runtime validation are separate steps.
+
 All twenty missions are published for the current 2026.09.11 revision:
 
 - **Crossing Lines:** Four deployment areas per map (two per player),
@@ -968,11 +1002,11 @@ All twenty missions are published for the current 2026.09.11 revision:
   p. 95 clauses about one Emit per Trooper per round and retrying failed WIP
   Rolls are recorded as a source issue, not reconciled by inference. Sources:
   EN pp. 92–96 and ES pp. 92–96. The original publication is unchanged.
-- **Evacuation:** Four schematic, fixed-position Civilians and two central 40 mm
+- **Evacuation:** Four fixed-position Civilians and two central 40 mm
   Extraction Consoles, on all six Army Point sizes, with 8-/12-inch opposing
-  Deployment Zones. Civilians have no published physical base diameter;
-  the map displays center positions without asserting one. Player-deployed
-  enemy HVTs remain location-free. Score up to 4 OP for Extracted Civilians,
+  Deployment Zones. The 25 mm Player A/B Token option is rendered at scale;
+  the Civilian Model alternative has no prescribed base diameter. Player-
+  deployed enemy HVTs remain location-free. Score up to 4 OP for Extracted Civilians,
   2 OP for Extracted enemy HVTs, and 4 OP for two Classified Objectives.
   The mission includes the one-subject-per-successful-console-action procedure,
   Specialist Troops, Operational Learning, the three-round/Retreat! endings,
