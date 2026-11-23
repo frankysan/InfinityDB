@@ -1935,7 +1935,7 @@
               "paragraphs": [
                 "A player Dominates a Zone of Operations if they have more Victory Points of eligible Troopers inside than their opponent.",
                 "Count Models, Trooper Markers, Proxies and Peripheral Troops in non-Null States. Equipment Tokens and fake Holoechoes do not count; more than half of a Trooper's base must lie within the Zone.",
-                "Troopers with [[skill:shasvastii]] count in Unconscious or other non-Null States; eligible [[equipment:baggage]] Troopers contribute an additional 20 Victory Points."
+                "Troopers with [[skill:shasvastii]] count in Shasvastii-Embryo or any non-Null State (English p. 64); Spanish p. 64 instead specifies Normal or Unconscious. Eligible [[equipment:baggage]] Troopers contribute an additional 20 Victory Points."
               ]
             },
             {
@@ -2001,7 +2001,15 @@
               }
             }
           ],
-          "sourceIssues": []
+          "sourceIssues": [
+            {
+              "id": "its18-crossing-lines-shasvastii-states-en-es",
+              "armyPoints": [150, 200, 250, 300, 350, 400],
+              "objectiveId": "dominate-dead-zone-a",
+              "status": "needs-verification",
+              "description": "ITS 18 EN p. 64 counts Shasvastii Troopers in Shasvastii-Embryo or any non-Null State; ES p. 64 specifies Normal or Unconscious. This affects Domination of both Dead Zones. The language-specific state sets remain distinct."
+            }
+          ]
         }
       },
       "citations": [

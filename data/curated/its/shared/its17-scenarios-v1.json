@@ -13778,7 +13778,7 @@
                 "name": "Infected Placement",
                 "paragraphs": [
                   "Five Infected Civilians participate; the Alpha Infected is fixed at the table center. Before the Deployment Phase, each player places two further Infected entirely within the opponent's half of the table. Their locations are chosen by players, not pre-marked on the map.",
-                  "Each player-placed Infected must be at least [[distance:4:inch]] outside the enemy Deployment Zone and at least [[distance:8:inch]] from all other Infected. They cannot be placed inside or atop scenery or buildings and must be in an accessible location.",
+                  "Each player-placed Infected must be at least [[distance:4:inch]] outside the enemy Deployment Zone. The two Infected placed by each player must be at least [[distance:8:inch]] apart from each other. They cannot be placed inside or atop scenery or buildings and must be in an accessible location.",
                   "The player who kept Deployment places both of their Infected first. A Trooper may CivEvac at most one Infected at a time. Infected are represented by suitable Infinity/Infinity Bootleg Models, normally HVT or Civilian miniatures.",
                   "It is not permitted to deploy in Silhouette contact with an Infected. The English and Spanish distance conventions differ slightly: [[distance:4:inch]] / [[distance:8:inch]] versus [[distance:10:cm]] / [[distance:20:cm]]."
                 ]
@@ -13868,7 +13868,8 @@
                 "id": "no-hvt-classified",
                 "name": "No HVT or Classified Deck",
                 "paragraphs": [
-                  "No player deploys an HVT. The HVT Model and Secure HVT rules do not apply; the Classified Deck is not used and this scenario has no Classified Objectives."
+                  "No player deploys an HVT. The HVT Model and Secure HVT rules do not apply; the Classified Deck is not used and this scenario has no Classified Objectives.",
+                  "Secure Treasure does not apply (ITS 17 EN p. 71 / ES p. 49)."
                 ]
               }
             ],

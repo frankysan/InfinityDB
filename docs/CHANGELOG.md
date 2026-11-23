@@ -44,6 +44,9 @@ are not retroactively relabeled.
   openings and a width ruler below each room; gate widths remain schematic.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
   HVTs each player uses.
+- Corrected ITS 18 Crossing Lines' Shasvastii Domination rule and disclosed
+  the bilingual discrepancy. ITS 17 Outbreak now uses its historical Infected
+  separation rule and explicitly excludes Secure Treasure.
 - Scenario-specific Skills share normal Skill cards, appear under their own
   `/skills` category, and are searchable with scenario-specific destinations.
   All 26 current ITS actions now have structured Requirements and Effects,

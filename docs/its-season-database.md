@@ -164,8 +164,8 @@ for CivEvacing the Stabilized Alpha. This is a changed objective set,
 not merely a point-value override: **do not reuse an identical version**
 of the entire Outbreak scenario. ITS 17 also requires player-placed
 Infected to be 8 inches apart *from each other*, while ITS 18 p. 84
-says *from all other Infected*; this changed placement scope needs its
-own reviewed rule/component version. Both publications restrict CivEvac
+says *from all other Infected*. The two versions now retain separate
+reviewed placement rules. Both publications restrict CivEvac
 to **one Infected** in Outbreak (ITS 18 p. 84), whereas the general
 ITS 18 CivEvac rule permits **two Civilians** (p. 23). Evacuation
 (ITS 18 pp. 88–90) applies the general CivEvac rule but requires a
@@ -485,8 +485,10 @@ fact text and provenance; no shared cross-season definition is claimed.
 Both originals agree on five Infected, the central Alpha, three
 opposite-corner deployment maps, player-placed Stabilization Zones,
 CivEvac restrictions, Scan/Stabilize Short Skills and no Classified/HVT.
-One bilingual difference remains: placement distances of 4/8 inches
-versus 10/20 cm. ITS 18 scoring remains unchanged.
+ITS 17 EN p. 69 / ES p. 47 require separation between each player's own
+two Infected, not all five; EN p. 71 / ES p. 49 also explicitly exclude
+Secure Treasure. One bilingual difference remains: placement distances of
+4/8 inches versus 10/20 cm. ITS 18 scoring and placement remain unchanged.
 
 Akial Interference V0.2 EN pp. **31–35** and ES pp. **58–62**
 confirms the 6 + 1 + 1 + 2 OP scoring, 2 public Common Classified
@@ -872,6 +874,10 @@ All twenty missions are published for the current 2026.09.11 revision:
 - **Crossing Lines:** Four deployment areas per map (two per player),
   two Dead Zones, two Antennas, scoring at the end of rounds and at game
   end, and the hotfix's explicit HVT/Classified exclusion (EN/ES pp. 63–66).
+  Both languages on p. 64 disagree over Shasvastii eligibility for Domination:
+  English counts Shasvastii-Embryo or any non-Null State; Spanish names
+  Normal or Unconscious. The English-selected rule and source issue retain
+  both formulations, also independently documented for ITS 17.
 - **Double Bind:** Three Antennas, their Circular Template Zones of
   Influence, 4-inch central Exclusion Zone and typed, mutually exclusive
   Main Objective sets (Encryption, Sabotage and Secure Vector). The

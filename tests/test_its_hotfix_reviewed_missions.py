@@ -62,6 +62,18 @@ def test_crossing_lines_split_deployment_and_hvt_hotfix() -> None:
     assert len(mission["objectives"]) == 4
     assert sum(item["maximumPoints"] for item in mission["objectives"]) == 10
     assert [c["page"] for c in record["citations"]] == [63, 64, 65, 66] * 2
+    rules = {rule["id"]: rule for rule in mission["rules"]}
+    domination = rules["dominate-zo"]["paragraphs"][2]
+    assert "Shasvastii-Embryo or any non-Null State" in domination
+    assert "Normal or Unconscious" in domination
+    issue = next(
+        i for i in mission["sourceIssues"]
+        if i["id"] == "its18-crossing-lines-shasvastii-states-en-es"
+    )
+    assert issue["armyPoints"] == list(SIZES)
+    assert issue["status"] == "needs-verification"
+    assert "EN p. 64" in issue["description"]
+    assert "ES p. 64" in issue["description"]
     assert "HVT" in " ".join(mission["rules"][-1]["paragraphs"])
     assert "Classified Deck" in " ".join(mission["rules"][-1]["paragraphs"])
     for size in mission["gameSizes"]:

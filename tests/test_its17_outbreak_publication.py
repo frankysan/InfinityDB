@@ -123,6 +123,13 @@ def test_its17_outbreak_geometry_skills_and_source_differences() -> None:
         }
         assert h_rules[skill]["skillTypeIds"] == ["short-skill"]
     assert "each player places two" in h_rules["infected-placement"]["paragraphs"][0]
+    assert "apart from each other" in h_rules["infected-placement"]["paragraphs"][1]
+    assert "from all other Infected" not in h_rules["infected-placement"]["paragraphs"][1]
+    assert "from all other Infected" in m_rules["infected-placement"]["paragraphs"][1]
+    assert any(
+        "Secure Treasure does not apply" in paragraph
+        for paragraph in h_rules["no-hvt-classified"]["paragraphs"]
+    )
     assert "Circular Template" in h_rules["stabilization-zones"]["paragraphs"][0]
     assert "Doctor or Paramedic" in h_rules["doctor-paramedic-bonus"]["paragraphs"][0]
     issues = old["mission"]["sourceIssues"]

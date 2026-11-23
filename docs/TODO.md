@@ -368,13 +368,6 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
   and all 16 ITS 17 EN mission chapters (V0.2, pp. 31–96), with comparison
   against curated objectives, setup, special rules and Skill definitions and
   targeted Spanish verification. Resolve these findings before release:
-  - [ ] **Gameplay corrections.** ITS 18 Crossing Lines: EN p. 64 counts
-    Shasvastii-Embryo or non-Null States; ES p. 64 names Normal or
-    Unconscious. Correct the current rule text and record the bilingual issue
-    with season-local evidence. ITS 17 Outbreak: EN p. 69 / ES p. 47 require
-    8-inch / 20-cm separation between the two player-placed Infected, not
-    from all other Infected as in ITS 18 EN p. 84. Also restore the explicit
-    Secure Treasure exclusion (ITS 17 EN p. 71 / ES p. 49).
   - [ ] **Historical HVT count.** Reconcile ITS 17 Crossing Lines'
     provisional zero-HVT count with compulsory HVT deployment in the general
     ITS 17 rules (EN pp. 26–27). The mission disables Secure HVT and Secure
