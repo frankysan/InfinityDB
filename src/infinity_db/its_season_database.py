@@ -242,6 +242,48 @@ def _validate_season_state(
         raise ValueError("ITS season State requires reviewed source citations")
 
 
+def _validate_season_rule(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    if record["id"] != "rule:tactical-support":
+        _validate_season_extra(record, season_id=season_id, revision=revision)
+        return
+    facts = record.get("facts")
+    if (
+        not isinstance(facts, dict)
+        or set(facts) != {"category", "applicability", "effects", "restrictions",
+                          "options", "sourceNotes"}
+        or facts["category"] != "basic-rule"
+        or facts["applicability"] != {"context": "tactical-support", "revision": revision}
+        or season_id != "its-17"
+        or record["scope"] != {"game": "N5", "seasons": [season_id]}
+        or record["composition"] != {"role": "definition"}
+        or record.get("armyLinks")
+        or not record.get("citations")
+        or record.get("review", {}).get("status") != "reviewed"
+    ):
+        raise ValueError("Tactical Support requires season-local reviewed rule facts")
+    for key in ("effects", "restrictions", "sourceNotes"):
+        entries = facts[key]
+        if not isinstance(entries, list) or not entries or any(
+            not isinstance(entry, str) or not entry.strip() for entry in entries
+        ):
+            raise ValueError(f"Tactical Support requires {key}")
+    options = facts["options"]
+    names: set[str] = set()
+    if not isinstance(options, list) or not options:
+        raise ValueError("Tactical Support requires options")
+    for option in options:
+        if (
+            not isinstance(option, dict)
+            or set(option) != {"name", "effect", "timing"}
+            or any(not isinstance(v, str) or not v.strip() for v in option.values())
+            or option["name"] in names
+        ):
+            raise ValueError("Invalid Tactical Support option")
+        names.add(option["name"])
+
+
 def _validate_season_extra(
     record: dict[str, Any], *, season_id: str, revision: str,
 ) -> None:
@@ -410,7 +452,7 @@ def _validate_its_document(document: dict[str, Any], core_revision: str) -> None
         elif record["kind"] == "state":
             _validate_season_state(record, season_id=season_id, revision=season["revision"])
         elif record["kind"] == "rule":
-            _validate_season_extra(record, season_id=season_id, revision=season["revision"])
+            _validate_season_rule(record, season_id=season_id, revision=season["revision"])
         elif record["kind"] != "scenario":
             raise ValueError(f"ITS publication contains unsupported record {record['id']!r}")
 
@@ -685,7 +727,7 @@ def inspect_its_database(
                     record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
                 )
             else:
-                _validate_season_extra(
+                _validate_season_rule(
                     record, season_id=identity["seasonId"], revision=identity["seasonRevision"],
                 )
             citation_rows = connection.execute(
@@ -834,11 +876,15 @@ def inspect_its_database(
             ],
             "policies": policies,
         }
-        if extra_rows:
-            report["extras"] = [
-                {"id": row["id"], "contentSha256": row["content_sha256"]}
-                for row in extra_rows
-            ]
+        for key, rows in (
+            ("extras", [row for row in extra_rows if row["id"] != "rule:tactical-support"]),
+            ("seasonRules", [row for row in extra_rows if row["id"] == "rule:tactical-support"]),
+        ):
+            if rows:
+                report[key] = [
+                    {"id": row["id"], "contentSha256": row["content_sha256"]}
+                    for row in rows
+                ]
         return report
 
 

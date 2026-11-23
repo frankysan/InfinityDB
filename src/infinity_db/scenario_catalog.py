@@ -143,6 +143,7 @@ class ScenarioCatalog:
         self.rules_database = rules_database
         self.publication_registry = publication_registry
         self._records_cache: list[tuple[dict[str, Any], dict[str, Any]]] | None = None
+        self._season_rules_cache: list[dict[str, Any]] | None = None
         self._scenario_skills_cache: list[dict[str, Any]] | None = None
         self._scenario_skill_aliases: dict[str, dict[str, Any]] = {}
 
@@ -794,6 +795,27 @@ class ScenarioCatalog:
                 item["rule"] = deepcopy(rule)
             special_rules.append(item)
 
+        tactical_support = None
+        if record["facts"].get("eventContext", {}).get("tacticalSupportOptions", 0) > 0:
+            if self._season_rules_cache is None:
+                self._season_rules_cache = (
+                    self.publication_registry.season_rule_entries()
+                    if self.publication_registry is not None else []
+                )
+            support = next((
+                entry for entry in self._season_rules_cache
+                if entry["record"]["id"] == "rule:tactical-support"
+                and entry["collection"] == publication["collection"]
+                and entry["revision"] == publication["revision"]
+            ), None)
+            if support is None:
+                raise ValueError("Scenario requires a published Tactical Support rule")
+            tactical_support = {
+                "name": support["record"]["name"],
+                **deepcopy(support["record"]["facts"]),
+                "citations": deepcopy(support["citations"]),
+            }
+
         source_issues = [
             deepcopy(issue)
             for issue in mission["sourceIssues"]
@@ -813,6 +835,8 @@ class ScenarioCatalog:
                 "game_size": game_size,
                 **({"play_requirements": deepcopy(record["facts"]["playRequirements"])}
                    if "playRequirements" in record["facts"] else {}),
+                **({"event_context": deepcopy(record["facts"]["eventContext"])}
+                   if "eventContext" in record["facts"] else {}),
             },
             "placement": {
                 "configuration_id": configuration_id,
@@ -831,6 +855,7 @@ class ScenarioCatalog:
                 ),
             },
             "objectives": objectives,
+            **({"tactical_support": tactical_support} if tactical_support else {}),
             **({"objective_selection": deepcopy(mission["objectiveSelection"])}
                if "objectiveSelection" in mission else {}),
             "special_rules": special_rules,

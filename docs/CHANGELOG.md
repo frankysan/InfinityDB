@@ -43,7 +43,10 @@ are not retroactively relabeled.
   in Critical Intervention and Last Launch now have four labeled Wide Gate
   openings and a width ruler below each room; gate widths remain schematic.
 - Scenario setup lists how many Classified Objectives, Tactical Objectives, and
-  HVTs each player uses.
+  HVTs each player uses. ITS 17 setup also lists Tactical Support options per
+  player and links to the historical selection rules and all twelve effects.
+  Both seasons show their declared Reinforcements suitability, distinguishing
+  absent labels from explicit exclusions and bilingual discrepancies.
 - Corrected ITS 18 Crossing Lines' Shasvastii Domination rule and disclosed
   the bilingual discrepancy. ITS 17 Outbreak now uses its historical Infected
   separation rule and explicitly excludes Secure Treasure. ITS 17 Crossing

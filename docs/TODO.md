@@ -368,15 +368,6 @@ In-browser visual acceptance at relevant breakpoints is still open. See the
   and all 16 ITS 17 EN mission chapters (V0.2, pp. 31–96), with comparison
   against curated objectives, setup, special rules and Skill definitions and
   targeted Spanish verification. Resolve these findings before release:
-  - [ ] **Historical Tactical Support.** Publish ITS 17 per-player option
-    counts, selection rules and effects (EN pp. 27–29), distinct from
-    Tactical Objectives: B-Pong (p. 36), Evacuation (p. 55), Last Launch
-    (p. 63) each 2; Critical Intervention (p. 45), Hardlock (p. 59),
-    Provisioning (p. 72) each 1; all other published missions 0.
-  - [ ] **Reinforcements context.** Consistently present source-declared
-    suitability in mission setup rather than relying on summaries. Review
-    mission headers for both seasons and preserve language discrepancies;
-    do not treat an absent suitability label as an explicit prohibition.
   - [ ] **Season-specific marker footprints.** ITS 17 B-Pong's 25 mm Beacon
     is confirmed by its mission (EN p. 37) and chart (EN p. 13 / ES p. 14);
     the shared tracking-beacon rendering/catalog code currently applies

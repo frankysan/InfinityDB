@@ -46,6 +46,60 @@ def _get(app, path):
     return status, json.loads(content)
 
 
+@pytest.mark.parametrize("season", ["its-17", "its-18"])
+def test_mission_event_context(app, its17_app, season):
+    common = {
+        "evacuation", "hardlock", "uplink-center", "battleground", "annihilation",
+        "cutthroat", "superiority", "provisioning", "area-of-interest", "last-launch",
+        "b-pong", "crossing-lines", "corporate-appropriation", "critical-intervention",
+        "outbreak", "akial-interference",
+    }
+    excluded = {"battleground", "superiority", "crossing-lines", "critical-intervention"}
+    historical = season == "its-17"
+    selected_app = its17_app if historical else app
+    slugs = common if historical else common | {
+        "double-bind", "the-dig", "data-harvest", "neutralization",
+    }
+    counts = {
+        "b-pong": 2, "evacuation": 2, "last-launch": 2,
+        "critical-intervention": 1, "hardlock": 1, "provisioning": 1,
+    }
+    for slug in sorted(slugs):
+        status, mission = _get(
+            selected_app, f"/api/scenarios/{slug}?collection={season}&army_points=300",
+        )
+        assert status == 200, slug
+        if historical:
+            en = "not-suitable" if slug in excluded else "suitable"
+            es = "not-suitable" if slug in {
+                "area-of-interest", "corporate-appropriation",
+            } else en
+        else:
+            en = "not-declared" if slug in excluded | {
+                "double-bind", "data-harvest", "provisioning",
+            } else "suitable"
+            es = "suitable" if slug == "provisioning" else en
+        expected: dict[str, object] = {"reinforcements": {"en": en, "es": es}}
+        count = counts.get(slug, 0) if historical else 0
+        if historical:
+            expected["tacticalSupportOptions"] = count
+        assert mission["setup"]["event_context"] == expected, slug
+        if not count:
+            assert "tactical_support" not in mission, slug
+            continue
+        support = mission["tactical_support"]
+        assert support["name"] == "Tactical Support"
+        assert len(support["options"]) == 12
+        assert len(support["sourceNotes"]) == 2
+        assert {(c["source_id"], c["page"]) for c in support["citations"]} == {
+            ("its-season-17-v0.2-en-pdf", page) for page in (27, 28, 29)
+        } | {
+            ("its-season-17-v0.2-es-pdf", page) for page in (28, 29, 30)
+        }
+        cancel = next(o for o in support["options"] if o["name"] == "Cancel enemy support")
+        assert "EN:" in cancel["timing"] and "ES:" in cancel["timing"]
+
+
 def test_scenario_skills_listed_with_context_and_source(app):
     status, payload = _get(app, "/api/skills")
     assert status == 200

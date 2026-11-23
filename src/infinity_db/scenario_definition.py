@@ -108,7 +108,7 @@ def parse_scenario_definition_record(
     _only_keys(
         facts,
         {"definitionVersion", "configurations"},
-        {"relatedCategories", "mission", "componentSources", "playRequirements"},
+        {"relatedCategories", "mission", "componentSources", "playRequirements", "eventContext"},
         "scenario record.facts",
     )
     if (
@@ -131,6 +131,20 @@ def parse_scenario_definition_record(
         for key, count in requirements.items():
             if type(count) is not int or count < 0:
                 raise ScenarioDefinitionError(f"{context}.{key} must be a non-negative integer")
+
+    if "eventContext" in facts:
+        context = "scenario record.facts.eventContext"
+        event = _object(facts["eventContext"], context)
+        _only_keys(event, {"reinforcements"}, {"tacticalSupportOptions"}, context)
+        suitability = _object(event["reinforcements"], f"{context}.reinforcements")
+        _only_keys(suitability, {"en", "es"}, set(), f"{context}.reinforcements")
+        for value in suitability.values():
+            if value not in ("suitable", "not-suitable", "not-declared"):
+                raise ScenarioDefinitionError(f"{context}: invalid Reinforcements declaration")
+        if "tacticalSupportOptions" in event:
+            count = event["tacticalSupportOptions"]
+            if type(count) is not int or count < 0:
+                raise ScenarioDefinitionError(f"{context}: invalid Tactical Support count")
 
     raw_configurations = facts.get("configurations")
     if not isinstance(raw_configurations, list) or not raw_configurations:

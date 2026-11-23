@@ -149,6 +149,10 @@ class PublicationRegistry:
         """Return source-cited season States without promoting them to N5 core."""
         return self._season_rule_entries("state")
 
+    def season_rule_entries(self) -> list[dict[str, Any]]:
+        """Return reviewed season-local rules, including tournament Extras."""
+        return self._season_rule_entries("rule")
+
     def _season_rule_entries(self, kind: str) -> list[dict[str, Any]]:
         entries: list[dict[str, Any]] = []
         for registered, report in self._season_reports.items():

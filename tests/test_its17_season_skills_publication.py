@@ -33,7 +33,7 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
     assert all("resilience" not in member["scenarioId"] for member in members)
     assert {record["id"] for record in document["records"]} == {
         "skill:civevac", "skill:casevac", "state:casevac",
-        "rule:resilience-operations",
+        "rule:resilience-operations", "rule:tactical-support",
     }
     assert "short-movement-skill" in {
         item["id"] for item in document["skillTypes"]
@@ -42,7 +42,8 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
 
 def test_original_casevac_and_civevac_types_have_bilingual_citations() -> None:
     records = historical_records()
-    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 4  # season Skills, State, Extra
+    # Season Skills, State, Extra and Tactical Support.
+    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 5
     expected = {
         "skill:civevac": [(EN, 17), (EN, 18), (ES, 18), (ES, 19)],
         "skill:casevac": [(EN, 19), (EN, 20), (ES, 20), (ES, 21)],

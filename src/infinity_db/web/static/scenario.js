@@ -175,6 +175,33 @@ function setupCard(item) {
       : "Objective and HVT counts are per player.";
     card.append(note);
   }
+  const event = item.setup?.event_context;
+  if (event) {
+    if (event.tacticalSupportOptions != null) {
+      const support = event.tacticalSupportOptions;
+      const row = fact("Tactical Support Options per player", support === 0 ? "Not used" : String(support));
+      if (support > 0 && item.tactical_support) {
+        const link = document.createElement("a");
+        link.href = "#scenario-tactical-support";
+        link.textContent = String(support);
+        row.querySelector("dd").replaceChildren(link);
+      }
+      facts.append(row);
+    }
+    const suitability = event.reinforcements;
+    const labels = {
+      suitable: "Suitable", "not-suitable": "Not suitable", "not-declared": "Not stated",
+    };
+    if (suitability.en === suitability.es) {
+      facts.append(fact("Reinforcements", labels[suitability.en]));
+    } else {
+      facts.append(fact("Reinforcements", "Source discrepancy"));
+      const note = document.createElement("p");
+      note.className = "scenario-setup-note";
+      note.textContent = `Reinforcements: English — ${labels[suitability.en]}; Spanish — ${labels[suitability.es]}.`;
+      card.append(note);
+    }
+  }
   // Table dimensions are derived from canonical inches, not marker footprint metadata.
   const tableValue = tableFact.querySelector("dd");
   if (tableValue && Number.isFinite(table.width) && Number.isFinite(table.height)) {
@@ -550,6 +577,50 @@ function provenanceSection(item) {
   return wrapper;
 }
 
+function tacticalSupportSection(item) {
+  const support = item.tactical_support;
+  if (!support) return null;
+  const card = document.createElement("article");
+  card.id = "scenario-tactical-support";
+  card.className = "surface surface--subtle surface--clipped";
+  const title = document.createElement("h3");
+  title.className = "surface-titlebar surface-titlebar--subtle";
+  title.textContent = support.name;
+  const body = document.createElement("div");
+  body.className = "surface-body";
+  for (const paragraph of [...support.effects, ...support.restrictions]) {
+    const text = document.createElement("p");
+    text.className = "detail-copy";
+    text.textContent = paragraph;
+    body.append(text);
+  }
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const option of support.options) {
+    const entry = document.createElement("li");
+    const label = document.createElement("strong");
+    label.textContent = option.name + ": ";
+    entry.append(label, option.effect, " — ", option.timing);
+    list.append(entry);
+  }
+  body.append(list);
+  for (const note of support.sourceNotes) {
+    const text = document.createElement("p");
+    text.className = "detail-copy";
+    text.textContent = note;
+    body.append(text);
+  }
+  const sources = document.createElement("p");
+  sources.className = "detail-source";
+  for (const [index, citation] of support.citations.entries()) {
+    if (index) sources.append(" · ");
+    sources.append(rulesCitationNode(citation));
+  }
+  body.append(sources);
+  card.append(title, body);
+  return section("Tactical Support", card);
+}
+
 function seasonPolicyDetails(policy, publication) {
   const details = document.createElement("div");
   const title = document.createElement("h4");
@@ -646,6 +717,7 @@ function render(item, faqItems, controller) {
   placement.append(setupCard(item), mapCard(item));
   const sections = [
     section("Setup", placement),
+    tacticalSupportSection(item),
     objectivesSection(item),
     rulesSection(item),
     seasonPolicySection(item, controller),

@@ -35,6 +35,17 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   Their current authored revisions (2026.09.11 and 0.2, respectively) resolve
   automatically; explicit older revision links still fail closed without
   silently displaying replacement facts. Historical revision browsing remains deferred.
+- **Event context:** All 36 published missions carry `eventContext` with separate
+  English and Spanish Reinforcements declarations (`suitable`, `not-suitable`,
+  or `not-declared`). ITS 17 also records `tacticalSupportOptions` per player
+  (including explicit zeroes), distinct from Tactical Objectives. The ITS 17
+  season-owned `rule:tactical-support` supplies the shared selection rules,
+  restrictions and twelve effects/timings (EN pp. 27–29, ES pp. 28–30), linked
+  from mission setup when options are used. Cancellation timing and the scope
+  of the Specialist reroll differ between the languages and remain disclosed.
+  ITS 18 has no Tactical Support count. Reinforcements discrepancies are retained
+  for ITS 17 Area of Interest and Corporate Appropriation, and ITS 18 Provisioning;
+  mission-header omission is not converted into an explicit prohibition.
 - **Scenario Skills:** Mission rules with `skillTypeIds` and `skillFacts`
   project to standard Skill cards, `/skills` and Search. All 31 reviewed ITS 18
   and 22 ITS 17 actions have structured Requirements and Effects, with optional Restrictions,

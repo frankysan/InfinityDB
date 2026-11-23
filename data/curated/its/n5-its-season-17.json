@@ -1356,6 +1356,137 @@
       }
     },
     {
+      "id": "rule:tactical-support",
+      "kind": "rule",
+      "name": "Tactical Support",
+      "summary": "ITS 17 mission-selected support bonuses drawn from the symbol-bearing Tactical Objective cards.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "tactical-support",
+          "revision": "0.2"
+        },
+        "effects": [
+          "After selecting an Army List, each player removes the four symbol-free cards (King of the Hill, Central Control, Z Domination and N Domination) from their own Tactical Objective Deck, shuffles it in front of their opponent and draws the mission-specified number of cards.",
+          "Tactical Support options are Open Information and provide bonuses rather than additional scoring objectives."
+        ],
+        "restrictions": [
+          "A recipient must be deployed on the table as a Model, not in Hidden Deployment or a Marker State, and must remain on the table as a Model. Irregular Troopers, REMs and VHs are ineligible."
+        ],
+        "options": [
+          {
+            "name": "Single-use reroll",
+            "effect": "Apply the ReRoll MOD to a Skill with the Scenario Label; one use.",
+            "timing": "After a failed Roll."
+          },
+          {
+            "name": "Single-use automatic success",
+            "effect": "Automatically succeed at a Roll for a Skill with the Scenario Label; one use.",
+            "timing": "Before the Roll."
+          },
+          {
+            "name": "Specialist reroll",
+            "effect": "A chosen Specialist gains ReRoll for Scenario-labelled Skills.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Wildcard",
+            "effect": "Choose any other Tactical Support effect.",
+            "timing": "When the card is drawn."
+          },
+          {
+            "name": "Sensor",
+            "effect": "A chosen Specialist gains Sensor.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Specialist Operative",
+            "effect": "A chosen eligible Trooper gains Specialist Operative.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "MediKit",
+            "effect": "A chosen Specialist gains a MediKit.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "GizmoKit",
+            "effect": "A chosen Specialist gains a GizmoKit.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Cancel enemy support",
+            "effect": "Cancel one opposing Tactical Support option.",
+            "timing": "EN: end of Deployment in Initiative order; ES: when the card is drawn."
+          },
+          {
+            "name": "Blitzen",
+            "effect": "A chosen Specialist gains a Blitzen.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Adhesive Launcher Rifle",
+            "effect": "A chosen Specialist gains an Adhesive Launcher Rifle.",
+            "timing": "Assigned at the end of Deployment, in Initiative order."
+          },
+          {
+            "name": "Initiative bonus",
+            "effect": "The Lieutenant receives WIP +1 for the Initiative Roll.",
+            "timing": "During the Initiative Roll."
+          }
+        ],
+        "sourceNotes": [
+          "The cancellation timing differs between EN p. 29 and ES p. 30; neither timing is silently substituted for the other.",
+          "For the ongoing Specialist reroll, EN p. 28 describes Scenario-labelled Skills generally; ES p. 29 specifically describes WIP Rolls for those Skills."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 27,
+          "section": "Tactical Support"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 28,
+          "section": "Tactical Support"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 29,
+          "section": "Tactical Support"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 28,
+          "section": "Apoyos Tácticos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 29,
+          "section": "Apoyos Tácticos"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 30,
+          "section": "Apoyos Tácticos"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-23"
+      }
+    },
+    {
       "id": "rule:resilience-operations",
       "kind": "rule",
       "name": "Resilience Operations",
@@ -2457,6 +2588,6 @@
   },
   "sharedScenarioLibrary": {
     "id": "its17-scenarios",
-    "sha256": "c85d650d1be4d94a0f6f8bcd5f8ac815c3897b7fe6c9d93f58915bbbd8d3458e"
+    "sha256": "e0b807e8297823dee596ee813b24b3a2539590de89496b40495d759494b5e119"
   }
 }

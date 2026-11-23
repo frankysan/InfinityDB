@@ -1078,6 +1078,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "not-declared"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -2075,6 +2078,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "not-declared"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
@@ -3129,6 +3135,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 2,
           "tacticalObjectives": 0,
@@ -3867,6 +3876,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -4873,6 +4885,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "not-declared"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -5777,6 +5792,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -6428,6 +6446,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "not-declared"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -7466,6 +7487,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -8260,6 +8284,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
@@ -9156,6 +9183,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 2,
           "tacticalObjectives": 0,
@@ -10088,6 +10118,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
@@ -10842,6 +10875,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 2,
           "tacticalObjectives": 0,
@@ -11751,6 +11787,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
@@ -12840,6 +12879,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
@@ -13677,6 +13719,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
@@ -14374,6 +14419,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "not-declared"}
+        },
         "playRequirements": {
           "classifiedObjectives": 2,
           "tacticalObjectives": 0,
@@ -15207,6 +15255,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 3,
           "tacticalObjectives": 0,
@@ -16188,6 +16239,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 3,
           "tacticalObjectives": 0,
@@ -17158,6 +17212,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "suitable", "es": "suitable"}
+        },
         "playRequirements": {
           "classifiedObjectives": 0,
           "tacticalObjectives": 0,
@@ -17904,6 +17961,9 @@
       },
       "facts": {
         "definitionVersion": 1,
+        "eventContext": {
+          "reinforcements": {"en": "not-declared", "es": "not-declared"}
+        },
         "playRequirements": {
           "classifiedObjectives": 1,
           "tacticalObjectives": 0,
