@@ -18,7 +18,8 @@ are not retroactively relabeled.
 - Double Bind now distinguishes its three alternative Main Objective sets;
   players can compare them or focus on one while Secondary and Classified
   Objectives stay visible.
-- Scenario lists are alphabetical. ITS tournament and Extra rules have separate
+- Scenario lists are alphabetical within sections, with ITS Standard scenarios
+  followed by Direct Action scenarios for both ITS 17 and 18. ITS tournament and Extra rules have separate
   cards, and physical marker sizes now include the source-chart 25 mm Defensive
   Turret Token (distinct from its S2 Model option), 25 mm Civilians, and
   Hardlock's Beacon.

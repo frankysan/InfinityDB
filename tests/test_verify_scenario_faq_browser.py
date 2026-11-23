@@ -2585,6 +2585,46 @@ def test_core_scenario_detail_error_recovers_after_valid_size_choice(
         page.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+@pytest.mark.parametrize(("season", "standard_count"), [("its-17", 11), ("its-18", 15)])
+def test_its_scenario_catalog_groups_standard_and_direct_action(
+    scenario_app: Callable[..., Any], chrome: Any,
+    width: int, season: str, standard_count: int,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/scenarios?collection={season}", wait_until="domcontentloaded")
+        catalog = page.locator("#scenario-grid")
+        catalog.wait_for(state="visible", timeout=30000)
+        assert catalog.locator(".scenario-catalog-group > h3").all_text_contents() == [
+            "Standard scenarios", "Direct Action scenarios",
+        ]
+        groups = catalog.locator(".scenario-catalog-group")
+        standard = groups.nth(0).locator(".scenario-card h4").all_text_contents()
+        direct = groups.nth(1).locator(".scenario-card h4").all_text_contents()
+        assert len(standard) == standard_count
+        assert standard == sorted(standard, key=str.casefold)
+        assert direct == [
+            "Annihilation", "Battleground", "Cutthroat", "Superiority", "Uplink Center",
+        ]
+        assert not set(standard) & set(direct)
+        assert page.locator("#scenario-count").inner_text() == f"{standard_count + 5} scenarios"
+        assert catalog.locator(".scenario-card-footer a").count() == standard_count + 5
+        assert all(
+            f"collection={season}" in url
+            for url in catalog.locator(".scenario-card-footer a").evaluate_all(
+                "(links) => links.map(link => link.href)"
+            )
+        )
+        assert page.evaluate("() => document.documentElement.scrollWidth <= innerWidth + 1")
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390, 320])
 def test_core_scenario_catalog_keyboard_soft_navigation_and_back(
     scenario_app: Callable[..., Any], chrome: Any, width: int,

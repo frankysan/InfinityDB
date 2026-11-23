@@ -785,11 +785,22 @@ html:not([data-developer-mode="true"])
   width: min(100%, 400px);
 }
 
+.scenario-list {
+  padding: 20px 24px 28px;
+}
+
+.scenario-catalog-group + .scenario-catalog-group {
+  margin-top: 28px;
+}
+
+.scenario-catalog-group > .detail-heading {
+  margin: 0 0 14px;
+}
+
 .scenario-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 14px;
-  padding: 20px 24px 28px;
 }
 
 .scenario-card {
@@ -807,7 +818,7 @@ html:not([data-developer-mode="true"])
   gap: 12px;
 }
 
-.scenario-card-header h3 {
+.scenario-card-header :is(h3, h4) {
   margin: 0;
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
@@ -1196,7 +1207,7 @@ svg.scenario-map .label {
 }
 
 @media (max-width: 760px) {
-  .scenario-grid {
+  .scenario-list {
     padding-inline: 18px;
   }
 
