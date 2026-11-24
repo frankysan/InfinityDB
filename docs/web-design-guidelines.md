@@ -82,6 +82,14 @@ an implicit source note. Important unresolved *gameplay* ambiguities remain visi
 in normal mode with an intelligible explanation; developer mode is not a way to
 hide conflicting rules.
 
+**Accepted design direction (not yet implemented):** Distinguish official rules
+and statistics, recent official changes, examples, explanations, corrections,
+interpretations and source inconsistencies using shared semantic presentation.
+Official change notices must use reviewed change history; editorial corrections
+and interpretations must not appear to be official rulings. Meaning must remain
+clear independently of color. The final typography and visual treatments are
+subject to the representative-content comparison tracked in [TODO](TODO.md).
+
 **Prefer canonical player labels.** Present reviewed N5 Trait names and preserve
 source labels in the API. Pure spelling, abbreviation, and duplicate Army labels
 (`Zone of Control` versus `Zone of Control (ZoC)`) are developer-only annotations
@@ -480,6 +488,12 @@ branding.
 ### Keep theme and layout concerns separate
 
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
+
+**Accepted design direction (not yet implemented):** Theme identity and theme
+mode are independent preferences. The InfinityDB palette remains the default;
+optional Army palettes derive semantic colors from imported Army color pairs.
+Auto, Light and Dark apply to every palette. Army identity colors must not
+replace semantic status colors or compromise the contrast contract below.
 
 ### Maintain measurable contrast and non-color meaning
 

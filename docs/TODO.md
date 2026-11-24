@@ -22,7 +22,7 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Presentation and feedback](#reference-presentation-and-feedback), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
@@ -142,6 +142,40 @@ Use these links to jump directly to a workstream:
     the reason or effective date is unknown.
   Preserve multiple successive changes and supersession without overwriting
   earlier events or conflating history with current canonical facts.
+
+### Reference presentation and feedback
+
+- [ ] **Web frontend + Web backend:** Add optional Army-derived themes using
+  the imported Army color pairs. Separate Theme (InfinityDB, then Armies
+  ordered by numerical ID) from Theme mode (Auto, Light, Dark). Preserve
+  InfinityDB as the default, migrate existing preferences, derive accessible
+  semantic palettes for both modes, and retain first-paint resolution and
+  theme-aware scenario SVG rendering. Verify the palette contrast contract
+  in [web design guidelines](web-design-guidelines.md).
+- [ ] **Web frontend + Data processing:** Establish and implement a shared
+  visual hierarchy for official rules text, recent official rule/stat changes,
+  examples, explanations, corrections, interpretations and source
+  inconsistencies. Compare typography (family, style, weight and features),
+  color and other semantic treatments on representative existing cards in
+  light/dark and Army-derived themes. Preserve provenance and accessible
+  non-color meaning; integrate official-change notices with the
+  [per-reference change history](#per-reference-change-history) work, not a
+  parallel mechanism. Record the selected policy in
+  [web design guidelines](web-design-guidelines.md).
+- [ ] **Web frontend + Web backend + Deployment:** Add a shared, minimal
+  bug/error reporting form with lightweight spam/bot protection. Include
+  the current page and relevant entity context by default, let the reporter
+  inspect the submitted context, and omit personal details and private
+  URL/query/share data. Require no account, name or email. Choose a simple
+  report-delivery mechanism and retention policy before implementation;
+  avoid a separate issue-management system or personal-content store.
+  Keep the component consistent wherever displayed.
+- [ ] **Web backend + Web frontend:** Link Unit detail pages to their
+  corresponding entries in official Infinity Army. Verify the supported
+  deep-link format before generating links from imported source identifiers;
+  resolve the selected Army context and multiple memberships correctly.
+  Omit unsupported targets, including out-of-catalog entries without a
+  verified destination.
 
 ### List and session configuration
 
@@ -677,6 +711,14 @@ Season 16 Part II remains later scope.
   - [ ] Scenario pages should expose the selected season prominently and link
     season-specific terms to the relevant rules/state references.
 
+- [ ] **Web frontend + Web backend:** Add a collapsed-by-default Season Rules
+  section to ITS scenario pages, using the selected season's canonical
+  season-wide Rules, Skills, States and event policies. Reuse existing
+  reference cards and citations; distinguish generally applicable rules
+  from optional Extras and retain their applicability. Identify and curate
+  any missing common rule coverage rather than duplicating rules per mission
+  or mixing seasons/revisions.
+
 - [ ] **Data processing + Web frontend:** Extend the existing core-scenario SVG renderer for ITS
   geometry after the seasonal scenario data is curated. Reuse the same versioned geometry model and
   rendering engine rather than creating an ITS-only map format.
@@ -770,6 +812,15 @@ persistence needs a separate privacy decision; the official Army app
 remains authoritative for list legality.
 
 - [ ] Build a curated unit-model image repository; do not assume open uploads.
+  - [ ] **Data processing + Web frontend:** **Dependency-bound:** Automatically generate printable model
+    identification sheets for all current factions and Armies/sectorials from
+    the published `miniatures.db`. Begin once the curated database and
+    representative image coverage are sufficient for useful, accurate sheets;
+    retain the goal of complete current-faction coverage. Include Unit names,
+    representative images, and explicit missing-image handling; consider
+    optional older sculpts/alternatives. Provide print-friendly layouts and PDF
+    export, with regeneration after Army or miniature database updates.
+    Respect asset publication permissions and preserve canonical identities.
 - [ ] Evaluate an offline/portable model-collection tracker without accounts.
 - [ ] Support portable army lists, favourites and notes with export/import,
   independent of replaceable Army snapshots.
