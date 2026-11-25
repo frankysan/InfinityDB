@@ -20,7 +20,7 @@ from infinity_db.database_set_builder import build_database_set
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
-from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
+from tools.runtime_semantic_baseline import CURRENT_BASELINE, capture, check
 
 ROOT = Path(__file__).resolve().parents[2]
 ORIGIN = "http://database-set-acceptance.test"
@@ -245,7 +245,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             version = _api(app, "/api/version")
             if version["static_revision"] != app.presentation.static_revision:
                 raise ValueError("Server and presentation disagree on selected asset revision")
-            baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
+            baseline = json.loads(CURRENT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
             )

@@ -19,10 +19,10 @@ from urllib.request import urlopen
 
 from infinity_db.database_set import validate_database_set
 from infinity_db.snapshot_revision import database_set_snapshot_revision
-from tools.runtime_semantic_baseline import capture, check
+from tools.runtime_semantic_baseline import CURRENT_BASELINE, capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CHECKOUT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json"
+DEFAULT_CHECKOUT_BASELINE = CURRENT_BASELINE
 LEGACY_FILES = ("deployed-objects.json", "variant-usage.json", "weapon-profile-sources.json")
 
 
