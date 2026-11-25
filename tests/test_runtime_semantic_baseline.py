@@ -177,7 +177,10 @@ def test_v121_baseline_preserves_routes_and_pins_reviewed_update_scope() -> None
         (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json")
         .read_text(encoding="utf-8")
     )
-    current = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    current = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.1.json")
+        .read_text(encoding="utf-8")
+    )
     old_rows = {row["path"]: row for row in earlier["probes"]}
     new_rows = {row["path"]: row for row in current["probes"]}
     assert old_rows.keys() == new_rows.keys()
@@ -196,6 +199,20 @@ def test_v121_baseline_preserves_routes_and_pins_reviewed_update_scope() -> None
         "/api/weapons/akrylat-kanone",
         "/api/variant-usage?record_id=skill%3Aberserk",
         "/api/variant-usage?record_id=equipment%3Aalbedo",
+    }
+
+
+def test_v122_baseline_changes_only_reviewed_routes() -> None:
+    earlier = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.1.json")
+        .read_text(encoding="utf-8")
+    )
+    current = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    old_rows = {row["path"]: row for row in earlier["probes"]}
+    new_rows = {row["path"]: row for row in current["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    assert {path for path in old_rows if old_rows[path] != new_rows[path]} == {
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
     }
 
 
