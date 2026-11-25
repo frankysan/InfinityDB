@@ -214,7 +214,7 @@ def test_army_links_and_filtered_availability_counts(
         page.goto(f"{origin}/armies", wait_until="domcontentloaded")
         card = page.locator(f'[id="army-{_slug(section)}"]')
         with page.expect_response(
-            lambda response: "/api/units?" in response.url and "counts=1" in response.url,
+            lambda response: "/api/units?" in response.url and "counts=prospective" in response.url,
             timeout=60000,
         ) as result:
             card.get_by_role("link", name="Browse units").click()
@@ -271,7 +271,7 @@ def test_army_links_and_filtered_availability_counts(
             f"({payload['total']})"
         )
         with page.expect_response(
-            lambda response: "/api/units?" in response.url and "counts=1" in response.url,
+            lambda response: "/api/units?" in response.url and "counts=prospective" in response.url,
             timeout=60000,
         ) as empty_result:
             page.locator("#unit-search").fill("impossible-unique-unit-name")

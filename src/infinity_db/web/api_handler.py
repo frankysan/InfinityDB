@@ -475,6 +475,9 @@ def _unit_query(query: str) -> dict:
     matching_scope = params.get("matching_scope", [""])[0]
     if matching_scope not in {"", "profile", "loadout", "unit"}:
         raise ValueError("Invalid matching scope")
+    prospective_only = params.get("counts", [""])[0] == "prospective"
+    if prospective_only and not matching_scope:
+        raise ValueError("Prospective-only counts require a matching scope")
     return {
         "and_filters": tuple(sorted(and_keys)),
         "matching_scope": matching_scope or None,
@@ -505,7 +508,8 @@ def _unit_query(query: str) -> dict:
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
         "extended": _flag(params, "extended"),
-        "include_usage_counts": _flag(params, "counts"),
+        "include_usage_counts": prospective_only or _flag(params, "counts"),
+        **({"include_raw_usage_counts": False} if prospective_only else {}),
     }
 
 
@@ -1561,7 +1565,7 @@ class ApiHandler:
                     if logical_unit_ids is not None:
                         query["_logical_unit_ids"] = frozenset(logical_unit_ids)
                     payload = self.database.list_units(**query)
-                    if "usage_counts" in payload:
+                    if "army_usage_counts" in payload:
                         encoded_ids = (
                             self.equipment_catalog.presentation_equipment_characteristic_ids()
                         )
@@ -1591,6 +1595,7 @@ class ApiHandler:
                         baseline = self.database.list_units(
                             limit=1, include_usage_counts=True,
                             matching_scope=query["matching_scope"],
+                            include_raw_usage_counts=query["matching_scope"] is None,
                             **{key: query[key] for key in (
                                 "mercs", "specops", "teamops", "reinforcement"
                             )},
@@ -1601,7 +1606,10 @@ class ApiHandler:
                             )
                         payload = {
                             **payload,
-                            "usage_counts": public_counts(payload["usage_counts"]),
+                            **(
+                                {"usage_counts": public_counts(payload["usage_counts"])}
+                                if "usage_counts" in payload else {}
+                            ),
                             "baseline_usage_counts": (
                                 public_counts(baseline["usage_counts"])
                                 if query["matching_scope"] is None

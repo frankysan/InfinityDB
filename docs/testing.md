@@ -45,6 +45,23 @@ Focused verification passed 16 scoped-filter, 22 Peripheral identity and
 establish conservative filter behavior, not complete list-building legality
 or missing upstream semantic data.
 
+## Unit Explorer filter performance — 2026-11-25
+
+Windows development checkout based on `caae1c2c`, using the November 25
+`data/generated/army.db` (9,199,616 bytes). The runtime benchmark compares
+full counts with prospective-only counts on the same database and code,
+using three independent cold samples and six identical cached samples per
+case. Median / nearest-rank p95 times in milliseconds (p95 is the maximum
+of these three samples):
+
+- Cold initial profile-scope list: 1593 / 1608 to 1265 / 1331.
+- Fresh profile-scope query after index construction: 265 / 273 to 159 / 171.
+- Fresh loadout-scope query after index construction: 297 / 316 to 160 / 231.
+- Fresh unit-scope query after index construction: 251 / 262 to 111 / 112.
+
+These are repository timings, not end-to-end HTTP or browser timings.
+Use repeatable `--case` options to select individual runtime benchmark cases.
+
 ## Unit Explorer filter performance — 2026-11-15
 
 Windows development checkout based on `cd688672`, with the scoped Unit-option

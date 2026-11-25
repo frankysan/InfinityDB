@@ -86,6 +86,19 @@ def discover_cases(database: Database) -> list[BenchmarkCase]:
             ),
         ),
         BenchmarkCase("traits", lambda db: db.list_traits()),
+        BenchmarkCase(
+            "units-scoped-initial-full",
+            lambda db: db.list_units(
+                matching_scope="profile", limit=50, include_usage_counts=True,
+            ),
+        ),
+        BenchmarkCase(
+            "units-scoped-initial-prospective",
+            lambda db: db.list_units(
+                matching_scope="profile", limit=50, include_usage_counts=True,
+                include_raw_usage_counts=False,
+            ),
+        ),
     ]
     if armies:
         army_id = armies[0]["id"]
@@ -180,6 +193,21 @@ def discover_cases(database: Database) -> list[BenchmarkCase]:
                         ),
                     )
                 )
+            for scope in ("profile", "loadout", "unit"):
+                cases.append(
+                    BenchmarkCase(
+                        f"units-prospective-{scope}-after-index",
+                        lambda db, values=scoped_ids, mode=scope: db.list_units(
+                            skill_id=values, and_filters=("skill",),
+                            matching_scope=mode, limit=50, include_usage_counts=True,
+                            include_raw_usage_counts=False,
+                        ),
+                        setup=lambda db, value=scoped_ids[0], mode=scope: db.list_units(
+                            skill_id=value, matching_scope=mode, limit=50,
+                            include_usage_counts=True, include_raw_usage_counts=False,
+                        ),
+                    )
+                )
         if items:
             item_id = items[0]["id"]
             cases.append(
@@ -201,10 +229,16 @@ def benchmark_database(
     *,
     cold_iterations: int,
     warm_iterations: int,
+    case_names: Sequence[str] = (),
 ) -> dict[str, Any]:
     database = Database(path)
     database.validate()
     cases = discover_cases(database)
+    if case_names:
+        unknown = set(case_names) - {case.name for case in cases}
+        if unknown:
+            raise ValueError(f"Unknown benchmark cases: {', '.join(sorted(unknown))}")
+        cases = [case for case in cases if case.name in case_names]
     results = []
     for case in cases:
         cold_samples = [_cold_sample(case, path) for _ in range(cold_iterations)]
@@ -239,6 +273,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("database", type=Path, help="Path to a built army.db snapshot.")
     parser.add_argument("--cold-iterations", type=int, default=20)
     parser.add_argument("--warm-iterations", type=int, default=200)
+    parser.add_argument("--case", action="append", default=[], help="Run only this named case.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -252,6 +287,7 @@ def main(argv: list[str] | None = None) -> int:
             args.database,
             cold_iterations=args.cold_iterations,
             warm_iterations=args.warm_iterations,
+            case_names=args.case,
         )
     except (OSError, sqlite3.Error, ValueError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

@@ -3274,7 +3274,11 @@ player-facing menus. An **unselected** option has exactly the result `total`
 after selecting it under current AND/OR and matching scope; a **selected**
 option displays the current `total`. Both result membership and prospective
 counts use one shared scope evaluator and an indexed source occurrence graph,
-not separate database queries for each menu option.
+not separate database queries for each menu option. Explicit scoped browser
+requests use `counts=prospective`, which returns the same prospective, baseline
+and Army counts without calculating the unused legacy `usage_counts` map.
+Existing `counts=1` clients retain the full response and legacy unscoped browser
+links continue to use that mode.
 
 `baseline_usage_counts` ignores discovery filters, Army selection and search,
 but retains the optional-unit Settings flags (Mercenaries, Spec-Ops, Team

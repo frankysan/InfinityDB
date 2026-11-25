@@ -511,6 +511,22 @@ def test_http_usage_counts_are_opt_in_and_stable_across_requests() -> None:
     )
     assert filtered_optional["baseline_usage_counts"] == optional["baseline_usage_counts"]
 
+    # Scoped browser requests need only prospective and Army availability counts.
+    for filters in (
+        "matching_scope=profile",
+        "matching_scope=loadout&skill_id=engineer&points_min=10&reinforcement=1",
+        "matching_scope=unit&search=impossible-unique-unit-name",
+    ):
+        legacy_counts = request(f"limit=1&counts=1&{filters}")
+        browser_counts = request(f"limit=1&counts=prospective&{filters}")
+        assert "usage_counts" in legacy_counts
+        assert "usage_counts" not in browser_counts
+        assert browser_counts == {
+            key: value for key, value in legacy_counts.items() if key != "usage_counts"
+        }
+    with pytest.raises(ValueError, match="require a matching scope"):
+        _unit_query("counts=prospective")
+
 @pytest.mark.parametrize(
     ("catalog", "slug", "filter_name"),
     [

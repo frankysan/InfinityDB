@@ -3598,9 +3598,12 @@ class Database:
         include_usage_counts: bool = False,
         and_filters: tuple[str, ...] = (),
         matching_scope: str | None = None,
+        include_raw_usage_counts: bool = True,
     ) -> dict[str, Any]:
         if matching_scope is not None and matching_scope not in {"profile", "loadout", "unit"}:
             raise ValueError("Invalid matching scope")
+        if not include_raw_usage_counts and matching_scope is None:
+            raise ValueError("Prospective-only counts require a matching scope")
         unresolved_army_filter = False
         if army_id is not None:
             resolved_army_id = self.application_army_id(army_id)
@@ -4052,7 +4055,7 @@ class Database:
                     }
             else:
                 prospective_counts = None
-        if include_usage_counts:
+        if include_usage_counts and include_raw_usage_counts:
             eligible_contexts: set[tuple[int, int, int, int | None, int | None]] = set()
             for group in grouped:
                 for occurrence in group["army_occurrences"]:
@@ -4154,7 +4157,8 @@ class Database:
                 for visible_army_id in group["armies"]:
                     army_usage_counts[str(visible_army_id)] += 1
             result["army_usage_counts"] = dict(army_usage_counts)
-            result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
+            if include_raw_usage_counts:
+                result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
             if prospective_counts is not None:
                 result["prospective_counts"] = prospective_counts
         if declared_faction_id is not None:
