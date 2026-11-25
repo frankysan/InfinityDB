@@ -3285,6 +3285,16 @@ matching occurrence identities; prospective counts deduplicate logical Units.
 Catalog option IDs come from the same application identity graph as the
 public catalogs, without calculating catalog usage statistics.
 
+`/api/unit-filters?catalogs=1` adds a `catalogs` object containing the
+Skills, Equipment and Weapons filter choices (IDs, names, public slugs
+and source aliases) in the same order as the public catalogs. The default
+response shape is unchanged. This projection skips catalog use counts
+and unused rules presentation metadata. The browser overlaps initial Unit
+results with filter initialization unless saved Army or categorical
+selections require normalization. Public slug reads reuse a resolved
+ID-to-slug index scoped to the immutable snapshot; unresolved identities
+still return no slug.
+
 `baseline_usage_counts` ignores discovery filters, Army selection and search,
 but retains the optional-unit Settings flags (Mercenaries, Spec-Ops, Team
 Operations, Reinforcements). With an explicit matching scope, the baseline is

@@ -1618,6 +1618,41 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 400
     assert json.loads(body)["error"] == "extended must be 0 or 1"
 
+def test_unit_filter_catalogs_match_public_catalog_identities(monkeypatch) -> None:
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    status, _, body = request(application, "/api/unit-filters")
+    assert status == 200
+    original = json.loads(body)
+    status, _, body = request(application, "/api/unit-filters", query="catalogs=0")
+    assert status == 200
+    assert json.loads(body) == original
+    status, _, body = request(application, "/api/unit-filters", query="catalogs=invalid")
+    assert status == 400
+
+    def unexpected_usage_query(*args, **kwargs):
+        pytest.fail("Filter initialization must not calculate catalog usage")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(application.database, "list_catalog_items", unexpected_usage_query)
+        patch.setattr(application.equipment_catalog, "_units_for_encoding", unexpected_usage_query)
+        status, _, body = request(application, "/api/unit-filters", query="catalogs=1")
+        assert status == 200
+    payload = json.loads(body)
+    catalogs = payload.pop("catalogs")
+    assert payload == original
+    for catalog, options in catalogs.items():
+        status, _, body = request(application, f"/api/{catalog}")
+        assert status == 200
+        assert options == [
+            {key: value for key, value in item.items()
+             if key in {"id", "name", "slug", "source_ids"}}
+            for item in json.loads(body)["items"]
+        ]
+
+
 def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -> None:
     from infinity_db.unit_presentation import extended_general_profiles
 

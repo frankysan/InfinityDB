@@ -282,13 +282,15 @@ class SkillCatalog:
             )
         ]
 
-    def list_skills(self) -> list[dict[str, Any]]:
+    def list_skills(self, *, filter_only: bool = False) -> list[dict[str, Any]]:
         """Return rules-domain Skills plus unresolved Army Skill identities."""
         excluded = self._rules_catalog_excluded_source_ids()
+        source_items = (
+            self.database.list_catalog_filter_items("skills") if filter_only
+            else self.database.list_catalog_items("skills")
+        )
         items = [
-            item
-            for item in deepcopy(self.database.list_catalog_items("skills"))
-            if int(item["id"]) not in excluded
+            item for item in deepcopy(source_items) if int(item["id"]) not in excluded
         ]
         definition_records: list[dict[str, Any]] = []
         if self.rules_database is not None:
@@ -316,8 +318,11 @@ class SkillCatalog:
         }
         represented_definition_ids: set[str] = set()
         for item in items:
-            item["categories"] = self._categories_for_ids({int(item["id"])})
-            self._enrich_skill_item(item)
+            if filter_only:
+                self._attach_public_slug(item)
+            else:
+                item["categories"] = self._categories_for_ids({int(item["id"])})
+                self._enrich_skill_item(item)
             record = next(
                 (
                     definitions_by_ref[reference]

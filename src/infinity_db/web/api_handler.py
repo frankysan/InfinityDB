@@ -623,6 +623,28 @@ class ApiHandler:
             general_only=True,
         ))
 
+    @instance_lru_cache(maxsize=1)
+    def _unit_filter_catalogs(self) -> dict[str, list[dict[str, Any]]]:
+        """Initialize the Explorer with the public catalog identities, not usage stats."""
+        weapons = [
+            dict(item) for item in self.database.list_catalog_filter_items("weapons")
+        ]
+        for item in weapons:
+            attach_public_catalog_slug(self.database, "weapons", item)
+        catalogs = {
+            "skills": self.skill_catalog.list_skills(filter_only=True),
+            "equipment": self.equipment_catalog.list_equipment(filter_only=True),
+            "weapons": weapons,
+        }
+        return {
+            catalog: [
+                {key: value for key, value in item.items()
+                 if key in {"id", "slug", "name", "source_ids"}}
+                for item in items
+            ]
+            for catalog, items in catalogs.items()
+        }
+
     def validate_health(self) -> None:
         """Exercise the minimum database paths required by the health endpoint."""
 
@@ -1520,10 +1542,19 @@ class ApiHandler:
         elif path == "/api/unit-filters":
             cache_control = API_CACHE_CONTROL
             try:
+                include_catalogs = _flag(parse_qs(query_string, keep_blank_values=True), "catalogs")
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
                 payload = enrich_unit_filter_presentation(
                     self.database.list_unit_filter_values(),
                     filter_semantics=self.database.unit_filter_semantics(),
                 )
+                if include_catalogs:
+                    payload["catalogs"] = self._unit_filter_catalogs()
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

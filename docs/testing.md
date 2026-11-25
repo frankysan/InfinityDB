@@ -102,6 +102,24 @@ profile projection (512 entries per application, keyed by Unit and enabled
 availability flags); preserve the existing full detail response. These local
 three-sample measurements do not establish production tail latency.
 
+### Unit Explorer initialization — 2026-11-25
+
+Windows checkout based on `885b7757`, same Army and N5 Rules snapshot,
+three fresh application/browser-context samples per configuration. The
+browser benchmark also prints initial API resource start/end times and
+decoded response sizes. The initial page median / maximum (ms) changed
+from 1936 / 1952 to 1383 / 1389 with lightweight filter catalogs and
+overlapping initialization/results requests, then to 975 / 1077 with a
+snapshot-level resolved public slug index. Compact next page changed from
+334 / 370 to 272 / 353; search from 299 / 337 to 295 / 299.
+Skills, Equipment, Weapons and numeric/vocabulary filter payloads totalled
+74,409 bytes before the change and 24,322 bytes afterward. The initial
+Unit list request now starts alongside initialization on an unfiltered
+entry; saved Army or categorical selections still normalize first.
+Concurrent requests can take longer individually than sequential requests,
+so assess the completed browser render rather than isolated API duration.
+The benchmark excludes application startup and production network latency.
+
 ## Unit Explorer filter performance — 2026-11-15
 
 Windows development checkout based on `cd688672`, with the scoped Unit-option

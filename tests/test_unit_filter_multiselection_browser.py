@@ -181,6 +181,30 @@ def test_unit_multiselect_legacy_invalid_and_empty_links(
     finally:
         page.close()
 
+def test_initial_results_failure_preserves_filter_initialization(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 1280, "height": 900})
+    route_browser_page(page, app, origin)
+    requests: list[str] = []
+    page.on("request", lambda request: requests.append(request.url))
+    pattern = "**/api/units?*"
+    page.route(pattern, lambda route: route.abort())
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        page.locator("#error-state").wait_for(state="visible")
+        assert page.locator(".unit-multi-option").count() > 0
+        assert page.locator("#army-filter").is_enabled()
+        assert sum("/api/unit-filters?" in url for url in requests) == 1
+        page.unroute(pattern)
+        page.locator("#retry").click()
+        page.locator("#table-container").wait_for(state="visible")
+        assert sum("/api/unit-filters?" in url for url in requests) == 1
+        assert sum("/api/units?" in url for url in requests) == 2
+    finally:
+        page.close()
+
+
 def test_contextual_counts_accessible_loading_and_failure(
     app: Any, origin: str, browser: Any,
 ) -> None:

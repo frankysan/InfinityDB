@@ -1,4 +1,4 @@
-import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
+import { getArmies, getUnitFilters, getUnits } from "./api.js";
 import {
   optionalUnitDefaultFilters, optionalUnitFilters, saveUnitAdvancedFiltersOpen,
   unitAdvancedFiltersOpen,
@@ -668,28 +668,35 @@ async function load() {
   elements.army.setAttribute("aria-busy", "true");
   elements.summary.textContent = "Loading units…";
   try {
+    let data;
     if (!armiesLoaded) {
-      const [armies, skills, equipment, weapons, unitFilters] = await Promise.all([
-        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal), getUnitFilters(signal),
-      ]);
+      // Saved Army/catalog selections must be normalized before requesting results.
+      // Otherwise fetch results alongside the two initialization requests.
+      const needsNormalization = state.armyId || AND_FILTER_KEYS.some(([key]) => state[key]);
+      const initialization = Promise.all([getArmies(signal), getUnitFilters(signal)]);
+      const initialRequest = needsNormalization ? null : getUnits(state, signal).then(
+        (data) => ({ data }), (error) => ({ error }),
+      );
+      const [armies, unitFilters] = await initialization;
       if (currentRequest !== requestNumber) return;
+      const { skills, equipment, weapons } = unitFilters.catalogs;
       populateArmies(armies.items);
       const normalizedCatalogFilters = [
-        normalizeCatalogFilterState(skills.items, "skillId"),
-        normalizeCatalogFilterState(equipment.items, "equipmentId"),
-        normalizeCatalogFilterState(weapons.items, "weaponId"),
+        normalizeCatalogFilterState(skills, "skillId"),
+        normalizeCatalogFilterState(equipment, "equipmentId"),
+        normalizeCatalogFilterState(weapons, "weaponId"),
         normalizeUnitFilterState(unitFilters.troop_types, "troopType"),
         normalizeUnitFilterState(unitFilters.classifications, "classification"),
         normalizeUnitFilterState(unitFilters.characteristics, "characteristic"),
       ].some(Boolean);
-      populateCatalogFilter(elements.skill, skills.items, "Skills");
-      populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
-      populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
-      multiControls.skillId.setItems(skills.items);
-      multiControls.equipmentId.setItems(equipment.items.map((item) => ({
+      populateCatalogFilter(elements.skill, skills, "Skills");
+      populateCatalogFilter(elements.equipment, equipment, "Equipment");
+      populateCatalogFilter(elements.weapon, weapons, "Weapons");
+      multiControls.skillId.setItems(skills);
+      multiControls.equipmentId.setItems(equipment.map((item) => ({
         ...item, hidden: ["cube", "cube-2"].includes(item.slug),
       })));
-      multiControls.weaponId.setItems(weapons.items);
+      multiControls.weaponId.setItems(weapons);
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
         (item) => item.display_name || item.name,
@@ -705,8 +712,13 @@ async function load() {
       syncFilters();
       if (normalizedCatalogFilters) writeLocation(true);
       armiesLoaded = true;
+      if (initialRequest) {
+        const result = await initialRequest;
+        if (result.error) throw result.error;
+        data = result.data;
+      }
     }
-    const data = await getUnits(state, signal);
+    data ??= await getUnits(state, signal);
     if (currentRequest !== requestNumber) return;
     // Shared links can point beyond the end after the database is refreshed.
     if (data.total > 0 && state.offset >= data.total) {

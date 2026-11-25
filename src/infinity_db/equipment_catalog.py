@@ -78,10 +78,13 @@ class EquipmentCatalog:
         )
         return [item for item in payload["items"] if item["id"] in logical_ids]
 
-    def list_equipment(self) -> list[dict[str, Any]]:
+    def list_equipment(self, *, filter_only: bool = False) -> list[dict[str, Any]]:
         """Return Army, presentation-encoded, and curated-only Equipment."""
 
-        items = deepcopy(self.database.list_catalog_items("equipment"))
+        items = deepcopy(
+            self.database.list_catalog_filter_items("equipment") if filter_only
+            else self.database.list_catalog_items("equipment")
+        )
         represented_slugs: set[str] = set()
         for item in items:
             attach_public_catalog_slug(self.database, "equipment", item)
@@ -103,12 +106,11 @@ class EquipmentCatalog:
                     "name": record["name"],
                     "wiki": None,
                     "source_ids": [],
-                    "use_count": len(
-                        self._units_for_encoding(
-                            encoding,
-                            include_all_optional=False,
-                        )
-                    ),
+                    **({} if filter_only else {
+                        "use_count": len(self._units_for_encoding(
+                            encoding, include_all_optional=False,
+                        )),
+                    }),
                 }
             )
             represented_slugs.add(encoding.equipment_id)

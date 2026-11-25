@@ -293,12 +293,15 @@ def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = Fals
         app = create_app(path, rules_database_path=path.with_name("rules_n5.db"))
         def serve(environ, start_response):
             if (
-                profile and environ.get("PATH_INFO") == "/api/units"
-                and "extended=1" in environ.get("QUERY_STRING", "")
+                profile and (
+                    environ.get("PATH_INFO") == "/api/unit-filters"
+                    or (environ.get("PATH_INFO") == "/api/units"
+                        and "extended=1" in environ.get("QUERY_STRING", ""))
+                )
             ):
                 profiler = cProfile.Profile()
                 result = profiler.runcall(app, environ, start_response)
-                print("Extended API profile:", environ["QUERY_STRING"], flush=True)
+                print("API profile:", environ["PATH_INFO"], environ["QUERY_STRING"], flush=True)
                 pstats.Stats(profiler).strip_dirs().sort_stats("cumulative").print_stats(25)
                 return result
             return app(environ, start_response)
@@ -340,6 +343,15 @@ def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = Fals
             measure("initial", lambda: page.goto(
                 origin + "/units", wait_until="domcontentloaded",
             ))
+            resources = page.evaluate("""() => performance.getEntriesByType('resource')
+                .filter(entry => new URL(entry.name).pathname.startsWith('/api/'))
+                .map(entry => ({
+                    path: new URL(entry.name).pathname,
+                    start: Math.round(entry.startTime),
+                    end: Math.round(entry.responseEnd),
+                    bytes: entry.decodedBodySize,
+                }))""")
+            print(f"Initial API resources: {resources}", flush=True)
             measure("next page", lambda: page.locator("#next-page-top").click())
             measure("previous page", lambda: page.locator("#previous-page-top").click())
             measure("Extended", lambda: page.locator("#extended-results").check())

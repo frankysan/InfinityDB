@@ -74,7 +74,7 @@ export async function getVariantUsages(recordIds, signal) {
 }
 
 export function getUnitFilters(signal) {
-  return getJson("/api/unit-filters", signal);
+  return getJson("/api/unit-filters?catalogs=1", signal);
 }
 
 export function getUnitProfileHelp(signal) {

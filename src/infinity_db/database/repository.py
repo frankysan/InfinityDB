@@ -1590,7 +1590,18 @@ class Database:
             raise ValueError(f"Unknown catalog: {catalog}")
         return self.application_domain_id(catalog, item_ref)
 
-    @instance_lru_cache(maxsize=512)
+    @instance_lru_cache(maxsize=1)
+    def _application_slugs_by_id(self) -> dict[tuple[str, int], str]:
+        """Index resolved public slugs once for this immutable snapshot."""
+        with self._connect() as connection:
+            return {
+                (str(row["domain"]), int(row["application_id"])): str(row["slug"])
+                for row in connection.execute(
+                    "SELECT domain, application_id, slug FROM application_domain_slugs "
+                    "WHERE status = 'resolved' AND slug IS NOT NULL"
+                )
+            }
+
     def application_slug(self, domain: str, application_id: int) -> str | None:
         """Return the current domain-local slug for one application identity."""
 
@@ -1600,13 +1611,7 @@ class Database:
             raise ValueError(
                 "application_id must be an integer within SQLite's signed 64-bit range"
             )
-        with self._connect() as connection:
-            row = connection.execute(
-                "SELECT slug FROM application_domain_slugs "
-                "WHERE domain = ? AND application_id = ? AND status = 'resolved'",
-                (domain, application_id),
-            ).fetchone()
-        return None if row is None or row["slug"] is None else str(row["slug"])
+        return self._application_slugs_by_id().get((domain, application_id))
 
     @instance_lru_cache(maxsize=1)
     def list_hacking_programs(self) -> list[dict[str, Any]]:
@@ -2088,6 +2093,22 @@ class Database:
                 if unit not in item["units"]:
                     item["units"].append(unit)
             return list(combinations.values())
+
+    @instance_lru_cache(maxsize=3)
+    def list_catalog_filter_items(self, catalog: str) -> list[dict[str, Any]]:
+        """Return filter identities and source aliases without catalog usage queries."""
+        graph = self._application_catalog_graph(catalog)
+        return sorted(
+            [
+                {
+                    "id": item["id"],
+                    "name": item["name"],
+                    "source_ids": list(graph["source_ids_by_item"].get(item["id"], ())),
+                }
+                for item in graph["ordered_items"]
+            ],
+            key=lambda item: (unit_sort_key(item["name"]), item["id"]),
+        )
 
     @instance_lru_cache(maxsize=8)
     def list_catalog_items(self, catalog: str) -> list[dict[str, Any]]:
