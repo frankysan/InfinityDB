@@ -215,6 +215,17 @@ Use these links to jump directly to a workstream:
 
 **Project domain:** Project infrastructure
 
+- [ ] **v1.2.2: Reuse pre-merge CI for identical release trees.** Implement
+  the accepted [release policy](releasing.md#accepted-direction-reuse-ci-for-identical-merge-trees-v122)
+  in `tools.ci.prepare_release_ci_evidence`. Validate the approved candidate,
+  actual merge and exact Git tree identity; retain complete required workflow
+  coverage and both candidate and final release SHAs in the evidence and
+  annotated tag. Require fresh applicable CI if tree or workflow equivalence
+  cannot be established, and preserve commit-dependent release/artifact checks.
+  Test successful reuse, changed-tree rejection, missing or failed evidence,
+  and final release identity. Update the release checklist and CI references
+  when implemented; do not relax the existing gate beforehand.
+
 - [ ] **Prevent recurrence of v1.1.0 release-process failures** without adding
   another release-management system or routine full-suite gates. The 2026-11-16
   release passed application/data/CI validation, but exposed late checklist
