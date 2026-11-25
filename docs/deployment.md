@@ -504,6 +504,19 @@ sh scripts/deploy-local-test.sh 8080
 COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python -m tools.operations.deployment_resources --output local/performance/http-capacity/RUN_ID/resources.json -- .venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --scenario unit-explorer --output local/performance/http-capacity/RUN_ID/capacity.json
 ```
 
+For an app-only capacity check without a Compose deployment, the disposable
+runtime image preview also supports `--capacity-output`:
+
+```bash
+.venv/bin/python -m tools.preview_runtime_image --tag infinity-db:preview-capacity --capacity-output local/performance/http-capacity/RUN_ID/capacity.json
+```
+
+It builds the normal Dockerfile, starts a read-only preview with an ephemeral
+IPv4 loopback port, waits for health, runs the same Unit Explorer workload,
+retains the JSON receipt and removes the owned container/image. This mode
+does not run semantic parity checks, Caddy, or the Compose resource sampler;
+use the full isolated stack for deployment-level resource evidence.
+
 The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 

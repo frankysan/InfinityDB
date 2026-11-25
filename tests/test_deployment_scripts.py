@@ -82,6 +82,32 @@ def test_preview_waits_for_health_and_cleans_only_owned_resources(
     assert not list((tmp_path / "local").iterdir())
 
 
+def test_preview_capacity_uses_loopback_and_retains_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import preview_runtime_image as preview
+
+    output = tmp_path / "capacity.json"
+    seen = []
+    report = {"phases": [{"errors": 0}]}
+    monkeypatch.setattr(preview.subprocess, "check_output", lambda *a, **kw: "127.0.0.1:12345\n")
+
+    def measure(url, **kwargs):
+        seen.append((url, kwargs))
+        return report
+
+    monkeypatch.setattr(preview, "capacity_test", measure)
+    monkeypatch.setattr(preview, "_render_summary", lambda _: "summary")
+    preview._measure_capacity("preview-test", output)
+    assert json.loads(output.read_text()) == report
+    assert seen[0][0] == "http://127.0.0.1:12345"
+    assert seen[0][1]["scenario"] == "unit-explorer"
+    monkeypatch.setattr(preview.subprocess, "check_output", lambda *a, **kw: "0.0.0.0:12345")
+    with pytest.raises(ValueError, match="loopback"):
+        preview._measure_capacity("preview-test", tmp_path / "unsafe.json")
+    assert len(seen) == 1
+
+
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     compose = _read("compose.yaml")
     assert "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80" in compose
