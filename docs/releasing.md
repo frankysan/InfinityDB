@@ -431,6 +431,32 @@ is not a second default full-suite run.
 
 ## 5. Approve the candidate, merge, verify main, and tag
 
+### Accepted direction: reuse CI for identical merge trees (v1.2.2)
+
+Avoid repeating equivalent hosted validation solely because merging produces a
+new commit SHA. The mandatory pre-merge acceptance and exact candidate CI
+remain unchanged. Once the release-evidence collector supports and validates
+this policy:
+
+- Accept green candidate CI for the final release commit when both commits
+  have the same Git tree SHA and the required workflow coverage and validation
+  semantics are equivalent. Verify the approved candidate and resulting
+  `main` commit belong to the intended merge; record both commit SHAs, their
+  verified tree identity and the actual workflow run SHAs in release evidence.
+- Require fresh applicable CI on the final commit when the trees differ or
+  equivalence cannot be established. Never reuse incomplete, failed or
+  otherwise ineligible candidate evidence.
+- Retain final-commit, tag and artifact-identity checks wherever the result
+  depends on the release SHA, ref, event or generated deployment artifact.
+  Tree equivalence does not establish equality of commit-dependent image
+  metadata or release version identity. The tag still points to the verified
+  final `main` commit.
+
+This is the accepted v1.2.2 direction, not an implemented exception. Until the
+collector and regression tests support it, the existing exact-main-SHA CI
+requirement below remains in force. See the implementation task in
+[release and deployment robustness](TODO.md#release-and-deployment-robustness).
+
 ### Development freeze and release-only handoff
 
 The **pre-merge sign-off above is mandatory**; it is not retroactively
