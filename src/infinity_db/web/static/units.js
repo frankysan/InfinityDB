@@ -5,7 +5,7 @@ import {
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { createUnitMultiSelect, normalizeMultiSelection, parseMultiSelection } from "./unit-multiselect.js";
-import { readShareState, writeShareState } from "./share-state.js";
+import { readShareState, writeShareState, UNIT_EXPLORER_DEFAULT_AND_FILTERS } from "./share-state.js";
 import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const PAGE_SIZE = 50;
@@ -46,7 +46,7 @@ const AND_FILTER_KEYS = [
   ["troopType", "troop_type"], ["classification", "classification"],
   ["characteristic", "characteristic"],
 ];
-const ALL_AND_FILTERS = AND_FILTER_KEYS.map(([, key]) => key).join(",");
+const ALL_AND_FILTERS = UNIT_EXPLORER_DEFAULT_AND_FILTERS;
 const MATCHING_SCOPE_DESCRIPTIONS = {
   profile: "All AND selections must occur on one Trooper profile and its compatible loadout.",
   loadout: "Selections may occur on different profiles in one loadout or an explicitly included model. Alternate states need not be active together.",
@@ -501,15 +501,24 @@ function populateArmies(armies) {
       ? 2
       : Number(army.role === "sectorial" || army.role === "non_aligned");
     const indent = "\u00a0\u00a0\u00a0\u00a0".repeat(indentLevel);
-    elements.army.add(new Option(
-      `${indent}${army.name} (${number.format(army.unit_count)})`,
-      armyFilterValue(army),
-    ));
+    const option = new Option(`${indent}${army.name}`, armyFilterValue(army));
+    option.dataset.armyId = String(army.id);
+    option.dataset.armyLabel = option.textContent;
+    elements.army.add(option);
   }
   if (normalizedArmyFilter) writeLocation(true);
-  elements.armyCount.textContent = number.format(playableArmies.length);
   elements.army.disabled = false;
   syncFilters();
+}
+
+function renderArmyCounts(counts) {
+  for (const option of elements.army.options) {
+    if (!option.dataset.armyId) continue;
+    const count = counts === undefined ? "—" : number.format(counts[option.dataset.armyId] || 0);
+    option.textContent = `${option.dataset.armyLabel} (${count})`;
+  }
+  elements.armyCount.textContent = counts === undefined
+    ? "—" : number.format(Object.keys(counts).length);
 }
 
 function catalogFilterValue(item) {
@@ -591,6 +600,7 @@ function renderUnits(data) {
   }
   renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
+  renderArmyCounts(data.army_usage_counts);
   renderDeclaredMembershipContext(data);
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
@@ -628,6 +638,8 @@ async function load() {
   showPanel(elements.loading);
   for (const key of Object.keys(multiControls)) multiControls[key].setCounts(null);
   elements.unitCount.setAttribute("aria-busy", "true");
+  elements.armyCount.setAttribute("aria-busy", "true");
+  elements.army.setAttribute("aria-busy", "true");
   elements.summary.textContent = "Loading units…";
   try {
     if (!armiesLoaded) {
@@ -678,9 +690,14 @@ async function load() {
     }
     renderUnits(data);
     elements.unitCount.setAttribute("aria-busy", "false");
+    elements.armyCount.setAttribute("aria-busy", "false");
+    elements.army.setAttribute("aria-busy", "false");
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
     elements.unitCount.setAttribute("aria-busy", "false");
+    elements.armyCount.setAttribute("aria-busy", "false");
+    elements.army.setAttribute("aria-busy", "false");
+    renderArmyCounts(undefined);
     for (const key of Object.keys(multiControls)) multiControls[key].setCounts(undefined);
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."

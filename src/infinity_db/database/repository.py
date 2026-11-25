@@ -4148,6 +4148,12 @@ class Database:
             "availability": summary,
         }
         if include_usage_counts:
+            # Count the visible memberships used by the result-row symbols.
+            army_usage_counts: dict[str, int] = defaultdict(int)
+            for group in grouped:
+                for visible_army_id in group["armies"]:
+                    army_usage_counts[str(visible_army_id)] += 1
+            result["army_usage_counts"] = dict(army_usage_counts)
             result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
             if prospective_counts is not None:
                 result["prospective_counts"] = prospective_counts

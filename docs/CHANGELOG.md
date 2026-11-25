@@ -15,6 +15,8 @@ are not retroactively relabeled.
 - Improved standalone scenario SVG compatibility and range helper endcap contrast.
 - Extended Unit Explorer results now show General profiles, including the
   Skills, Equipment and Weapons shared by their profile variants.
+- Army filter counts and the Armies summary reflect matching Units and their
+  visible availability. Army overview links use current filter defaults.
 
 ### Added
 
@@ -26,6 +28,10 @@ are not retroactively relabeled.
 
 - **Web backend:** Resolve map colors and font sizes before SVG serialization and
   draw contrasting ruler endcaps without changing measurement coordinates.
+- **Web backend + Web frontend:** Calculate Army usage across the filtered Unit
+  population before pagination, respecting optional availability settings.
+  Army overview links use Same profile and AND defaults and enable
+  Reinforcements for Reinforcement sections.
 
 ## [1.2.1] - 2026-11-25
 

@@ -3284,7 +3284,12 @@ Includes. Without a scope, the legacy raw usage baseline is unchanged.
 Options absent from the baseline are hidden unless already selected; baseline
 options with zero current prospective matches remain selectable and dimmed.
 Unlisted count keys mean zero. Count extensions are opt-in; API clients without
-`counts=1` retain their previous response shape.
+`counts=1` retain their previous response shape. The separate `army_usage_counts`
+map counts distinct matching logical Units per visible application Army ID, using
+the same memberships as the availability symbols across all result pages.
+Its number of keys is the Armies summary count. These are usage counts within
+the filtered population, not prospective Army replacement counts.
+Optional-unit flags apply to both symbols and counts.
 
 Unit Explorer keeps the last displayed matching-Unit and per-option numbers
 visible while an updated request is pending; accessible loading/error states

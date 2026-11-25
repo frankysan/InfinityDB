@@ -417,6 +417,8 @@ def test_multiselect_availability_and_result_views_are_consistent() -> None:
         {"search": "unit-name-that-does-not-exist"},
         {"skill_id": ("aerial", "berserk")},
         {"army_id": "does-not-exist"},
+        {"matching_scope": "profile", "skill_id": "berserk"},
+        {"matching_scope": "loadout", "skill_id": "berserk", "reinforcement": True},
         {"mercs": True, "specops": True, "teamops": True, "reinforcement": True},
     ],
 )
@@ -436,6 +438,15 @@ def test_usage_counts_match_filtered_population(filters: dict) -> None:
         )
     if not first["total"]:
         assert all(not counts for counts in first["usage_counts"].values())
+    assert first["army_usage_counts"] == last["army_usage_counts"]
+    full = database.list_units(limit=10_000, _unbounded=True, **filters)
+    expected: dict[str, int] = {}
+    for unit in full["items"]:
+        for army_id in unit["army_ids"]:
+            key = str(army_id)
+            expected[key] = expected.get(key, 0) + 1
+    assert first["army_usage_counts"] == expected
+    assert "army_usage_counts" not in full
 
 
 def test_usage_counts_include_selected_item_and_logical_unit_deduplication() -> None:

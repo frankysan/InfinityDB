@@ -696,7 +696,10 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"article.id = `army-${armyValue(army)}`;" in script
     assert b"requestAnimationFrame(revealHashTarget);" in script
     assert b'target.scrollIntoView({ block: "center" });' in script
-    assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
+    assert b'shareStateHref("/units", "units", filters)' in script
+    assert b"army_id: armyValue(army)" in script
+    assert b'matching_scope: "profile"' in script
+    assert b"and_filters: UNIT_EXPLORER_DEFAULT_AND_FILTERS" in script
     assert b"army.overview_group" in script
     assert b"reinforcementRelationships(army, visibleArmies)" in script
     assert b"army.parent_armies" in script
