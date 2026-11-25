@@ -3276,13 +3276,6 @@ def test_extended_unit_list_exposes_compact_profile_context(
         )["items"]
         if item["id"] == 1
     )
-    capabilities = {
-        catalog: [{"id": 1, "name": name, "quantity": 1, "extras": [
-            {"id": 1, "name": "extras"},
-        ]}]
-        for catalog, name in (("skills", "skills"), ("equipment", "equip"),
-                              ("weapons", "weapons"))
-    }
     assert item["profiles"] == [
         {
             "name": "Trooper",
@@ -3300,53 +3293,12 @@ def test_extended_unit_list_exposes_compact_profile_context(
             "silhouette": None,
             "is_structure": False,
             "characteristics": ["chars"],
-            **capabilities,
-            "loadouts": [{"name": "Rifle", **capabilities}],
             "availability": [
                 {"army_id": 101, "ava": "total"},
                 {"army_id": 201, "ava": 1},
             ],
         }
     ]
-
-
-def test_extended_unit_list_preserves_profile_and_loadout_ownership(
-    tmp_path: Path, normalized: dict,
-) -> None:
-    tables = normalized["tables"]
-    # Identical stats and name in two armies, but only the first carries its
-    # profile weapon. The additional option belongs to the second army alone.
-    removed = {row["occurrence_id"] for row in tables["profile_weapons"]
-               if row["army_id"] == 201}
-    tables["profile_weapons"] = [
-        row for row in tables["profile_weapons"] if row["occurrence_id"] not in removed
-    ]
-    tables["profile_weapon_extras"] = [
-        row for row in tables["profile_weapon_extras"] if row["occurrence_id"] not in removed
-    ]
-    tables["loadout_options"].append({
-        "army_id": 201, "unit_id": 1, "group_id": 1, "option_id": 2,
-        "position": 2, "name": "Unarmed option", "points": 5, "swc": "0",
-        "minis": None, "disabled": None,
-    })
-    path = tmp_path / "army.sqlite3"
-    export_database(normalized, path)
-    database = Database(path)
-    item = next(item for item in database.list_units(extended=True)["items"] if item["id"] == 1)
-    profiles = {row["availability"][0]["army_id"]: row for row in item["profiles"]}
-    assert set(profiles) == {101, 201}
-    assert [row["name"] for row in profiles[101]["weapons"]] == ["weapons"]
-    assert profiles[201]["weapons"] == []
-    assert [row["name"] for row in profiles[101]["loadouts"]] == ["Rifle"]
-    assert [row["name"] for row in profiles[201]["loadouts"]] == ["Rifle", "Unarmed option"]
-    assert profiles[201]["loadouts"][0]["weapons"][0]["name"] == "weapons"
-    assert profiles[201]["loadouts"][1]["weapons"] == []
-    assert all(len(profile["availability"]) == 1 for profile in profiles.values())
-    selected = next(
-        item for item in database.list_units(army_id=201, extended=True)["items"]
-        if item["id"] == 1
-    )
-    assert selected["profiles"] == item["profiles"]
 
 
 def test_unit_numeric_filters_support_exact_values_and_inclusive_ranges(

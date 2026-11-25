@@ -540,15 +540,35 @@ def test_extended_profiles_show_plain_text_capabilities(
     errors: list[str] = []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
     try:
-        page.goto(f"{origin}/units?search=fusiliers&extended=1", wait_until="domcontentloaded")
+        with page.expect_response(
+            lambda response: "/api/units?" in response.url
+            and "extended=1" in response.url and response.status == 200
+        ) as response_info:
+            page.goto(f"{origin}/units?search=fusiliers&extended=1", wait_until="domcontentloaded")
+        expected = [
+            general
+            for unit in response_info.value.json()["items"]
+            for general in unit["general_profiles"]
+        ]
         profile = page.locator(".unit-extended-profile").first
-        profile.wait_for(state="visible")
+        try:
+            profile.wait_for(state="visible", timeout=10000)
+        except Exception:
+            pytest.fail(
+                f"Extended results missing: {errors}; {page.locator('body').inner_text()[-2000:]}"
+            )
         assert page.locator("#extended-results").is_checked()
         capabilities = profile.locator(".unit-extended-capability-section")
         assert capabilities.is_visible()
         assert "Weapons:" in capabilities.inner_text()
-        assert "Combi Rifle" in capabilities.inner_text()
-        assert capabilities.locator(".unit-extended-loadout").count() > 1
+        assert "Shared by all variants of this profile" in capabilities.inner_text()
+        assert "Combi Rifle" not in capabilities.inner_text()
+        assert page.locator(".unit-extended-profile").count() == len(expected)
+        assert [
+            heading.text_content()
+            for heading in page.locator(".unit-extended-profile-heading > strong").all()
+        ] == [f"General profile — {general['display_name']}" for general in expected]
+        assert page.locator(".unit-extended-loadout").count() == 0
         assert capabilities.locator("a").count() == 0
         assert not errors, errors
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")

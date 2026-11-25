@@ -3299,16 +3299,16 @@ assumption. The API still accepts their context keys, and older UI URLs
 normalize these equivalent choices to Standard set. Actual Specialist status
 remains determined by the chosen scenario and profile.
 
-The opt-in `extended=1` Unit list adds exact profile-owned Skills, Equipment
-and Weapons, including source quantities and extras, and a separate list of
-loadout options from the same source Army/Unit/profile group. Published reviewed
-loadout additions apply only to their exact option. Profile rows merge across
-Armies only when stats, Characteristics, capability occurrences and group
-loadout options agree; differing capabilities remain separate with their own
-availability. The frontend uses plain text with the shared distance/quantity
-formatting and reviewed Skill-bucket classifications. It does not union
-alternative loadouts into a simultaneous profile inventory. The ordinary list
-response is unchanged.
+The opt-in `extended=1` Unit list exposes the visible General profiles
+from the same detail presentation pipeline, using the selected optional-unit
+flags. Extended results render only these General profiles, with shared Skills,
+Equipment and Weapons as plain text, including quantities and extras as on
+the Unit page. Attribute differences are marked, and Army availability is
+aggregated by General profile identity without conflating distinct AVA values.
+Distinct General profile identities (such as a trooper and its peripheral)
+remain separate. Army-specific profiles and loadouts are not rendered in
+the Explorer. The existing compact `profiles` response is retained for
+compatibility; the ordinary list response is unchanged.
 
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public

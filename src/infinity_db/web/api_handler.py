@@ -55,6 +55,7 @@ from infinity_db.unit_presentation import (
     enrich_unit_filter_presentation,
     enrich_unit_list_presentation,
     enrich_unit_presentation,
+    extended_general_profiles,
 )
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
@@ -580,6 +581,24 @@ class ApiHandler:
             self.fireteam_rules_reference = enrich_maintained_text_references(
                 database, rules_database, self.fireteam_rules_reference
             )
+
+    def _present_unit(
+        self, unit: dict[str, Any], *,
+        optional_filters: dict[str, bool], requested_army: str | None = None,
+    ) -> dict[str, Any]:
+        """Use the same General profile semantics for detail and Explorer."""
+        unit = self.skill_catalog.enrich_unit(unit)
+        unit = self.equipment_catalog.enrich_unit(unit)
+        unit = enrich_nested_catalog_slugs(
+            self.database, unit, frozenset({"equipment", "weapons"}),
+        )
+        attach_public_unit_slug(self.database, unit)
+        unit = enrich_army_references(self.database, unit)
+        self.symbol_catalog.enrich_unit(unit)
+        return enrich_unit_presentation(
+            unit, optional_filters=optional_filters, requested_army=requested_army,
+            source_skill_classifications=self.database.skill_source_classifications(),
+        )
 
     def validate_health(self) -> None:
         """Exercise the minimum database paths required by the health endpoint."""
@@ -1600,18 +1619,18 @@ class ApiHandler:
                     }
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_units(payload["items"])
+                    enrich_unit_list_presentation(payload["items"])
                     if query["extended"]:
-                        payload = self.skill_catalog.enrich_unit(payload)
-                        payload = enrich_nested_catalog_slugs(
-                            self.database, payload, frozenset({"equipment", "weapons"}),
-                        )
-                    enrich_unit_list_presentation(
-                        payload["items"],
-                        source_skill_classifications=(
-                            self.database.skill_source_classifications()
-                            if query["extended"] else None
-                        ),
-                    )
+                        optional_filters = {
+                            flag: query[flag] for flag in OPTIONAL_AVAILABILITY_FLAGS
+                        }
+                        for item in payload["items"]:
+                            detail = self.database.get_unit(item["id"])
+                            item["general_profiles"] = (
+                                extended_general_profiles(self._present_unit(
+                                    detail, optional_filters=optional_filters,
+                                )) if detail is not None else []
+                            )
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": "Choose a playable Army list to browse its units."}
@@ -1635,21 +1654,8 @@ class ApiHandler:
                 unit_ref = int(identifier) if identifier.isdigit() else identifier
                 payload = self.database.get_unit(unit_ref)
                 if payload is not None:
-                    payload = self.skill_catalog.enrich_unit(payload)
-                    payload = self.equipment_catalog.enrich_unit(payload)
-                    payload = enrich_nested_catalog_slugs(
-                        self.database,
-                        payload,
-                        frozenset({"equipment", "weapons"}),
-                    )
-                    attach_public_unit_slug(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    self.symbol_catalog.enrich_unit(payload)
-                    payload = enrich_unit_presentation(
-                        payload,
-                        optional_filters=optional_filters,
-                        requested_army=requested_army,
-                        source_skill_classifications=self.database.skill_source_classifications(),
+                    payload = self._present_unit(
+                        payload, optional_filters=optional_filters, requested_army=requested_army,
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

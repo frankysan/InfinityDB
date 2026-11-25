@@ -13,13 +13,14 @@ are not retroactively relabeled.
 ### Player summary
 
 - Improved standalone scenario SVG compatibility and range helper endcap contrast.
-- Extended Unit Explorer results now show Skills, Equipment and Weapons, with
-  alternative loadouts kept separate.
+- Extended Unit Explorer results now show General profiles, including the
+  Skills, Equipment and Weapons shared by their profile variants.
 
 ### Added
 
-- **Web backend + Web frontend:** Display profile-owned capabilities and group
-  loadout options in Extended Unit Explorer details as plain text.
+- **Web backend + Web frontend:** Show only the General profiles in Extended
+  Unit Explorer results, including shared Skills, Equipment and Weapons as
+  plain text. Army-specific variants and loadouts remain on the Unit page.
 
 ### Fixed
 

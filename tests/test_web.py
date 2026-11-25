@@ -1572,6 +1572,7 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 200
     normal = next(item for item in json.loads(body)["items"] if item["id"] == 1)
     assert "profiles" not in normal
+    assert "general_profiles" not in normal
 
     status, _, body = request(app, "/api/units", query="extended=1")
     assert status == 200
@@ -1582,16 +1583,31 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert profile["type_label"] == "Line Trooper"
     assert profile["classification"] == "Light Infantry"
     assert profile["characteristic_presentations"] == []
-    assert profile["skills"][0]["name"] == "Stealth"
-    assert profile["skills"][0]["extras"][0]["name"] == "+3"
-    assert profile["equipment"][0]["name"] == "Medikit"
-    assert profile["equipment"][0]["quantity"] == 2
-    assert profile["weapons"][0]["name"] == "Combi Rifle"
-    assert len(profile["loadouts"]) == 1
-    loadout = profile["loadouts"][0]
-    assert loadout["name"] == "Rifle loadout"
-    assert loadout["weapons"][0]["quantity"] == 2
-    assert loadout["weapons"][0]["extras"][0]["name"] == "AP"
+    assert "loadouts" not in profile
+    assert "skills" not in profile
+    status, _, detail_body = request(
+        app, "/api/units/1", query="mercs=0&specops=0&teamops=0&reinforcement=0",
+    )
+    assert status == 200
+    general = item["general_profiles"]
+    assert len(general) == 1
+    assert [
+        {key: value for key, value in row.items() if key != "availability"}
+        for row in general
+    ] == [
+        row for row in json.loads(detail_body)["general_profiles"]
+        if row["presentation_visible"]
+    ]
+    shared = general[0]["shared_items"]
+    assert shared["skills"][0]["name"] == "Stealth"
+    assert shared["skills"][0]["extras"][0]["name"] == "+3"
+    assert shared["equipment"][0]["name"] == "Medikit"
+    assert shared["equipment"][0]["quantity"] == 2
+    assert shared["weapons"][0]["quantity"] == 2
+    assert shared["weapons"][0]["extras"][0]["name"] == "AP"
+    assert general[0]["availability"] == [
+        {"army_id": 101, "ava": "2"}, {"army_id": 201, "ava": "2"},
+    ]
     assert {entry["army_id"] for entry in profile["availability"]} == {101, 201}
     assert {entry["ava"] for entry in profile["availability"]} == {2}
 
@@ -2112,14 +2128,15 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
 
     status, _, unit_list_script = request(app, "/static/unit-list.js")
     assert status == 200
-    assert b'unit-extended-profile-subordinate' in unit_list_script
+    assert b'unit-extended-profile-subordinate' not in unit_list_script
+    assert b'unit.general_profiles' in unit_list_script
+    assert b'Shared by all variants of this profile' in unit_list_script
     assert b'unit-profile-availability-value' in unit_list_script
     assert b'if (!extended && displayArmySymbol)' in unit_list_script
     assert b'nameCell.colSpan = 2' in unit_list_script
     assert b'row.append(nameCell, idCell)' in unit_list_script
     assert b'unit-profile-characteristic-symbol' in unit_list_script
-    assert b'unit-profile-characteristic-fallback' in unit_list_script
-    assert b'descriptor.developer_only' in unit_list_script
+    assert b'profile.symbol_descriptors' in unit_list_script
     assert b'developerOnlyCharacteristic' not in unit_list_script
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
