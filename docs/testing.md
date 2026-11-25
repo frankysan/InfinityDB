@@ -130,6 +130,35 @@ usage payload (decoded); investigate their rendering/transfer costs before
 changing the public reference contract. Catalog details may render again
 as availability, FAQ and exact-variant data arrive.
 
+### Skill and Equipment detail follow-up — 2026-11-25
+
+The page benchmark now observes first/last direct content replacement
+timestamps for Skill and catalog detail pages, waiting for follow-up traffic
+to settle without including the fixed network-idle interval in those metrics.
+`--pages --profile` profiles the selected page API and variant/visibility
+requests. These DOM timestamps are not paint or production network timings.
+
+Windows Chrome, baseline `7347882c`, three fresh app/context samples per
+route and repeat visits. Mimetism normally fetched 490,127 bytes of detail
+and 1,365,742 bytes of exact-variant evidence (decoded), even with Developer
+Mode off. Skill/Equipment pages now request the evidence once when Developer
+Mode is enabled, including after page load; it remains cached for the page
+lifetime. Normal Mimetism API bytes fell from 1,865,232 to 499,490 (73%).
+Both tested pages rendered twice instead of three times. Successive server
+enrichments now mutate the first detached response copy, preserving the
+public response and default copy contracts.
+
+Median first/final DOM times, baseline to optimized (ms):
+
+- Mimetism cold 506.4/545.5 to 522.9/553.2; repeat 135.3/159.4 to 113.3/118.2.
+- MediKit cold 490.8/523.6 to 488.2/518.4; repeat 121.7/130.0 to 107.9/114.2.
+
+Cold latency was effectively unchanged in these small samples; repeat
+rendering and normal-mode transfer improved. Exact-occurrence API output
+is unchanged. Skill detail parity against the original detached enrichment
+pipeline is regression-tested. Profile remaining cold catalog generation
+and detail construction before further optimizing them.
+
 ### Unit Explorer initialization — 2026-11-25
 
 Windows checkout based on `885b7757`, same Army and N5 Rules snapshot,

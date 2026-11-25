@@ -210,23 +210,19 @@ def test_variant_usage_developer_browser_matches_real_source_groups(
                 assert response and response.status == 200
                 page.locator("#skill-content" if catalog == "skills"
                              else "#item-content").wait_for(state="visible")
-                page.wait_for_function(
-                    "expected => document.querySelectorAll("
-                    "'.exact-variant-group').length >= expected",
-                    arg=expected_count, timeout=15000,
-                )
-                groups = page.locator(".exact-variant-group")
-                assert groups.count() == expected_count, (
-                    catalog, slug, width, expected_count, groups.count()
-                )
+                page.wait_for_load_state("networkidle")
                 usage = page.locator(".exact-variant-usage")
-                assert usage.is_hidden(), (catalog, slug, width)
+                assert usage.count() == 0, (catalog, slug, width)
+                groups = page.locator(".exact-variant-group")
                 settings = page.locator('button[aria-controls="settings-menu"]')
                 settings.click()
                 toggle = page.locator("#developer-mode-toggle")
                 toggle.set_checked(True)
                 settings.click()
                 usage.wait_for(state="visible")
+                assert groups.count() == expected_count, (
+                    catalog, slug, width, expected_count, groups.count()
+                )
                 summary = groups.first.locator("summary")
                 summary.focus()
                 summary.press("Enter")

@@ -1,3 +1,5 @@
+import { getVariantUsages } from "./api.js";
+import { developerModeEnabled } from "./preferences.js";
 import { shareStateHref } from "./share-state.js";
 import { tableViewport } from "./view-components.js";
 
@@ -108,6 +110,28 @@ export function exactVariantRuleIds(item, prefix) {
     ids.push(`${prefix}:${item.slug}`);
   }
   return ids;
+}
+
+/** Fetch Developer Mode evidence only when requested, once per successful page load. */
+export function loadExactVariantUsage(item, prefix, signal, onLoaded) {
+  if (!item.variant_usage_published) return;
+  const ruleIds = exactVariantRuleIds(item, prefix);
+  if (!ruleIds.length) return;
+  let requested = false;
+  const load = () => {
+    if (requested || signal.aborted || !developerModeEnabled()) return;
+    requested = true;
+    getVariantUsages(ruleIds, signal).then((payload) => {
+      if (!signal.aborted) onLoaded(payload);
+    }).catch((error) => {
+      requested = false;
+      if (error.name !== "AbortError" && !error.message?.includes("not published")) {
+        console.error("Exact source occurrences unavailable", error);
+      }
+    });
+  };
+  window.addEventListener("developermodechange", load, { signal });
+  load();
 }
 
 /** Optional matched-publication view; never infer membership from catalog display names. */

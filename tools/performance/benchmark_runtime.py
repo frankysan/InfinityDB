@@ -315,7 +315,9 @@ def benchmark_unit_explorer(
         def serve(environ, start_response):
             if (
                 profile and (
-                    (pages and environ.get("PATH_INFO", "").startswith("/api/units/"))
+                    (pages and environ.get("PATH_INFO") in {
+                        "/api" + selected_route, "/api/variant-usage", "/api/visible-unit-ids",
+                    })
                     or (not pages and (
                         environ.get("PATH_INFO") == "/api/unit-filters"
                         or (environ.get("PATH_INFO") == "/api/units"
@@ -366,12 +368,39 @@ def benchmark_unit_explorer(
             origin = f"http://127.0.0.1:{server.server_port}"
             if pages:
                 ready = page_cases[selected_route]
+                detail = ready in {"#skill-content", "#item-content"}
+                if detail:
+                    page.add_init_script("""(() => {
+                        window.detailRenderTimes = [];
+                        const observer = new MutationObserver(records => {
+                            if (records.some(record =>
+                                record.target.id === 'skill-content'
+                                || record.target.id === 'item-content')) {
+                                window.detailRenderTimes.push(performance.now());
+                            }
+                        });
+                        observer.observe(document, {subtree: true, childList: true});
+                    })()""")
                 for phase in ("cold", "repeat"):
                     started = time.perf_counter()
                     page.goto(origin + selected_route, wait_until="domcontentloaded")
                     page.locator(ready).wait_for(state="visible", timeout=15_000)
                     elapsed = time.perf_counter() - started
                     samples.setdefault(f"{selected_route} {phase}", []).append(elapsed)
+                    if detail:
+                        # Wait for follow-up requests, but report observed render
+                        # timestamps rather than networkidle's fixed quiet interval.
+                        page.wait_for_load_state("networkidle", timeout=15_000)
+                        times = page.evaluate("window.detailRenderTimes")
+                        if not times:
+                            raise ValueError("No detail render observed")
+                        samples.setdefault(f"{selected_route} {phase} first DOM", []).append(
+                            times[0] / 1000,
+                        )
+                        samples.setdefault(f"{selected_route} {phase} final DOM", []).append(
+                            times[-1] / 1000,
+                        )
+                        print(f"{selected_route} {phase} renders: {times}", flush=True)
                     resources = page.evaluate("""() => performance.getEntriesByType('resource')
                         .filter(e => new URL(e.name).pathname.startsWith('/api/'))
                         .map(e => ({

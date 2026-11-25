@@ -1120,14 +1120,17 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
                 else:
+                    # The first enrichment detaches the complete catalog payload.
+                    # Subsequent transforms own that copy, not the catalog cache.
                     payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
+                    enrich_army_references(self.database, payload, in_place=True)
+                    self.symbol_catalog.enrich_nested_units(payload, in_place=True)
+                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         scenario_id=(payload.get("scenario") or {}).get("id"),
                         additional_records=self._season_rule_records,
+                        in_place=True,
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
@@ -1152,11 +1155,11 @@ class ApiHandler:
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                    enrich_army_references(self.database, payload, in_place=True)
+                    self.symbol_catalog.enrich_nested_units(payload, in_place=True)
+                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_maintained_text_references(
+                        self.database, self.rules_database, payload, in_place=True,
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):

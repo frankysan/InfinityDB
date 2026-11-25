@@ -1,12 +1,12 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, getVariantUsages, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { referenceLoadMessage, tableViewport } from "./view-components.js";
-import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
+import { exactVariantUsageSection, loadExactVariantUsage } from "./variant-usage.js";
 import { weaponFootnotesForProfile, withoutWeaponFootnotes } from "./weapon-footnotes.js";
 import {
   gameplayVariantRules,
@@ -769,17 +769,10 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
     const prefix = { equipment: "equipment", traits: "trait", states: "state" }[catalog];
     const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
       || `${prefix}:${itemId}`;
-    const variantRuleIds = catalog === "equipment"
-      ? exactVariantRuleIds(item, "equipment") : [];
-    if (item.variant_usage_published && variantRuleIds.length) {
-      getVariantUsages(variantRuleIds, pageController.signal).then((payload) => {
-        if (pageController.signal.aborted) return;
+    if (catalog === "equipment") {
+      loadExactVariantUsage(item, "equipment", pageController.signal, (payload) => {
         exactUsage = payload;
         if (displayedItem) render(displayedItem);
-      }).catch((error) => {
-        if (error.name !== "AbortError" && !error.message?.includes("not published")) {
-          console.error("Exact Equipment occurrences unavailable", error);
-        }
       });
     }
     fetchReviewedFaqRulings(topicId, { signal: pageController.signal })

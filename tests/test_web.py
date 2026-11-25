@@ -1618,6 +1618,35 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 400
     assert json.loads(body)["error"] == "extended must be 0 or 1"
 
+def test_skill_detail_in_place_enrichment_matches_detached_reference() -> None:
+    from infinity_db.army_slugs import enrich_army_references
+    from infinity_db.domain_references import enrich_rule_relation_references
+    from infinity_db.maintained_text_references import enrich_maintained_text_references
+    from infinity_db.unit_slugs import enrich_nested_unit_slugs
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    api = application.api
+    original = api.skill_catalog.get_skill("mimetism")
+    assert original is not None
+    expected = enrich_nested_unit_slugs(api.database, original)
+    expected = enrich_army_references(api.database, expected)
+    expected = api.symbol_catalog.enrich_nested_units(expected)
+    expected = enrich_rule_relation_references(api.database, expected)
+    expected = enrich_maintained_text_references(
+        api.database, api.rules_database, expected,
+        additional_records=api._season_rule_records,
+    )
+    expected["variant_usage_published"] = api.variant_usage is not None
+    for _ in range(2):
+        status, _, body = request(application, "/api/skills/mimetism")
+        assert status == 200
+        assert json.loads(body) == expected
+    assert api.skill_catalog.get_skill("mimetism") == original
+
+
 def test_unit_profile_help_uses_only_attribute_entries_and_caches_payload(monkeypatch) -> None:
     application = create_app(
         Path("data/generated/army.db"),
@@ -6585,9 +6614,10 @@ def test_variant_usage_page_modules_are_packaged_and_capability_gated(
         status, _, body = request(app, f"/static/{filename}")
         assert status == 200
         assert b'from "./variant-usage.js"' in body
-        assert b"variant_usage_published" in body
-        assert b"exactVariantRuleIds" in body
-        assert b"getVariantUsages(variantRuleIds, pageController.signal)" in body
+        assert b"loadExactVariantUsage" in body
+    assert b"variant_usage_published" in module
+    assert b"developerModeEnabled()" in module
+    assert b"getVariantUsages(ruleIds, signal)" in module
 
     status, _, unit = request(app, "/static/unit.js")
     assert status == 200
@@ -6621,6 +6651,9 @@ def test_variant_usage_browser_does_not_fetch_unpublished_index(
             page.goto(f"http://variant-usage.test/{catalog}/{slug}", wait_until="domcontentloaded")
             selector = "#skill-content" if catalog == "skills" else "#item-content"
             page.locator(selector).wait_for(state="visible", timeout=30000)
+            page.locator('button[aria-controls="settings-menu"]').click()
+            page.locator("#developer-mode-toggle").set_checked(True)
+            page.wait_for_load_state("networkidle")
             assert not requests
             assert page.locator(".exact-variant-usage").count() == 0
             page.close()
@@ -6700,6 +6733,9 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                 route_browser_page(page, app, "http://variant-usage.test")
                 errors: list[str] = []
                 page.on("pageerror", lambda error, failures=errors: failures.append(str(error)))
+                requests: list[str] = []
+                page.on("request", lambda request, seen=requests: seen.append(request.url)
+                        if "/api/variant-usage" in request.url else None)
                 try:
                     response = page.goto(
                         f"http://variant-usage.test/{catalog}/{slug}",
@@ -6707,13 +6743,16 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                     )
                     assert response is not None and response.status == 200
                     usage = page.locator(".exact-variant-usage")
-                    usage.wait_for(state="attached", timeout=30000)
-                    assert usage.is_hidden(), (catalog, width)
+                    page.locator("#skill-content" if catalog == "skills"
+                                 else "#item-content").wait_for(state="visible")
+                    page.wait_for_load_state("networkidle")
+                    assert usage.count() == 0 and not requests, (catalog, width)
                     page.locator('button[aria-controls="settings-menu"]').click()
                     toggle = page.locator("#developer-mode-toggle")
                     toggle.set_checked(True)
                     page.locator('button[aria-controls="settings-menu"]').click()
                     usage.wait_for(state="visible", timeout=30000)
+                    assert len(requests) == 1
                     assert "Only complete, source-reviewed variants" in usage.inner_text()
                     group = usage.locator(".exact-variant-group")
                     assert group.count() == 1
@@ -6745,6 +6784,7 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                         state="visible", timeout=30000,
                     )
                     assert links.count() == 2
+                    assert len(requests) == 1
                     assert all(
                         f"#{anchor}" in (links.nth(index).get_attribute("href") or "")
                         for index in range(links.count())

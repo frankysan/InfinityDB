@@ -675,8 +675,7 @@ def test_skill_faq_card_padding_and_developer_occurrence_geometry(
         assert group.locator(":scope > .detail-source").count() == 0
 
         usage = page.locator(".exact-variant-usage")
-        usage.wait_for(state="attached", timeout=30000)
-        assert usage.is_hidden(), (width, theme)
+        assert usage.count() == 0, (width, theme)
         page.locator('button[aria-controls="settings-menu"]').click()
         toggle = page.locator("#developer-mode-toggle")
         toggle.set_checked(True)
@@ -785,6 +784,7 @@ def test_tinbot_reference_only_variants_keep_unfiltered_classification(
     errors: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     try:
+        page.add_init_script("sessionStorage.setItem('infinity-db-developer-mode', 'true')")
         page.goto(f"{ORIGIN}/equipment/tinbot", wait_until="domcontentloaded")
         page.locator("#rule-equipment-tinbot-firewall").wait_for(
             state="visible", timeout=30000,

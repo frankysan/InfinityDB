@@ -1,13 +1,13 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, getVariantUsages, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { referenceLoadMessage, tableViewport } from "./view-components.js";
-import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
+import { exactVariantUsageSection, loadExactVariantUsage } from "./variant-usage.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -435,18 +435,10 @@ if (!skillId) {
     render(skill);
     const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
       || `skill:${skillId}`;
-    const variantRuleIds = exactVariantRuleIds(skill, "skill");
-    if (skill.variant_usage_published && variantRuleIds.length) {
-      getVariantUsages(variantRuleIds, pageController.signal).then((payload) => {
-        if (pageController.signal.aborted) return;
-        exactUsage = payload;
-        if (displayedSkill) render(displayedSkill);
-      }).catch((error) => {
-        if (error.name !== "AbortError" && !error.message?.includes("not published")) {
-          console.error("Exact Skill occurrences unavailable", error);
-        }
-      });
-    }
+    loadExactVariantUsage(skill, "skill", pageController.signal, (payload) => {
+      exactUsage = payload;
+      if (displayedSkill) render(displayedSkill);
+    });
     fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
       .then((payload) => {
         if (pageController.signal.aborted) return;
