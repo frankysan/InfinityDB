@@ -26,7 +26,7 @@ assert set(report['sha256']) == {'army.db', 'rules_n5.db', 'its_17.db', 'its_18.
 assert {p.name for p in d.iterdir()} == set(report['sha256'])
 app = create_app_from_database_set(d)
 assert len(app.deployed_objects['objects']) == 17
-assert len(app.variant_usage['variants']) == 151
+assert len(app.variant_usage['variants']) == 150
 assert len(app.weapon_profile_citations) == 69
 print('Runtime immutable image artifacts: PASS')
 """

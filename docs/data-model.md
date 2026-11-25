@@ -3190,10 +3190,12 @@ disabled loadouts does not generate a synthetic root; a profile-only group
 with no loadouts retains its normal profile context. Such Units remain
 visible without filters, without inventing selectable configurations.
 
-The Army 2026-09-29 snapshot has one reviewed omission: Unit #965
-KISS! (Repeater) loadout option 3 has no source Equipment array, while
-its name identifies Repeater (source Equipment 63). Its alternative
-KISS! loadout instead explicitly carries Deployable Repeater (111).
+The reviewed Unit #965 KISS! (Repeater) omission persists in the
+2026-11-25 Army snapshot: loadout option 3 has no Equipment entry for
+Repeater (source Equipment 63), despite its explicit name. In Combined
+Army and Onyx, the alternate KISS! loadout carries Deployable Repeater
+(111); Next Wave has no alternate KISS! loadout. The three occurrences
+were revalidated against the November archive before publication.
 The authored, snapshot-hash-bound additions in
 `data/curated/relationships/loadout-capabilities.json` are checked
 against exact Army/source-Unit/group/option coordinates, loadout name,

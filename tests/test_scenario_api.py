@@ -372,9 +372,9 @@ def test_domination_review_scoring_specialists_and_console_skill_reach_api(
     assert len(payload["source_issues"]) == 1
     issue = payload["source_issues"][0]
     assert issue["status"] == "needs-verification"
-    assert "Wiki Domination revision 3264" in issue["description"]
-    assert "Spanish N5.3 Domination chart" in issue["description"]
-    assert "official language editions" in issue["description"]
+    assert "English Wiki (revision 3264) give 6 SWC" in issue["description"]
+    assert "Spanish N5.3 (p. 155) gives 7 SWC" in issue["description"]
+    assert "intended SWC limit remains unclear" in issue["description"]
 
 
 def test_firefight_review_scoring_and_overlays_reach_api(

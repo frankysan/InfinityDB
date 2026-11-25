@@ -66,7 +66,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],
             )
             if (
-                inventory != (151, 62, 6) or report["traitWikiLinks"] != 33
+                inventory != (150, 62, 6) or report["traitWikiLinks"] != 33
                 or report["combinedSavingRollProfiles"] != 6
                 or report["ammunitionReferences"] != 16
                 or report["weaponProperties"] != 12
