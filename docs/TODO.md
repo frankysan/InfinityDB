@@ -314,6 +314,10 @@ Use these links to jump directly to a workstream:
     deployed worker configuration and representative concurrent traffic.
     Profile remaining Extended first-visit costs or cold scoped-index
     construction only if measured latency warrants it.
+  - [ ] Detail/catalog follow-up: profile cold Skills/Weapons catalog generation
+    and large Skill/Equipment/Weapon detail payloads, especially exact-variant
+    usage and repeated rendering. Measure final asynchronous updates as well
+    as first visible content. Preserve canonical source references.
 
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.

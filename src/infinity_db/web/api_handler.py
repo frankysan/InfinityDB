@@ -645,6 +645,20 @@ class ApiHandler:
             for catalog, items in catalogs.items()
         }
 
+    @instance_lru_cache(maxsize=1)
+    def _unit_profile_help_payload(self) -> dict[str, Any]:
+        """Cache the snapshot-wide, Unit-independent notation and Attribute help."""
+        items = (
+            self.rules_database.unit_profile_help()
+            if self.rules_database is not None else []
+        )
+        tokens = maintained_text_tokens_batch(
+            self.database, self.rules_database, (item["summary"] for item in items),
+        )
+        for item, summary_tokens in zip(items, tokens, strict=True):
+            item["summary_tokens"] = summary_tokens
+        return {"items": items, "attributes": self.glossary_catalog.attribute_entries()}
+
     def validate_health(self) -> None:
         """Exercise the minimum database paths required by the health endpoint."""
 
@@ -961,21 +975,7 @@ class ApiHandler:
         elif path == "/api/unit-profile-help":
             cache_control = API_CACHE_CONTROL
             try:
-                items = (
-                    self.rules_database.unit_profile_help()
-                    if self.rules_database is not None
-                    else []
-                )
-                for item in items:
-                    item["summary_tokens"] = maintained_text_tokens(
-                        self.database, self.rules_database, item["summary"]
-                    )
-                attributes = [
-                    item
-                    for item in self.glossary_catalog.embedded_entries()
-                    if item["domain_slug"] == "attributes"
-                ]
-                payload = {"items": items, "attributes": attributes}
+                payload = self._unit_profile_help_payload()
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit Profile help")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

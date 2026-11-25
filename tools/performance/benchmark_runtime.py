@@ -268,7 +268,10 @@ def benchmark_database(
     }
 
 
-def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = False) -> None:
+def benchmark_unit_explorer(
+    path: Path, iterations: int, *, profile: bool = False,
+    pages: bool = False, page_names: Sequence[str] = (),
+) -> None:
     """Measure loopback HTTP and completed DOM updates on a fresh app per sample."""
     import cProfile
     import pstats
@@ -288,15 +291,36 @@ def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = Fals
             pass
 
     samples: dict[str, list[float]] = {}
+    page_cases = {
+        "/units/minutemen": "#unit-content",
+        "/units/dragoes": "#unit-content",
+        "/skills/mimetism": "#skill-content",
+        "/equipment/medikit": "#item-content",
+        "/weapons/combi-rifle": "#item-content",
+        "/skills": "#catalog-table-container",
+        "/equipment": "#catalog-table-container",
+        "/weapons": "#catalog-table-container",
+        "/armies": "#army-overview-groups",
+    }
 
-    def run_sample(browser: Any) -> None:
+    if page_names:
+        page_names = tuple("/" + name.lstrip("/") for name in page_names)
+        unknown = set(page_names) - page_cases.keys()
+        if unknown:
+            raise ValueError(f"Unknown page benchmark cases: {', '.join(sorted(unknown))}")
+        page_cases = {route: page_cases[route] for route in page_names}
+
+    def run_sample(browser: Any, selected_route: str = "") -> None:
         app = create_app(path, rules_database_path=path.with_name("rules_n5.db"))
         def serve(environ, start_response):
             if (
                 profile and (
-                    environ.get("PATH_INFO") == "/api/unit-filters"
-                    or (environ.get("PATH_INFO") == "/api/units"
-                        and "extended=1" in environ.get("QUERY_STRING", ""))
+                    (pages and environ.get("PATH_INFO", "").startswith("/api/units/"))
+                    or (not pages and (
+                        environ.get("PATH_INFO") == "/api/unit-filters"
+                        or (environ.get("PATH_INFO") == "/api/units"
+                            and "extended=1" in environ.get("QUERY_STRING", ""))
+                    ))
                 )
             ):
                 profiler = cProfile.Profile()
@@ -340,6 +364,28 @@ def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = Fals
                 samples.setdefault(name + " API", []).append(timing["responseEnd"] / 1000)
 
             origin = f"http://127.0.0.1:{server.server_port}"
+            if pages:
+                ready = page_cases[selected_route]
+                for phase in ("cold", "repeat"):
+                    started = time.perf_counter()
+                    page.goto(origin + selected_route, wait_until="domcontentloaded")
+                    page.locator(ready).wait_for(state="visible", timeout=15_000)
+                    elapsed = time.perf_counter() - started
+                    samples.setdefault(f"{selected_route} {phase}", []).append(elapsed)
+                    resources = page.evaluate("""() => performance.getEntriesByType('resource')
+                        .filter(e => new URL(e.name).pathname.startsWith('/api/'))
+                        .map(e => ({
+                            path: new URL(e.name).pathname,
+                            start: Math.round(e.startTime), end: Math.round(e.responseEnd),
+                            bytes: e.decodedBodySize,
+                        }))""")
+                    print(
+                        f"{selected_route} {phase}: {elapsed*1000:.1f} ms {resources}",
+                        flush=True,
+                    )
+                if errors:
+                    raise ValueError(f"Browser errors: {errors}")
+                return
             measure("initial", lambda: page.goto(
                 origin + "/units", wait_until="domcontentloaded",
             ))
@@ -373,7 +419,11 @@ def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = Fals
         browser = driver.chromium.launch(channel="chrome")
         try:
             for _ in range(iterations):
-                run_sample(browser)
+                if pages:
+                    for route in page_cases:
+                        run_sample(browser, route)
+                else:
+                    run_sample(browser)
         finally:
             browser.close()
 
@@ -390,6 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--case", action="append", default=[], help="Run only this named case.")
     parser.add_argument("--profile", action="store_true", help="Profile each selected case.")
     parser.add_argument("--browser", action="store_true", help="Benchmark Unit Explorer in Chrome.")
+    parser.add_argument("--pages", action="store_true", help="Benchmark detail and catalog pages.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -399,10 +450,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
     try:
-        if args.browser:
-            if args.case or args.json:
-                raise ValueError("--browser cannot be combined with --case or --json")
-            benchmark_unit_explorer(args.database, args.cold_iterations, profile=args.profile)
+        if args.browser or args.pages:
+            if args.json or (args.browser and (args.case or args.pages)):
+                raise ValueError("--browser cannot be combined with --case, --pages or --json")
+            benchmark_unit_explorer(
+                args.database, args.cold_iterations, profile=args.profile,
+                pages=args.pages, page_names=args.case,
+            )
             return 0
         if args.profile:
             import cProfile

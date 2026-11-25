@@ -41,17 +41,24 @@ class GlossaryCatalog:
             return None
         return f"/{catalog}/{identifier}"
 
-    def _record_entries(self) -> list[dict[str, Any]]:
+    def _record_entries(self, *, domain_slug: str | None = None) -> list[dict[str, Any]]:
         if self.rules_database is None:
             return []
         entries: list[dict[str, Any]] = []
-        equipment_slugs = frozenset(
-            item["slug"]
-            for item in EquipmentCatalog(self.database, self.rules_database).list_equipment()
-            if isinstance(item.get("slug"), str)
+        equipment_slugs = (
+            frozenset(
+                item["slug"]
+                for item in EquipmentCatalog(
+                    self.database, self.rules_database,
+                ).list_equipment(filter_only=True)
+                if isinstance(item.get("slug"), str)
+            )
+            if domain_slug in (None, "equipment") else frozenset()
         )
         for domain in APPLICATION_DOMAINS:
             if not domain.published or not domain.glossary:
+                continue
+            if domain_slug is not None and domain.slug != domain_slug:
                 continue
             for kind in domain.record_kinds:
                 for record in self.rules_database.composed_records_by_kind(
@@ -205,6 +212,13 @@ class GlossaryCatalog:
                 entry["citations"] = deepcopy(item["citations"])
             entries.append(entry)
         return entries
+
+    def attribute_entries(self) -> list[dict[str, Any]]:
+        """Return canonical Attribute entries without constructing other Glossary domains."""
+        return sorted(
+            self._record_entries(domain_slug="attributes"),
+            key=lambda item: (accent_insensitive_key(item["name"]), item["kind"], item["id"]),
+        )
 
     def embedded_entries(self) -> list[dict[str, Any]]:
         """Return embedded concepts for global search without duplicating catalogs."""

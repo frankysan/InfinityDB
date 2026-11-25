@@ -1618,6 +1618,36 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 400
     assert json.loads(body)["error"] == "extended must be 0 or 1"
 
+def test_unit_profile_help_uses_only_attribute_entries_and_caches_payload(monkeypatch) -> None:
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    expected = [
+        item for item in application.api.glossary_catalog.embedded_entries()
+        if item["domain_slug"] == "attributes"
+    ]
+    # A fresh app must not build the full Glossary to serve this projection.
+    fresh = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("Unit Profile help must not construct the full Glossary")
+
+    monkeypatch.setattr(fresh.api.glossary_catalog, "entries", unexpected)
+    status, _, body = request(fresh, "/api/unit-profile-help")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["attributes"] == expected
+    assert payload["items"]
+    monkeypatch.setattr(fresh.api.glossary_catalog, "attribute_entries", unexpected)
+    status, _, repeated = request(fresh, "/api/unit-profile-help")
+    assert status == 200
+    assert repeated == body
+
+
 def test_unit_explorer_capacity_scenario_against_current_snapshot() -> None:
     from urllib.parse import urlsplit
 

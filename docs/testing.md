@@ -102,6 +102,34 @@ profile projection (512 entries per application, keyed by Unit and enabled
 availability flags); preserve the existing full detail response. These local
 three-sample measurements do not establish production tail latency.
 
+### Detail and catalog browser performance — 2026-11-25
+
+Run `python -m tools.performance.benchmark_runtime data/generated/army.db
+--pages --cold-iterations 3` for the representative page set, optionally with
+repeatable `--case units/minutemen` (or another listed route without a leading
+slash). Fresh application and browser context per route/sample; repeat visit
+uses the same app/context. Timings end at visible main content, not all
+secondary asynchronous updates; Playwright visibility polling can inflate
+the observed time. API resource timings and decoded sizes are printed
+separately. Application construction is excluded.
+
+Windows Chrome baseline at `e5faa116`, same recorded Army/Rules inputs,
+three samples per case. Median cold/repeat visible times (ms): Minutemen
+950/136, Dragoes 959/129, Mimetism 952/231, MediKit 959/134, Combi Rifle
+944/128, Skills catalog 958/64, Equipment catalog 358/72, Weapons catalog
+958/63, Armies 229/167. These are diagnostic measurements, not production SLOs.
+
+Unit Profile help unnecessarily built all Glossary domains to obtain
+Attributes. A domain-scoped projection, shared maintained-text resolver
+and snapshot-wide cached help payload preserve its public structure.
+Median cold/repeat times after the change: Minutemen 410/57, Dragoes 382/56;
+cold help HTTP duration fell from roughly 540–650 ms to 89–119 ms.
+The remaining Unit detail request is now the main API dependency.
+Mimetism also transfers a 490 KB detail payload and 1.37 MB exact-variant
+usage payload (decoded); investigate their rendering/transfer costs before
+changing the public reference contract. Catalog details may render again
+as availability, FAQ and exact-variant data arrive.
+
 ### Unit Explorer initialization — 2026-11-25
 
 Windows checkout based on `885b7757`, same Army and N5 Rules snapshot,
