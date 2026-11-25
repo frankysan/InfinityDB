@@ -249,6 +249,17 @@ becomes shared. Cross-season composition must be in place before curating ITS
 17 against ITS 18. The detailed authoring and override invariants belong in
 [the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
 
+**Accepted v1.2.2 direction (not yet implemented):** Separate a reviewed canonical
+Scenario Skill identity from the exact versioned definition and its applicability.
+Functionally equivalent Skills may share a catalog and Search entry even when
+context-specific requirements, MODs, types or effects differ. Similar names
+identify review candidates, not automatic equivalence; distinct functions retain
+distinct identities. A canonical detail card presents common mechanics and
+explicit season/scenario variants with links to applicable scenarios. Scoped URLs
+and scenario cards continue to resolve the exact applicable definition and source
+citations. Grouping does not relax the existing fact/version validation or
+independent season publication contracts.
+
 Geometry and scoring are maintained semantic data. Core diagrams and reference views are generated
 from that data, with source/season overlays kept distinct from canonical Army or rules facts.
 A **post-1.0 scenario editor** will reuse this component model and renderer for

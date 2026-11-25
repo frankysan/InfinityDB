@@ -28,6 +28,28 @@ Use these links to jump directly to a workstream:
 
 ## Active development
 
+### v1.2.2 reference refinements
+
+- [ ] **Web backend + Web frontend:** Fix standalone scenario SVG appearance.
+  Saved SVGs must retain the selected theme, colors, labels, patterns and
+  measurements outside InfinityDB. Verify standalone viewing in both themes
+  and distance units.
+- [ ] **Web backend:** Make range helper endcaps visible over map and zone edges
+  in the shared SVG renderer, including at table boundaries. Preserve exact
+  measurement coordinates; verify overlapping and boundary cases.
+- [ ] **Web backend + Web frontend:** Include Skills, Equipment and Weapons in
+  Extended Unit Explorer details as plain text without individual links.
+  Preserve profile ownership and distinguish alternative loadouts rather than
+  implying simultaneous possession; keep the presentation compact.
+- [ ] **Data processing + Web backend + Web frontend:** Consolidate functionally
+  equivalent Scenario Skills under reviewed canonical identities, with one
+  catalog/Search entry and a common detail card plus season/scenario differences
+  and links to all applicable scenarios. Keep contextual scenario cards and
+  existing scoped URLs; preserve exact source facts and citations.
+  Follow the [accepted identity direction](architecture.md).
+  Test shared and distinct identities, contextual overrides, search, links,
+  and route compatibility across ITS seasons.
+
 ### External source clarifications
 
 **Project domain:** Data processing
