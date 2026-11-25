@@ -15,6 +15,8 @@ from pathlib import Path
 
 from tools.ci.prepare_release_ci_evidence import (
     ReleaseEvidenceError,
+    ReusedReleaseEvidence,
+    collect_identical_merge_evidence,
     collect_release_evidence,
 )
 
@@ -71,6 +73,12 @@ def baseline_is_valid(repository: str, sha: str, token: str | None) -> bool:
         collect_release_evidence(
             repository, sha, token=token, include_cross_browser=False,
         )
+    except ReusedReleaseEvidence:
+        # A main commit may have verified merge reuse rather than fresh jobs.
+        try:
+            collect_identical_merge_evidence(repository, sha, token=token)
+        except (ReleaseEvidenceError, OSError, ValueError):
+            return False
     except (ReleaseEvidenceError, OSError, ValueError):
         return False
     return True

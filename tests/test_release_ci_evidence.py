@@ -8,6 +8,7 @@ from subprocess import CompletedProcess
 
 import pytest
 
+from tools.ci import identical_merge
 from tools.ci import prepare_release_ci_evidence as release_ci
 
 COMMIT = "0123456789abcdef0123456789abcdef01234567"
@@ -116,6 +117,23 @@ def test_release_collector_source_contract_matches_workflow() -> None:
             assert f"- name: {step}" in section
 
 
+@pytest.mark.parametrize("filename", [
+    "source-checks.yml", "installed-wheel.yml", "deployment-smoke.yml",
+])
+def test_core_workflows_reuse_only_on_main_push(filename) -> None:
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github/workflows" / filename
+    ).read_text(encoding="utf-8")
+    assert "ref: ${{ github.event.pull_request.head.sha || github.sha }}" in workflow
+    assert "actions: read" in workflow and "pull-requests: read" in workflow
+    assert "if: github.event_name == 'push' && github.ref == 'refs/heads/main'" in workflow
+    assert "python3 -m tools.ci.identical_merge" in workflow
+    if filename == "source-checks.yml":
+        assert "steps.merge.outputs.reuse == 'true' && 'false'" in workflow
+    else:
+        assert "if: steps.merge.outputs.reuse != 'true'" in workflow
+
+
 def test_workflow_runs_url_uses_exact_workflow_file_and_commit() -> None:
     url = release_ci.workflow_runs_url(REPOSITORY, "source-checks.yml", COMMIT)
 
@@ -184,8 +202,7 @@ def test_collect_release_evidence_requires_every_configured_workflow(monkeypatch
         requested.append(url)
         assert token == "token"
         if "/jobs?" in url:
-            jobs = _source_jobs()
-            return {"jobs": jobs, "total_count": len(jobs)}
+            return _core_job_payload(url, source_id=101, wheel_id=103, deploy_id=105)
         requirement = next(
             item for item in release_ci.REQUIRED_WORKFLOWS if item.filename in url
         )
@@ -205,7 +222,7 @@ def test_collect_release_evidence_requires_every_configured_workflow(monkeypatch
         "Installed wheel smoke",
         "Deployment smoke test",
     ]
-    assert len(requested) == 4
+    assert len(requested) == 6
     assert evidence["workflows"][0]["source_validation"] == {"mode": "full"}
 
 
@@ -215,8 +232,7 @@ def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatc
     def fake_request(url: str, *, token: str | None) -> dict[str, object]:
         requested.append(url)
         if "/jobs?" in url:
-            jobs = _source_jobs()
-            return {"jobs": jobs, "total_count": len(jobs)}
+            return _core_job_payload(url, source_id=101, wheel_id=103, deploy_id=105)
         requirements = release_ci.REQUIRED_WORKFLOWS + (release_ci.OPTIONAL_FULL_ASSET_WORKFLOW,)
         requirement = next(item for item in requirements if item.filename in url)
         return {"workflow_runs": [_run(requirement, run_id=100 + len(requested))]}
@@ -237,7 +253,28 @@ def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatc
         "Deployment smoke test",
         "Full-asset checks",
     ]
-    assert len(requested) == 5
+    assert len(requested) == 7
+
+
+def _core_job_payload(
+    url: str, *, source_id: int, wheel_id: int, deploy_id: int,
+) -> dict[str, object]:
+    if url == release_ci.cross_browser_jobs_url(REPOSITORY, source_id):
+        jobs = _source_jobs(source_id)
+        return {"jobs": jobs, "total_count": len(jobs)}
+    for run_id, name, step in (
+        (wheel_id, "installed-wheel", "Validate installed wheel outside checkout"),
+        (deploy_id, "deployment-smoke", "Validate image and production startup"),
+    ):
+        if url == release_ci.cross_browser_jobs_url(REPOSITORY, run_id):
+            return {"total_count": 1, "jobs": [{
+                "name": name, "run_id": run_id, "status": "completed", "conclusion": "success",
+                "steps": [
+                    {"name": "Check out exact candidate", "conclusion": "success"},
+                    {"name": step, "conclusion": "success"},
+                ],
+            }]}
+    pytest.fail(f"Unexpected jobs request: {url}")
 
 
 def _browser_jobs(run_id: int = 200) -> list[dict[str, object]]:
@@ -283,13 +320,16 @@ def _source_jobs(run_id: int = 101, *, focused: bool = False):
         "name": release_ci.SOURCE_FAST_JOB,
         "status": "completed",
         "conclusion": "success",
-        "steps": [{
-            "name": (
-                "Run changed tests with verified baseline"
-                if focused else "Run focused release checks before full matrix"
-            ),
-            "conclusion": "success",
-        }],
+        "steps": [
+            {"name": "Check out exact candidate", "conclusion": "success"},
+            {
+                "name": (
+                    "Run changed tests with verified baseline"
+                    if focused else "Run focused release checks before full matrix"
+                ),
+                "conclusion": "success",
+            },
+        ],
     })
     return jobs
 
@@ -377,11 +417,9 @@ def test_collect_release_evidence_requires_cross_browser_job_matrix(monkeypatch)
     def fake_request(url: str, *, token: str | None) -> dict[str, object]:
         requested.append(url)
         if "/jobs?" in url:
-            if url == release_ci.cross_browser_jobs_url(REPOSITORY, 101):
-                jobs = _source_jobs()
-                return {"jobs": jobs, "total_count": len(jobs)}
-            assert url == release_ci.cross_browser_jobs_url(REPOSITORY, 200)
-            return {"jobs": _browser_jobs(), "total_count": 4}
+            if url == release_ci.cross_browser_jobs_url(REPOSITORY, 200):
+                return {"jobs": _browser_jobs(), "total_count": 4}
+            return _core_job_payload(url, source_id=101, wheel_id=103, deploy_id=105)
         requirement = next(item for item in requirements if item.filename in url)
         return {
             "workflow_runs": [
@@ -394,7 +432,7 @@ def test_collect_release_evidence_requires_cross_browser_job_matrix(monkeypatch)
     evidence = release_ci.collect_release_evidence(
         REPOSITORY, COMMIT, include_cross_browser=True
     )
-    assert len(requested) == 6
+    assert len(requested) == 8
     assert evidence["workflows"][0]["source_validation"] == {"mode": "full"}
     browser = evidence["workflows"][-1]
     assert browser["workflow"] == "Cross-browser compatibility"
@@ -718,6 +756,155 @@ def test_v1_1_cli_browser_matrix_is_opt_in(monkeypatch, tmp_path: Path) -> None:
     assert release_ci.main(base_args) == 1
     assert release_ci.main([*base_args, "--include-cross-browser"]) == 1
     assert requested == [False, True]
+
+
+FINAL = "f" * 40
+TREE = "a" * 40
+
+
+def _merged_pr() -> dict:
+    return {
+        "number": 42, "state": "closed", "merged_at": "2026-11-25T20:00:00Z",
+        "merge_commit_sha": FINAL,
+        "base": {"ref": "main", "repo": {"full_name": REPOSITORY}},
+        "head": {"sha": COMMIT, "repo": {"full_name": REPOSITORY}},
+    }
+
+
+def _mock_merge_api(monkeypatch, *, problem: str = "") -> None:
+    pr = _merged_pr()
+    if problem == "different-pr":
+        pr["merge_commit_sha"] = "b" * 40
+    elif problem == "fork":
+        pr["head"]["repo"]["full_name"] = "other/InfinityDB"
+    elif problem == "unmerged":
+        pr["merged_at"] = None
+
+    def fake_payload(url, *, token):
+        assert url.endswith(f"/commits/{FINAL}/pulls?per_page=100")
+        return [pr, pr] if problem == "ambiguous" else [pr]
+
+    def fake_json(url, *, token):
+        if "/git/commits/" in url:
+            sha = url.rsplit("/", 1)[-1]
+            return {"sha": sha, "tree": {
+                "sha": "b" * 40 if sha == FINAL and problem == "tree" else TREE,
+            }}
+        if "/jobs?" in url:
+            payload = _core_job_payload(url, source_id=101, wheel_id=103, deploy_id=105)
+            if problem == "smoke-reused" and "/103/" in url:
+                payload["jobs"][0]["steps"] = []
+            if problem == "checkout" and "/105/" in url:
+                payload["jobs"][0]["steps"][0]["conclusion"] = "skipped"
+            return payload
+        assert f"head_sha={COMMIT}" in url
+        index, requirement = next(
+            (index, requirement)
+            for index, requirement in enumerate(release_ci.REQUIRED_WORKFLOWS)
+            if requirement.filename in url
+        )
+        if problem == "missing" and index == 2:
+            return {"workflow_runs": []}
+        run = _run(
+            requirement, run_id=101 + 2 * index,
+            conclusion="failure" if index == 1 and problem == "failed" else "success",
+        )
+        run["event"] = "push" if problem == "wrong-event" else "pull_request"
+        return {"workflow_runs": [run]}
+
+    monkeypatch.setattr(release_ci, "_request_payload", fake_payload)
+    monkeypatch.setattr(release_ci, "_request_json", fake_json)
+
+
+def test_identical_merge_records_actual_candidate_workflow_shas(monkeypatch) -> None:
+    _mock_merge_api(monkeypatch)
+    evidence = release_ci.collect_identical_merge_evidence(
+        REPOSITORY, FINAL, candidate_sha=COMMIT,
+    )
+    assert evidence["commit_sha"] == FINAL
+    assert evidence["identical_merge"] == {
+        "candidate_sha": COMMIT, "final_sha": FINAL, "tree_sha": TREE, "pull_request": 42,
+    }
+    assert all(run["head_sha"] == COMMIT for run in evidence["workflows"])
+    message = release_ci.render_tag_message("v1.2.2", evidence)
+    assert f"Commit: {FINAL}" in message
+    assert f"Validated candidate: {COMMIT}" in message
+    assert f"Shared Git tree: {TREE}" in message
+    assert message.count(f"Validated SHA: {COMMIT}") == 3
+    evidence["workflows"][0]["head_sha"] = FINAL
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="does not match candidate"):
+        release_ci.render_tag_message("v1.2.2", evidence)
+
+
+@pytest.mark.parametrize("problem", [
+    "different-pr", "fork", "unmerged", "ambiguous", "tree", "missing", "failed",
+    "wrong-event", "checkout", "smoke-reused",
+])
+def test_identical_merge_rejects_unverified_evidence(monkeypatch, problem) -> None:
+    _mock_merge_api(monkeypatch, problem=problem)
+    with pytest.raises(release_ci.ReleaseEvidenceError):
+        release_ci.collect_identical_merge_evidence(REPOSITORY, FINAL, candidate_sha=COMMIT)
+
+
+def test_identical_merge_requires_approved_candidate(monkeypatch) -> None:
+    _mock_merge_api(monkeypatch)
+    with pytest.raises(release_ci.ReleaseEvidenceError, match="Approved candidate"):
+        release_ci.collect_identical_merge_evidence(
+            REPOSITORY, FINAL, candidate_sha="c" * 40,
+        )
+
+
+@pytest.mark.parametrize("problem", ["", "tree", "missing", "failed"])
+def test_main_push_reuse_guard_falls_back_to_fresh_checks(
+    monkeypatch, tmp_path, problem,
+) -> None:
+    _mock_merge_api(monkeypatch, problem=problem)
+    output = tmp_path / "github-output"
+    assert identical_merge.main([
+        "--repository", REPOSITORY, "--commit", FINAL, "--github-output", str(output),
+    ]) == 0
+    assert output.read_text(encoding="utf-8") == (
+        "reuse=false\n" if problem else "reuse=true\n"
+    )
+
+
+def test_main_reuse_acknowledgments_are_not_fresh_source_or_smoke_evidence() -> None:
+    jobs = _source_jobs(focused=True)
+    jobs[-1]["steps"] = [{"name": "Verify identical merged PR evidence", "conclusion": "success"}]
+    with pytest.raises(release_ci.ReusedReleaseEvidence, match="Source reused"):
+        release_ci.verify_source_jobs({"jobs": jobs, "total_count": len(jobs)}, run_id=101)
+    requirement = release_ci.REQUIRED_WORKFLOWS[1]
+    evidence = release_ci.select_latest_run(
+        {"workflow_runs": [_run(requirement, run_id=103)]},
+        requirement=requirement, commit_sha=COMMIT,
+    )
+    payload = _core_job_payload(
+        release_ci.cross_browser_jobs_url(REPOSITORY, 103),
+        source_id=101, wheel_id=103, deploy_id=105,
+    )
+    payload["jobs"][0]["steps"] = [
+        {"name": "Verify identical merged PR evidence", "conclusion": "success"}
+    ]
+    with pytest.raises(release_ci.ReusedReleaseEvidence, match="reused merged PR"):
+        release_ci.verify_smoke_job(payload, evidence, require_pr_candidate=False)
+
+
+def test_identical_merge_cli_validates_metadata_on_final_sha(monkeypatch, tmp_path) -> None:
+    _mock_merge_api(monkeypatch)
+    checked = []
+    monkeypatch.setattr(
+        release_ci, "verify_release_metadata_for_tag", lambda tag, sha: checked.append((tag, sha)),
+    )
+    json_output = tmp_path / "evidence.json"
+    tag_output = tmp_path / "tag.txt"
+    assert release_ci.main([
+        "--repository", REPOSITORY, "--commit", FINAL, "--candidate", COMMIT,
+        "--tag", "v1.2.2", "--json-output", str(json_output),
+        "--tag-message-output", str(tag_output),
+    ]) == 0
+    assert checked == [("v1.2.2", FINAL)]
+    assert json.loads(json_output.read_text(encoding="utf-8"))["commit_sha"] == FINAL
+    assert f"Validated candidate: {COMMIT}" in tag_output.read_text(encoding="utf-8")
 
 
 def test_main_rejects_invalid_release_commit_without_traceback(capsys) -> None:

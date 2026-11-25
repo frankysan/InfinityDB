@@ -9,16 +9,31 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  pull-requests: read
 
 jobs:
   installed-wheel:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check out source
+      - name: Check out exact candidate
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify identical merged PR evidence
+        id: merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -m tools.ci.identical_merge
+          --repository "${{ github.repository }}" --commit "${{ github.sha }}"
+          --github-output "$GITHUB_OUTPUT"
 
       - name: Set up Python
+        if: steps.merge.outputs.reuse != 'true'
         uses: actions/setup-python@v7
         with:
           python-version: "3.11"
@@ -26,9 +41,11 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Build wheel
+        if: steps.merge.outputs.reuse != 'true'
         run: python -m pip wheel --no-deps --wheel-dir "$RUNNER_TEMP/wheelhouse" .
 
       - name: Validate installed wheel outside checkout
+        if: steps.merge.outputs.reuse != 'true'
         run: >-
           python tools/ci/installed_wheel_smoke.py
           --wheel "$RUNNER_TEMP"/wheelhouse/*.whl

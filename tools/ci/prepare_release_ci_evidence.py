@@ -84,6 +84,10 @@ class ReleaseEvidenceError(RuntimeError):
     """Raised when hosted CI evidence is missing, stale, or invalid."""
 
 
+class ReusedReleaseEvidence(ReleaseEvidenceError):
+    """A successful main job reused candidate checks; verify their original evidence."""
+
+
 def validate_repository(value: str) -> str:
     repository = value.strip()
     if not _REPOSITORY_RE.fullmatch(repository):
@@ -143,7 +147,7 @@ def verify_release_metadata_for_tag(tag: str, commit_sha: str) -> None:
         )
 
 
-def _request_json(url: str, *, token: str | None) -> dict[str, Any]:
+def _request_payload(url: str, *, token: str | None) -> Any:
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "InfinityDB-release-evidence",
@@ -161,8 +165,13 @@ def _request_json(url: str, *, token: str | None) -> dict[str, Any]:
         ) from exc
     except (OSError, UnicodeError, json.JSONDecodeError, urllib.error.URLError) as exc:
         raise ReleaseEvidenceError(f"Could not read GitHub Actions evidence: {exc}") from exc
+    return payload
+
+
+def _request_json(url: str, *, token: str | None) -> dict[str, Any]:
+    payload = _request_payload(url, token=token)
     if not isinstance(payload, dict):
-        raise ReleaseEvidenceError("GitHub Actions response was not a JSON object")
+        raise ReleaseEvidenceError("GitHub response was not a JSON object")
     return payload
 
 
@@ -216,6 +225,43 @@ def verify_cross_browser_jobs(payload: dict[str, Any], *, run_id: int) -> list[d
     return sorted(result, key=lambda job: CROSS_BROWSER_JOBS.index(job["name"]))
 
 
+def _passed_step(job: dict[str, Any], name: str) -> bool:
+    steps = job.get("steps")
+    return isinstance(steps, list) and any(
+        isinstance(step, dict)
+        and step.get("name") == name
+        and step.get("conclusion") == "success"
+        for step in steps
+    )
+
+
+def verify_smoke_job(
+    payload: dict[str, Any], evidence: WorkflowRunEvidence, *, require_pr_candidate: bool,
+) -> None:
+    """Require actual smoke execution, not a main-push reuse acknowledgment."""
+    job_name, step_name = (
+        ("installed-wheel", "Validate installed wheel outside checkout")
+        if evidence.workflow_file == "installed-wheel.yml"
+        else ("deployment-smoke", "Validate image and production startup")
+    )
+    jobs = payload.get("jobs")
+    if not isinstance(jobs, list) or len(jobs) != 1 or payload.get("total_count") != 1:
+        raise ReleaseEvidenceError(f"{evidence.workflow} job response is incomplete")
+    job = jobs[0]
+    if (
+        not isinstance(job, dict) or job.get("name") != job_name
+        or job.get("run_id") != evidence.run_id or job.get("status") != "completed"
+        or job.get("conclusion") != "success"
+    ):
+        raise ReleaseEvidenceError(f"{evidence.workflow} job did not pass completely")
+    if not _passed_step(job, step_name):
+        if _passed_step(job, "Verify identical merged PR evidence"):
+            raise ReusedReleaseEvidence(f"{evidence.workflow} reused merged PR evidence")
+        raise ReleaseEvidenceError(f"{evidence.workflow} did not execute smoke checks")
+    if require_pr_candidate and not _passed_step(job, "Check out exact candidate"):
+        raise ReleaseEvidenceError(f"{evidence.workflow} PR lacks exact candidate checkout")
+
+
 def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str]:
     """Distinguish full Source coverage from justified, focused reuse."""
     jobs = payload.get("jobs")
@@ -234,6 +280,8 @@ def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str
         raise ReleaseEvidenceError("Source matrix jobs are missing, unexpected or duplicated")
     if any(job.get("run_id") != run_id for job in jobs):
         raise ReleaseEvidenceError("Source matrix contains jobs from a different run")
+    if any(job.get("status") != "completed" for job in jobs):
+        raise ReleaseEvidenceError("Source matrix contains nonterminal jobs")
     if has_fast and by_name[SOURCE_FAST_JOB].get("conclusion") != "success":
         raise ReleaseEvidenceError("Source fast-validation job did not pass")
     if any(by_name[name].get("conclusion") != "success" for name in SOURCE_FULL_JOBS):
@@ -241,17 +289,8 @@ def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str
     if not has_fast:
         return {"mode": "full"}
 
-    def passed_step(job: dict[str, Any], name: str) -> bool:
-        steps = job.get("steps")
-        return isinstance(steps, list) and any(
-            isinstance(step, dict)
-            and step.get("name") == name
-            and step.get("conclusion") == "success"
-            for step in steps
-        )
-
     reuse = [
-        passed_step(
+        _passed_step(
             by_name[name],
             "Reuse validated determinism baseline"
             if name in SOURCE_PINNED_JOBS
@@ -264,9 +303,11 @@ def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str
         for name in SOURCE_FULL_JOBS
     ]
     if all(reuse):
-        if not passed_step(
+        if not _passed_step(
             by_name[SOURCE_FAST_JOB], "Run changed tests with verified baseline"
         ):
+            if _passed_step(by_name[SOURCE_FAST_JOB], "Verify identical merged PR evidence"):
+                raise ReusedReleaseEvidence("Source reused merged PR evidence")
             raise ReleaseEvidenceError("Scoped Source run lacks successful focused tests")
         return {"mode": "focused", "basis": "verified hosted baseline"}
     if any(reuse):
@@ -281,7 +322,7 @@ def verify_source_jobs(payload: dict[str, Any], *, run_id: int) -> dict[str, str
                 else "Run source checks"
             )
         )
-        if not passed_step(by_name[name], expected_step):
+        if not _passed_step(by_name[name], expected_step):
             raise ReleaseEvidenceError(f"Full Source job {name!r} did not run checks")
     return {"mode": "full"}
 
@@ -328,6 +369,8 @@ def select_latest_run(
 
     latest = max(runs, key=run_order)
     conclusion = _required_str(latest, "conclusion", workflow=requirement.name)
+    if latest.get("status") != "completed":
+        raise ReleaseEvidenceError(f"Latest {requirement.name} run is not completed")
     if conclusion != "success":
         run_url = latest.get("html_url")
         detail = f" ({run_url})" if isinstance(run_url, str) and run_url else ""
@@ -369,6 +412,7 @@ def collect_release_evidence(
     token: str | None = None,
     include_full_assets: bool = False,
     include_cross_browser: bool = False,
+    require_pr_candidate: bool = False,
 ) -> dict[str, Any]:
     repository = validate_repository(repository)
     commit_sha = validate_commit_sha(commit_sha)
@@ -389,6 +433,9 @@ def collect_release_evidence(
             commit_sha=commit_sha,
         )
         entry = asdict(evidence)
+        if require_pr_candidate and requirement in REQUIRED_WORKFLOWS:
+            if evidence.event != "pull_request":
+                raise ReleaseEvidenceError(f"{requirement.name} is not candidate PR evidence")
         if requirement == REQUIRED_WORKFLOWS[0]:
             source_jobs = _request_json(
                 cross_browser_jobs_url(repository, evidence.run_id), token=token,
@@ -396,6 +443,17 @@ def collect_release_evidence(
             entry["source_validation"] = verify_source_jobs(
                 source_jobs, run_id=evidence.run_id,
             )
+            if require_pr_candidate:
+                fast = next(
+                    (job for job in source_jobs["jobs"] if job["name"] == SOURCE_FAST_JOB), {}
+                )
+                if not _passed_step(fast, "Check out exact candidate"):
+                    raise ReleaseEvidenceError("Source PR did not verify exact candidate checkout")
+        if requirement in REQUIRED_WORKFLOWS[1:]:
+            job_payload = _request_json(
+                cross_browser_jobs_url(repository, evidence.run_id), token=token,
+            )
+            verify_smoke_job(job_payload, evidence, require_pr_candidate=require_pr_candidate)
         if requirement == CROSS_BROWSER_WORKFLOW:
             job_payload = _request_json(
                 cross_browser_jobs_url(repository, evidence.run_id), token=token,
@@ -407,6 +465,75 @@ def collect_release_evidence(
         "repository": repository,
         "commit_sha": commit_sha,
         "workflows": workflows,
+    }
+
+
+def _commit_tree(repository: str, sha: str, token: str | None) -> str:
+    commit = _request_json(
+        f"{GITHUB_API_BASE}/repos/{repository}/git/commits/{sha}", token=token,
+    )
+    tree = commit.get("tree")
+    tree_sha = tree.get("sha") if isinstance(tree, dict) else None
+    if commit.get("sha") != sha or not isinstance(tree_sha, str) or not _SHA_RE.fullmatch(tree_sha):
+        raise ReleaseEvidenceError("GitHub did not return the exact commit and tree identity")
+    return tree_sha.lower()
+
+
+def collect_identical_merge_evidence(
+    repository: str, final_sha: str, *,
+    candidate_sha: str | None = None,
+    token: str | None = None,
+    include_full_assets: bool = False,
+    include_cross_browser: bool = False,
+) -> dict[str, Any]:
+    """Reuse only the actual same-repository PR head merged into main."""
+    repository = validate_repository(repository)
+    final_sha = validate_commit_sha(final_sha)
+    if candidate_sha is not None:
+        candidate_sha = validate_commit_sha(candidate_sha)
+    prs = _request_payload(
+        f"{GITHUB_API_BASE}/repos/{repository}/commits/{final_sha}/pulls?per_page=100",
+        token=token,
+    )
+    if not isinstance(prs, list) or len(prs) >= 100:
+        raise ReleaseEvidenceError("Associated pull requests are unavailable or incomplete")
+    matches = []
+    for pr in prs:
+        if not isinstance(pr, dict):
+            raise ReleaseEvidenceError("Invalid associated pull request")
+        base, head = pr.get("base"), pr.get("head")
+        if not isinstance(base, dict) or not isinstance(head, dict):
+            continue
+        base_repo, head_repo = base.get("repo"), head.get("repo")
+        if (
+            pr.get("state") == "closed" and pr.get("merged_at")
+            and pr.get("merge_commit_sha") == final_sha and base.get("ref") == "main"
+            and isinstance(base_repo, dict) and isinstance(head_repo, dict)
+            and base_repo.get("full_name") == head_repo.get("full_name") == repository
+        ):
+            matches.append(pr)
+    if len(matches) != 1:
+        raise ReleaseEvidenceError("No unique same-repository PR merged into main at this SHA")
+    pr = matches[0]
+    head_sha = validate_commit_sha(_required_str(pr["head"], "sha", workflow="Merged PR"))
+    if head_sha == final_sha or (candidate_sha is not None and candidate_sha != head_sha):
+        raise ReleaseEvidenceError("Approved candidate does not match the distinct merged PR head")
+    final_tree = _commit_tree(repository, final_sha, token)
+    if _commit_tree(repository, head_sha, token) != final_tree:
+        raise ReleaseEvidenceError("Candidate and final main Git trees differ")
+    evidence = collect_release_evidence(
+        repository, head_sha, token=token, include_full_assets=include_full_assets,
+        include_cross_browser=include_cross_browser, require_pr_candidate=True,
+    )
+    return {
+        **evidence,
+        "commit_sha": final_sha,
+        "identical_merge": {
+            "candidate_sha": head_sha,
+            "final_sha": final_sha,
+            "tree_sha": final_tree,
+            "pull_request": _required_int(pr, "number", workflow="Merged PR"),
+        },
     }
 
 
@@ -452,9 +579,23 @@ def render_tag_message(tag: str, evidence: dict[str, Any]) -> str:
         f"Repository: {repository}",
         f"Commit: {commit_sha}",
     ]
+    merge = evidence.get("identical_merge")
+    if merge is not None:
+        if not isinstance(merge, dict) or merge.get("final_sha") != commit_sha:
+            raise ReleaseEvidenceError("Invalid identical merge release identity")
+        candidate = validate_commit_sha(_required_str(merge, "candidate_sha", workflow="Merge"))
+        tree = validate_commit_sha(_required_str(merge, "tree_sha", workflow="Merge"))
+        pr = _required_int(merge, "pull_request", workflow="Merge")
+        lines.extend([
+            f"Identical-tree reuse: PR #{pr}",
+            f"Validated candidate: {candidate}",
+            f"Shared Git tree: {tree}",
+        ])
     for workflow in workflows:
         if not isinstance(workflow, dict):
             raise ReleaseEvidenceError("Release evidence contains an invalid workflow entry")
+        if merge is not None and workflow.get("head_sha") != merge["candidate_sha"]:
+            raise ReleaseEvidenceError("Reused workflow SHA does not match candidate")
         name = workflow.get("workflow")
         run_number = workflow.get("run_number")
         run_attempt = workflow.get("run_attempt")
@@ -476,6 +617,8 @@ def render_tag_message(tag: str, evidence: dict[str, Any]) -> str:
         lines.append(
             f"- {name}: {conclusion} (run {run_number}, attempt {run_attempt}){suffix}"
         )
+        if merge is not None:
+            lines.append(f"  Validated SHA: {workflow['head_sha']}")
         lines.append(f"  {url}")
     return "\n".join(lines) + "\n"
 
@@ -490,6 +633,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repository", required=True, help="GitHub repository as OWNER/REPO")
     parser.add_argument("--commit", required=True, help="full 40-character release commit SHA")
     parser.add_argument("--tag", required=True, help="planned release tag, for example v0.10.0")
+    parser.add_argument(
+        "--candidate", help="approved pre-merge SHA; require verified identical-tree reuse",
+    )
     parser.add_argument(
         "--check-only",
         action="store_true",
@@ -544,13 +690,17 @@ def main(argv: list[str] | None = None) -> int:
                 )
             _check_fresh_outputs(args.json_output, args.tag_message_output)
         tag = validate_tag(args.tag)
-        evidence = collect_release_evidence(
-            args.repository,
-            args.commit,
-            token=os.environ.get("GITHUB_TOKEN"),
-            include_full_assets=args.include_full_assets,
-            include_cross_browser=requires_cross_browser(tag) or args.include_cross_browser,
-        )
+        options = {
+            "token": os.environ.get("GITHUB_TOKEN"),
+            "include_full_assets": args.include_full_assets,
+            "include_cross_browser": requires_cross_browser(tag) or args.include_cross_browser,
+        }
+        if args.candidate:
+            evidence = collect_identical_merge_evidence(
+                args.repository, args.commit, candidate_sha=args.candidate, **options,
+            )
+        else:
+            evidence = collect_release_evidence(args.repository, args.commit, **options)
         tag_message = render_tag_message(tag, evidence)
         verify_release_metadata_for_tag(tag, args.commit)
         if not args.check_only:

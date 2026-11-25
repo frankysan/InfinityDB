@@ -176,7 +176,7 @@ do not relabel unfinished descendants as separate gates merely to close a parent
 
 **Freeze before merging a release candidate:** The active development TODO
 must be reconciled before the final planned merge. Keep merge approval,
-exact-main-SHA hosted CI, tagging, authorized deployment and post-deployment
+final-main hosted CI evidence, tagging, authorized deployment and post-deployment
 verification in the canonical [release checklist](releasing.md), not as open
 development tasks whose later retirement requires a second merge. When an
 existing V1S entry concerns only those external release operations, transfer

@@ -67,7 +67,7 @@ affected acceptance before the merge.
   intentional, and the required PR Source, installed-wheel and Docker smoke
   checks (and chosen additional browser checks) have passed for the candidate
   SHA. Obtain merge approval; after the merge, verify the resulting exact
-  `main` SHA again before tagging.
+  `main` SHA again before tagging, using fresh CI or verified identical-tree reuse.
 
 ## Version 1.0 data-completeness gate
 
@@ -431,12 +431,11 @@ is not a second default full-suite run.
 
 ## 5. Approve the candidate, merge, verify main, and tag
 
-### Accepted direction: reuse CI for identical merge trees (v1.2.2)
+### Reuse CI for identical merge trees (v1.2.2)
 
 Avoid repeating equivalent hosted validation solely because merging produces a
 new commit SHA. The mandatory pre-merge acceptance and exact candidate CI
-remain unchanged. Once the release-evidence collector supports and validates
-this policy:
+remain unchanged. The release-evidence collector implements this policy:
 
 - Accept green candidate CI for the final release commit when both commits
   have the same Git tree SHA and the required workflow coverage and validation
@@ -452,10 +451,12 @@ this policy:
   metadata or release version identity. The tag still points to the verified
   final `main` commit.
 
-This is the accepted v1.2.2 direction, not an implemented exception. Until the
-collector and regression tests support it, the existing exact-main-SHA CI
-requirement below remains in force. See the implementation task in
-[release and deployment robustness](TODO.md#release-and-deployment-robustness).
+The three core `main`-push workflows independently verify the merged PR and
+candidate evidence before omitting their expensive steps. A changed tree,
+missing PR/evidence or inaccessible API falls back to fresh validation. Manual
+workflow dispatch always permits fresh checks. The final release collector
+requires the explicit approved candidate SHA to use this exception; it does
+not treat a reuse acknowledgment as a newly executed smoke or Source run.
 
 ### Development freeze and release-only handoff
 
@@ -492,10 +493,11 @@ Do not create a routine second PR to finish release prose or TODO cleanup.
   accessibility acceptance are all complete. Obtain merge approval, then
   merge the verified candidate through the intended PR workflow.
 - [ ] After merging, identify the resulting exact `main` SHA (which may
-  differ from the branch tip after a merge/squash). Verify the three
-  mandatory hosted workflows and any selected additional checks on this
-  exact SHA **before tagging**. The hosted Deployment smoke workflow validates
-  the immutable image but does not replace the pre-merge Docker test stack.
+  differ from the branch tip after a merge/squash). Verify the three mandatory
+  hosted workflows and any selected additional checks **before tagging**,
+  either on this exact SHA or through the verified identical-tree exception.
+  Investigate any actual failed post-merge checks; reuse is not a failure waiver.
+  The hosted Deployment smoke workflow does not replace the pre-merge Docker test stack.
 - [ ] If any check fails, correct the development branch, run the applicable
   local acceptance again (including the complete suite and running Docker
   test for changed runtime behavior), and obtain green hosted evidence for
@@ -507,6 +509,13 @@ Do not create a routine second PR to finish release prose or TODO cleanup.
   ```text
   python -m tools.ci.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/evidence.json --tag-message-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/annotated-tag.txt
   ```
+
+  For an identical merged tree, add `--candidate <approved-candidate-sha>` to
+  that command. The collector verifies the actual same-repository PR merged into
+  `main`, both commit trees, and complete candidate workflow coverage. If reuse
+  cannot be established, obtain fresh final-SHA CI (dispatch manually if needed)
+  and run the command without `--candidate`. Optional selected workflows must
+  also have successful evidence on the chosen validation SHA.
 
   The collector rejects both files if either already exists or the two output
   selections resolve to the same file. Re-running a completed check requires a
