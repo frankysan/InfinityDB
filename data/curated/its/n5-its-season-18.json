@@ -3,7 +3,7 @@
   "formatVersion": 23,
   "collection": {
     "id": "its-season-18-2026.09.11",
-    "title": "ITS Season 18: Overheat — September hotfix mission curation",
+    "title": "ITS Season 18: Overheat — September hotfix",
     "domain": "its",
     "status": "current",
     "effectiveFrom": "2026-09-24",
@@ -216,7 +216,7 @@
       },
       "effect": {
         "kind": "optional-availability",
-        "text": "ITS Season 18 offers Reinforcements as an optional Extra, not as a rule for all N5 games. Its availability here does not independently certify unchanged N4-origin Reinforcements procedures as newly published N5 mechanics."
+        "text": "ITS Season 18 offers Reinforcements as an optional Extra, not as a rule for all N5 games. The underlying Reinforcements rules originate in N4; not every procedure has been separately confirmed for N5."
       },
       "citations": [
         {
@@ -4542,7 +4542,7 @@
               ],
               "objectiveId": "destroy-forces",
               "status": "needs-verification",
-              "description": "Both September hotfix PDFs print 176–274 for the 3-point band and more than 275 for the 4-point band, leaving exactly 275 points without a printed award. Preserve the source gap pending official clarification; do not infer a corrected boundary."
+              "description": "Both September hotfix PDFs print 176–274 for the 3-point band and more than 275 for the 4-point band, leaving exactly 275 points without a printed award. The award for exactly 275 points is unclear."
             },
             {
               "id": "350-point-preserve-forces-gap",
@@ -4551,7 +4551,7 @@
               ],
               "objectiveId": "preserve-forces",
               "status": "needs-verification",
-              "description": "Both September hotfix PDFs print 176–274 for the 3-point band and more than 275 for the 4-point band, leaving exactly 275 points without a printed award. Preserve the source gap pending official clarification; do not infer a corrected boundary."
+              "description": "Both September hotfix PDFs print 176–274 for the 3-point band and more than 275 for the 4-point band, leaving exactly 275 points without a printed award. The award for exactly 275 points is unclear."
             },
             {
               "id": "400-point-preserve-forces-bilingual-threshold",
@@ -4560,7 +4560,7 @@
               ],
               "objectiveId": "preserve-forces",
               "status": "needs-verification",
-              "description": "English 2026.09.11 p. 126 awards 4 Objective Points for more than 300 surviving Victory Points. Spanish p. 132 prints more than 30; preserve the English source value and record the bilingual discrepancy rather than interpreting the Spanish overlap as a second scoring rule."
+              "description": "English 2026.09.11 p. 126 awards 4 Objective Points for more than 300 surviving Victory Points. Spanish p. 132 prints more than 30; the Spanish value overlaps the other scoring bands. The English value is shown in the scoring table."
             }
           ]
         },
@@ -6102,7 +6102,7 @@
               ],
               "objectiveId": "kill-more-lieutenants",
               "status": "needs-verification",
-              "description": "English 2026.09.11 p. 133 explicitly counts a Trooper who was a Lieutenant at any time during the game as a Killed Lieutenant when it enters Dead State or ends in a Null State. Spanish p. 138 does not include that explicit sentence; retain the English wording and record the omission rather than assuming the two publications are identical."
+              "description": "English 2026.09.11 p. 133 explicitly counts a Trooper who was a Lieutenant at any time during the game as a Killed Lieutenant when it enters Dead State or ends in a Null State. Spanish p. 138 does not say whether former Lieutenants count."
             },
             {
               "id": "key-ops-without-designation",
@@ -6116,7 +6116,7 @@
               ],
               "objectiveId": "kill-more-with-lieutenants",
               "status": "needs-verification",
-              "description": "Both English p. 133 and Spanish p. 138 include a Killing paragraph about Key Ops credit. Cutthroat provides no Key Ops selection or designation procedure. Do not infer a Key Ops role or scoring bonus for this mission without an applicable official source."
+              "description": "Both English p. 133 and Spanish p. 138 include a Killing paragraph about Key Ops credit. Cutthroat provides no Key Ops selection or designation procedure. Neither version explains how Key Ops are selected or how they would score in Cutthroat."
             }
           ]
         },
@@ -6766,7 +6766,7 @@
               ],
               "objectiveId": "dominate-more-quadrants",
               "status": "needs-verification",
-              "description": "English 2026.09.11 p. 136 says Shasvastii Troopers within a ZO count in Unconscious State or any non-Null State. Spanish p. 141 instead names Normal and Shasvastii-Embryo States, omitting the explicit Unconscious condition. Preserve the two source descriptions and seek clarification before claiming equivalence."
+              "description": "English 2026.09.11 p. 136 says Shasvastii Troopers within a ZO count in Unconscious State or any non-Null State. Spanish p. 141 instead names Normal and Shasvastii-Embryo States, omitting the explicit Unconscious condition. The two versions differ on which States count for Domination."
             }
           ]
         },
@@ -8598,7 +8598,7 @@
                 "restrictions": [],
                 "clarifications": [],
                 "sourceNotes": [
-                  "The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; the wording remains an unresolved source discrepancy."
+                  "The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; it is unclear whether a different condition is intended."
                 ]
               },
               "skillCitations": [
@@ -8607,7 +8607,7 @@
               ],
               "paragraphs": [
                 "Pick Up Beacon is an Attack, Scenario Short Skill, requiring that the player has an Activated Console. The Trooper must also be in Silhouette contact either with a friendly Trooper in Normal State carrying the Enemy Beacon, or with an unaccompanied Enemy Beacon with no opposing non-Null Trooper in contact.",
-                "Spend one Short Skill to pick up the Enemy Beacon without a Roll. Follow the Common Rules of Beacons. The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; see the source issue below."
+                "Spend one Short Skill to pick up the Enemy Beacon without a Roll. Follow the Common Rules of Beacons. The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; see the Source notes."
               ]
             },
             {
@@ -8714,7 +8714,7 @@
               ],
               "objectiveId": "control-enemy-beacon",
               "status": "needs-verification",
-              "description": "EN p. 50 requires the friendly Trooper carrying the Enemy Beacon to be in a Normal State for transfer by Pick Up Beacon; ES p. 128 omits this Normal State qualification. The English condition is retained with the bilingual difference explicitly unresolved."
+              "description": "EN p. 50 requires the friendly Trooper carrying the Enemy Beacon to be in a Normal State for transfer by Pick Up Beacon; ES p. 128 omits this Normal State qualification. The transfer requirement differs between the two versions."
             }
           ]
         },
@@ -9455,7 +9455,7 @@
               "id": "tracking-beacon-representation",
               "name": "Tracking Beacon",
               "paragraphs": [
-                "One Tracking Beacon begins at the table center and is represented by a Beacon Token or scenery. The English source specifies a 40 mm diameter; the Spanish source says 25 mm. This source conflict is unresolved, so the map marks its center schematically rather than claiming a physical footprint.",
+                "One Tracking Beacon begins at the table center and is represented by a Beacon Token or scenery. The English source specifies a 40 mm diameter; the Spanish source says 25 mm. The map shows the Beacon's location only because its diameter is disputed.",
                 "Tracking Beacon Control requires a Model, not a Marker, in Silhouette contact and no enemy Troopers in contact; Models in a Null State do not count. English specifies that this is checked at the end of each Game Round."
               ]
             },
@@ -9485,7 +9485,7 @@
               ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Tracking Beacon may declare this action only once per Game Round. Spend one Short Skill, no Roll required, to place the Beacon anywhere within [[distance:4:inch]] of its previous position (English source).",
-                "The Spanish source instead specifies a position within [[distance:10:cm]] of the Trooper declaring the Order; preserve that different measurement origin as a source issue."
+                "The Spanish source instead specifies a position within [[distance:10:cm]] of the Trooper declaring the Order; the two versions differ on where to measure from."
               ]
             },
             {
@@ -9610,7 +9610,7 @@
               ],
               "objectiveId": "control-tracking-beacon",
               "status": "needs-verification",
-              "description": "EN pp. 59, 61 explicitly award Beacon Control at the end of each Game Round. ES p. 58 objective also says end of round, but ES p. 60 Control definition says end of the game. The round-scoring objective is preserved without silently resolving the inconsistency."
+              "description": "EN pp. 59, 61 explicitly award Beacon Control at the end of each Game Round. ES p. 58 objective also says end of round, but ES p. 60 Control definition says end of the game. The scoring table follows the end-of-round objective; the conflicting Spanish Control rule remains unclear."
             },
             {
               "id": "console-requirements-bilingual",
@@ -10436,7 +10436,7 @@
                   "Each qualifying completed Common card may be selected only once. Private Classified Objectives are excluded."
                 ],
                 "clarifications": [
-                  "The source also limits each Specialist Troop to one Emission per Game Round; whether that applies to attempts or successful uses is not explicitly reconciled."
+                  "The source also limits each Specialist Troop to one Emission per Game Round; it is unclear whether that limit counts attempts or successful uses."
                 ],
                 "sourceNotes": []
               },
@@ -10446,7 +10446,7 @@
               ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with the Akial Antenna may declare Emit Akial Interference if their player has accomplished a Common Classified Objective bearing one of the four pictured symbols (cross, gear, globe, reticle; see EN/ES p. 95). Each qualifying completed Common card may be selected only once for this Skill.",
-                "Spend one Short Skill and make a Normal WIP Roll. The source permits failed Rolls to be retried by spending more Short Skills, but also states that each Specialist Troop may only Emit Akial Interference once per Game Round; the attempted-versus-successful limit is not explicitly reconciled.",
+                "Spend one Short Skill and make a Normal WIP Roll. The source permits failed Rolls to be retried by spending more Short Skills, but also states that each Specialist Troop may only Emit Akial Interference once per Game Round; it is unclear whether the limit counts attempts or successful activations.",
                 "After success, the player may cancel an opponent's accomplished Common Classified Objective if it shares a symbol with a Common Classified Objective previously accomplished by the player. The opponent no longer counts that completion. If neither player has accomplished the chosen card, discard it.",
                 "Only accomplished Common Classified Objectives contribute to the Common score total or can be selected for Emit Akial Interference. Private Classified Objectives are excluded."
               ]
@@ -10519,7 +10519,7 @@
               ],
               "objectiveId": "common-classified",
               "status": "needs-verification",
-              "description": "EN/ES p. 95 both limit each Specialist Troop to Emit Akial Interference once per Game Round while allowing repeated failed WIP attempts. The text does not explicitly establish whether the once-per-round restriction counts attempts or successful emissions; no automatic rule is inferred."
+              "description": "EN/ES p. 95 both limit each Specialist Troop to Emit Akial Interference once per Game Round while allowing repeated failed WIP attempts. The text does not explicitly establish whether the once-per-round restriction counts attempts or successful emissions."
             }
           ]
         },
@@ -11090,7 +11090,7 @@
                   "objectivePoints": 2,
                   "condition": {
                     "kind": "reviewed-prose",
-                    "text": "Each player has two Classified Objectives, worth 2 Objective Points each when completed (up to four), as specified explicitly in the English publication."
+                    "text": "Each player has two Classified Objectives, worth 2 Objective Points each when completed (up to four), under the English rules."
                   }
                 }
               ]
@@ -11157,7 +11157,7 @@
               ],
               "paragraphs": [
                 "Attack, Scenario Short Skill. Only a Specialist Troop in Silhouette contact with an Extraction Console and CivEvacing at least one Civilian or enemy HVT may declare this Skill.",
-                "The English publication prohibits this Skill in the first Game Round. The Spanish publication instead uses 'primer Turno de Juego'; the different timing term is retained as a source issue.",
+                "The English publication prohibits this Skill in the first Game Round. The Spanish publication instead uses 'primer Turno de Juego', meaning the first Game Turn rather than the first Game Round.",
                 "Spend a Short Skill and make a Normal WIP Roll. If it fails, another attempt can be made by spending another Short Skill. On success, choose one of the Civilians or enemy HVTs currently CivEvaced by that Specialist Troop, mark it Extracted and remove it from the table.",
                 "The Spanish source expressly states that a Console may be Activated after the opponent has Activated it; the English text is silent. Extraction is per successful action, not permanent Console Control."
               ]
@@ -11212,7 +11212,7 @@
               ],
               "objectiveId": "classified-objectives",
               "status": "needs-verification",
-              "description": "EN p. 88 explicitly awards 2 Objective Points for each of two Classified Objectives (4 possible). ES p. 88 says two Classified Objectives and '2 Puntos de Objetivo' without 'each', leaving whether it means per card or total ambiguous. The English wording is used, with the difference exposed."
+              "description": "EN p. 88 explicitly awards 2 Objective Points for each of two Classified Objectives (4 possible). ES p. 88 says two Classified Objectives and '2 Puntos de Objetivo' without 'each', leaving whether it means per card or total ambiguous. The scoring table uses the English value."
             },
             {
               "id": "activation-first-round-bilingual",
@@ -11226,7 +11226,7 @@
               ],
               "objectiveId": "extracted-civilians",
               "status": "needs-verification",
-              "description": "EN p. 90 forbids Activate Extraction Console during the first Game Round; ES p. 90 says 'primer Turno de Juego' (first Game Turn), which is different from the usual Spanish 'Ronda de Juego'. This could affect legal activation timing, so no unqualified reconciliation is asserted."
+              "description": "EN p. 90 forbids Activate Extraction Console during the first Game Round; ES p. 90 says 'primer Turno de Juego' (first Game Turn), which is different from the usual Spanish 'Ronda de Juego'. The two versions may allow activation at different times."
             },
             {
               "id": "reactivation-english-omission",
@@ -12048,7 +12048,7 @@
               "id": "forces-and-exclusion",
               "name": "Forces, Deployment, and Exclusion Zone",
               "paragraphs": [
-                "Opposite table-edge Deployment Zones are [[distance:8:inch]] deep at 150 Army Points and [[distance:12:inch]] deep at 200–400 Army Points. The three reviewed maps specify all six Army Point configurations.",
+                "Opposite table-edge Deployment Zones are [[distance:8:inch]] deep at 150 Army Points and [[distance:12:inch]] deep at 200–400 Army Points.",
                 "The central Exclusion Zone extends [[distance:4:inch]] on either side of the table centerline. Airborne Deployment and Superior Deployment cannot be used to deploy in that zone.",
                 "Troopers may not deploy inside any of the four Neutralization Areas, even where a circular area overlaps their Deployment Zone."
               ]
@@ -12185,7 +12185,7 @@
               ],
               "objectiveId": "neutralize-hyperthermal-techs",
               "status": "needs-verification",
-              "description": "EN pp. 105–106 / ES pp. 105–107 specify two Hyperthermal Tech Boxes and an objective cap of four Neutralized Techs, but do not define the number of Techs a Box can yield or a depletion/removal rule. Do not invent a per-Box limit."
+              "description": "EN pp. 105–106 / ES pp. 105–107 specify two Hyperthermal Tech Boxes and an objective cap of four Neutralized Techs, but do not define the number of Techs a Box can yield or a depletion/removal rule. The number of Techs available from each Box is unspecified."
             },
             {
               "id": "carrier-marker-state-bilingual-omission",
@@ -12199,7 +12199,7 @@
               ],
               "objectiveId": "neutralize-hyperthermal-techs",
               "status": "needs-verification",
-              "description": "EN p. 107 says Models carrying Hyperthermal Techs cannot enter Marker States. ES p. 108 says only Models, not Markers, may carry Tokens but omits the additional prohibition on entering Marker States. Preserve the English restriction and record the Spanish omission."
+              "description": "EN p. 107 says Models carrying Hyperthermal Techs cannot enter Marker States. ES p. 108 says only Models, not Markers, may carry Tokens but omits the additional prohibition on entering Marker States. The two versions differ on whether a carrier may enter a Marker State."
             }
           ]
         },
@@ -13177,7 +13177,7 @@
               ],
               "paragraphs": [
                 "A Specialist Troop in contact with a Tech-Coffin can make a Normal WIP Roll to Extract a Supply Box, placing a Supply Box Token beside the Trooper on success. A failed Roll can be retried with another Short Skill.",
-                "The central Tech-Coffin requires two successful extractions to become empty; each outer one requires one. The English source removes an emptied Tech-Coffin Token (or marks a retained scenery piece with a Player Token), while Spanish instructs marking an emptied Tech-Coffin with a Player Token. This bilingual difference is not silently resolved."
+                "The central Tech-Coffin requires two successful extractions to become empty; each outer one requires one. The English source removes an emptied Tech-Coffin Token (or marks a retained scenery piece with a Player Token), while Spanish instructs marking an emptied Tech-Coffin with a Player Token. The two versions differ on what to do with the empty Tech-Coffin."
               ]
             },
             {
@@ -13286,7 +13286,7 @@
               ],
               "objectiveId": "control-supply-boxes",
               "status": "needs-verification",
-              "description": "EN p. 112 removes an emptied Tech-Coffin Token (or marks a retained scenery piece with a Player Token); ES p. 112 instructs placing a Player Token beside the Tech-Coffin after all Supplies are extracted. Do not silently pick one disposition."
+              "description": "EN p. 112 removes an emptied Tech-Coffin Token (or marks a retained scenery piece with a Player Token); ES p. 112 instructs placing a Player Token beside the Tech-Coffin after all Supplies are extracted. The treatment of an empty Tech-Coffin differs between the two versions."
             },
             {
               "id": "safe-area-pickup-bilingual-scope",
@@ -13314,21 +13314,21 @@
               ],
               "objectiveId": "control-supply-boxes",
               "status": "needs-verification",
-              "description": "ES p. 113 explicitly requires a deposited Supply Box to be completely within the Safe Area. EN p. 113 does not specify that additional placement qualifier. Preserve the Spanish detail without asserting that the English text does."
+              "description": "ES p. 113 explicitly requires a deposited Supply Box to be completely within the Safe Area. EN p. 113 does not specify that additional placement qualifier. The two versions differ on whether the Box must be entirely inside the Safe Area."
             },
             {
               "id": "reinforcements-suitability-bilingual",
               "armyPoints": [150, 200, 250, 300, 350, 400],
               "objectiveId": "control-supply-boxes",
               "status": "needs-verification",
-              "description": "ES p. 110 explicitly marks Reabastecimiento as suitable for Reinforcements (Adecuada para Refuerzos), whereas EN p. 110 does not mark Provisioning as suitable for Reinforcements. Do not infer matching eligibility from the unmarked English publication."
+              "description": "ES p. 110 explicitly marks Reabastecimiento as suitable for Reinforcements (Adecuada para Refuerzos), whereas EN p. 110 does not mark Provisioning as suitable for Reinforcements. Reinforcements suitability is therefore stated only in the Spanish rules."
             },
             {
               "id": "extract-contact-bilingual",
               "armyPoints": [150, 200, 250, 300, 350, 400],
               "objectiveId": "control-supply-boxes",
               "status": "needs-verification",
-              "description": "EN p. 112 requires base contact with a Tech-Coffin to Extract; ES p. 112 uses Silhouette contact (contacto de Silueta). The player-facing description says contact without imposing an inferred equivalence."
+              "description": "EN p. 112 requires base contact with a Tech-Coffin to Extract; ES p. 112 uses Silhouette contact (contacto de Silueta). The required type of contact differs between the two versions."
             }
           ]
         },
@@ -14113,7 +14113,7 @@
               ],
               "objectiveId": "activate-antenna",
               "status": "needs-verification",
-              "description": "EN p. 122 specifies a 40 mm Communication Antenna marker/scenery footprint; ES p. 123 refers only to scenery of a similar diameter, without repeating the 40 mm measurement. The English dimension is retained as explicit source provenance."
+              "description": "EN p. 122 specifies a 40 mm Communication Antenna marker/scenery footprint; ES p. 123 refers only to scenery of a similar diameter, without repeating the 40 mm measurement. The map uses the English diameter."
             }
           ]
         },
@@ -14730,7 +14730,7 @@
               ],
               "paragraphs": [
                 "Only Specialist Troops may declare this Attack, Scenario Short Skill while in contact with a Tech-Coffin. On a successful Normal WIP Roll they Extract one Inactive Data-Harvester, pick it up and place its Token next to the Trooper. A failed attempt may be repeated with another Short Skill.",
-                "Remove the Tech-Coffin once both of its Data-Harvesters have been Extracted. English p. 68 specifies base contact to Extract; Spanish p. 68 specifies Silhouette contact. The difference is recorded rather than silently reconciled."
+                "Remove the Tech-Coffin once both of its Data-Harvesters have been Extracted. English p. 68 specifies base contact to Extract; Spanish p. 68 specifies Silhouette contact. The required type of contact differs between the two versions."
               ]
             },
             {
@@ -15554,7 +15554,7 @@
               "paragraphs": [
                 "Both sides deploy in opposite edge Deployment Zones of game-size-specific depth, and no Trooper can deploy inside the centrally located Launching Tower.",
                 "The Launching Tower is a [[distance:8:inch]] × [[distance:8:inch]] Zone of Operations at the table center. Its walls count as infinitely high and completely block Line of Fire. Four Wide Gates are centered in its four walls and start open; the published diagram is schematic and does not specify their opening width.",
-                "The English map specifies [[distance:8:inch]] × [[distance:8:inch]]; the Spanish publication specifies [[distance:20:cm]] × [[distance:20:cm]]. The slight difference is preserved as a source issue rather than asserting a single exact conversion."
+                "The English map specifies [[distance:8:inch]] × [[distance:8:inch]]; the Spanish publication specifies [[distance:20:cm]] × [[distance:20:cm]]. The two sizes are slightly different."
               ]
             },
             {
@@ -15725,7 +15725,7 @@
               ],
               "objectiveId": "dominate-launching-tower",
               "status": "needs-verification",
-              "description": "EN p. 117 specifies a [[distance:8:inch]] × [[distance:8:inch]] Launching Tower, whereas ES p. 118 specifies [[distance:20:cm]] × [[distance:20:cm]], a small physical size difference. Geometry uses the English dimensions and preserves Spanish provenance without imposing equivalence."
+              "description": "EN p. 117 specifies a [[distance:8:inch]] × [[distance:8:inch]] Launching Tower, whereas ES p. 118 specifies [[distance:20:cm]] × [[distance:20:cm]], a small physical size difference. The map uses the English dimensions."
             },
             {
               "id": "gate-access-bilingual",
@@ -15739,7 +15739,7 @@
               ],
               "objectiveId": "dominate-launching-tower",
               "status": "needs-verification",
-              "description": "ES p. 118 explicitly instructs representing Wide Gates with Tokens and allowing Troopers access regardless of Silhouette Attribute. EN p. 117 only says four Wide Gates centered on walls, open from the beginning. The additional Spanish clause is reported rather than silently attributed to both."
+              "description": "ES p. 118 explicitly instructs representing Wide Gates with Tokens and allowing Troopers access regardless of Silhouette Attribute. EN p. 117 only says four Wide Gates centered on walls, open from the beginning. Only the Spanish rules include that additional instruction."
             },
             {
               "id": "peripheral-extraction-points-bilingual",
@@ -16605,7 +16605,7 @@
               "name": "Capturing Enemy Prototype",
               "paragraphs": [
                 "At game end, a player Captures the enemy Prototype by having a non-Null Model (not a Marker) carrying it, with no Silhouette contact with an opposing Model in a non-Null State.",
-                "English p. 56 limits enemy contact to non-Null Models; Spanish p. 55 uses broader enemy Trooper contact language and separately excludes Null-state Models. Both are preserved without silently broadening or narrowing the condition."
+                "English p. 56 limits enemy contact to non-Null Models; Spanish p. 55 uses broader enemy Trooper contact language and separately excludes Null-state Models. The English and Spanish rules differ on which enemy Troopers prevent Control."
               ]
             },
             {
@@ -17512,7 +17512,7 @@
               "name": "Player-Placed Stabilization Zones",
               "paragraphs": [
                 "There are two Circular Template Stabilization Zones ([[distance:12:cm]] diameter each), one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
-                "The player who kept Deployment places the first Stabilization Zone. Its precise position is not specified by the published map and is not invented here.",
+                "The player who kept Deployment places the first Stabilization Zone.",
                 "At the end of each Player Turn, an Infected being CivEvaced is Stabilized if both the Infected and their CivEvacing Trooper are totally inside a Stabilization Zone. Mark which player Stabilized the Infected with a Player A or B Token.",
                 "An Infected already Stabilized by one player cannot be Stabilized by the other, including by a Stabilization Zone."
               ]
@@ -17626,7 +17626,7 @@
                 400
               ],
               "objectiveId": "secure-infected",
-              "description": "EN p.84 uses minimum [[distance:4:inch]] outside the enemy Deployment Zone and [[distance:8:inch]] between Infected; ES p.84 prints [[distance:10:cm]] and [[distance:20:cm]]. The metric values differ slightly from exact inch conversions, so both are disclosed rather than silently unified."
+              "description": "EN p.84 uses minimum [[distance:4:inch]] outside the enemy Deployment Zone and [[distance:8:inch]] between Infected; ES p.84 prints [[distance:10:cm]] and [[distance:20:cm]]. The distances differ slightly between the two versions."
             }
           ]
         },
@@ -18518,7 +18518,7 @@
               "id": "attacker-defender",
               "name": "Attacker and Defender Roles",
               "paragraphs": [
-                "Two fixed roles apply, not a mutually chosen Main Objective set: the player taking the first Player Turn is the Attacker, and the player taking the second Player Turn is the Defender. Each has distinct Main Objectives; the Classified Objective is common.",
+                "The player taking the first Player Turn is the Attacker; the player taking the second Player Turn is the Defender. Each has distinct Main Objectives; the Classified Objective is common.",
                 "Before Deployment, the Defender may spend one Command Token either to activate the Server Room Defense System, or instead to ignore the Server Room deployment restriction and deploy up to 65 Army Points of Troops from their Army List anywhere within the Server Room. Superior Deployment Skills are not required for that exception.",
                 "This optional Command Token spending is additional to the Strategic Use of Command Tokens. The Defender may select only one of these options with the single Token."
               ]
@@ -18536,8 +18536,8 @@
               "name": "Server Room and Gates",
               "paragraphs": [
                 "The Server Room is a central [[distance:8:inch]] × [[distance:8:inch]] Zone of Operations (ZO). It is treated as having infinitely high walls completely blocking Line of Fire, with four Wide Gates, one in the center of each wall, open at game start.",
-                "Wide Gate Tokens or comparable scenery represent the Gates. Spanish p.100 explicitly confirms the Gates allow access irrespective of Silhouette Attribute. The four openings are shown schematically on the SVG; neither publication defines a numeric Gate width.",
-                "The Spanish publication describes the room as [[distance:20:cm]] × [[distance:20:cm]], slightly smaller than the English inches; geometry follows the English source."
+                "Wide Gate Tokens or comparable scenery represent the Gates. Spanish p.100 explicitly confirms the Gates allow access irrespective of Silhouette Attribute. Neither version specifies an exact Gate width.",
+                "The Spanish publication describes the room as [[distance:20:cm]] × [[distance:20:cm]], slightly smaller than the English dimensions shown on the map."
               ]
             },
             {
@@ -18553,7 +18553,7 @@
               "id": "defense-system",
               "name": "Server Room Defense System",
               "paragraphs": [
-                "Two Armed Turrets (Defensive Turret A/B Tokens, or S2 Models/scenery) occupy different corners inside the Server Room (EN pp. 100–101). The Token diameter is 25 mm (EN p. 18); the map depicts that footprint. The exact corner clearance is not specified, so the turret positions are schematic.",
+                "Two Armed Turrets (Defensive Turret A/B Tokens, or S2 Models/scenery) occupy different corners inside the Server Room (EN pp. 100–101). The Token diameter is 25 mm (EN p. 18); the map shows the Tokens to scale. The exact corner clearance is not specified, so the turret positions are schematic.",
                 "When the Defense System is active, the Armed Turrets respond with BS Attack or CC Attack to Orders declared by the Attacker's active Models, not Markers, that are in their Line of Fire or Silhouette contact.",
                 "English p.101 lists an Armed Turret profile of CC 5, BS 10, WIP 11, ARM 2, BTS 3, STR 1 and Silhouette 2, with 360° Visor, Total Reaction, Combi Rifle and PARA CC Weapon (-3). MOV and PH have no printed values.",
                 "The Spanish p.101 table prints the STR-equivalent field as a dash, whereas English specifies STR 1. This is a source inconsistency; the English profile is recorded without fabricating a Spanish value."
@@ -18652,7 +18652,7 @@
               "paragraphs": [
                 "Before the game begins, after choosing the initial Classified Objective, each player publicly declares whether that card is used as their Classified Objective or INTELCOM Card. Roll a die; the highest roll announces first. The card's mission text or numeric value remains Private Information.",
                 "At the end of the final Game Round, count points in Initiative order. A player with at least one non-Null Trooper inside the Server Room may use the INTELCOM Card in Support and Control Mode to add its numeric value to the Trooper-point total used for Zone of Operations control.",
-                "English p.103 describes adding the INTELCOM value to Victory Points inside a chosen ZO; Spanish p.104 says Army Points inside a ZO. Both are retained as source wording; no unrelated Zone is invented."
+                "English p.103 describes adding the INTELCOM value to Victory Points inside a chosen ZO; Spanish p.104 says Army Points inside a ZO. The two versions use different terms for the points added to the ZO."
               ]
             }
           ],
@@ -18689,7 +18689,7 @@
               ],
               "objectiveId": "defender-prevent-extract",
               "status": "needs-verification",
-              "description": "Both EN pp.97-98 and ES pp.97-98 print a maximum Defender Main Objective total of 11 OP (1+3+2+3+2) plus 1 Classified OP, for 12 OP. The 12 printed OP are preserved and not silently normalized to a 10-point cap."
+              "description": "Both EN pp.97-98 and ES pp.97-98 print a maximum Defender Main Objective total of 11 OP (1+3+2+3+2) plus 1 Classified OP, for 12 OP. The Defender can therefore score up to 12 OP according to both versions."
             },
             {
               "id": "server-room-dimension-bilingual",
@@ -18703,7 +18703,7 @@
               ],
               "objectiveId": "attacker-dominate-room",
               "status": "needs-verification",
-              "description": "EN p.99 says [[distance:8:inch]] square for the Server Room, while ES p.99 says [[distance:20:cm]] square. The geometry uses English inches and records the near-equivalence without treating it as exact."
+              "description": "EN p.99 says [[distance:8:inch]] square for the Server Room, while ES p.99 says [[distance:20:cm]] square. The map uses the English dimensions."
             },
             {
               "id": "defense-turret-str-bilingual",
@@ -18717,7 +18717,7 @@
               ],
               "objectiveId": "defender-dominate-room",
               "status": "needs-verification",
-              "description": "EN p.101 prints STR 1 on the Armed Turret Profile. ES p.101 shows a dash in its EST/STR column, not 1. Profile details are retained in rule text without resolving the discrepancy."
+              "description": "EN p.101 prints STR 1 on the Armed Turret Profile. ES p.101 shows a dash in its EST/STR column, not 1. The turret's STR is unclear."
             },
             {
               "id": "intelcom-scoring-label-bilingual",
@@ -18745,7 +18745,7 @@
               ],
               "objectiveId": "attacker-dominate-room",
               "status": "needs-verification",
-              "description": "EN p.100 counts Shasvastii-Embryo or any non-Null State; ES p.100 specifies Normal or Unconscious. Keep each text's status wording distinct."
+              "description": "EN p.100 counts Shasvastii-Embryo or any non-Null State; ES p.100 specifies Normal or Unconscious. The two versions differ on which States count for Domination."
             },
             {
               "id": "exclusion-distance-bilingual",
@@ -19304,7 +19304,7 @@
       "id": "skill:civevac",
       "kind": "skill",
       "name": "CivEvac",
-      "summary": "ITS Common Basic Short Skill (Optional, Scenario): take control of a Civilian with a WIP Roll and keep them in Silhouette contact while moving.",
+      "summary": "Take control of a Civilian with a WIP Roll and keep them in Silhouette contact while moving.",
       "composition": {
         "role": "definition"
       },
@@ -19363,7 +19363,7 @@
       "id": "skill:casevac",
       "kind": "skill",
       "name": "Casevac",
-      "summary": "ITS Optional Common Short Skill: carry an allied Stunned, Immobilized or Unconscious Trooper by entering Casevac State.",
+      "summary": "Carry an allied Stunned, Immobilized or Unconscious Trooper by entering Casevac State.",
       "composition": {
         "role": "definition"
       },
@@ -19417,7 +19417,7 @@
       "id": "skill:team-ops",
       "kind": "skill",
       "name": "Team-Ops",
-      "summary": "Automatic Special Skill available only through the optional Team-Ops tournament Extra, allowing customization of a Team-Ops Trooper when creating an Army List.",
+      "summary": "Customize Team-Ops Troopers when creating an Army List for a tournament using the optional Team-Ops Extra.",
       "composition": {
         "role": "definition"
       },
@@ -19472,7 +19472,7 @@
       "id": "skill:request-tacball",
       "kind": "skill",
       "name": "Request a Tacball",
-      "summary": "Optional Attack Short Skill for Team-Ops Troopers in the second Game Round, placing a Tacball support drop without a Roll.",
+      "summary": "Place a Tacball support drop without a Roll during the second Game Round.",
       "composition": {
         "role": "definition"
       },

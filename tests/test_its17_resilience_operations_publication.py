@@ -86,7 +86,7 @@ def test_tactical_objective_battle_condition_and_scoring_facts() -> None:
     ]
     assert "Classified Deck" in " ".join(facts["effects"])
     assert "end of a player's Turn" in " ".join(facts["effects"])
-    assert "not the complete contents" in " ".join(facts["restrictions"])
+    assert "Refer to the Tactical Objective and Battle Condition cards" in " ".join(facts["restrictions"])
 
 
 def test_tactical_elements_and_glossary_preserve_key_details_and_source_disputes() -> None:

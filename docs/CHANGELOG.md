@@ -14,6 +14,8 @@ are not retroactively relabeled.
 
 - Updated to the November 25, 2026 Infinity Army data, including
   the Shadowcrow Operator, revised Unit profiles and Fireteam Charts.
+- Clarified scenario and Skill descriptions, setup instructions and differences
+  between the English and Spanish rules.
 
 ### Changed
 
@@ -21,6 +23,9 @@ are not retroactively relabeled.
   snapshot and rebuilt the runtime database set.
 - **Data processing + Web frontend:** Added the Shadowcrow Operator symbol
   while preserving all existing published SVGs and compatibility URLs.
+- **Data processing + Web frontend:** Revised player-facing core and ITS scenario,
+  Skill and Extra copy to explain gameplay directly while retaining source
+  citations and unresolved rule differences.
 
 ## [1.2.0] - 2026-11-23
 
