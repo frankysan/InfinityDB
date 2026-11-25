@@ -78,6 +78,30 @@ The small-sample p95 is the maximum observed sample, not a production tail
 estimate. The benchmark's `--profile` mode reports cumulative function
 costs separately from timing measurements; setup runs before profiling.
 
+### Unit Explorer browser performance — 2026-11-25
+
+Windows checkout based on `e39c84f7`, same Army snapshot and adjacent N5 Rules
+database. Run
+`python -m tools.performance.benchmark_runtime data/generated/army.db --browser --cold-iterations 3`
+with Chrome installed. Each sample uses a fresh application and browser context,
+a threaded loopback WSGI server, and waits for the completed results DOM.
+Application startup is excluded. API timings use browser resource timings.
+Median / nearest-rank p95 before and after (ms):
+
+- Initial page: 2100 / 2109 to 2011 / 2110.
+- Compact next: 363 / 366 to 332 / 350.
+- Enable Extended: 3031 / 3452 to 1333 / 1337; API: 2834 / 3124 to 1018 / 1109.
+- Extended next: 3000 / 3086 to 1057 / 1327; API: 2708 / 2882 to 881 / 910.
+- Extended previous: 2477 / 2518 to 164 / 208; API: 2323 / 2397 to 18 / 19.
+- Search: 323 / 339 to 326 / 350, including the 250 ms debounce.
+
+The Extended API profile (`--browser --profile --cold-iterations 1`) identified
+repeated Equipment catalog composition, payload copying and detail-only
+presentation. Cache the immutable Equipment name mapping and the General
+profile projection (512 entries per application, keyed by Unit and enabled
+availability flags); preserve the existing full detail response. These local
+three-sample measurements do not establish production tail latency.
+
 ## Unit Explorer filter performance — 2026-11-15
 
 Windows development checkout based on `cd688672`, with the scoped Unit-option

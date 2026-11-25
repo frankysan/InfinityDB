@@ -310,11 +310,10 @@ Use these links to jump directly to a workstream:
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.
-  - [ ] Unit Explorer follow-up: benchmark actual HTTP/browser interactions
-    (initial load, filter changes, pagination and Extended unit details).
-    Inspect per-Unit detail presentation, request sequencing and rendering.
-    Further optimize cold scoped-index construction if measured latency
-    warrants it.
+  - [ ] Unit Explorer follow-up: reduce initial browser load latency by
+    investigating request sequencing and catalog/filter initialization.
+    Profile remaining Extended first-visit presentation costs if warranted.
+    Use the browser benchmark for filter changes, pagination and rendering.
 
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.

@@ -18,8 +18,8 @@ are not retroactively relabeled.
 - Army filter counts and the Armies summary reflect matching Units and their
   visible availability. Matching armies shows the availability total and a
   collapsible breakdown by Army type. Army overview links use current filter defaults.
-- Faster Unit Explorer initial loading and filter changes, with unchanged
-  matching and availability semantics.
+- Faster Unit Explorer initial loading, filter changes and Extended results,
+  with unchanged matching and availability semantics.
 - Consolidated equivalent Scenario Skills across Core N5 and ITS seasons, with
   applicable scenario links and exact seasonal or mission-specific differences.
 

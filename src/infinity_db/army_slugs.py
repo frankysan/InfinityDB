@@ -20,10 +20,12 @@ def attach_public_army_slug(database: Database, item: dict[str, Any]) -> None:
         item["public_slug"] = slug
 
 
-def enrich_army_references(database: Database, value: dict[str, Any]) -> dict[str, Any]:
-    """Attach public slugs to canonical Army references in one API payload copy."""
+def enrich_army_references(
+    database: Database, value: dict[str, Any], *, in_place: bool = False,
+) -> dict[str, Any]:
+    """Attach public slugs to canonical Army references, copying by default."""
 
-    result = deepcopy(value)
+    result = value if in_place else deepcopy(value)
 
     def walk(node: Any) -> None:
         if isinstance(node, dict):

@@ -638,6 +638,7 @@ def enrich_unit_presentation(
     optional_filters: dict[str, bool] | None = None,
     requested_army: str | None = None,
     source_skill_classifications: tuple[SkillSourceClassification, ...] | None = None,
+    general_only: bool = False,
 ) -> dict[str, Any]:
     """Compose General-profile and Unit-detail presentation semantics in the backend.
 
@@ -767,6 +768,12 @@ def enrich_unit_presentation(
 
     _annotate_general_profile_visibility(general_profiles)
     unit["general_profiles"] = general_profiles
+
+    if general_only:
+        # Extended Explorer rows consume only the General profiles and visibility.
+        for general in general_profiles:
+            _classify_skill_source_presentations(general["shared_items"], source_classifications)
+        return unit
 
     for army in selected_armies:
         profiles_by_group: dict[Any, list[dict[str, Any]]] = {}

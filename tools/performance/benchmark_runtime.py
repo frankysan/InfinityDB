@@ -268,6 +268,108 @@ def benchmark_database(
     }
 
 
+def benchmark_unit_explorer(path: Path, iterations: int, *, profile: bool = False) -> None:
+    """Measure loopback HTTP and completed DOM updates on a fresh app per sample."""
+    import cProfile
+    import pstats
+    from socketserver import ThreadingMixIn
+    from threading import Thread
+    from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
+
+    from playwright.sync_api import sync_playwright
+
+    from infinity_db.web import create_app
+
+    class Server(ThreadingMixIn, WSGIServer):
+        daemon_threads = True
+
+    class QuietHandler(WSGIRequestHandler):
+        def log_message(self, format: str, *args: object) -> None:
+            pass
+
+    samples: dict[str, list[float]] = {}
+
+    def run_sample(browser: Any) -> None:
+        app = create_app(path, rules_database_path=path.with_name("rules_n5.db"))
+        def serve(environ, start_response):
+            if (
+                profile and environ.get("PATH_INFO") == "/api/units"
+                and "extended=1" in environ.get("QUERY_STRING", "")
+            ):
+                profiler = cProfile.Profile()
+                result = profiler.runcall(app, environ, start_response)
+                print("Extended API profile:", environ["QUERY_STRING"], flush=True)
+                pstats.Stats(profiler).strip_dirs().sort_stats("cumulative").print_stats(25)
+                return result
+            return app(environ, start_response)
+
+        server = make_server(
+            "127.0.0.1", 0, serve, server_class=Server, handler_class=QuietHandler,
+        )
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        context = browser.new_context(viewport={"width": 1440, "height": 900})
+        page = context.new_page()
+        errors: list[str] = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        try:
+            def measure(name: str, action: Callable[[], object]) -> None:
+                started = time.perf_counter()
+                with page.expect_response(
+                    lambda response: "/api/units?" in response.url
+                    and response.request.method == "GET",
+                    timeout=60_000,
+                ) as response_info:
+                    action()
+                response = response_info.value
+                if not response.ok:
+                    raise ValueError(f"Unit Explorer returned HTTP {response.status}")
+                page.wait_for_function(
+                    """() => document.querySelector('#unit-count')
+                    ?.getAttribute('aria-busy') === 'false'
+                    && !document.querySelector('#table-container').hidden""",
+                    timeout=60_000,
+                )
+                samples.setdefault(name, []).append(time.perf_counter() - started)
+                timing = response.request.timing
+                if timing["responseEnd"] < 0:
+                    raise ValueError("API resource timing unavailable")
+                samples.setdefault(name + " API", []).append(timing["responseEnd"] / 1000)
+
+            origin = f"http://127.0.0.1:{server.server_port}"
+            measure("initial", lambda: page.goto(
+                origin + "/units", wait_until="domcontentloaded",
+            ))
+            measure("next page", lambda: page.locator("#next-page-top").click())
+            measure("previous page", lambda: page.locator("#previous-page-top").click())
+            measure("Extended", lambda: page.locator("#extended-results").check())
+            page.locator(".unit-extended-profile").first.wait_for(state="visible")
+            measure("Extended next", lambda: page.locator("#next-page-top").click())
+            measure("Extended previous", lambda: page.locator("#previous-page-top").click())
+            measure("compact", lambda: page.locator("#extended-results").uncheck())
+            measure("search", lambda: page.locator("#unit-search").fill("fusiliers"))
+            if errors:
+                raise ValueError(f"Browser errors: {errors}")
+            print("Completed browser sample", flush=True)
+        finally:
+            context.close()
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+    with sync_playwright() as driver:
+        browser = driver.chromium.launch(channel="chrome")
+        try:
+            for _ in range(iterations):
+                run_sample(browser)
+        finally:
+            browser.close()
+
+    for name, values in samples.items():
+        summary = _summary(values)
+        print(f"{name:<24} p50 {summary['medianMs']:8.1f} ms  p95 {summary['p95Ms']:8.1f} ms")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path, help="Path to a built army.db snapshot.")
@@ -275,6 +377,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--warm-iterations", type=int, default=200)
     parser.add_argument("--case", action="append", default=[], help="Run only this named case.")
     parser.add_argument("--profile", action="store_true", help="Profile each selected case.")
+    parser.add_argument("--browser", action="store_true", help="Benchmark Unit Explorer in Chrome.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -284,6 +387,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
     try:
+        if args.browser:
+            if args.case or args.json:
+                raise ValueError("--browser cannot be combined with --case or --json")
+            benchmark_unit_explorer(args.database, args.cold_iterations, profile=args.profile)
+            return 0
         if args.profile:
             import cProfile
             import pstats

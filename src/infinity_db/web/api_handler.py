@@ -20,6 +20,7 @@ from infinity_db.army_slugs import attach_public_army_slug, enrich_army_referenc
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
 from infinity_db.database import ArmySelectionError, Database
+from infinity_db.database.repository import instance_lru_cache
 from infinity_db.declaration_matrix import (
     core_declaration_matrix,
     core_scenario_declaration_extension,
@@ -589,20 +590,38 @@ class ApiHandler:
     def _present_unit(
         self, unit: dict[str, Any], *,
         optional_filters: dict[str, bool], requested_army: str | None = None,
+        general_only: bool = False,
     ) -> dict[str, Any]:
         """Use the same General profile semantics for detail and Explorer."""
+        # Skill enrichment detaches the cached repository payload. All further
+        # enrichment owns this copy, so no intermediate deep copies are needed.
         unit = self.skill_catalog.enrich_unit(unit)
-        unit = self.equipment_catalog.enrich_unit(unit)
+        unit = self.equipment_catalog.enrich_unit(unit, in_place=True)
         unit = enrich_nested_catalog_slugs(
-            self.database, unit, frozenset({"equipment", "weapons"}),
+            self.database, unit, frozenset({"equipment", "weapons"}), in_place=True,
         )
         attach_public_unit_slug(self.database, unit)
-        unit = enrich_army_references(self.database, unit)
+        unit = enrich_army_references(self.database, unit, in_place=True)
         self.symbol_catalog.enrich_unit(unit)
         return enrich_unit_presentation(
             unit, optional_filters=optional_filters, requested_army=requested_army,
             source_skill_classifications=self.database.skill_source_classifications(),
+            general_only=general_only,
         )
+
+    @instance_lru_cache(maxsize=512)
+    def _extended_profiles(
+        self, unit_id: int, enabled_flags: frozenset[str],
+    ) -> list[dict[str, Any]]:
+        """Cache the immutable snapshot's small, availability-specific projection."""
+        detail = self.database.get_unit(unit_id)
+        if detail is None:
+            return []
+        return extended_general_profiles(self._present_unit(
+            detail,
+            optional_filters={flag: flag in enabled_flags for flag in OPTIONAL_AVAILABILITY_FLAGS},
+            general_only=True,
+        ))
 
     def validate_health(self) -> None:
         """Exercise the minimum database paths required by the health endpoint."""
@@ -1629,15 +1648,12 @@ class ApiHandler:
                     self.symbol_catalog.enrich_units(payload["items"])
                     enrich_unit_list_presentation(payload["items"])
                     if query["extended"]:
-                        optional_filters = {
-                            flag: query[flag] for flag in OPTIONAL_AVAILABILITY_FLAGS
-                        }
+                        enabled_flags = frozenset(
+                            flag for flag in OPTIONAL_AVAILABILITY_FLAGS if query[flag]
+                        )
                         for item in payload["items"]:
-                            detail = self.database.get_unit(item["id"])
-                            item["general_profiles"] = (
-                                extended_general_profiles(self._present_unit(
-                                    detail, optional_filters=optional_filters,
-                                )) if detail is not None else []
+                            item["general_profiles"] = self._extended_profiles(
+                                item["id"], enabled_flags,
                             )
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST

@@ -1618,6 +1618,48 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 400
     assert json.loads(body)["error"] == "extended must be 0 or 1"
 
+def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -> None:
+    from infinity_db.unit_presentation import extended_general_profiles
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    # Several real Units, including a multi-profile Unit and an optional-only path.
+    flags = (
+        "mercs=0&specops=0&teamops=0&reinforcement=0",
+        "mercs=1&specops=1&teamops=1&reinforcement=1",
+    )
+    original = application.api._present_unit
+    calls = []
+
+    def present(*args, **kwargs):
+        calls.append(kwargs.get("general_only", False))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(application.api, "_present_unit", present)
+    for settings in flags:
+        query = f"limit=10&extended=1&matching_scope=profile&{settings}"
+        status, _, body = request(application, "/api/units", query=query)
+        assert status == 200
+        first = json.loads(body)
+        assert first["items"]
+        calls_after_first = len(calls)
+        # A different page size reuses the projection, not a cached list response.
+        status, _, body = request(
+            application, "/api/units", query=query.replace("limit=10", "limit=5"),
+        )
+        assert status == 200
+        second = json.loads(body)
+        assert second["items"] == first["items"][:5]
+        assert len(calls) == calls_after_first
+        for item in first["items"]:
+            status, _, body = request(application, f"/api/units/{item['id']}", query=settings)
+            assert status == 200
+            assert item["general_profiles"] == extended_general_profiles(json.loads(body))
+    assert calls.count(True) == 20
+
+
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
     assert status == 200
