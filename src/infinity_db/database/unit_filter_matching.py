@@ -66,67 +66,83 @@ def evaluate(
     matches: dict[int, frozenset[tuple[int, int, int]]] = {}
     additions: dict[str, dict[str, int]] = {category: defaultdict(int) for category in CATEGORIES}
     or_base = defaultdict(int)
+    active = [
+        (category, choices, category in and_categories)
+        for category, choices in selected.items() if choices
+    ]
+    active_or = {
+        category for category, _, is_and in active if not is_and and category in CATEGORIES
+    }
+    # Many source occurrences share identical properties. Cache the outcome
+    # only for this query; never merge occurrence identities or numeric facts.
+    outcomes: dict[frozenset[Token], str | None] = {}
+
+    def classify(properties: frozenset[Token]) -> str | None:
+        # None: matches all categories; one category: rescuable OR failure;
+        # empty string: no single added option can rescue this context.
+        if properties not in outcomes:
+            failed = None
+            for category, choices, is_and in active:
+                checks = (not properties.isdisjoint(choice) for choice in choices)
+                matched = all(checks) if is_and else any(checks)
+                if matched:
+                    continue
+                if is_and or failed is not None or category not in active_or:
+                    failed = ""
+                    break
+                failed = category
+            outcomes[properties] = failed
+        return outcomes[properties]
 
     for logical_id, candidates in grouped.items():
         if scope == "unit":
-            # Only already-eligible occurrences of this logical Unit contribute;
-            # this never pulls in a different Unit or a Controller target pool.
+            # Only already-eligible occurrences of this logical Unit contribute.
             union = frozenset().union(*(candidate.properties for candidate in candidates))
-            aggregate = MatchContext(logical_id, 0, 0, 0, None, None, union)
-            considered = [aggregate]
+            considered = [MatchContext(logical_id, 0, 0, 0, None, None, union)]
         else:
             considered = candidates
 
-        if any(
-            matches_selected(candidate.properties, selected, and_categories)
-            for candidate in considered
-        ):
+        matching_properties: set[Token] = set()
+        rescued: dict[str, set[str]] = defaultdict(set)
+        matching_occurrences: set[tuple[int, int, int]] = set()
+        for candidate in considered:
+            failure = classify(candidate.properties)
+            if failure is None:
+                matching_properties.update(candidate.properties)
+                matching_occurrences.add((
+                    candidate.source_unit_id, candidate.source_army_id, candidate.group_id,
+                ))
+            elif failure:
+                # Only this failed OR category could be rescued by an addition.
+                for name, value in candidate.properties:
+                    if name == failure:
+                        rescued[failure].add(str(value))
+                    elif failure == "equipment" and name == "equipment_characteristics":
+                        rescued[failure].add(f"characteristic:{value}")
+
+        if matching_occurrences:
             matches[logical_id] = frozenset(
                 (candidate.source_unit_id, candidate.source_army_id, candidate.group_id)
                 for candidate in candidates
-                if scope == "unit" or matches_selected(
-                    candidate.properties, selected, and_categories,
-                )
-            )
-
-        for category in CATEGORIES:
-            remaining = [
-                candidate.properties for candidate in considered
-                if matches_selected(
-                    candidate.properties, selected, and_categories, excluding=category,
-                )
-            ]
-            if not remaining:
-                continue
-            choices = selected.get(category, ())
-            if choices and category not in and_categories:
-                # Existing OR match makes *every* added option a no-op for this
-                # logical Unit; account for it without enumerating the menu.
-                if any(
-                    any(not props.isdisjoint(choice) for choice in choices)
-                    for props in remaining
-                ):
-                    or_base[category] += 1
-                    continue
-            if choices and category in and_categories:
-                remaining = [
-                    props for props in remaining
-                    if all(not props.isdisjoint(choice) for choice in choices)
-                ]
-            keys = {
-                str(value)
-                for props in remaining
-                for name, value in props
-                if name == category
-            }
-            if category == "equipment":
-                keys.update(
-                    f"characteristic:{value}"
-                    for props in remaining for name, value in props
-                    if name == "equipment_characteristics"
-                )
-            for key in keys:
-                additions[category][key] += 1
+            ) if scope == "unit" else frozenset(matching_occurrences)
+            # Every added OR option retains a Unit that already matches.
+            for category in active_or:
+                or_base[category] += 1
+            # Scan the union once, not every property set for every category.
+            keys_by_category: dict[str, set[str]] = defaultdict(set)
+            for name, value in matching_properties:
+                if name == "equipment_characteristics":
+                    if "equipment" not in active_or:
+                        keys_by_category["equipment"].add(f"characteristic:{value}")
+                elif name in additions and name not in active_or:
+                    keys_by_category[name].add(str(value))
+            for category, keys in keys_by_category.items():
+                for key in keys:
+                    additions[category][key] += 1
+        else:
+            for category, keys in rescued.items():
+                for key in keys:
+                    additions[category][key] += 1
 
     for category in CATEGORIES:
         if or_base[category]:

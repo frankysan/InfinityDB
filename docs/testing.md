@@ -62,6 +62,22 @@ of these three samples):
 These are repository timings, not end-to-end HTTP or browser timings.
 Use repeatable `--case` options to select individual runtime benchmark cases.
 
+Second optimization batch based on `b30653eb`, using the same database.
+A cumulative CPU profile identified full catalog usage queries, repeated
+availability derivation and repeated context comparisons. The revised query
+uses catalog identity keys, materialized occurrence requirements and one
+classification per distinct property set. Five independent samples and six
+identical cached samples per case gave median / nearest-rank p95 times (ms):
+
+- Cold initial profile-scope list: 1129 / 1180 to 529 / 566.
+- Fresh profile-scope query after index construction: 143 / 145 to 32 / 33.
+- Fresh loadout-scope query after index construction: 155 / 170 to 31 / 39.
+- Fresh unit-scope query after index construction: 110 / 153 to 24 / 28.
+
+The small-sample p95 is the maximum observed sample, not a production tail
+estimate. The benchmark's `--profile` mode reports cumulative function
+costs separately from timing measurements; setup runs before profiling.
+
 ## Unit Explorer filter performance — 2026-11-15
 
 Windows development checkout based on `cd688672`, with the scoped Unit-option

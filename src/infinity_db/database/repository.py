@@ -534,6 +534,21 @@ def army_required_flags(
     return required
 
 
+def _occurrence_required_flags(
+    occurrence: Mapping[str, Any],
+    group: Mapping[str, Any],
+    canonical_faction_id: int | None,
+    declared_faction_ids: Collection[int],
+) -> frozenset[str]:
+    """Reuse the immutable graph's source-occurrence requirements."""
+    cached = occurrence.get("_required_flags")
+    if cached is not None:
+        return cached
+    return frozenset(army_required_flags(
+        occurrence, group, canonical_faction_id, declared_faction_ids,
+    ))
+
+
 def minimal_availability_requirements(
     group: Mapping[str, Any],
     canonical_factions: Mapping[int, int | None],
@@ -557,13 +572,11 @@ def minimal_availability_requirements(
             if (source_id, source_army_id) not in occurrence_keys:
                 continue
         requirements.add(
-            frozenset(
-                army_required_flags(
-                    occurrence,
-                    group,
-                    canonical_factions[source_id],
-                    declared_faction_ids_by_unit[source_id],
-                )
+            _occurrence_required_flags(
+                occurrence,
+                group,
+                canonical_factions[source_id],
+                declared_faction_ids_by_unit[source_id],
             )
         )
 
@@ -631,7 +644,7 @@ def visible_armies_for_group(
     visible: dict[int, dict[str, Any]] = {}
     for occurrence in group["army_occurrences"]:
         source_id = occurrence["source_id"]
-        flags = army_required_flags(
+        flags = _occurrence_required_flags(
             occurrence,
             group,
             canonical_factions[source_id],
@@ -1392,6 +1405,7 @@ class Database:
                         faction["faction_id"]
                     )
 
+        canonical_factions = {row["id"]: row["canonical_faction_id"] for row in source_rows}
         groups: list[dict[str, Any]] = []
         for logical in logical_rows:
             logical_id = logical["logical_unit_id"]
@@ -1424,6 +1438,10 @@ class Database:
                         {
                             **army,
                             "source_id": source_id,
+                            "_required_flags": frozenset(army_required_flags(
+                                army, group, canonical_factions[source_id],
+                                declared_faction_ids_by_unit[source_id],
+                            )),
                         }
                     )
             group["declared_faction_ids"] = set().union(
@@ -3975,7 +3993,7 @@ class Database:
                     if army_id is not None and occurrence["id"] != army_id:
                         continue
                     source_id = occurrence["source_id"]
-                    if not army_required_flags(
+                    if not _occurrence_required_flags(
                         occurrence, group, canonical_factions[source_id],
                         declared_faction_ids_by_unit[source_id],
                     ) <= selected_flags:
@@ -4034,7 +4052,8 @@ class Database:
                     base = counts.pop("__or_base__", 0)
                     if catalog in {"skills", "equipment", "weapons"}:
                         option_keys = {
-                            str(item["id"]) for item in self.list_catalog_items(catalog)
+                            str(item_id)
+                            for item_id in self._application_catalog_graph(catalog)["items"]
                         }
                     else:
                         option_keys = {
@@ -4063,7 +4082,7 @@ class Database:
                         continue
                     source_id = occurrence["source_id"]
                     source_army_id = occurrence["source_army_id"]
-                    required = army_required_flags(
+                    required = _occurrence_required_flags(
                         occurrence, group, canonical_factions[source_id],
                         declared_faction_ids_by_unit[source_id],
                     )
@@ -4511,7 +4530,7 @@ class Database:
                 source_id = occurrence["source_id"]
                 flags = tuple(
                     sorted(
-                        army_required_flags(
+                        _occurrence_required_flags(
                             occurrence,
                             group,
                             canonical_factions[source_id],

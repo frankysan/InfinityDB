@@ -274,6 +274,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cold-iterations", type=int, default=20)
     parser.add_argument("--warm-iterations", type=int, default=200)
     parser.add_argument("--case", action="append", default=[], help="Run only this named case.")
+    parser.add_argument("--profile", action="store_true", help="Profile each selected case.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -283,6 +284,25 @@ def main(argv: list[str] | None = None) -> int:
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
     try:
+        if args.profile:
+            import cProfile
+            import pstats
+
+            if not args.case or args.json:
+                raise ValueError("--profile requires --case and cannot be combined with --json")
+            cases = {case.name: case for case in discover_cases(Database(args.database))}
+            for name in args.case:
+                if name not in cases:
+                    raise ValueError(f"Unknown benchmark case: {name}")
+                print(f"Profile: {name}", flush=True)
+                profiler = cProfile.Profile()
+                database = Database(args.database)
+                setup = cases[name].setup
+                if setup is not None:
+                    setup(database)
+                profiler.runcall(cases[name].action, database)
+                pstats.Stats(profiler).strip_dirs().sort_stats("cumulative").print_stats(25)
+            return 0
         report = benchmark_database(
             args.database,
             cold_iterations=args.cold_iterations,

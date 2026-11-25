@@ -3278,7 +3278,12 @@ not separate database queries for each menu option. Explicit scoped browser
 requests use `counts=prospective`, which returns the same prospective, baseline
 and Army counts without calculating the unused legacy `usage_counts` map.
 Existing `counts=1` clients retain the full response and legacy unscoped browser
-links continue to use that mode.
+links continue to use that mode. The immutable Unit graph precomputes optional
+availability requirements per source occurrence. The scoped evaluator reuses
+selection outcomes for identical property sets within a query, retaining all
+matching occurrence identities; prospective counts deduplicate logical Units.
+Catalog option IDs come from the same application identity graph as the
+public catalogs, without calculating catalog usage statistics.
 
 `baseline_usage_counts` ignores discovery filters, Army selection and search,
 but retains the optional-unit Settings flags (Mercenaries, Spec-Ops, Team
