@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-import zipfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -13,10 +12,11 @@ from typing import Any
 import pytest
 
 from infinity_db.web import create_app
+from tests.current_army_source import CURRENT_ARMY_ZIP as SOURCE
+from tests.current_army_source import open_current_army_archive
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 ARMY = ROOT / "data/generated/army.db"
 SOURCE_CONTEXTS = {
     1912: {101, 102, 104, 105, 106, 107},
@@ -55,13 +55,6 @@ SOURCE_CONTEXTS = {
     1905: {101, 201, 401, 501},
 }
 SOURCE_IDS = tuple(SOURCE_CONTEXTS)
-SOURCE_VERSION_OVERRIDES = {
-    701: "7.26246.159", 702: "7.26246.159", 703: "7.26246.159",
-    801: "7.26246.159", 901: "7.26246.159", 902: "7.26246.159",
-    904: "7.26246.159", 905: "7.26246.159", 908: "7.26246.159", 909: "7.26246.159",
-    1001: "7.26246.159", 1002: "7.26246.159", 1003: "7.26246.159",
-    1101: "7.26246.159", 1102: "7.26246.159", 1103: "7.26246.159",
-}
 
 
 @pytest.fixture(scope="module")
@@ -73,25 +66,22 @@ def profile_app() -> Callable[..., Any]:
 def source_documents() -> dict[int, dict[str, Any]]:
     if not SOURCE.exists():
         pytest.skip("Pinned Army ZIP unavailable; source parity is not verified")
-    assert hashlib.sha256(SOURCE.read_bytes()).hexdigest() == (
-        "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
-    )
     with sqlite3.connect(ARMY.as_uri() + "?mode=ro", uri=True) as connection:
         rows = connection.execute(
-            "SELECT a.application_army_id, s.source_file, s.source_sha256 "
+            "SELECT a.application_army_id, s.source_file, s.source_sha256, s.version "
             "FROM application_army_sources AS a JOIN army_lists AS s "
             "ON s.id = a.source_army_id WHERE a.has_army_list = 1"
         ).fetchall()
     documents = {}
-    with zipfile.ZipFile(SOURCE) as archive:
-        for army_id, member, digest in rows:
+    with open_current_army_archive() as archive:
+        for army_id, member, digest, version in rows:
             raw = archive.read(member)
             document = json.loads(raw)
             if not any(unit["id"] in SOURCE_IDS for unit in document["units"]):
                 continue
             assert army_id not in documents
             assert hashlib.sha256(raw).hexdigest() == digest
-            assert document["version"] == SOURCE_VERSION_OVERRIDES.get(army_id, "7.26246.158")
+            assert document["version"] == version
             documents[army_id] = {**document, "source_file": member}
     assert {
         source_id: {

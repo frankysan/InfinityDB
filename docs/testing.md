@@ -639,10 +639,14 @@ maintained v1.2.0 release snapshot is
 catalog, both scenario catalog probes and the current ITS 18 Battleground
 detail changed after the season/mission and Skill publication work; all other
 37 probes, including Battleground SVG bytes, retain their earlier identity.
-The historical fixtures are unchanged. `tools.verify_checkout_server` uses this current snapshot by default;
-explicit `--baseline` still permits historical comparisons when appropriate.
-Use
-`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2-release.json`
+The v1.2.1 snapshot is
+`tests/fixtures/runtime-semantic-baseline-v1.2.1.json`. The November 25 Army update
+and scenario copy corrections change 14 JSON probes; the other 27 probes,
+including the Battleground SVG, retain their earlier identity. All earlier
+fixtures remain unchanged. Checkout, image-preview and complete-build
+verification use the v1.2.1 snapshot by default; explicit `--baseline`
+still permits historical comparisons where supported. Use
+`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2.1.json`
 for the current selected four-file runtime; `--identical-artifacts` additionally
 requires byte-identical artifact metadata. A future baseline may be freshly
 captured with `--capture --db-dir` to a **new** path, never overwriting the

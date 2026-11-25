@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import sqlite3
-import zipfile
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
@@ -17,12 +16,13 @@ import pytest
 
 from infinity_db.database import Database
 from infinity_db.web import create_app
+from tests.current_army_source import CURRENT_ARMY_ZIP as ARMY_ZIP
+from tests.current_army_source import open_current_army_archive
 from tools.browser.verify_non_skill_army_browser import CASES, WIDTHS, projected_buckets
 
 ROOT = Path(__file__).resolve().parents[1]
 APPLICATION_DB = ROOT / "data/generated/army.db"
 RULES_DB = ROOT / "data/generated/rules_n5.db"
-ARMY_ZIP = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 
 # Original Army Skill IDs deliberately published in other player-facing buckets.
 SOURCE_BUCKETS = {
@@ -114,7 +114,7 @@ def _unit_items(unit: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
 
 def test_every_published_non_skill_army_source_has_a_correct_bucket(application: Any) -> None:
     pairs = _source_pairs()
-    assert len(pairs) == 72  # Pinned published snapshot, not browser pass count.
+    assert len(pairs) == 73  # Pinned published snapshot, not browser pass count.
     assert {source_id for _, source_id in pairs} == set(SOURCE_BUCKETS)
     for slug, source_id in pairs:
         source_slug, expected_bucket = SOURCE_BUCKETS[source_id]
@@ -164,7 +164,7 @@ def test_browser_case_manifest_tracks_the_pinned_api_samples() -> None:
 
 
 def _army_source(member: str) -> dict[str, Any]:
-    with zipfile.ZipFile(ARMY_ZIP) as archive:
+    with open_current_army_archive() as archive:
         return json.loads(archive.read(member))
 
 
@@ -184,7 +184,6 @@ def test_army_17_ioann_source_membership_and_duo_chart_are_published(
         ("1002-starmada.json", 1002, "Varangian Guards Fireteams"),
     ):
         source = _army_source(source_file)
-        assert source["version"] == "7.26246.159"
         ioann = next(unit for unit in source["units"] if unit["id"] == 1940)
         assert ioann["slug"] == "ioann-bann-varangian-dog-warrior"
         profiles = ioann["profileGroups"][0]["profiles"]
@@ -230,7 +229,6 @@ def test_army_18_najjarun_shared_deactivator_survives_all_loadouts(
                "403-qapu-khalqi.json")
     for member in sources:
         document = _army_source(member)
-        assert document["version"] == "7.26246.158"
         unit = next(unit for unit in document["units"] if unit["id"] == 314)
         group = unit["profileGroups"][0]
         assert 238 in {entry["id"] for entry in group["profiles"][0]["equip"]}
@@ -255,21 +253,20 @@ def test_army_19_sacha_ava_one_across_pinned_factions(
     application: Any,
 ) -> None:
     contexts = (
-        ("1003-torchlight-brigade.json", "7.26246.159", 1003),
-        ("107-kestrel-colonial-force.json", "7.26246.158", 107),
-        ("204-invincible-army.json", "7.26246.158", 204),
-        ("304-usariadna.json", "7.26246.158", 304),
+        ("1003-torchlight-brigade.json", 1003),
+        ("107-kestrel-colonial-force.json", 107),
+        ("204-invincible-army.json", 204),
+        ("304-usariadna.json", 304),
     )
-    for member, version, _ in contexts:
+    for member, _ in contexts:
         document = _army_source(member)
-        assert document["version"] == version
         unit = next(unit for unit in document["units"] if unit["id"] == 1874)
         assert unit["slug"] == "sacha-xenotech-hunters"
         assert [p["ava"] for group in unit["profileGroups"]
                 for p in group["profiles"]] == [1]
     unit = _published_unit(application, "sacha-xenotech-hunters")
     assert 1874 in unit["source_ids"]
-    for _, _, source_army in contexts:
+    for _, source_army in contexts:
         matching = [army for army in unit["armies"] if army["id"] == source_army]
         assert matching, source_army
         assert all(profile["ava"] == 1
@@ -285,7 +282,6 @@ def test_army_20_racerbot_bangbomb_source_buckets_are_deduplicated(
     assert next(item for item in meta["skills"] if item["id"] == 266)["name"] == "Bangbomb"
     for member in ("101-panoceania.json", "401-haqqislam.json"):
         source = _army_source(member)
-        assert source["version"] == "7.26246.158"
         racer = next(unit for unit in source["units"] if unit["id"] == 1905)
         profile = racer["profileGroups"][0]["profiles"][0]
         for bucket, source_id in (("equip", 246), ("skills", 266)):

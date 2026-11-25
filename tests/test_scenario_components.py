@@ -85,8 +85,8 @@ def test_annihilation_review_preserves_all_source_scoring_and_end_conditions(
     assert "all Troopers" in (mission.end_conditions[1].description or "")
     assert mission.source_issues[0].id == "350-point-survival-bands"
     assert mission.source_issues[0].status == "reviewed-resolution"
-    assert "Spanish N5.3 Aniquilación" in mission.source_issues[0].description
-    assert "explicitly prints contiguous" in mission.source_issues[0].description
+    assert "Spanish N5.3 ranges (p. 153)" in mission.source_issues[0].description
+    assert "85–175, 176–270, and more than 270" in mission.source_issues[0].description
     assert {c["page"] for c in raw["citations"]} == {149, 150}
 
 
@@ -114,10 +114,10 @@ def test_domination_review_preserves_scoring_and_specialist_boundaries(
     assert (issue.id, issue.army_points, issue.game_size_field, issue.status) == (
         "350-point-swc", (350,), "swc", "needs-verification",
     )
-    assert "Wiki Domination revision 3264" in issue.description
-    assert "Spanish N5.3 Domination chart" in issue.description
-    assert "official language editions" in issue.description
-    assert "intended authoritative value remains unverified" in issue.description
+    assert "English Wiki (revision 3264)" in issue.description
+    assert "Spanish N5.3 (p. 155) gives 7 SWC" in issue.description
+    assert "give 6 SWC" in issue.description
+    assert "intended SWC limit remains unclear" in issue.description
 
     quadrants, consoles = mission.objectives
     assert (quadrants.timing, quadrants.aggregation, quadrants.maximum_points) == (

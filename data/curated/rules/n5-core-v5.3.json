@@ -25896,7 +25896,7 @@
             "id": "scenario:domination",
             "kind": "scenario",
             "name": "Domination",
-            "summary": "Core scenario using four scoring Quadrants and four Consoles.",
+            "summary": "Dominate Quadrants and [[skill:hack-consoles|Hack Consoles]] to score Objective Points.",
             "composition": {
                 "role": "definition"
             },
@@ -25963,7 +25963,7 @@
                             ],
                             "gameSizeField": "swc",
                             "status": "needs-verification",
-                            "description": "The English Domination N5.3 chart (printed p. 151), English N5.2 chart (p. 150), and pinned English Wiki Domination revision 3264 all print 6 SWC at 350 Army Points. However, the official Spanish N5.3 Domination chart (printed p. 155) prints 7 SWC (CAP) for the same size, matching the usual progression and other core scenarios. This is an unresolved discrepancy between current official language editions, not merely an unexplained progression exception. InfinityDB retains 6 SWC from its English primary source for now; the intended authoritative value remains unverified and should not be silently inferred from either edition."
+                            "description": "At 350 Army Points, English N5.3 (p. 151), English N5.2 (p. 150) and the English Wiki (revision 3264) give 6 SWC. Spanish N5.3 (p. 155) gives 7 SWC, matching the other core scenarios. The setup shows the English value; the intended SWC limit remains unclear."
                         }
                     ]
                 },
@@ -26703,7 +26703,7 @@
             "id": "scenario:supplies",
             "kind": "scenario",
             "name": "Supplies",
-            "summary": "Core scenario using three carryable Supply Boxes on the center line.",
+            "summary": "Collect and control Supply Boxes from three positions along the centerline.",
             "composition": {
                 "role": "definition"
             },
@@ -27279,7 +27279,7 @@
                             ],
                             "objectiveId": "preserve-forces",
                             "status": "reviewed-resolution",
-                            "description": "The English N5.3 Annihilation table (printed p. 149) has contradictory 350-point surviving-Victory-Points bands: 85–150 for 1 Objective Point, 176–270 for 3, and more than 250 for 4. The official Spanish N5.3 Aniquilación table (printed p. 153) instead explicitly prints contiguous 85–175, 176–270, and more than 270 bands, matching the English enemy-kills bands. InfinityDB's reviewed 85–175/176–270/more-than-270 resolution is therefore supported by the Spanish source, not solely inferred from table continuity."
+                            "description": "The English N5.3 Annihilation table (p. 149) gives conflicting ranges for surviving Victory Points at 350 Army Points: 85–150 for 1 Objective Point, 176–270 for 3, and more than 250 for 4. The scoring table uses the Spanish N5.3 ranges (p. 153): 85–175, 176–270, and more than 270. These also match the English ranges for enemy Victory Points killed."
                         }
                     ]
                 },
@@ -27338,7 +27338,7 @@
             "id": "scenario:firefight",
             "kind": "scenario",
             "name": "Firefight",
-            "summary": "Core scenario using the standard opposing Deployment Zone map with scenario-specific combat objectives.",
+            "summary": "Keep your Specialist Troops alive while eliminating enemy Specialists, [[skill:lieutenant|Lieutenants]] and other Troopers.",
             "composition": {
                 "role": "definition"
             },
@@ -27516,7 +27516,7 @@
             "facts": {
                 "category": "scenario-rule",
                 "effects": [
-                    "Place one Console at the center of each of the four scoring Quadrants, using the maintained marker positions in the selected map.",
+                    "Place one Console at the center of each of the four scoring Quadrants, as shown on the map.",
                     "Represent each Console with a Console A Marker or scenery of the same diameter."
                 ],
                 "restrictions": [],

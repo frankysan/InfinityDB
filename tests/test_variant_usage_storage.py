@@ -60,8 +60,8 @@ def test_all_committed_groups_and_source_rows_round_trip_without_a_sidecar(embed
     report = validate_database_set(directory)
     assert report["layout"] == "v12-two-file"
     assert set(report["sha256"]) == {"army.db", "rules_n5.db"}
-    assert report["variantGroups"] == 151
-    assert sum(len(group["sourceRows"]) for group in expected["variants"]) == 10923
+    assert report["variantGroups"] == 150
+    assert sum(len(group["sourceRows"]) for group in expected["variants"]) == 10950
     assert not (directory / "variant-usage.json").exists()
     with closing(sqlite3.connect(directory / "rules_n5.db")) as connection:
         assert connection.execute("PRAGMA user_version").fetchone()[0] == 12
@@ -70,7 +70,7 @@ def test_all_committed_groups_and_source_rows_round_trip_without_a_sidecar(embed
             "SELECT group_count,row_count FROM variant_usage_metadata"
         ).fetchone()
         assert counts == (
-            151, 10923,
+            150, 10950,
         )
         # Equivalent one-extra and two-extra TAGCom spellings keep distinct
         # reviewed source coordinates within the same semantic group.

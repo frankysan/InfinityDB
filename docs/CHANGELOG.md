@@ -8,6 +8,25 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.2.1] - 2026-11-25
+
+### Player summary
+
+- Updated to the November 25, 2026 Infinity Army data, including
+  the Shadowcrow Operator, revised Unit profiles and Fireteam Charts.
+- Clarified scenario and Skill descriptions, setup instructions and differences
+  between the English and Spanish rules.
+
+### Changed
+
+- **Data processing:** Refreshed all 58 Army lists from the November 25
+  snapshot and rebuilt the runtime database set.
+- **Data processing + Web frontend:** Added the Shadowcrow Operator symbol
+  while preserving all existing published SVGs and compatibility URLs.
+- **Data processing + Web frontend:** Revised player-facing core and ITS scenario,
+  Skill and Extra copy to explain gameplay directly while retaining source
+  citations and unresolved rule differences.
+
 ## [1.2.0] - 2026-11-23
 
 ### Player summary

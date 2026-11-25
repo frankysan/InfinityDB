@@ -3510,7 +3510,7 @@ def test_core_scenario_marker_sizes_are_visible_and_physically_fixed(
                     unit,
                 )
                 assert expected in marker.inner_text()
-                assert "not scoring area or map scale" in marker.inner_text()
+                assert "Token diameters, not scoring area sizes" in marker.inner_text()
                 citation = marker.locator(".detail-source a")
                 assert citation.count() == 1
                 assert "ITS Season 18" in citation.inner_text()
@@ -3666,10 +3666,10 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
                 assert issue.is_visible()
                 detail = issue.inner_text()
                 assert "needs verification" in detail.lower()
-                assert "English Domination N5.3 chart (printed p. 151)" in detail
-                assert "Spanish N5.3 Domination chart (printed p. 155)" in detail
-                assert "7 SWC (CAP)" in detail
-                assert "retains 6 SWC" in detail
+                assert "English N5.3 (p. 151)" in detail
+                assert "English Wiki (revision 3264) give 6 SWC" in detail
+                assert "Spanish N5.3 (p. 155) gives 7 SWC" in detail
+                assert "intended SWC limit remains unclear" in detail
                 link.focus()
                 assert link.evaluate("(node) => document.activeElement === node")
                 link.press("Enter")

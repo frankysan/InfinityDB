@@ -12,10 +12,9 @@ import uuid
 from pathlib import Path
 
 from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_set
-from tools.runtime_semantic_baseline import capture, check
+from tools.runtime_semantic_baseline import CURRENT_BASELINE, capture, check
 
 ROOT = Path(__file__).resolve().parents[1]
-CURRENT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json"
 
 _IMAGE_VERIFY = """
 from pathlib import Path
@@ -23,11 +22,11 @@ from infinity_db.web import create_app_from_database_set
 from infinity_db.database_set import validate_database_set
 d = Path('/app/data')
 report = validate_database_set(d, require_complete=True)
-assert set(report['sha256']) == {'army.db', 'rules_n5.db', 'its_18.db'}
+assert set(report['sha256']) == {'army.db', 'rules_n5.db', 'its_17.db', 'its_18.db'}
 assert {p.name for p in d.iterdir()} == set(report['sha256'])
 app = create_app_from_database_set(d)
 assert len(app.deployed_objects['objects']) == 17
-assert len(app.variant_usage['variants']) == 151
+assert len(app.variant_usage['variants']) == 150
 assert len(app.weapon_profile_citations) == 69
 print('Runtime immutable image artifacts: PASS')
 """

@@ -237,7 +237,7 @@ function mapCard(item) {
   )) {
     const note = document.createElement("p");
     note.className = "scenario-map-placement-note";
-    note.textContent = "Circular Template areas: 12 cm diameter each (footprints drawn to scale).";
+    note.textContent = "Circular Template areas: 12 cm in diameter, drawn to scale.";
     figure.append(note);
   }
   if (["critical-intervention", "last-launch"].includes(item.slug)) {
@@ -281,11 +281,11 @@ function mapCard(item) {
     note.className = "detail-source";
     const measured = markers.find((marker) => marker.diameter_mm != null);
     if (measured?.citation) {
-      note.append("Physical token diameter, not scoring area or map scale · ");
+      note.append("Token diameters, not scoring area sizes · ");
       note.append(rulesCitationNode(measured.citation));
     }
     if (schematic) {
-      note.append(" Schematic markers indicate placement only where physical size is unknown or disputed; check mission rules and source issues.");
+      note.append(" Markers with an unspecified or disputed diameter show placement only. See the mission rules and source notes.");
     }
     dimensions.append(title, list, note);
     figure.append(dimensions);
@@ -614,12 +614,16 @@ function tacticalSupportSection(item) {
   body.append(list);
   for (const note of support.sourceNotes) {
     const text = document.createElement("p");
-    text.className = "detail-copy";
-    text.textContent = note;
+    text.className = "rules-source-note";
+    const label = document.createElement("strong");
+    label.className = "rules-provenance-label";
+    label.textContent = "Source context: ";
+    text.append(label, note);
     body.append(text);
   }
   const sources = document.createElement("p");
   sources.className = "detail-source";
+  sources.append("Sources: ");
   for (const [index, citation] of support.citations.entries()) {
     if (index) sources.append(" · ");
     sources.append(rulesCitationNode(citation));
@@ -688,7 +692,7 @@ async function loadSeasonPolicyCards(publication, { signal }, wrapper) {
         if (signal.aborted) return null;
         const message = document.createElement("p");
         message.className = "detail-copy";
-        message.textContent = "The rules for this play context could not be loaded.";
+        message.textContent = "These tournament or Extra rules could not be loaded.";
         body.append(message);
         console.error("Could not load ITS play-context rules", error);
       }
@@ -765,7 +769,7 @@ async function loadDetail(points) {
     if (controller.signal.aborted || pageController.signal.aborted) return;
     if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.status === 400
-      ? "This scenario setup is unavailable for the selected publication and Army Points value. Check the selection."
+      ? "This setup is unavailable for your selected rules and game size. Check your selection."
       : collectionLoadMessage(error, "scenario");
     console.error("Could not load scenario setup", error);
     show(elements.error);
@@ -829,7 +833,7 @@ async function initialize() {
   } catch (error) {
     if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.status === 400
-      ? "This scenario collection or revision is not supported. Open Scenarios to choose another collection."
+      ? "This rules set, ITS season or rules revision is unavailable. Choose another from Scenarios."
       : collectionLoadMessage(error, "scenario");
     console.error("Could not load scenario collection", error);
     show(elements.error);

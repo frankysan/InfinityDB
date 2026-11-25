@@ -170,9 +170,10 @@ def test_domination_350_point_language_conflict_stays_scenario_scoped(app: Any) 
     assert len(issues) == 1
     assert issues[0]["status"] == "needs-verification"
     description = issues[0]["description"]
-    assert "Spanish N5.3 Domination chart" in description
-    assert "Wiki Domination revision 3264" in description
-    assert "official language editions" in description
+    assert "English N5.3 (p. 151)" in description
+    assert "English Wiki (revision 3264) give 6 SWC" in description
+    assert "Spanish N5.3 (p. 155) gives 7 SWC" in description
+    assert "intended SWC limit remains unclear" in description
 
     status, page = _get(app, "/scenarios/domination")
     assert status == 200

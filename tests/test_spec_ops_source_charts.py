@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import sqlite3
-import zipfile
 from pathlib import Path
 from typing import Any
 from wsgiref.util import setup_testing_defaults
@@ -17,10 +16,11 @@ from wsgiref.util import setup_testing_defaults
 import pytest
 
 from infinity_db.web import create_app
+from tests.current_army_source import CURRENT_ARMY_ZIP as SOURCE
+from tests.current_army_source import open_current_army_archive
 
 ROOT = Path(__file__).resolve().parents[1]
 ARMY = ROOT / "data/generated/army.db"
-SOURCE = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 RULES = ROOT / "data/generated/rules_n5.db"
 SPEC_OPS_IDS = {1908, *range(1912, 1926)}
 TEAM_OPS_IDS = {1909, *range(1926, 1940)}
@@ -177,7 +177,7 @@ def test_army_02_to_16_source_pairs_are_published_with_own_chart_context(
     team_id: int,
 ) -> None:
     """Current-source pair identities and exact option context, not a historical diff."""
-    with zipfile.ZipFile(SOURCE) as archive:
+    with open_current_army_archive() as archive:
         member = json.loads(archive.read(source_member))
     source_units = {unit["id"]: unit for unit in member["units"]}
     app = create_app(ARMY, rules_database_path=RULES)
@@ -218,14 +218,13 @@ def test_army_02_to_16_source_pairs_are_published_with_own_chart_context(
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
 def test_army_09_treitak_preserves_combined_and_morat_source_contexts() -> None:
     """One Treitak identity spans two factions; Morat TEAM-OPS is faction-specific."""
-    with zipfile.ZipFile(SOURCE) as archive:
+    with open_current_army_archive() as archive:
         combined = json.loads(archive.read("601-combined-army.json"))
         morat = json.loads(archive.read("602-morat.json"))
     combined_units = {unit["id"]: unit for unit in combined["units"]}
     morat_units = {unit["id"]: unit for unit in morat["units"]}
     assert 1919 in combined_units and 1919 in morat_units
     assert 1933 not in combined_units and 1933 in morat_units
-    assert combined["version"] == morat["version"] == "7.26246.158"
     assert combined_units[1919]["spectables"] == morat_units[1919]["spectables"]
 
     app = create_app(ARMY, rules_database_path=RULES)
@@ -236,8 +235,8 @@ def test_army_09_treitak_preserves_combined_and_morat_source_contexts() -> None:
         (item["version"], item["source_file"])
         for item in spec_ops["source_charts"][0]["source_versions"]
     } >= {
-        ("7.26246.158", "601-combined-army.json"),
-        ("7.26246.158", "602-morat.json"),
+        (combined["version"], "601-combined-army.json"),
+        (morat["version"], "602-morat.json"),
     }
     morat_team = _unit_api(app, "morat-team-ops")
     assert 1933 in morat_team["source_ids"]
@@ -245,13 +244,13 @@ def test_army_09_treitak_preserves_combined_and_morat_source_contexts() -> None:
     assert {
         (item["version"], item["source_file"])
         for item in morat_team["source_charts"][0]["source_versions"]
-    } == {("7.26246.158", "602-morat.json")}
+    } == {(morat["version"], "602-morat.json")}
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
 def test_army_12_chandra_source_revision_and_three_faction_contexts() -> None:
     members = ("701-aleph.json", "702-steel-phalanx.json", "703-operations.json")
-    with zipfile.ZipFile(SOURCE) as archive:
+    with open_current_army_archive() as archive:
         documents = {
             member: json.loads(archive.read(member))
             for member in members
@@ -268,8 +267,6 @@ def test_army_12_chandra_source_revision_and_three_faction_contexts() -> None:
             for document in documents.values()
         }
         assert len(source_payloads) == 1
-        assert all(document["version"] == "7.26246.159"
-                   for document in documents.values())
         unit = _unit_api(app, slug)
         entry = next(
             chart for chart in unit["source_charts"]
@@ -278,7 +275,7 @@ def test_army_12_chandra_source_revision_and_three_faction_contexts() -> None:
         assert {
             (version["version"], version["source_file"])
             for version in entry["source_versions"]
-        } == {("7.26246.159", member) for member in members}
+        } == {(documents[member]["version"], member) for member in members}
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
@@ -319,7 +316,7 @@ def test_army_13_14_16_faction_context_and_chart_payloads_are_distinct(
     team_members: tuple[str, ...],
 ) -> None:
     """Keep real faction membership, not an inferred shared TEAM-OPS matrix."""
-    with zipfile.ZipFile(SOURCE) as archive:
+    with open_current_army_archive() as archive:
         documents = {
             member: json.loads(archive.read(member))
             for member in {*spec_members, *team_members}
@@ -332,7 +329,6 @@ def test_army_13_14_16_faction_context_and_chart_payloads_are_distinct(
         raw_payloads = []
         for member in members:
             document = documents[member]
-            assert document["version"] == "7.26246.159"
             unit = next(unit for unit in document["units"] if unit["id"] == source_id)
             raw_payloads.append(json.dumps(unit["spectables"], sort_keys=True))
         assert len(set(raw_payloads)) == 1
@@ -342,7 +338,7 @@ def test_army_13_14_16_faction_context_and_chart_payloads_are_distinct(
         assert {
             (item["version"], item["source_file"])
             for item in published["source_charts"][0]["source_versions"]
-        } == {("7.26246.159", member) for member in members}
+        } == {(documents[member]["version"], member) for member in members}
     if spec_id == 1925:
         assert all(
             not any(unit["id"] == team_id for unit in documents[member]["units"])
@@ -353,9 +349,8 @@ def test_army_13_14_16_faction_context_and_chart_payloads_are_distinct(
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
 def test_army_15_hatail_source_keeps_symbiont_profiles_outside_choice_chart() -> None:
     """Tohaa's two Symbiont profile states are profiles, not chart selections."""
-    with zipfile.ZipFile(SOURCE) as archive:
+    with open_current_army_archive() as archive:
         document = json.loads(archive.read("801-tohaa.json"))
-    assert document["version"] == "7.26246.159"
     units = {unit["id"]: unit for unit in document["units"]}
     assert units[1908]["slug"] == "hatail-spec-ops"
     assert units[1909]["slug"] == "tohaa-team-ops"
@@ -375,15 +370,15 @@ def test_army_15_hatail_source_keeps_symbiont_profiles_outside_choice_chart() ->
         assert unit["source_ids"] == [source_id]
         assert len(unit["source_charts"]) == 1
         assert unit["source_charts"][0]["source_versions"] == [
-            {"version": "7.26246.159", "source_file": "801-tohaa.json"}
+            {"version": document["version"], "source_file": "801-tohaa.json"}
         ]
 
 
 @pytest.mark.skipif(not SOURCE.exists(), reason="Pinned Army ZIP unavailable")
 def test_pinned_army_spec_ops_charts_match_materialized_source_payloads() -> None:
-    """Cross-check the exact September 29 snapshot without altering source data."""
+    """Cross-check the published Army snapshot without altering source data."""
     by_source_id: dict[int, set[str]] = {}
-    with zipfile.ZipFile(SOURCE) as archive:
+    with open_current_army_archive() as archive:
         for name in archive.namelist():
             if name == "metadata.json" or not name.endswith(".json"):
                 continue
