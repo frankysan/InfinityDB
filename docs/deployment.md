@@ -483,6 +483,27 @@ contains the target version/snapshot identity, aggregate and per-route p50/p95/p
 request/error rate, status classes, and response sizes. The generated search term is synthetic and
 redacted from retained report paths. A non-zero load-phase error count makes the command fail.
 
+For the current Unit Explorer, use the separate `--scenario unit-explorer`
+workload. It discovers positive-count Skill and Equipment identities and
+exercises 15 routes/query shapes: page and filter initialization, scoped
+prospective counts, pagination, sorting, search, individual and combined
+filters (profile/loadout/unit), Extended pages and optional availability.
+It reports per-case timings and redacts the synthetic Unit search value.
+The general scenario remains the default; do not compare aggregate throughput
+across the two workloads. This is a warmed, repeatedly sampled HTTP workload,
+not a measurement of cold worker initialization or browser rendering.
+
+On the Linux development checkout, use the isolated test stack and collect a
+fresh resource and capacity report with the normal 2x4 worker configuration:
+
+```bash
+sh scripts/deploy-local-test.sh 8080
+```
+
+```bash
+COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python -m tools.operations.deployment_resources --output local/performance/http-capacity/RUN_ID/resources.json -- .venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --scenario unit-explorer --output local/performance/http-capacity/RUN_ID/capacity.json
+```
+
 The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 

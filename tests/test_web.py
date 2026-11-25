@@ -1618,6 +1618,39 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 400
     assert json.loads(body)["error"] == "extended must be 0 or 1"
 
+def test_unit_explorer_capacity_scenario_against_current_snapshot() -> None:
+    from urllib.parse import urlsplit
+
+    from tools.performance.capacity_test import discover_scenario
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+
+    def fetch(path: str):
+        parsed = urlsplit(path)
+        status, _, body = request(application, parsed.path, query=parsed.query)
+        assert status == 200, path
+        return json.loads(body) if parsed.path.startswith("/api/") else None
+
+    _, cases = discover_scenario(
+        "http://example.invalid", timeout=10,
+        fetch_json=lambda _base_url, path: fetch(path),
+        scenario="unit-explorer",
+    )
+    for case in cases:
+        payload = fetch(case.path)
+        if case.name == "explorer-filters":
+            assert payload["catalogs"]["skills"]
+        elif case.name.startswith("explorer-extended"):
+            assert payload["items"]
+            assert all("general_profiles" in item for item in payload["items"])
+        elif case.path.startswith("/api/units?"):
+            assert "prospective_counts" in payload
+            assert "army_usage_counts" in payload
+
+
 def test_unit_filter_catalogs_match_public_catalog_identities(monkeypatch) -> None:
     application = create_app(
         Path("data/generated/army.db"),
