@@ -75,8 +75,8 @@ def test_exact_mapping_roundtrip_and_paired_health(v31) -> None:
         field: document[field] for field in MAPPING_FIELDS
     }
     assert actual["publishedSha256ByPath"] == document["publishedSha256ByPath"]
-    assert sum(len(actual[field]) for field in MAPPING_FIELDS) == 2019
-    assert len(actual["publishedSha256ByPath"]) == 808
+    assert sum(len(actual[field]) for field in MAPPING_FIELDS) == 2021
+    assert len(actual["publishedSha256ByPath"]) == 809
     assert SymbolCatalog(publication=actual).revision == SymbolCatalog(MANIFEST).revision
     assert validate_database_pair(army, raw_path=raw) is not None
     health = database_health_report(army, require_raw=True)

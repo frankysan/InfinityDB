@@ -1,6 +1,6 @@
 {
   "browserUsageSummary": {
-    "browserReferencedAssetCount": 807,
+    "browserReferencedAssetCount": 808,
     "unreferencedPublishedAssetCount": 1
   },
   "canonicalArchivePathToPublishedPath": {
@@ -621,6 +621,7 @@
     "units/senku-troops-1-1.svg": "units/jsa/1817-senku-troops.svg",
     "units/senor-massacre-1-1.svg": "units/unassigned/462-senor-massacre--army-502.svg",
     "units/seraphs-1-1.svg": "units/panoceania/34-seraphs--army-103.svg",
+    "units/shadowcrow-operator-1-1.svg": "units/panoceania/1942-shadowcrow-operator.svg",
     "units/shakush-1-1.svg": "units/haqqislam/1546-shakush-light-armored-unit.svg",
     "units/shang-ji-1-1.svg": "units/yu-jing/150-shang-ji-invincibles.svg",
     "units/shaolin-warrior-monks-1-1.svg": "units/yu-jing/136-shaolin-warrior-monks.svg",
@@ -1504,6 +1505,7 @@
     "units/panoceania/1905-racerbots.svg": "e1b33de1690212a709677af7a4792d01bcc78780aa36a9354c0967d143083874",
     "units/panoceania/1912-indigo-spec-ops.svg": "a5ecbaee1485bd601d90314c293d910910de21e7598a60f6671336a03b46c206",
     "units/panoceania/1926-indigo-team-ops--3-1.svg": "9102d4ff736ae5bed61942e50efd36ad7b622081f084fdeecafe6132b4f59821",
+    "units/panoceania/1942-shadowcrow-operator.svg": "6ff676844d5729bd23ed18aebf45947ae9810135998ac616aa863af1c8ff3a59",
     "units/panoceania/2-akalis--army-102.svg": "e33942d76b64eb54e742b5ecc1bc2f385013f4a372d8b31da3e9cf50a040c235",
     "units/panoceania/20-jeanne-d-arc.svg": "0e22ea2d7f335d4ad617eb9005cf2f689ba15be67dc615f995f7f054e52783d5",
     "units/panoceania/21-acontecimento-regulars--army-102.svg": "834d10174af17e04074851d87bbbb2ce59ad7717dec55b2caafbd92e9032a4cd",
@@ -2571,6 +2573,7 @@
     "units/seraphs-2-1.svg": "units/panoceania/34-seraphs--army-103.svg",
     "units/seraphs-3-1.svg": "peripherals/panoceania/crabbot.svg",
     "units/sergeant-so-ra-kwon-jujak-regiment-1-1.svg": "units/yu-jing/1567-sergeant-so-ra-kwon--army-205.svg",
+    "units/shadowcrow-operator-1-1.svg": "units/panoceania/1942-shadowcrow-operator.svg",
     "units/shakush-1-1.svg": "units/haqqislam/1546-shakush-light-armored-unit.svg",
     "units/shakush-light-armored-unit-2-1.svg": "peripherals/haqqislam/jandab.svg",
     "units/shang-ji-1-1.svg": "units/yu-jing/150-shang-ji-invincibles.svg",
@@ -2804,8 +2807,8 @@
   },
   "sourceSnapshot": {
     "armyArtifact": {
-      "name": "JSON 20260929-114335.zip",
-      "sha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
+      "name": "JSON 20261125-162328.zip",
+      "sha256": "8e2c53fc3425ab80627ba99c88629bc33df6403971465ba1fcccef7882da0715"
     }
   },
   "staticKeyToPublishedPath": {
@@ -2820,13 +2823,13 @@
     "tactical": "orders/tactical.svg"
   },
   "summary": {
-    "canonicalAssetCount": 807,
+    "canonicalAssetCount": 808,
     "factionMappingCount": 60,
-    "publishedAssetCount": 808,
-    "publishedBytes": 10001525,
-    "sourceAssetCount": 1101,
+    "publishedAssetCount": 809,
+    "publishedBytes": 10035631,
+    "sourceAssetCount": 1102,
     "staticMappingCount": 9,
-    "unitMappingCount": 918
+    "unitMappingCount": 919
   },
   "unavailableSourceAssets": [],
   "unitProfileLogoToPublishedPath": {
@@ -3633,6 +3636,7 @@
     "https://assets.corvusbelli.net/army/img/logo/units/seraphs-2-1.svg": "units/panoceania/34-seraphs--army-103.svg",
     "https://assets.corvusbelli.net/army/img/logo/units/seraphs-3-1.svg": "peripherals/panoceania/crabbot.svg",
     "https://assets.corvusbelli.net/army/img/logo/units/sergeant-so-ra-kwon-jujak-regiment-1-1.svg": "units/yu-jing/1567-sergeant-so-ra-kwon--army-205.svg",
+    "https://assets.corvusbelli.net/army/img/logo/units/shadowcrow-operator-1-1.svg": "units/panoceania/1942-shadowcrow-operator.svg",
     "https://assets.corvusbelli.net/army/img/logo/units/shakush-1-1.svg": "units/haqqislam/1546-shakush-light-armored-unit.svg",
     "https://assets.corvusbelli.net/army/img/logo/units/shakush-light-armored-unit-2-1.svg": "peripherals/haqqislam/jandab.svg",
     "https://assets.corvusbelli.net/army/img/logo/units/shang-ji-1-1.svg": "units/yu-jing/150-shang-ji-invincibles.svg",
@@ -4591,6 +4595,7 @@
     "senor-massacre": "units/unassigned/462-senor-massacre--army-502.svg",
     "seraphs": "units/panoceania/34-seraphs--army-103.svg",
     "sergeant-so-ra-kwon": "units/yu-jing/1567-sergeant-so-ra-kwon--army-205.svg",
+    "shadowcrow-operator": "units/panoceania/1942-shadowcrow-operator.svg",
     "shakush-light-armored-unit": "units/haqqislam/1546-shakush-light-armored-unit.svg",
     "shang-ji-invincibles": "units/yu-jing/150-shang-ji-invincibles.svg",
     "shaolin-warrior-monks": "units/yu-jing/136-shaolin-warrior-monks.svg",

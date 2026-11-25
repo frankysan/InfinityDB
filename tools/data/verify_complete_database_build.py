@@ -76,8 +76,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["sourceClassificationMemberships"] != 1
                 or report["armyOverviewSummaries"] != 58
                 or report["legacyArmyIdentities"] != 2
-                or report["publishedSymbolMappings"] != 2019
-                or report["publishedSymbolAssets"] != 808
+                or report["publishedSymbolMappings"] != 2021
+                or report["publishedSymbolAssets"] != 809
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -259,8 +259,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"12 Weapon Properties, 2 Equipment encodings, "
                 f"6 Skill classifications, 2 hidden characteristics, "
                 f"1 classification membership, 58 Army summaries, "
-                f"2 historical Army identities, 2019 symbol mappings, "
-                f"808 verified SVGs, 41 baseline routes; "
+                f"2 historical Army identities, 2021 symbol mappings, "
+                f"809 verified SVGs, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )
