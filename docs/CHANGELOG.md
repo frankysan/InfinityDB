@@ -8,6 +8,17 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.2.2] - Unreleased
+
+### Player summary
+
+- Improved standalone scenario SVG compatibility and range helper endcap contrast.
+
+### Fixed
+
+- **Web backend:** Resolve map colors and font sizes before SVG serialization and
+  draw contrasting ruler endcaps without changing measurement coordinates.
+
 ## [1.2.1] - 2026-11-25
 
 ### Player summary

@@ -4219,8 +4219,10 @@ dimensions. Rendered measurement text carries the canonical inch value in
 `data-distance-inches` or `data-distance-size-inches`, separate from the user-facing display unit.
 The map API accepts optional `distance_unit=in|cm`, using the Infinity distance convention
 of 1 inch = 2.5 cm, and optional `theme=light|dark` (default Light). Its standalone SVG
-embeds the selected theme's canonical map palette. Browser pages retain it as a normal
-image element for Save Image As; theme and distance-unit preference events change the
+embeds the selected theme's canonical map palette and resolves CSS variable references
+in styles and hatch patterns to literal colors and font sizes for standalone viewers.
+Measurement endcaps use a contrasting under-stroke at their original coordinates.
+Browser pages retain it as a normal image element for Save Image As; theme and distance-unit preference events change the
 image URL without altering the inch viewBox or stored geometry. Marker `data-diameter-mm`
 remains unconverted physical metadata.
 It also supports `element-edge-distance` annotations for markers and rectangles: the

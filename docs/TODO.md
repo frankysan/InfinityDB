@@ -32,11 +32,15 @@ Use these links to jump directly to a workstream:
 
 - [ ] **Web backend + Web frontend:** Fix standalone scenario SVG appearance.
   Saved SVGs must retain the selected theme, colors, labels, patterns and
-  measurements outside InfinityDB. Verify standalone viewing in both themes
-  and distance units.
+  measurements outside InfinityDB. Literal theme colors and font sizes now replace
+  CSS variable references in the generated stylesheet and patterns; focused tests
+  pass. Remaining: confirm standalone visual appearance in the affected viewer
+  in both themes and distance units.
 - [ ] **Web backend:** Make range helper endcaps visible over map and zone edges
   in the shared SVG renderer, including at table boundaries. Preserve exact
-  measurement coordinates; verify overlapping and boundary cases.
+  measurement coordinates. A contrasting halo and stronger stroke are implemented;
+  focused geometry tests pass. Remaining: visually confirm overlapping and boundary
+  cases at typical map display sizes.
 - [ ] **Web backend + Web frontend:** Include Skills, Equipment and Weapons in
   Extended Unit Explorer details as plain text without individual links.
   Preserve profile ownership and distinguish alternative loadouts rather than

@@ -67,6 +67,9 @@ stroke:var(--color-scenario-map-outline,#203b35);stroke-width:.1}
 .guide{fill:none;stroke:var(--color-scenario-map-guide,#65716b);
 stroke-width:.06;stroke-dasharray:.35 .25}
 .measurement{fill:none;stroke:var(--color-scenario-map-measurement,#203b35);stroke-width:.05}
+.measurement .endcap-halo{fill:none;stroke:var(--color-scenario-map-text-halo,#fffefa);
+stroke-width:.32;stroke-linecap:round}
+.measurement line.endcap{stroke-width:.14;stroke-linecap:round}
 .center-measurement{fill:none;stroke:var(--color-scenario-map-measurement,#203b35);
 stroke-width:.075;stroke-dasharray:.3 .16}
 .dimension-label,.area-size{fill:var(--color-scenario-map-text,#203b35);
@@ -76,8 +79,7 @@ paint-order:stroke;stroke:var(--color-scenario-map-text-halo,#fffefa);stroke-wid
 font-family:sans-serif;font-size:var(--scenario-map-label-size,1.4px);font-weight:600}
 """
 
-# Optional ITS-only styling is omitted from historical Core and Battleground
-# SVGs to preserve their frozen byte-level publication identity.
+# Optional ITS-only styling is omitted from maps that do not use it.
 _NO_DEPLOY_CSS = """.no-deploy{fill:#f0c6c6;fill-opacity:.72;stroke:#aa7777;stroke-width:.09}
 svg[data-theme="dark"] .no-deploy{fill:#744647;stroke:#d5a7a7}
 """
@@ -351,6 +353,16 @@ def _measurement_text(value: float, distance_unit: Literal["in", "cm"]) -> str:
     return f"{_number(value)}″"
 
 
+def _render_endcap(x1: float, y1: float, x2: float, y2: float) -> str:
+    """Keep the exact tick position visible over map and zone boundaries."""
+    x1_text, y1_text, x2_text, y2_text = map(_number, (x1, y1, x2, y2))
+    return (
+        f'<path class="endcap-halo" d="M{x1_text} {y1_text} L{x2_text} {y2_text}"/>'
+        f'<line class="endcap" x1="{x1_text}" y1="{y1_text}" '
+        f'x2="{x2_text}" y2="{y2_text}"/>'
+    )
+
+
 def _render_ruler(
     geometry: ScenarioGeometry, ruler: RulerAnnotation,
     text_scale: float, distance_unit: Literal["in", "cm"],
@@ -380,10 +392,8 @@ def _render_ruler(
         f'data-distance-inches="{_number(display_distance)}" data-ruler-reference="positions">'
         f'<line x1="{_number(x1)}" y1="{_number(y1)}" '
         f'x2="{_number(x2)}" y2="{_number(y2)}"/>'
-        f'<line x1="{_number(x1 - tick * nx)}" y1="{_number(y1 - tick * ny)}" '
-        f'x2="{_number(x1 + tick * nx)}" y2="{_number(y1 + tick * ny)}"/>'
-        f'<line x1="{_number(x2 - tick * nx)}" y1="{_number(y2 - tick * ny)}" '
-        f'x2="{_number(x2 + tick * nx)}" y2="{_number(y2 + tick * ny)}"/>'
+        f'{_render_endcap(x1 - tick * nx, y1 - tick * ny, x1 + tick * nx, y1 + tick * ny)}'
+        f'{_render_endcap(x2 - tick * nx, y2 - tick * ny, x2 + tick * nx, y2 + tick * ny)}'
         f'<text class="dimension-label" x="{_number(label_x)}" '
         f'y="{_number(label_y)}" text-anchor="middle" '
         f'data-distance-inches="{_number(display_distance)}">'
@@ -432,10 +442,8 @@ def _render_annotation(
                 f'data-edge="{edge}" data-axis="x">'
                 f'<line x1="{_number(measure_x1)}" y1="{_number(line_y)}" '
                 f'x2="{_number(measure_x2)}" y2="{_number(line_y)}"/>'
-                f'<line x1="{_number(measure_x1)}" y1="{_number(line_y - tick)}" '
-                f'x2="{_number(measure_x1)}" y2="{_number(line_y + tick)}"/>'
-                f'<line x1="{_number(measure_x2)}" y1="{_number(line_y - tick)}" '
-                f'x2="{_number(measure_x2)}" y2="{_number(line_y + tick)}"/>'
+                f'{_render_endcap(measure_x1, line_y - tick, measure_x1, line_y + tick)}'
+                f'{_render_endcap(measure_x2, line_y - tick, measure_x2, line_y + tick)}'
                 f'<text class="dimension-label" x="{_number((measure_x1 + measure_x2) / 2.0)}" '
                 f'y="{_number(label_y)}" text-anchor="middle" '
                 f'data-distance-inches="{_number(distance)}">'
@@ -454,10 +462,8 @@ def _render_annotation(
             f'data-edge="{edge}" data-axis="y">'
             f'<line x1="{_number(line_x)}" y1="{_number(measure_y1)}" '
             f'x2="{_number(line_x)}" y2="{_number(measure_y2)}"/>'
-            f'<line x1="{_number(line_x - tick)}" y1="{_number(measure_y1)}" '
-            f'x2="{_number(line_x + tick)}" y2="{_number(measure_y1)}"/>'
-            f'<line x1="{_number(line_x - tick)}" y1="{_number(measure_y2)}" '
-            f'x2="{_number(line_x + tick)}" y2="{_number(measure_y2)}"/>'
+            f'{_render_endcap(line_x - tick, measure_y1, line_x + tick, measure_y1)}'
+            f'{_render_endcap(line_x - tick, measure_y2, line_x + tick, measure_y2)}'
             f'<text class="dimension-label" x="{_number(line_x)}" y="{_number(mid_y)}" '
             f'text-anchor="middle" transform="rotate(-90 {_number(line_x)} {_number(mid_y)})" '
             f'dy="{_number(label_dy)}" data-distance-inches="{_number(distance)}">'
@@ -489,10 +495,8 @@ def _render_annotation(
         return (
             f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" data-axis="x">'
             f'<line x1="{_number(x1)}" y1="{_number(y)}" x2="{_number(x2)}" y2="{_number(y)}"/>'
-            f'<line x1="{_number(x1)}" y1="{_number(y - tick)}" '
-            f'x2="{_number(x1)}" y2="{_number(y + tick)}"/>'
-            f'<line x1="{_number(x2)}" y1="{_number(y - tick)}" '
-            f'x2="{_number(x2)}" y2="{_number(y + tick)}"/>'
+            f'{_render_endcap(x1, y - tick, x1, y + tick)}'
+            f'{_render_endcap(x2, y - tick, x2, y + tick)}'
             f'<text class="dimension-label" x="{_number(mid_x)}" y="{_number(label_y)}" '
             f'text-anchor="middle" data-distance-inches="{_number(x2 - x1)}">'
             f'{_measurement_text(x2 - x1, distance_unit)}</text></g>'
@@ -504,10 +508,8 @@ def _render_annotation(
     return (
         f'<g id="{annotation_id}" class="measurement" data-target="{target_id}" data-axis="y">'
         f'<line x1="{_number(x)}" y1="{_number(y1)}" x2="{_number(x)}" y2="{_number(y2)}"/>'
-        f'<line x1="{_number(x - tick)}" y1="{_number(y1)}" '
-        f'x2="{_number(x + tick)}" y2="{_number(y1)}"/>'
-        f'<line x1="{_number(x - tick)}" y1="{_number(y2)}" '
-        f'x2="{_number(x + tick)}" y2="{_number(y2)}"/>'
+        f'{_render_endcap(x - tick, y1, x + tick, y1)}'
+        f'{_render_endcap(x - tick, y2, x + tick, y2)}'
         f'<text class="dimension-label" x="{_number(x)}" y="{_number(mid_y)}" '
         f'text-anchor="middle" transform="rotate(-90 {_number(x)} {_number(mid_y)})" '
         f'dy="{_number(label_dy)}" data-distance-inches="{_number(y2 - y1)}">'
@@ -706,17 +708,32 @@ def render_scenario_map_svg(
         + (_RULER_CSS if has_rulers else "")
     )
     defs = _EXCLUSION_DEFS if has_exclusion else ""
+    # Resolve CSS variables before serialization: standalone SVG renderers may
+    # support ordinary SVG styles without supporting CSS custom properties.
+    theme_style = (
+        f"--scenario-map-label-size:{_number(1.4 * text_scale)}px;"
+        f"--scenario-map-measure-size:{_number(1.1 * text_scale)}px;"
+        f"{_theme_style(theme)}"
+    )
+    tokens = {name: value for entry in theme_style.split(";")
+              for name, _, value in (entry.partition(":"),)}
+
+    def resolve_variables(markup: str) -> str:
+        return re.sub(
+            r"var\((--[a-z-]+),([^)]*)\)",
+            lambda match: tokens[match[1]],
+            markup,
+        )
+
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
         f'role="img" aria-labelledby="map-title" data-unit="in" '
         f'data-distance-unit="{distance_unit}" data-theme="{theme}" '
-        f'style="--scenario-map-label-size:{_number(1.4 * text_scale)}px;'
-        f'--scenario-map-measure-size:{_number(1.1 * text_scale)}px;'
-        f'{_theme_style(theme)}">\n'
+        f'style="{theme_style}">\n'
         f'<title id="map-title">{title}</title>\n'
-        f'<style>{_STYLE_CSS}{extra_style}</style>\n'
-        f'{defs}'
+        f'<style>{resolve_variables(_STYLE_CSS + extra_style)}</style>\n'
+        f'{resolve_variables(defs)}'
         f'<rect class="table" x="0" y="0" width="{width}" height="{height}"/>\n'
         f"{elements}"
         f"{annotations}"
