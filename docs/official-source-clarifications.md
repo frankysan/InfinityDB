@@ -80,7 +80,8 @@ This register collects questions that may eventually be sent to Corvus Belli for
 
 - **Status:** open — source intent unknown. **Alias:** ARMY-01.
 - **Evidence:** Pinned Fireteam chart has 11 rows referencing eight exact slugs without corresponding Unit definitions (including three Combined Army Spec-Ops placeholders), ARJUNA matching only a global rather than army-local Unit, and KORSAN FTO notation without a locally FTO-named loadout. See [external-source TODO provenance](TODO.md) and [Fireteam model](data-model.md).
-- **Question:** Which missing identities are intentional placeholders versus missing Army Units, and what are the intended army-local ARJUNA and KORSAN FTO eligibility/matching targets?
+- **November 25, 2026 snapshot recheck:** `JSON 20261125-162328.zip` (SHA-256 `8e2c53fc3425ab80627ba99c88629bc33df6403971465ba1fcccef7882da0715`), `301-ariadna.json`, revision `7.26329.479`, adds a Wildcard member `SHADOWCROW` with comment `FTO` and slug `shadowcrow-operator`. Unit 1942, group 1, option 4 is its sole loadout, named `SHADOWCROW` without an FTO qualifier. The chart and loadout therefore lack an exact FTO match. The ARJUNA and KORSAN mismatches remain; the Fireteam semantic audit now reports three unresolved FTO rows rather than two. The November source does not establish whether the chart comment or loadout name is incorrect.
+- **Question:** Which missing identities are intentional placeholders versus missing Army Units, and what are the intended army-local ARJUNA, KORSAN and SHADOWCROW FTO eligibility/matching targets? Is the Shadowcrow Wildcard FTO qualifier intended for its sole existing loadout?
 - **InfinityDB:** Retains chart text and unresolved references; invents neither aliases nor eligible loadouts.
 
 ## Open questions: weapons, equipment, and Army source identities
