@@ -583,6 +583,34 @@ After the experiment, restore the ordinary isolated 2x4 stack simply by redeploy
 sh scripts/deploy-local-test.sh 8080
 ```
 
+#### Unit Explorer app-only 2x4 measurement (2026-11-25)
+
+The disposable Docker preview on the Linux development worker ran the
+15-case Unit Explorer capacity scenario at commit `a1ad31c4` using the
+normal Dockerfile (Gunicorn 2x4, Python 3.11). The preview did not supply a
+development display-version override, so the API reported 1.2.1; the Git
+commit identifies the tested development code. Snapshot revision:
+`55375a32f200506ec03943c627f1d4face5b0a4fc17b4bd8ebb368bcd9c8ff13`.
+
+- Steady, concurrency 8 / 60 seconds: 112.2 requests/s, p50/p95/p99
+  23.2/193.9/289.0 ms, 6,745 requests, zero errors.
+- Burst, concurrency 32 / 10 seconds: 109.8 requests/s, p50/p95/p99
+  192.2/730.1/841.3 ms, 1,166 requests, zero errors.
+- Steady per-case p95: initial results 179.2 ms, filter initialization
+  96.8 ms, profile/loadout/unit matching 155.6/171.1/176.8 ms,
+  Extended first/next page 222.8/225.6 ms.
+- Burst Extended first/next page p95: 737.1/837.2 ms.
+
+The preview passed health, completed both phases and removed its disposable
+container and image. The JSON receipt is retained on the Linux worker under
+`local/performance/http-capacity/20261125-a1ad31c4/capacity.json`.
+This was a warmed repeated-query workload directly against Gunicorn; Caddy,
+matched production resource boundaries, concurrent host/container resource
+sampling and cold-worker latency were not measured. The similar throughput
+and higher burst latency suggest saturation under this synthetic workload,
+not a measured CPU or worker-count bottleneck. Do not compare the aggregate
+rates with the older general capacity scenario or infer a production SLO.
+
 #### Recorded 2x4 baseline (2026-10-06)
 
 The first retained baseline used the isolated `infinitydb-test` deployment with Gunicorn configured
