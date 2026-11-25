@@ -57,6 +57,8 @@ its application metrics.
   choice, alongside numeric ranges and optional availability. Filter state is
   shareable, and old links retain their previous matching behavior; optional-unit
   Settings seed a new view without overwriting another user's saved preferences.
+  Extended results show profile capabilities and separate group loadout options
+  as plain text.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Groups equivalent standard, reinforcement, and optional-mercenary source

@@ -3299,6 +3299,17 @@ assumption. The API still accepts their context keys, and older UI URLs
 normalize these equivalent choices to Standard set. Actual Specialist status
 remains determined by the chosen scenario and profile.
 
+The opt-in `extended=1` Unit list adds exact profile-owned Skills, Equipment
+and Weapons, including source quantities and extras, and a separate list of
+loadout options from the same source Army/Unit/profile group. Published reviewed
+loadout additions apply only to their exact option. Profile rows merge across
+Armies only when stats, Characteristics, capability occurrences and group
+loadout options agree; differing capabilities remain separate with their own
+availability. The frontend uses plain text with the shared distance/quantity
+formatting and reviewed Skill-bucket classifications. It does not union
+alternative loadouts into a simultaneous profile inventory. The ordinary list
+response is unchanged.
+
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public
 Classification filter, while source Characteristics that duplicate a canonical current Skill can be

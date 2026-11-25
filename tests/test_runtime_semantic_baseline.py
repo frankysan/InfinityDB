@@ -213,6 +213,7 @@ def test_v122_baseline_changes_only_reviewed_routes() -> None:
     assert old_rows.keys() == new_rows.keys()
     assert {path for path in old_rows if old_rows[path] != new_rows[path]} == {
         "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
+        "/api/units?limit=5&extended=1",
     }
 
 

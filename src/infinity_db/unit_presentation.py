@@ -524,9 +524,19 @@ def enrich_unit_filter_presentation(
     return result
 
 
-def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Attach backend-owned labels/symbol roles to extended Unit-list profiles."""
+def enrich_unit_list_presentation(
+    items: list[dict[str, Any]], *,
+    source_skill_classifications: tuple[SkillSourceClassification, ...] | None = None,
+) -> list[dict[str, Any]]:
+    """Attach labels and reviewed capability classifications to extended profiles."""
 
+    if not any(unit.get("profiles") for unit in items):
+        return items
+    classifications = {
+        str(item.skill_ref): item.classification
+        for item in (source_skill_classifications
+                     if source_skill_classifications is not None else load_skill_source_config())
+    }
     for unit in items:
         for profile in unit.get("profiles", ()):
             profile["type_label"] = troop_type_label(profile.get("type"))
@@ -534,6 +544,9 @@ def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str,
                 characteristic_presentation(characteristic)
                 for characteristic in profile.get("characteristics", ())
             ]
+            for context in (profile, *profile.get("loadouts", ())):
+                if "skills" in context:
+                    _classify_skill_source_presentations(context, classifications)
     return items
 
 

@@ -528,6 +528,34 @@ def test_bit_and_kiss_includes_one_linked_peripheral_per_loadout(
         page.close()
 
 
+@pytest.mark.parametrize("width", [1280, 390])
+def test_extended_profiles_show_plain_text_capabilities(
+    app: Any, origin: str, browser: Any, width: int,
+) -> None:
+    page = browser.new_page(
+        viewport={"width": width, "height": 900},
+        has_touch=width == 390, is_mobile=width == 390,
+    )
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    try:
+        page.goto(f"{origin}/units?search=fusiliers&extended=1", wait_until="domcontentloaded")
+        profile = page.locator(".unit-extended-profile").first
+        profile.wait_for(state="visible")
+        assert page.locator("#extended-results").is_checked()
+        capabilities = profile.locator(".unit-extended-capability-section")
+        assert capabilities.is_visible()
+        assert "Weapons:" in capabilities.inner_text()
+        assert "Combi Rifle" in capabilities.inner_text()
+        assert capabilities.locator(".unit-extended-loadout").count() > 1
+        assert capabilities.locator("a").count() == 0
+        assert not errors, errors
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("scope", ["profile", "loadout"])
 @pytest.mark.parametrize("width", [1024, 390])
 def test_matching_context_disclosure_does_not_navigate(

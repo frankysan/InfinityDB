@@ -41,10 +41,6 @@ Use these links to jump directly to a workstream:
   measurement coordinates. A contrasting halo and stronger stroke are implemented;
   focused geometry tests pass. Remaining: visually confirm overlapping and boundary
   cases at typical map display sizes.
-- [ ] **Web backend + Web frontend:** Include Skills, Equipment and Weapons in
-  Extended Unit Explorer details as plain text without individual links.
-  Preserve profile ownership and distinguish alternative loadouts rather than
-  implying simultaneous possession; keep the presentation compact.
 - [ ] **Data processing + Web backend + Web frontend:** Consolidate functionally
   equivalent Scenario Skills under reviewed canonical identities, with one
   catalog/Search entry and a common detail card plus season/scenario differences

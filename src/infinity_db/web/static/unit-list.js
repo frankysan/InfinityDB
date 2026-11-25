@@ -1,7 +1,7 @@
 import { distanceUnit } from "./preferences.js";
 import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
-import { formatMovement } from "./unit-presentation.js";
+import { formatMovement, formatProfileItem } from "./unit-presentation.js";
 
 function displayArmies(armies) {
   return [...armies].sort((left, right) => left.id - right.id);
@@ -79,6 +79,52 @@ function profileAvailability(profile, armiesById) {
   return list;
 }
 
+function capabilityLines(context) {
+  const lines = document.createElement("div");
+  lines.className = "unit-extended-capabilities";
+  for (const [key, label, fallback] of [
+    ["skills", "Skills", "Skill"],
+    ["equipment", "Equipment", "Equipment"],
+    ["weapons", "Weapons", "Weapon"],
+  ]) {
+    const items = context[key] || [];
+    if (!items.length) continue;
+    const line = document.createElement("div");
+    const heading = document.createElement("strong");
+    heading.textContent = label + ": ";
+    line.append(heading, items.map((item) => formatProfileItem(item, fallback).label).join(", "));
+    lines.append(line);
+  }
+  return lines;
+}
+
+function profileCapabilities(profile) {
+  const section = document.createElement("div");
+  section.className = "unit-extended-capability-section";
+  const base = capabilityLines(profile);
+  if (base.childElementCount) section.append(base);
+  if (profile.loadouts?.length) {
+    const options = document.createElement("div");
+    options.className = "unit-extended-loadouts";
+    const heading = document.createElement("strong");
+    heading.textContent = "Profile group loadouts";
+    options.append(heading);
+    for (const loadout of profile.loadouts) {
+      const option = document.createElement("div");
+      option.className = "unit-extended-loadout";
+      const title = document.createElement("div");
+      title.className = "unit-extended-loadout-name";
+      title.textContent = loadout.name || "Loadout";
+      const lines = capabilityLines(loadout);
+      if (!lines.childElementCount) lines.textContent = "No additional capabilities";
+      option.append(title, lines);
+      options.append(option);
+    }
+    section.append(options);
+  }
+  return section;
+}
+
 function extendedProfilesRow(unit, columnCount) {
   const row = document.createElement("tr");
   row.className = "unit-extended-row";
@@ -152,6 +198,8 @@ function extendedProfilesRow(unit, columnCount) {
     if (!characteristics.childElementCount) characteristics.textContent = "No characteristics";
     body.append(characteristics, profileAvailability(profile, armiesById));
     profileRow.append(heading, body);
+    const capabilities = profileCapabilities(profile);
+    if (capabilities.childElementCount) profileRow.append(capabilities);
     surface.append(profileRow);
   }
 

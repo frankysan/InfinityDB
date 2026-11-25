@@ -1600,7 +1600,18 @@ class ApiHandler:
                     }
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_units(payload["items"])
-                    enrich_unit_list_presentation(payload["items"])
+                    if query["extended"]:
+                        payload = self.skill_catalog.enrich_unit(payload)
+                        payload = enrich_nested_catalog_slugs(
+                            self.database, payload, frozenset({"equipment", "weapons"}),
+                        )
+                    enrich_unit_list_presentation(
+                        payload["items"],
+                        source_skill_classifications=(
+                            self.database.skill_source_classifications()
+                            if query["extended"] else None
+                        ),
+                    )
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": "Choose a playable Army list to browse its units."}

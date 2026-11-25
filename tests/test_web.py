@@ -1582,6 +1582,16 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert profile["type_label"] == "Line Trooper"
     assert profile["classification"] == "Light Infantry"
     assert profile["characteristic_presentations"] == []
+    assert profile["skills"][0]["name"] == "Stealth"
+    assert profile["skills"][0]["extras"][0]["name"] == "+3"
+    assert profile["equipment"][0]["name"] == "Medikit"
+    assert profile["equipment"][0]["quantity"] == 2
+    assert profile["weapons"][0]["name"] == "Combi Rifle"
+    assert len(profile["loadouts"]) == 1
+    loadout = profile["loadouts"][0]
+    assert loadout["name"] == "Rifle loadout"
+    assert loadout["weapons"][0]["quantity"] == 2
+    assert loadout["weapons"][0]["extras"][0]["name"] == "AP"
     assert {entry["army_id"] for entry in profile["availability"]} == {101, 201}
     assert {entry["ava"] for entry in profile["availability"]} == {2}
 

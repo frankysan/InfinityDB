@@ -4300,6 +4300,47 @@ class Database:
             }
         return result
 
+    @staticmethod
+    def _extended_payload_capabilities(
+        connection: sqlite3.Connection, payload_kind: str, logical_unit_ids: tuple[int, ...],
+    ) -> dict[int, dict[str, list[dict[str, Any]]]]:
+        """Read exact profile or loadout capability occurrences for the selected page."""
+        payload_key = f"{payload_kind}_payload_id"
+        placeholders = ", ".join("?" for _ in logical_unit_ids)
+        result: dict[int, dict[str, list[dict[str, Any]]]] = {}
+        for catalog, singular in (("skills", "skill"), ("equipment", "equipment"),
+                                  ("weapons", "weapon")):
+            occurrences: dict[tuple[int, int], dict[str, Any]] = {}
+            for row in connection.execute(
+                f"SELECT o.{payload_key} AS payload_id, o.position, o.item_id, "
+                "o.quantity, c.name, e.extra_id, x.name AS extra_name, x.type AS extra_type "
+                f"FROM {payload_kind}_payload_{catalog} AS o "
+                f"JOIN {payload_kind}_payloads AS p ON p.id = o.{payload_key} "
+                f"LEFT JOIN {catalog} AS c ON c.id = o.item_id "
+                f"LEFT JOIN {payload_kind}_payload_{singular}_extras AS e "
+                f"ON e.{payload_key} = o.{payload_key} AND e.occurrence_position = o.position "
+                "LEFT JOIN extras AS x ON x.id = e.extra_id "
+                f"WHERE p.logical_unit_id IN ({placeholders}) "
+                f"ORDER BY o.{payload_key}, o.position, e.position",
+                logical_unit_ids,
+            ):
+                payload_id = int(row["payload_id"])
+                key = (payload_id, int(row["position"]))
+                item = occurrences.get(key)
+                if item is None:
+                    item = {
+                        "id": row["item_id"], "name": row["name"],
+                        "quantity": row["quantity"], "extras": [],
+                    }
+                    occurrences[key] = item
+                    result.setdefault(payload_id, {}).setdefault(catalog, []).append(item)
+                if row["extra_id"] is not None:
+                    extra = {"id": row["extra_id"], "name": row["extra_name"]}
+                    if catalog == "skills" and row["extra_type"] == "DISTANCE":
+                        extra["is_distance"] = True
+                    item["extras"].append(extra)
+        return result
+
     @instance_lru_cache(maxsize=64)
     def _unit_list_extended_profiles(
         self, logical_unit_ids: tuple[int, ...]
@@ -4313,6 +4354,7 @@ class Database:
         with self._connect() as connection:
             rows = connection.execute(
                 "SELECT lus.logical_unit_id, ppo.profile_payload_id, "
+                "ppo.unit_id AS source_unit_id, "
                 "ppo.army_id AS source_army_id, aas.application_army_id, "
                 "ppo.group_id, ppo.profile_id, ppo.position AS profile_position, "
                 "ppo.ava, pp.name, t.name AS type, "
@@ -4351,11 +4393,60 @@ class Database:
                         int(characteristic["profile_payload_id"]), []
                     ).append(str(characteristic["name"]))
 
+            profile_capabilities = self._extended_payload_capabilities(
+                connection, "profile", logical_unit_ids
+            )
+            loadout_capabilities = self._extended_payload_capabilities(
+                connection, "loadout", logical_unit_ids
+            )
+            reviewed_by_option: dict[tuple[int, int, int, int], list[dict[str, Any]]] = {}
+            for reviewed in published_reviewed_loadout_capabilities(connection):
+                reviewed_key = (
+                    reviewed["army_id"], reviewed["unit_id"],
+                    reviewed["group_id"], reviewed["option_id"],
+                )
+                reviewed_by_option.setdefault(reviewed_key, []).append(reviewed)
+
+            group_loadouts: dict[tuple[int, int, int], list[dict[str, Any]]] = {}
+            for loadout in connection.execute(
+                "SELECT lpo.army_id, lpo.unit_id, lpo.group_id, lpo.option_id, "
+                "lpo.loadout_payload_id, lp.name "
+                "FROM loadout_payload_occurrences AS lpo "
+                "JOIN loadout_payloads AS lp ON lp.id = lpo.loadout_payload_id "
+                "JOIN logical_unit_sources AS lus ON lus.source_unit_id = lpo.unit_id "
+                f"WHERE lus.logical_unit_id IN ({placeholders}) "
+                "ORDER BY lpo.army_id, lpo.unit_id, lpo.group_id, lpo.position, lpo.option_id",
+                logical_unit_ids,
+            ):
+                option_key = (
+                    loadout["army_id"], loadout["unit_id"],
+                    loadout["group_id"], loadout["option_id"],
+                )
+                capabilities = loadout_capabilities.get(loadout["loadout_payload_id"], {})
+                option = {
+                    "name": loadout["name"],
+                    **{catalog: list(capabilities.get(catalog, ()))
+                       for catalog in ("skills", "equipment", "weapons")},
+                }
+                for reviewed in reviewed_by_option.get(option_key, ()):
+                    append_unique_item(option[reviewed["catalog"]], {
+                        "id": reviewed["item_id"], "name": reviewed["name"],
+                        "quantity": 1, "extras": [],
+                    })
+                append_unique_item(group_loadouts.setdefault(option_key[:3], []), option)
+
         profiles_by_unit: dict[int, OrderedDict[tuple[Any, ...], dict[str, Any]]] = {}
         for row in rows:
             logical_unit_id = int(row["logical_unit_id"])
             payload_id = int(row["profile_payload_id"])
             characteristics = tuple(characteristics_by_payload.get(payload_id, ()))
+            capabilities = {
+                catalog: profile_capabilities.get(payload_id, {}).get(catalog, [])
+                for catalog in ("skills", "equipment", "weapons")
+            }
+            loadouts = group_loadouts.get(
+                (row["source_army_id"], row["source_unit_id"], row["group_id"]), []
+            )
             display_name = strip_reinforcement_prefix(row["name"], identity_config)
             profile_identity = normalized_profile_identity(row["name"], identity_config)
             stats = (
@@ -4366,6 +4457,8 @@ class Database:
             key = (
                 profile_identity, display_name.casefold(), row["type"], row["classification"],
                 *stats, characteristics,
+                json.dumps(capabilities, sort_keys=True),
+                json.dumps(loadouts, sort_keys=True),
             )
             profiles = profiles_by_unit.setdefault(logical_unit_id, OrderedDict())
             profile = profiles.get(key)
@@ -4391,6 +4484,8 @@ class Database:
                     "silhouette": row["silhouette"],
                     "is_structure": bool(row["is_structure"]),
                     "characteristics": list(characteristics),
+                    **capabilities,
+                    "loadouts": loadouts,
                     "availability": [],
                     "_order": order,
                 }
