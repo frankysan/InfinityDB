@@ -368,15 +368,19 @@ def test_shared_season_skill_has_no_fabricated_scenario_binding(
         assert historical["seasons"][0]["collection"] == "its-17"
         items = _api(app, "/api/skills")["items"]
         routes = {item["slug"]: item for item in items if item["name"] == "Synthetic Global Skill"}
-        assert set(routes) == {"its-synthetic-global", "its-17-its-synthetic-global"}
-        assert routes["its-synthetic-global"]["categories"][0]["id"] == "short-skill"
-        assert routes["its-synthetic-global"]["seasons"][0]["collection"] == "its-18"
-        older = routes["its-17-its-synthetic-global"]
+        assert set(routes) == {"its-synthetic-global"}
+        canonical = routes["its-synthetic-global"]
+        assert {category["id"] for category in canonical["categories"]} == {
+            "short-skill", "short-movement-skill",
+        }
+        assert {use["collection"] for use in canonical["seasons"]} == {"its-17", "its-18"}
+        assert len(canonical["context_variants"]) == 2
+        older = _api(app, "/api/skills/its-17-its-synthetic-global")
         assert older["categories"][0]["id"] == "short-movement-skill"
         assert older["seasons"][0]["collection"] == "its-17"
         assert older["rules"][0]["sharedSkill"]["version"] == "v2"
         old_detail = _api(app, "/api/skills/its-17-its-synthetic-global")
-        current_detail = _api(app, "/api/skills/its-synthetic-global")
+        current_detail = _api(app, "/api/skills/its-18-its-synthetic-global")
         assert old_detail["rules"][0]["sharedSkill"]["version"] == "v2"
         assert old_detail["rules"][0]["facts"]["typeIds"] == ["short-movement-skill"]
         assert old_detail["rules"][0]["scope"]["seasons"] == ["its-17"]
@@ -500,9 +504,11 @@ def test_reviewed_skill_overrides_keep_contextual_variants_separate(tmp_path: Pa
     )
     items = _api(app, "/api/skills")["items"]
     canonical, = [item for item in items if item["slug"] == SHARED.removeprefix("skill:")]
-    assert [entry["collection"] for entry in canonical["scenarios"]] == ["its-18"]
+    assert {entry["collection"] for entry in canonical["scenarios"]} == {"its-17", "its-18"}
     legacy = "its-17-hardlock-activate-console"
-    variant, = [item for item in items if item["slug"] == legacy]
+    assert not any(item["slug"] == legacy for item in items)
+    assert len(canonical["context_variants"]) == 2
+    variant = _api(app, f"/api/skills/{legacy}")
     assert variant["rules"][0]["sharedSkill"]["overriddenFields"] == ["skillFacts.effects"]
     assert variant["rules"][0]["facts"]["effects"] == [
         "Synthetic ITS 17 scenario effect; not real historical evidence.",
@@ -515,7 +521,7 @@ def test_reviewed_skill_overrides_keep_contextual_variants_separate(tmp_path: Pa
     action = next(item for item in detail["special_rules"] if item["id"] == "activate-console")
     assert action["skill"]["facts"]["effects"] == variant["rules"][0]["facts"]["effects"]
     search = _api(app, "/api/search?q=activate%20console")["items"]
-    assert any(item["href"] == f"/skills/{legacy}" for item in search)
+    assert not any(item["href"] == f"/skills/{legacy}" for item in search)
     assert any(item["href"] == f"/skills/{canonical['slug']}" for item in search)
 
 

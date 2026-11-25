@@ -136,24 +136,34 @@ def test_season_specific_marker_dimensions(app, its17_app, season):
                     assert "size_status" not in marker
 
 
+def _scoped_actions(catalog, season):
+    return sorted({
+        slug
+        for item in catalog["items"]
+        for slug in [item["slug"], *item.get("aliases", [])]
+        if slug.startswith(f"{season}-")
+        and item["category"] == "Scenario-specific Skills"
+    })
+
+
 def test_scenario_skills_listed_with_context_and_source(app):
     status, payload = _get(app, "/api/skills")
     assert status == 200
     items = [item for item in payload["items"]
              if item["category"] == "Scenario-specific Skills"]
-    assert len([item for item in items if item.get("scenario")]) == 33
-    assert {"hack-consoles", "pick-up-supply-boxes"} <= {
+    assert len(items) == 26
+    assert {"scenario-hack-consoles", "scenario-pick-up-supply-boxes"} <= {
         item["slug"] for item in items
     }
     assert {item["slug"] for item in items if item["name"] == "Activate Console"} == {
-        "its-18-hardlock-activate-console", "its-18-b-pong-activate-console",
+        "scenario-activate-console",
     }
     assert all(item["categories"][0]["id"] == "short-skill" for item in items
                if item.get("scenario"))
     assert all(not item["name"].endswith((" (Short Skill)", " (Long Skill)"))
                for item in items)
     assert next(item["name"] for item in items
-                if item["slug"] == "its-18-last-launch-download-id") == "Download ID"
+                if item["slug"] == "scenario-download-id") == "Download ID"
 
     for scenario in ("hardlock", "b-pong"):
         status, detail = _get(app, f"/api/skills/its-18-{scenario}-activate-console")
@@ -198,13 +208,10 @@ def test_scenario_actions_use_standard_rule_card_model(app):
 def test_its17_source_labels_are_visible_on_skill_cards(its17_app):
     status, catalog = _get(its17_app, "/api/skills")
     assert status == 200
-    actions = [
-        item for item in catalog["items"]
-        if item["slug"].startswith("its-17-") and item.get("scenario")
-    ]
+    actions = _scoped_actions(catalog, "its-17")
     assert len(actions) == 22
-    for item in actions:
-        status, detail = _get(its17_app, f"/api/skills/{item['slug']}")
+    for slug in actions:
+        status, detail = _get(its17_app, f"/api/skills/{slug}")
         assert status == 200
         assert [label["name"] for label in detail["rules"][0]["labels"]] == [
             "Attack", "Scenario",
@@ -228,13 +235,10 @@ def test_its17_source_labels_are_visible_on_skill_cards(its17_app):
 def test_its18_source_labels_are_visible_on_every_skill_card(app):
     status, catalog = _get(app, "/api/skills")
     assert status == 200
-    actions = [
-        item for item in catalog["items"]
-        if item["slug"].startswith("its-18-") and item.get("scenario")
-    ]
+    actions = _scoped_actions(catalog, "its-18")
     assert len(actions) == 31
-    for item in actions:
-        status, detail = _get(app, f"/api/skills/{item['slug']}")
+    for slug in actions:
+        status, detail = _get(app, f"/api/skills/{slug}")
         assert status == 200
         labels = detail["rules"][0]["labels"]
         assert [label["name"] for label in labels] == ["Attack", "Scenario"]
@@ -308,8 +312,8 @@ def test_suffix_is_absent_from_skill_detail_scenario_and_search(app):
     assert status == 200
     assert {
         result["name"] for result in results["items"]
-        if result["href"] == f"/skills/{skill_slug}"
-    } == {"Download ID (Last Launch)"}
+        if result["href"] == "/skills/scenario-download-id"
+    } == {"Download ID"}
 
 
 def test_reviewed_action_pins_and_distinct_source_ambiguities(app):
@@ -369,11 +373,7 @@ def test_all_its18_scenario_actions_have_exact_bilingual_source_pages(app):
     }
     status, catalog = _get(app, "/api/skills")
     assert status == 200
-    published = {
-        item["slug"] for item in catalog["items"]
-        if item.get("scenario") and item["slug"].startswith("its-18-")
-    }
-    assert published == set(expected)
+    assert set(_scoped_actions(catalog, "its-18")) == set(expected)
     for slug, (english_page, spanish_page) in expected.items():
         status, detail = _get(app, f"/api/skills/{slug}")
         assert status == 200, slug
@@ -411,7 +411,8 @@ def test_restored_actions_have_cards_and_search_routes(
     assert card["skill"]["id"] == f"skill:{slug}"
     status, results = _get(selected_app, "/api/search?q=" + query.replace(" ", "%20"))
     assert status == 200
-    assert f"/skills/{slug}" in {result["href"] for result in results["items"]}
+    route = detail.get("canonical_slug", slug)
+    assert f"/skills/{route}" in {result["href"] for result in results["items"]}
 
 
 def test_destroyed_antenna_and_supply_pickup_variants_are_distinct(app, its17_app):
@@ -499,15 +500,19 @@ def test_multiple_exact_action_pages_are_preserved(app):
     ]
 
 
-def test_scenario_skills_search_uses_distinct_routes(app):
+def test_scenario_skills_search_uses_canonical_route(app):
     status, payload = _get(app, "/api/search?q=activate%20console")
     assert status == 200
-    relevant = [entry for entry in payload["items"]
-                if "Activate Console (" in entry["name"]]
-    assert {item["name"] for item in relevant} >= {
-        "Activate Console (Hardlock)", "Activate Console (B-Pong)",
-    }
-    assert {item["href"] for item in relevant} >= {
-        "/skills/its-18-hardlock-activate-console",
-        "/skills/its-18-b-pong-activate-console",
-    }
+    relevant = [entry for entry in payload["items"] if entry["name"] == "Activate Console"]
+    assert [item["href"] for item in relevant] == ["/skills/scenario-activate-console"]
+    status, detail = _get(app, "/api/skills/scenario-activate-console")
+    assert status == 200
+    assert {scenario["slug"] for scenario in detail["scenarios"]} == {"hardlock", "b-pong"}
+    assert len(detail["context_variants"]) == 2
+    for variant in detail["context_variants"]:
+        for rule in variant["rules"]:
+            status, exact = _get(app, "/api/skills/" + rule["id"].removeprefix("skill:"))
+            assert status == 200
+            assert exact["canonical_slug"] == detail["slug"]
+            assert exact["rules"][0]["facts"] == rule["facts"]
+            assert exact["rules"][0]["citations"] == rule["citations"]

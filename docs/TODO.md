@@ -41,14 +41,6 @@ Use these links to jump directly to a workstream:
   measurement coordinates. A contrasting halo and stronger stroke are implemented;
   focused geometry tests pass. Remaining: visually confirm overlapping and boundary
   cases at typical map display sizes.
-- [ ] **Data processing + Web backend + Web frontend:** Consolidate functionally
-  equivalent Scenario Skills under reviewed canonical identities, with one
-  catalog/Search entry and a common detail card plus season/scenario differences
-  and links to all applicable scenarios. Keep contextual scenario cards and
-  existing scoped URLs; preserve exact source facts and citations.
-  Follow the [accepted identity direction](architecture.md).
-  Test shared and distinct identities, contextual overrides, search, links,
-  and route compatibility across ITS seasons.
 
 ### External source clarifications
 

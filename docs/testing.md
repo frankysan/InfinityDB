@@ -644,9 +644,9 @@ The v1.2.1 snapshot is
 and scenario copy corrections change 14 JSON probes; the other 27 probes,
 including the Battleground SVG, retain their earlier identity. All earlier
 fixtures remain unchanged. The v1.2.2 baseline updates the Battleground SVG
-bytes for standalone styling and ruler changes and the Extended Unit list
-response for shared General profile capabilities. The other 39 probes retain
-their v1.2.1 identity. Checkout, image-preview and complete-build
+bytes for standalone styling and ruler changes, the Extended Unit list response
+for shared General profile capabilities, and the Skill catalog for reviewed
+scenario identities. The other 38 probes retain their v1.2.1 identity. Checkout, image-preview and complete-build
 verification use the v1.2.2 snapshot by default; explicit `--baseline`
 still permits historical comparisons where supported. Use
 `python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2.2.json`

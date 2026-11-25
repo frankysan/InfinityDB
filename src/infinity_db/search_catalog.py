@@ -141,7 +141,7 @@ class SearchCatalog:
         )
         for domain, route, items in catalog_sources:
             for item in items:
-                labels = [item["name"], *item.get("aliases", [])]
+                labels = [item["name"], *item.get("aliases", []), *item.get("alternate_names", [])]
                 if not any(needle in accent_insensitive_key(label) for label in labels):
                     continue
                 identifier = item.get("slug")

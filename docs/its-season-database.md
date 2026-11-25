@@ -52,12 +52,14 @@ artifact created from reviewed curated ITS facts. The implementation lives in
   Clarifications and Source context. Original mission paragraphs and action
   titles remain available for provenance and compatibility. Public Skill names
   omit redundant terminal `(Short Skill)` and `(Long Skill)` labels because
-  their typed badges convey that classification. Their public IDs include the
-  season and scenario, so same-named actions are not conflated. Optional
-  `skillCitations` now pin the exact English and Spanish action pages for
+  their typed badges convey that classification. Exact IDs include the season
+  and scenario; reviewed equivalent occurrences share a canonical catalog and
+  Search identity without changing their scoped definitions. Optional
+  `skillCitations` pin the exact English and Spanish action pages for
   all 31 ITS 18 actions, reviewed against the SHA-matched 2026.09.11 source
-  PDFs. Double Bind's intact and destroyed Antenna actions are separate Skills;
-  Provisioning pickup retains the season-specific Safe Area requirements.
+  PDFs. Double Bind's intact and destroyed Antenna actions remain distinct
+  contextual definitions of Activate Antenna; Provisioning pickup retains the
+  season-specific Safe Area requirements.
   Source-specific `sourceLabels` are projected through the standard
   Skill badge row: all reviewed ITS 17/18 scenario actions show **Attack** and
   **Scenario**, while season-wide Skills retain their own printed qualifiers
@@ -112,9 +114,10 @@ season, rather than inherited from the originating source. The existing
 `ScenarioComponents` composer materializes them before validation, preserving
 the legacy scenario action IDs and typed `sharedSkill` metadata. Repeated,
 semantically identical Skill definitions project to one canonical Skill in
-catalog and Search, with explicit scenario/season applicability; legacy
-season/scenario Skill routes and cards continue to work. Conflicting facts or
-versions are rejected rather than silently merged.
+catalog and Search, with explicit scenario/season applicability. Reviewed
+contextual overrides and distinct pinned versions may share that identity,
+while legacy season/scenario Skill routes and cards continue to work.
+Conflicting unmodified facts for the same pinned version still fail closed.
 
 **Season-wide ITS Skills (implemented):** ITS 18 2026.09.11 publishes
 CivEvac (Common Basic Short Skill, pp. 22–23), Casevac (Common Short
@@ -162,13 +165,13 @@ The ITS season Skill validator and catalog now support the historical
 without adding it to the current N5 core declaration matrix. Synthetic
 cross-season tests verify its independent API presentation. When one
 canonical Skill has distinct, explicitly pinned definition versions from
-the same reviewed library origin, the newest season retains the established
-unqualified `/skills/<slug>` route and older versions get season-qualified
-`/skills/its-17-<slug>` routes, with their own typed facts, applicability
-and citations. Registration order does not change route choice. Equivalent
-same-version facts still consolidate; changes under the same pinned
-version or unpinned identity collisions fail closed. No real ITS 17
-publication or historical revision browsing is activated.
+the same reviewed library origin, the unqualified `/skills/<slug>` route
+presents the common mechanics and contextual definitions. Season-qualified
+routes retain their own typed facts, applicability and citations. This also
+applies to the independently reviewed real ITS 17/18 CivEvac and Casevac
+identities. Registration order does not change route choice. Changes under
+the same unmodified pinned version still fail closed. Historical revisions
+within one season remain internal, not player-selectable.
 
 ITS 17 Outbreak awards 1 point for Stabilizing the Alpha Infected and
 1 point for CivEvacing the Stabilized Alpha. ITS 18 Outbreak (p. 83)

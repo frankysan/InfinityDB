@@ -17,12 +17,17 @@ are not retroactively relabeled.
   Skills, Equipment and Weapons shared by their profile variants.
 - Army filter counts and the Armies summary reflect matching Units and their
   visible availability. Army overview links use current filter defaults.
+- Consolidated equivalent Scenario Skills across Core N5 and ITS seasons, with
+  applicable scenario links and exact seasonal or mission-specific differences.
 
 ### Added
 
 - **Web backend + Web frontend:** Show only the General profiles in Extended
   Unit Explorer results, including shared Skills, Equipment and Weapons as
   plain text. Army-specific variants and loadouts remain on the Unit page.
+- **Data processing + Web backend + Web frontend:** Group reviewed equivalent
+  Scenario Skills and ITS CivEvac/Casevac into canonical catalog and Search
+  identities; retain context-specific rules, source citations and scoped routes.
 
 ### Fixed
 

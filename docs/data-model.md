@@ -3854,14 +3854,19 @@ applicable scenario IDs, reviewed source citations). The same library can build
 independent ITS 17/18 fixtures with different publication citations, including
 for a shared Skill; no runtime cross-database resolution is introduced.
 
-For genuinely shared pinned Skills, the Skill catalog and Search list one
-canonical typed identity with the applicable scenario/season bindings and
-combined citation evidence. The original season/scenario Skill URLs continue
-to resolve their context-specific records and work inside scenario cards.
-Identical names alone never trigger merging; differing Skill facts, types,
-versions or definition provenance fail closed. None of the 26 scenario action
-Skills has been migrated. The three repeated action names in ITS 18 have
-different structured facts and must not be merged by name.
+The reviewed presentation identities in `scenario_skill_identity.py` group
+exact scoped occurrences from Core N5, ITS 17 and ITS 18. Catalog and Search
+publish one entry per identity, retaining source names for search and scoped
+URLs as aliases. The canonical `rules` card contains the shared definition
+when identical, or reviewed common mechanics and exactly common clauses when
+different. `scenarios` identifies applicable publications and
+`context_variants` retains the exact source rules, facts, types, labels and
+citations grouped by matching definition. Scenario cards and scoped URLs
+continue to expose only their own definition. Explicit pinned shared Skill
+identities use the same projection. Differing facts under the same unmodified
+pinned version or conflicting origins still fail closed; a reviewed override
+or distinct pinned version may differ. Similar names alone do not establish
+equivalence. Core and season databases remain independently materialized.
 
 **Published ITS 18 season-wide Skills:** CivEvac (Common Basic Short Skill,
 pp. 22–23), Casevac (Common Short Skill, p. 25), Team-Ops (Automatic Special
@@ -3951,12 +3956,12 @@ do not make Team-Ops or Request a Tacball unconditional Skills.
 Resolved standalone Skills live in each season's own SQLite `records`
 table and are projected into catalog/Search; exact equivalent pinned Skills
 across seasons consolidate into one canonical identity with independent
-citations. Conflicting or unpinned same-version collisions fail closed. An
-explicit different pinned version from the same reviewed origin gets a
-season-qualified route instead, while the newest season retains the
-unqualified slug and both retain their own facts/citations. Compare
-actual ITS 17 facts before claiming cross-season equivalence. Existing
-scenario-specific Skill routes remain compatible.
+citations. Conflicting same-version facts fail closed. Explicit distinct
+pinned versions of one identity, and the reviewed source-local CivEvac and
+Casevac definitions, share the unqualified catalog route while retaining
+season-qualified exact rule routes and contextual cards. Other independently
+curated season Skills are not merged by name alone. Existing scenario-specific
+Skill routes remain compatible.
 
 Materialize the complete resolved payload in each season's SQLite artifact,
 including the selected definition version and relevant provenance, so
