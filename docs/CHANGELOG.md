@@ -16,7 +16,8 @@ are not retroactively relabeled.
 - Extended Unit Explorer results now show General profiles, including the
   Skills, Equipment and Weapons shared by their profile variants.
 - Army filter counts and the Armies summary reflect matching Units and their
-  visible availability. Army overview links use current filter defaults.
+  visible availability. Matching armies shows the availability total and a
+  collapsible breakdown by Army type. Army overview links use current filter defaults.
 - Consolidated equivalent Scenario Skills across Core N5 and ITS seasons, with
   applicable scenario links and exact seasonal or mission-specific differences.
 

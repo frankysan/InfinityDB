@@ -3287,9 +3287,13 @@ Unlisted count keys mean zero. Count extensions are opt-in; API clients without
 `counts=1` retain their previous response shape. The separate `army_usage_counts`
 map counts distinct matching logical Units per visible application Army ID, using
 the same memberships as the availability symbols across all result pages.
-Its number of keys is the Armies summary count. These are usage counts within
-the filtered population, not prospective Army replacement counts.
-Optional-unit flags apply to both symbols and counts.
+The Matching armies summary compares the number of visible Army IDs with
+all playable or source-backed availability identities from `/api/armies`,
+including Reinforcement sections and non-selectable grouping identities with
+Unit memberships, but excluding historical-only identities. The collapsed
+Currently shown breakdown groups visible identities by application role.
+These are usage counts within the filtered population, not prospective Army
+replacement counts. Optional-unit flags apply to both symbols and shown counts.
 
 Unit Explorer keeps the last displayed matching-Unit and per-option numbers
 visible while an updated request is pending; accessible loading/error states

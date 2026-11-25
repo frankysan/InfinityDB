@@ -2068,6 +2068,9 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'id="unit-count-details"' in body
     assert b'id="unit-count-shown-breakdown"' in body
     assert b'id="unit-count-filtered-breakdown"' in body
+    assert b'id="army-count-details"' in body
+    assert b'id="army-count-shown-breakdown"' in body
+    assert b"Matching armies" in body
     assert b"Optional availability categories may overlap" in body
     for filter_id in (
         b'troop-type-filter',

@@ -28,6 +28,7 @@ const elements = {
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   declaredMembership: byId("declared-membership-context"),
   unitCountShown: byId("unit-count-shown-breakdown"),
+  armyCountShown: byId("army-count-shown-breakdown"),
   unitCountFiltered: byId("unit-count-filtered-breakdown"),
   unitCountFilteredTotal: byId("unit-count-filtered-total"),
   summary: byId("results-summary"), results: byId("results"), loading: byId("loading-state"),
@@ -483,7 +484,10 @@ function normalizeArmyFilterState(armies) {
   return true;
 }
 
+let availabilityArmies = [];
+
 function populateArmies(armies) {
+  availabilityArmies = armies.filter((army) => army.playable !== false || army.unit_count > 0);
   // Keep source strings out of HTML so upstream data is always treated as text.
   elements.army.replaceChildren(new Option("All armies", ""));
   const playableArmies = armies.filter((army) => army.playable !== false);
@@ -512,13 +516,35 @@ function populateArmies(armies) {
 }
 
 function renderArmyCounts(counts) {
+  const roles = new Map([
+    ["main", { label: "Main armies", count: 0 }],
+    ["sectorial", { label: "Sectorials", count: 0 }],
+    ["non_aligned", { label: "Non-Aligned Armies", count: 0 }],
+    ["reinforcement", { label: "Reinforcements", count: 0 }],
+  ]);
   for (const option of elements.army.options) {
     if (!option.dataset.armyId) continue;
     const count = counts === undefined ? "—" : number.format(counts[option.dataset.armyId] || 0);
     option.textContent = `${option.dataset.armyLabel} (${count})`;
   }
+  // Grouping identities can have source-backed availability without being selectable.
+  const other = { label: "Other Army availability", count: 0 };
+  for (const army of availabilityArmies) {
+    if (!counts?.[army.id]) continue;
+    (roles.get(army.role) || other).count++;
+  }
+  if (other.count) roles.set("other", other);
   elements.armyCount.textContent = counts === undefined
-    ? "—" : number.format(Object.keys(counts).length);
+    ? "—" : `${number.format(Object.keys(counts).length)} / ${number.format(availabilityArmies.length)}`;
+  elements.armyCountShown.replaceChildren();
+  if (counts === undefined) return;
+  for (const { label, count } of roles.values()) {
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const value = document.createElement("dd");
+    value.textContent = number.format(count);
+    elements.armyCountShown.append(term, value);
+  }
 }
 
 function catalogFilterValue(item) {
