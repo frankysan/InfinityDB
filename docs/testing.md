@@ -91,6 +91,23 @@ pair/ownership checks passed (10.38 s). The failed full run is not
 release acceptance; use grouped browser lanes for the final rerun to
 avoid the observed Chromium slot admission timeouts.
 
+At `708528f4fee5fc1d00988eff5a504f5dd9054221`, the eight-worker,
+two-lane Windows run returned 6945 passed, 52 skipped, one failed,
+seven subtests passed (1362.28 s), with no setup errors. The single
+failure was a local Chromium connection refusal for two JavaScript
+requests. The full release browser verifier module passed 42/42
+in isolation (125.64 s); the real isolated Docker browser check
+passed 21/21 and all three hosted workflows and evidence preflight
+passed. Increased the test WSGI server listen backlog, without
+retrying or weakening assertions. Corrected five obsolete sibling
+raw-source lookups in the skipped source tests, using the verified
+normalized source or explicit paired archive. Updated the nested
+source parity counts for November 25. All 30 focused tests passed
+(29.25 s), with no skips, including all five newly enabled checks.
+Explicit normalized source occupancy verification found zero
+occupied unrepresented fields out of 39. A clean full-suite pass
+remains mandatory.
+
 ## Unit Explorer filter performance — 2026-11-25
 
 Windows development checkout based on `caae1c2c`, using the November 25

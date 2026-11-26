@@ -236,12 +236,13 @@ def test_reviewed_direct_uses_cover_every_matching_raw_source_occurrence(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
     """Check the reverse direction: source rows must not disappear from publication."""
-    from infinity_db.database import raw_database_path
+    from infinity_db.database.publication import validate_database_pair
     from infinity_db.deployed_object_usage import _source_ids
 
-    raw_path = raw_database_path(source_paths[0])
+    raw_path = Path(__file__).resolve().parents[1] / "local/work/build/army/army.raw.db"
     if not raw_path.is_file():
         pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    validate_database_pair(source_paths[0], raw_path=raw_path)
     publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     observed_kinds: set[str] = set()
     with (
@@ -307,12 +308,13 @@ def test_reviewed_include_uses_cover_matching_raw_target_loadouts(
     source_paths: tuple[Path, Path, Path, Path, Path],
 ) -> None:
     """Compare every resolved one-level Include with its source target option."""
-    from infinity_db.database import raw_database_path
+    from infinity_db.database.publication import validate_database_pair
     from infinity_db.deployed_object_usage import _source_ids
 
-    raw_path = raw_database_path(source_paths[0])
+    raw_path = Path(__file__).resolve().parents[1] / "local/work/build/army/army.raw.db"
     if not raw_path.is_file():
         pytest.skip("Ignored raw Army database is unavailable in clean CI")
+    validate_database_pair(source_paths[0], raw_path=raw_path)
     publication = build_deployed_objects(source_paths[0], *source_paths[2:])
     observed_kinds: set[str] = set()
     with (

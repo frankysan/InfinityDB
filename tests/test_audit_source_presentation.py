@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database import raw_database_path
-from infinity_db.database.publication import EXPORT_PAIR_SHA256_KEY, validate_database_pair
+from infinity_db.database.publication import EXPORT_PAIR_SHA256_KEY
 from tests.test_audit_runtime_database_surface import _runtime_database
 from tools.data import audit_source_presentation as audit
 
@@ -102,22 +102,15 @@ def test_source_presentation_audit_covers_complete_source_schema(tmp_path: Path)
 
 
 def test_pinned_published_army_has_no_occupied_unrepresented_source_fields() -> None:
-    """Validate actual published/raw source pairing, not just synthetic fixtures.
+    """Validate actual published/normalized source pairing, not just synthetic fixtures.
 
-    The raw database is intentionally ignored and absent in clean CI. A
-    release's explicit --source-occupancy-gate is still required there.
+    The normalized source is intentionally ignored and absent in clean CI.
     """
     published = ROOT / "data/generated/army.db"
-    raw = raw_database_path(published)
-    if not raw.is_file():
-        pytest.skip("Ignored raw Army database is unavailable in clean CI")
-    try:
-        validate_database_pair(published, raw_path=raw)
-    except ValueError as exc:
-        if "different exports" not in str(exc):
-            raise
-        pytest.skip(f"Ignored raw Army database is stale relative to tracked Army: {exc}")
-    report = audit.audit_database(published)
+    normalized = ROOT / "local/work/build/army/normalized.json"
+    if not normalized.is_file():
+        pytest.skip("Verified normalized Army source is unavailable in clean CI")
+    report = audit.audit_database(published, normalized=normalized)
     evidence = report["rawEvidence"]
     assert evidence["status"] == "available"
     assert evidence["normalizedTableCount"] == 70
