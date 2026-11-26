@@ -242,6 +242,13 @@ API behavior and source provenance, and retire superseded runtime work/caches
 when parity and compatibility are established. The objective is less total
 work and simpler serving, not maximum precomputation at any cost.
 
+The published General-profile and composed Rules paths bypass their legacy
+composition caches. Keep those caches for compatible fallback readers.
+The catalog summary/detail caches can still avoid JSON decoding and expansion
+of Unit usage; their removal requires a measured worker-memory benefit at
+acceptable repeat-request cost. The Glossary cache retains runtime-enriched
+tokens, and the shared maintained-text target cache avoids repeated decoding.
+
 Implementation priorities and remaining tasks belong to the
 [performance backlog](TODO.md#performance-storage-and-build-tooling).
 

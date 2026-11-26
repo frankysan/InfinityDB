@@ -254,8 +254,10 @@ Worker-memory measurements remain outstanding.
 Army v33 shares complete General-profile rows between Explorer and Unit
 details. Recorded-source rebuild: 110.0 s, Army database unchanged in size
 (11,911,168 bytes). All 11,808 published Explorer selections matched the
-runtime composer; full Unit-detail payload parity passed across the visible
-snapshot with all optional flags enabled and disabled. Single diagnostic
+runtime composer. Full Unit-detail and Extended Explorer payload parity
+passed for every visible Unit under all 16 availability masks on Windows
+(16 parametrized tests, 294.49 s); the separate requested-Army contextual
+fallback remains covered by the General-profile extras suite. Single diagnostic
 50-Unit sample: 4.69 ms published batch versus 743.0 ms cold composition.
 These are not end-to-end timing comparisons.
 

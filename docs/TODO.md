@@ -444,10 +444,10 @@ make v1.3.0 depend on them.
   Army v33 materializes all 16 General-profile combinations and serves both
   Extended Explorer and Unit details from the same projection, with a
   contextual fallback when a requested Army adds excluded occurrences.
+  All 16 availability masks passed Unit-detail and Extended Explorer parity.
   See [measured baseline](testing.md#general-profile-materialization-pilot).
-  - [ ] Extend full Unit-detail parity coverage to remaining availability
-    combinations; evaluate worker memory and cross-platform performance at
-    release validation; retire redundant runtime caches only when justified.
+  - [ ] Evaluate worker memory and cross-platform performance at release
+    validation; retire redundant runtime caches only when justified.
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.

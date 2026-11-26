@@ -1794,22 +1794,20 @@ def test_materialized_extended_profiles_preserve_detail_and_availability(monkeyp
     assert all(profiles is not None for profiles in detail_projections)
 
 
-@pytest.mark.parametrize("enabled", [False, True])
-def test_extended_general_projection_matches_all_current_units(enabled: bool) -> None:
-    from infinity_db.unit_presentation import (
-        OPTIONAL_AVAILABILITY_FLAGS,
-        extended_general_profiles,
-    )
+@pytest.mark.parametrize("mask", range(16))
+def test_extended_general_projection_matches_all_current_units(mask: int) -> None:
+    from infinity_db.general_profile_storage import flags_for_mask
+    from infinity_db.unit_presentation import extended_general_profiles
 
     application = create_app(
         Path("data/generated/army.db"),
         rules_database_path=Path("data/generated/rules_n5.db"),
     )
     api = application.api
-    flags = {flag: enabled for flag in OPTIONAL_AVAILABILITY_FLAGS}
+    flags = flags_for_mask(mask)
     units = api.database.list_units(
-        limit=10_000, _unbounded=True, mercs=enabled, specops=enabled,
-        teamops=enabled, reinforcement=enabled,
+        limit=10_000, _unbounded=True, mercs=flags["mercs"], specops=flags["specops"],
+        teamops=flags["teamops"], reinforcement=flags["reinforcement"],
     )["items"]
     assert units
     ids = [item["id"] for item in units]
@@ -1825,8 +1823,8 @@ def test_extended_general_projection_matches_all_current_units(enabled: bool) ->
             detail, optional_filters=flags,
             materialized_general_profiles=published[item["id"]],
         )
-        assert actual == expected, item["name"]
-        assert explorer[item["id"]] == extended_general_profiles(expected), item["name"]
+        assert actual == expected, (mask, item["name"])
+        assert explorer[item["id"]] == extended_general_profiles(expected), (mask, item["name"])
 
 
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
