@@ -17,7 +17,7 @@ entries.
 4. Mention new unresolved items during handoff. Never reuse an assigned ID:
    increment the next-ID marker when creating a new entry.
 
-**Next ID:** `AI-0022`
+**Next ID:** `AI-0023`
 
 ## Open improvements
 

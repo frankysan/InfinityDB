@@ -112,6 +112,68 @@ Use these links to jump directly to a workstream:
 
 ### Per-reference change history
 
+- [ ] **Data processing + Web backend + Web frontend:** Historical Army and Unit
+  version history (target: v1.3.0; offline N5 research integrated from
+  `agent/win/mcp/army-history` at `37a70d8`).
+  Offline source intake is accepted: exact producer receipt parity for all
+  1,406 objects and 2,841 observations; 29 focused tests passed, with clean
+  Ruff and Pyright results. See [source intake](../data/README.md).
+  Characterization accepted for all 1,370 faction objects and 36 metadata
+  objects. Every assigned content has contextual metadata; N5 has 505
+  unambiguous adjacent-date comparisons (12 revision-field-only), with 180
+  ambiguous endpoint pairs excluded. Of 37,541 shared Unit key occurrences,
+  six have changed labels. Private report: `local/data/history/reports/characterization-v1.json`.
+  N5 comparison pilot completed: 505 directional comparisons over 622 distinct
+  faction objects; 180 ambiguous endpoint pairs excluded. The pilot distinguishes
+  typed gameplay field candidates, reference changes, presentation and identity
+  review, and equivalent-definition Peripheral rekeys (7,437 of 7,446 differences).
+  Of 1,717 shared reference comparisons missing a metadata ID, 1,648 have
+  the ID in both faction filters. Private evidence:
+  `local/data/history/reports/n5-semantic-pilot-v3.summary.json`.
+  N5 identity/consolidation v2 accepted: 920 consistent ID/slug candidates
+  and five reviewed identities (four distinct Reinforcements IDs and the
+  Zaybak/Zeybek alias). All 1,753 eligible scalar/stat occurrences retained;
+  703 exact-window candidates reduced to 590 via compatible-window grouping.
+  Private evidence: `local/data/history/reports/n5-consolidation-v2.summary.json`
+  and `n5-identity-review-v1.json` in the same directory.
+  N5 consolidation v3 adds Skill, Equipment and Weapon reference changes:
+  3,119 of 3,211 occurrences retained as 1,219 candidates (45 occurrences
+  use filter-only definition evidence; 92 require label review). Combined:
+  4,872 eligible occurrences in 1,809 candidate groups, including the unchanged
+  590 scalar/stat groups. Private evidence:
+  `local/data/history/reports/n5-consolidation-v3.summary.json`.
+  N5 membership/lifecycle v2 accepted: 268 army-list Unit changes (82
+  have positive evidence in other armies), 208 declared membership claim
+  groups (137 corroborated by overlapping list changes), and 11 AVA changes.
+  Of 854 nested record appearances/disappearances, 428 group into 147
+  candidates; 426 have possible replacement keys and are retained for review.
+  No unique exact-record replacements were found in this archive.
+  Private evidence: `local/data/history/reports/n5-membership-v2.summary.json`.
+  Loadout reconciliation v2 reviewed all 844 loadout occurrences: three
+  unique same-composition pairs (six occurrences), 47 possible modification
+  pairs in 12 review groups, 399 one-sided changes and 345 other unpaired
+  occurrences. Of the original 426 replacement-review occurrences, 420
+  remain unpaired (including the modification hints).
+  Private evidence: `local/data/history/reports/n5-loadouts-v2.summary.json`.
+  N5 catalog analysis v1: 479 definition differences across 505 comparisons,
+  grouped into 144 definition transition groups with 2,368 affected reference
+  locations (counted per comparison and origin). Eleven Weapon mechanics
+  candidates, 57 definition identity/type review groups, 75 link/presentation
+  groups and one other Weapon definition review; no changed Peripheral
+  definitions among nine persistent-reference comparisons. Contextual metadata
+  evidence remains distinct from army-local definitions and Unit composition.
+  Private evidence: `local/data/history/reports/n5-catalogs-v1.summary.json`.
+  - [ ] Design the generated historical database and player-facing history
+    features using the accepted N5 candidate and evidence reports.
+    Keep unresolved loadout replacements, modification groups, changed labels,
+    missing definitions, unresolved reference shapes and same-day alternatives
+    as explicit review or coverage states. Preserve army scope, edition-scoped
+    provisional identities, observation windows and all source provenance;
+    do not treat catalog transition groups as Unit composition changes or
+    infer publication dates from contextual metadata. Extend to N4/CodeOne
+    only with edition-specific validation.
+  - [ ] Review publication rights before exposing derived historical data.
+
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
   **historical FAQ edition replay and source-date/season selection**,
   separate from the current-reference API. Independently curate

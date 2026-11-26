@@ -84,7 +84,7 @@ passed on 2026-11-12; see [testing evidence](testing.md#p58-source-freshness-clo
 ## Next unused IDs
 
 - Design: `VD-0118`; active obligations are listed above.
-- Execution: `VR-0149`; active obligations are listed above.
+- Execution: `VR-0151`; active obligations are listed above.
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.

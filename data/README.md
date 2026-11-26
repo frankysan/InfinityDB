@@ -62,6 +62,124 @@ the retired source roots.
 
 - `local/data/raw/army/` — immutable Corvus Belli Army snapshot ZIPs.
   Older raw-symbol ZIPs reside under `local/data/raw/symbols/`.
+- `local/data/history/archive/` — separately selected private historical Army
+  archives and producer acceptance receipts. The offline
+  `infinity_db.army_history_source` reader verifies format v1 using an explicit
+  archive and SHA-256; its CLI also requires an explicit receipt and SHA-256.
+  It preserves source observations, same-day alternatives, unresolved faction
+  identities and contextual metadata references. It does not establish
+  upstream publication order or canonical Unit identity. Never route this
+  input through live snapshot discovery, normal builds or public assets.
+  The offline `python -m tools.research.characterize_army_history` command
+  (also available as `infinity_db.army_history_characterization`) accepts the
+  same archive/receipt pins plus an explicit `--output` JSON path under
+  `local/data/history/reports/`. Its report separates edition-specific
+  record shapes, scoped numeric-key and label overlap, contextual metadata
+  ID membership, unordered same-day alternatives, and adjacent observed
+  date comparisons. Parsed JSON equality ignores object key order only;
+  revision-field-only differences are identified separately, and all other
+  differences require semantic review. Metadata ID membership is not proof
+  of meaning (weapon IDs can have several modes); neither numeric-key overlap
+  nor label overlap establishes canonical identity. Coverage gaps are
+  observation gaps, not evidence of missing releases or Unit removal.
+  The private N5 pilot (`python -m tools.research.compare_army_history`)
+  accepts the same explicit archive and receipt pins, an exclusive
+  `--output` path, and an optional `--summary-output` path under the
+  history reports directory. Each directional comparison uses adjacent
+  distinct encoded revision dates with exactly one assigned content at
+  both endpoints. Ambiguous endpoint pairs remain explicit omissions.
+  Changes retain typed before/after source values, presence, nested
+  source IDs, label-change flags and endpoint observation/metadata
+  references. Record appearances/disappearances are not canonical Unit
+  events. Reference order-only changes require identical multisets after
+  removing the display-order field; quantities, extras and duplicates
+  are retained. Peripheral IDs are army-local: changed references with the
+  same unique local definition (apart from ID) and identical remaining
+  reference fields/order are classified as equivalent-definition rekeys.
+  Other changes remain review candidates. This does not establish canonical
+  identity or resolve changed definitions behind unchanged references.
+  Shared referenced catalog IDs are compared across all available
+  contextual metadata objects without selecting a preferred context;
+  missing metadata entries are checked against faction filter membership
+  without claiming the filter establishes full rule semantics. The pilot
+  does not publish gameplay events or introduce a runtime history database.
+  The private N5 consolidation report
+  (`python -m tools.research.consolidate_army_history`) additionally pins the
+  accepted pilot report by SHA-256 and checks its directional pair coverage,
+  endpoint observation references and eligible typed field values against the
+  archive. Its identity inventory covers all assigned N5 contents, including
+  unordered alternatives. Consistent numeric Unit IDs and unique slugs form
+  provisional identity keys. Reviewed N5 exceptions retain distinct army-scoped
+  IDs for Reinforcements Wardrivers and Rui Shi and retain ID 1852 across the
+  Zaybak/Zeybek spelling revision. The dispositions require the exact observed
+  slug sets and army scopes; the alias also requires nonoverlapping ordered
+  observations. Source review is reproducible with
+  `python -m tools.research.review_army_history_identities` and explicit
+  Unit IDs, archive/receipt pins and private output path.
+  Scalar/stat changes first consolidate by identical date bounds, nested
+  source keys, before/after values and target-record fingerprints (including
+  parent labels and locally resolved Peripheral definitions). Format v2 then
+  consolidates identical transitions across overlapping observation windows
+  only if the complete overlap component has a common intersection, contains
+  no repeated army, and has no competing eligible transition at that path
+  overlapping the intersection. The resulting bounds are a common observation
+  window, not a proven release date. Format v3 also consolidates changed
+  Skill, Equipment and Weapon occurrence multisets using each endpoint's
+  unique named faction filter definitions and all available contextual
+  metadata record fingerprints (including multiple weapon modes).
+  Quantities, extra definitions, unknown occurrence fields and duplicates
+  are retained; display ordering and known army-list filter flags are
+  excluded from these signatures. Missing metadata entries are explicitly
+  filter-only evidence; ambiguous contexts, absent/duplicate filter IDs
+  and unresolved extra definitions remain outside candidate grouping.
+  IDs remain in the signatures: same-name references with different IDs
+  are not presumed equivalent. Army-specific availability and
+  nested record lifecycle are handled by the private
+  `python -m tools.research.compare_army_history_membership` report.
+  It uses the same archive/receipt and pilot pins, validates each selected
+  source field and record against its endpoints, and retains army-scoped
+  list appearances/disappearances, AVA/disabled changes and declared
+  faction membership claims separately. Declared claims are grouped by
+  exact window and corroborated against overlapping actual list changes;
+  absent corroboration is not a negative availability finding. Positive
+  observations in other armies distinguish some list changes from global
+  Unit lifecycle changes. Nested records can be grouped only when their
+  parent labels, source keys, record signatures and observation windows
+  agree; potential sibling replacements remain review evidence. A unique
+  mutual match of the full sibling payload apart from its ID (with resolved
+  local Peripheral IDs) is an exact-record replacement candidate, not proof
+  that all referenced rules remained unchanged.
+  The private `python -m tools.research.reconcile_army_history_loadouts`
+  report additionally pins the membership report by SHA-256. It compares
+  complete sibling collections at each endpoint, with resolved historical
+  reference multisets and Peripheral definitions. Composition excludes only
+  source ID, name and costs; null extra fields are equivalent to absent extras.
+  Unresolved siblings or nonempty includes prevent continuity inference.
+  Same-composition replacements require a unique match across all siblings
+  at both endpoints and retain the original records and changed costs/labels.
+  Possible modifications require a distinctive shared reference occurrence
+  and mutual uniqueness; identical review questions are bundled without
+  merging observation windows. Other key changes remain separate, including
+  one-sided changes with no opposing key. These are provisional source
+  continuity findings, not proof of canonical loadout identity.
+  The private `python -m tools.research.compare_army_history_catalogs`
+  report uses the archive/receipt and pilot pins to compare definitions
+  behind persistent reference occurrences. It requires matching nested
+  record keys and labels and typed reference occurrences (excluding display
+  order); modifiers retain their source reference evidence. Faction-filter
+  definitions remain army-scoped and exclude known army-list context flags.
+  Contextual metadata must agree across all associated contexts at each
+  endpoint; Weapon modes and duplicate rows are preserved as multisets.
+  Changed columns are compared without assigning a mode pairing. Link-only,
+  identity/type, mechanics and other definition differences remain distinct.
+  Identical metadata before/after transitions share an evidence group,
+  not a common publication date or necessarily a single historical event.
+  Missing or ambiguous definitions are coverage/review findings, not changes.
+  Catalog differences are not changes to Unit reference composition, and
+  contextual metadata alone does not establish historical rules validity.
+  Every included occurrence retains its faction, endpoint and pilot location;
+  excluded categories remain available in the pinned pilot. These are candidate
+  groups, not canonical events or a claim of exact publication dates.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not

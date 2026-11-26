@@ -241,6 +241,12 @@
       "modules": [
         "test_cli",
         "test_database_set_builder",
+        "test_army_history_catalogs",
+        "test_army_history_consolidation",
+        "test_army_history_loadouts",
+        "test_army_history_membership",
+        "test_army_history_pilot",
+        "test_army_history_source",
         "test_army_snapshot_source",
         "test_deterministic_io",
         "test_merge",
