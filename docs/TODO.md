@@ -58,6 +58,8 @@ retire this milestone summary when the release closes.
    [Army-derived themes and the visual rules-content hierarchy](#reference-presentation-and-feedback)
    together. Keep Theme separate from Auto/Light/Dark mode; retain the
    default InfinityDB theme, accessible contrast and theme-aware maps.
+   Initial faction palette implementation is complete; representative visual
+   review and the rules-content hierarchy remain.
 5. **Data processing + Web backend + Web frontend:** Publish player-facing
    Unit version histories and initial
    [per-reference change indicators](#per-reference-change-history)
@@ -364,12 +366,12 @@ make v1.3.0 depend on them.
 ### Reference presentation and feedback
 
 - [ ] **Web frontend + Web backend:** Add optional Army-derived themes using
-  the imported Army color pairs. Separate Theme (InfinityDB, then Armies
-  ordered by numerical ID) from Theme mode (Auto, Light, Dark). Preserve
-  InfinityDB as the default, migrate existing preferences, derive accessible
-  semantic palettes for both modes, and retain first-paint resolution and
-  theme-aware scenario SVG rendering. Verify the palette contrast contract
-  in [web design guidelines](web-design-guidelines.md).
+  the imported Army color pairs. Initial eleven faction palettes are implemented;
+  review them on representative desktop and mobile pages. Theme identity
+  and mode are independent, with first-paint resolution, compatible preference
+  persistence, shared scenario SVG colors and automated contrast coverage.
+  Add independent sectorial palettes only if established source color pairs
+  become available; do not invent them.
 - [ ] **Web frontend + Data processing:** Establish and implement a shared
   visual hierarchy for official rules text, recent official rule/stat changes,
   examples, explanations, corrections, interpretations and source

@@ -1095,10 +1095,26 @@ def test_scenario_map_api_returns_saveable_theme_complete_svg(
     assert f"--color-scenario-map-table:{table_color}".encode() in svg
     assert b"<style>" in svg
 
-    for query in ("army_points=300&theme=system", "army_points=300&theme=light&theme=dark"):
+    status, _, themed_svg = request(
+        scenario_app, endpoint,
+        query=f"army_points=300&distance_unit=cm&theme={theme}&palette=nomads",
+    )
+    assert status == 200
+    assert themed_svg != svg
+    assert f'data-theme="{theme}"'.encode() in themed_svg
+    assert b'data-distance-unit="cm"' in themed_svg
+    assert f"--color-scenario-map-table:{table_color}".encode() not in themed_svg
+    assert b"var(" not in themed_svg
+
+    for query in (
+        "army_points=300&theme=system",
+        "army_points=300&theme=light&theme=dark",
+        "army_points=300&palette=unknown",
+        "army_points=300&palette=nomads&palette=aleph",
+    ):
         status, _, body = request(scenario_app, endpoint, query=query)
         assert status == 400
-        assert b"theme" in body or b"duplicate" in body.lower()
+        assert b"theme" in body or b"palette" in body or b"duplicate" in body.lower()
 
 
 def test_scenario_map_api_renders_selected_maintained_geometry(

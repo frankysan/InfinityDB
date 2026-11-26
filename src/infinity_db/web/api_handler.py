@@ -52,6 +52,7 @@ from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
+from infinity_db.theme_palette import DEFAULT_PALETTE, PALETTE_IDS
 from infinity_db.trait_catalog import TraitCatalog
 from infinity_db.unit_composition import present_unit
 from infinity_db.unit_history import attach_unit_history
@@ -231,10 +232,13 @@ def _scenario_army_points(
 
 def _scenario_map_options(
     query_string: str,
-) -> tuple[int, Literal["in", "cm"], Literal["light", "dark"], str | None, str | None]:
+) -> tuple[int, Literal["in", "cm"], Literal["light", "dark"], str, str | None, str | None]:
     params = _validated_query_params(
         query_string,
-        {"army_points", "distance_unit", "theme", "collection", "revision", "cache_bust"},
+        {
+            "army_points", "distance_unit", "theme", "palette", "collection", "revision",
+            "cache_bust",
+        },
     )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
@@ -253,7 +257,10 @@ def _scenario_map_options(
         theme = "dark"
     else:
         raise ValueError("theme must be light or dark")
-    return army_points, unit, theme, *_scenario_selection(params)
+    palette = params.get("palette", [DEFAULT_PALETTE])[0]
+    if palette not in PALETTE_IDS:
+        raise ValueError("unknown theme palette")
+    return army_points, unit, theme, palette, *_scenario_selection(params)
 
 
 def _scenario_summary(
@@ -1389,9 +1396,9 @@ class ApiHandler:
         elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points, distance_unit, theme, collection, revision = _scenario_map_options(
-                    query_string
-                )
+                (
+                    army_points, distance_unit, theme, palette, collection, revision,
+                ) = _scenario_map_options(query_string)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -1437,7 +1444,9 @@ class ApiHandler:
                         cache_control=cache_control,
                     )
                 geometry = parse_scenario_geometry(scenario["placement"]["geometry"])
-                svg = render_scenario_map_svg(geometry, distance_unit=distance_unit, theme=theme)
+                svg = render_scenario_map_svg(
+                    geometry, distance_unit=distance_unit, theme=theme, palette=palette,
+                )
                 return WebResponse(
                     body=svg.encode("utf-8"),
                     content_type="image/svg+xml; charset=utf-8",

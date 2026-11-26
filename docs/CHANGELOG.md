@@ -20,6 +20,8 @@ are not retroactively relabeled.
 - Correct Equipment filter counts on repeated matching queries.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
+- Choose InfinityDB or one of eleven Army-inspired themes, independently of
+  Auto, Light or Dark mode. Saved scenario maps retain the selected appearance.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
@@ -30,6 +32,9 @@ are not retroactively relabeled.
   Unit history projection in Army schema v35. Collapsed histories distinguish
   shared General-profile changes, Army-specific changes and former Army
   contexts without needing a runtime JSON sidecar.
+- **Web frontend + Web backend:** Added Army-derived palettes with compatible
+  first-paint preference resolution, shared standalone SVG colors and contrast
+  regression coverage in both modes.
 
 ### Changed
 

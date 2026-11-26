@@ -3648,12 +3648,13 @@ def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable)
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
     assert b'const THEME_PREFERENCE_KEY = "infinity-db-theme";' in startup
-    assert b'{ value: "system", label: "System" }' in startup
+    assert b'{ value: "system", label: "Auto" }' in startup
     assert b'{ value: "light", label: "Light" }' in startup
     assert b'{ value: "dark", label: "Dark" }' in startup
     assert b'window.matchMedia?.("(prefers-color-scheme: dark)")' in startup
     assert b'document.documentElement.dataset.theme = resolved' in startup
     assert b"applySelection(savedThemeSelection())" in startup
+    assert b"applyPalette(savedPreference(PALETTE_PREFERENCE_KEY))" in startup
 
     status, _, theme = request(app, "/static/theme.js")
     assert status == 200
@@ -3671,6 +3672,8 @@ def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable)
 
 
 def test_theme_runtime_initialization_switching_and_persistence() -> None:
+    from infinity_db.theme_palette import palette_options
+
     root = Path(__file__).resolve().parents[1]
     harness = root / "tests" / "theme_runtime_harness.cjs"
     startup = root / "src" / "infinity_db" / "web" / "static" / "theme-startup.js"
@@ -3687,7 +3690,7 @@ def test_theme_runtime_initialization_switching_and_persistence() -> None:
         command = [sys.executable, "-m", "nodejs_wheel"]
 
     completed = subprocess.run(
-        [*command, str(harness), str(startup), str(preferences)],
+        [*command, str(harness), str(startup), str(preferences), json.dumps(palette_options())],
         check=True,
         capture_output=True,
         text=True,
@@ -3695,6 +3698,18 @@ def test_theme_runtime_initialization_switching_and_persistence() -> None:
     runtime = json.loads(completed.stdout)
 
     assert runtime["options"] == ["system", "light", "dark"]
+    assert runtime["palettes"] == [option["value"] for option in palette_options()]
+    assert runtime["paletteStartup"] == {
+        "selected": {"themePalette": "panoceania", "themePreference": "system", "theme": "dark"},
+        "remembered": {"themePalette": "nomads", "themePreference": "system", "theme": "light"},
+        "switched": "nomads", "afterModeChange": "nomads", "invalid": "infinitydb",
+    }
+    assert runtime["palettePersistence"] == {
+        "paletteTransient": ["panoceania", "panoceania", None],
+        "paletteRemembered": ["nomads", "nomads", "nomads"],
+        "paletteForgotten": ["nomads", "nomads", None],
+    }
+    assert all(state.pop("themePalette") == "infinitydb" for state in runtime["startup"].values())
     assert runtime["startup"] == {
         "defaultLight": {"themePreference": "system", "theme": "light"},
         "defaultDark": {"themePreference": "system", "theme": "dark"},
@@ -3746,6 +3761,8 @@ def test_representative_pages_share_theme_runtime_contract(app: Callable) -> Non
         assert status == 200
         assert b'<meta name="color-scheme" content="light dark">' in body
         assert b'id="theme-selector" class="setting-select"' in body
+        assert b'id="theme-palette-selector" class="setting-select"' in body
+        assert b"data-theme-options=" in body
         assert startup_src in body
         assert settings_src in body
         assert stylesheet_href in body
@@ -4066,6 +4083,7 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
         "/static/foundation.css",
         "/static/themes/light.css",
         "/static/themes/dark.css",
+        "/static/themes/army.css",
         "/static/components.css",
         "/static/page-overrides.css",
     )
@@ -4088,6 +4106,7 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
     assert b':root[data-theme="dark"]' in sources["/static/themes/dark.css"]
     assert b':root[data-theme="light"]' not in sources["/static/themes/dark.css"]
     assert b"--color-surface-page:" in sources["/static/themes/dark.css"]
+    assert b'[data-theme-palette="nomads"]' in sources["/static/themes/army.css"]
     assert b".surface {" in sources["/static/components.css"]
     assert b".army-overview {" in sources["/static/page-overrides.css"]
     assert b".fireteam-explorer {" in sources["/static/page-overrides.css"]

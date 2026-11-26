@@ -5,6 +5,19 @@ if (!bootstrap) {
 }
 
 export const THEME_PREFERENCE_KEY = bootstrap.preferenceKey;
+export const PALETTE_PREFERENCE_KEY = bootstrap.paletteKey;
+
+export function paletteOptions() {
+  return bootstrap.paletteOptions.map(({ value, label }) => ({ value, label }));
+}
+
+export function normalizePaletteSelection(value) {
+  return bootstrap.normalizePalette(value);
+}
+
+export function applyPaletteSelection(value) {
+  return bootstrap.applyPalette(value);
+}
 
 export function themeOptions() {
   return bootstrap.options.map(({ value, label }) => ({ value, label }));

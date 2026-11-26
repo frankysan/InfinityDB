@@ -3555,6 +3555,27 @@ def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
         )
         svg = _rendered_scenario_image(page)
         assert svg.attrib["data-theme"] == next_theme
+        default_style = svg.attrib["style"]
+        default_accent = page.evaluate(
+            "() => getComputedStyle(document.documentElement).getPropertyValue('--color-accent')"
+        )
+        page.evaluate(
+            """() => {
+              const select = document.querySelector("#theme-palette-selector");
+              select.value = "nomads";
+              select.dispatchEvent(new Event("change", { bubbles: true }));
+            }"""
+        )
+        page.wait_for_function(
+            "() => document.querySelector('img.scenario-map')?.src.includes('palette=nomads')",
+            timeout=30000,
+        )
+        svg = _rendered_scenario_image(page)
+        assert svg.attrib["data-theme"] == next_theme
+        assert svg.attrib["style"] != default_style
+        assert page.evaluate(
+            "() => getComputedStyle(document.documentElement).getPropertyValue('--color-accent')"
+        ) != default_accent
 
         page.evaluate(
             """() => {
@@ -3570,6 +3591,11 @@ def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
         svg = _rendered_scenario_image(page)
         assert svg.attrib["data-distance-unit"] == "cm"
         assert svg.attrib["data-theme"] == next_theme
+        assert "palette=nomads" in image.get_attribute("src")
+        assert page.locator("html").get_attribute("data-theme-palette") == "nomads"
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
     finally:
         page.close()
 

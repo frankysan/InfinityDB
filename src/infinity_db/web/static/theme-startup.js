@@ -1,12 +1,18 @@
 (() => {
   const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";
+  // Preserve the existing stored mode key and values for installed users.
   const THEME_PREFERENCE_KEY = "infinity-db-theme";
+  const PALETTE_PREFERENCE_KEY = "infinity-db-theme-palette";
   const THEME_OPTIONS = Object.freeze([
-    Object.freeze({ value: "system", label: "System" }),
+    Object.freeze({ value: "system", label: "Auto" }),
     Object.freeze({ value: "light", label: "Light" }),
     Object.freeze({ value: "dark", label: "Dark" }),
   ]);
   const THEME_VALUES = new Set(THEME_OPTIONS.map(({ value }) => value));
+  const PALETTE_OPTIONS = Object.freeze(JSON.parse(
+    document.documentElement.dataset.themeOptions || '[{"value":"infinitydb","label":"InfinityDB"}]',
+  ).map(Object.freeze));
+  const PALETTE_VALUES = new Set(PALETTE_OPTIONS.map(({ value }) => value));
 
   function cookieValue(name) {
     const prefix = `${encodeURIComponent(name)}=`;
@@ -24,10 +30,24 @@
     }
   }
 
-  function savedThemeSelection() {
-    const session = sessionValue(THEME_PREFERENCE_KEY);
+  function savedPreference(key) {
+    const session = sessionValue(key);
     if (cookieValue(REMEMBER_SETTINGS_KEY) !== "true") return session;
-    return cookieValue(THEME_PREFERENCE_KEY) ?? session;
+    return cookieValue(key) ?? session;
+  }
+
+  function savedThemeSelection() {
+    return savedPreference(THEME_PREFERENCE_KEY);
+  }
+
+  function normalizePalette(value) {
+    return PALETTE_VALUES.has(value) ? value : "infinitydb";
+  }
+
+  function applyPalette(value) {
+    const palette = normalizePalette(value);
+    document.documentElement.dataset.themePalette = palette;
+    return palette;
   }
 
   function normalizeSelection(value) {
@@ -50,9 +70,14 @@
   window.infinityThemeBootstrap = Object.freeze({
     preferenceKey: THEME_PREFERENCE_KEY,
     options: THEME_OPTIONS,
+    paletteKey: PALETTE_PREFERENCE_KEY,
+    paletteOptions: PALETTE_OPTIONS,
+    normalizePalette,
+    applyPalette,
     normalizeSelection,
     applySelection,
   });
 
+  applyPalette(savedPreference(PALETTE_PREFERENCE_KEY));
   applySelection(savedThemeSelection());
 })();

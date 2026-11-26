@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -16,6 +17,7 @@ from urllib.parse import parse_qs
 from infinity_db import __display_version__, __version__
 from infinity_db.application_domains import application_domain
 from infinity_db.symbol_catalog import SymbolCatalog, SymbolCatalogError
+from infinity_db.theme_palette import army_palette_stylesheet, palette_options
 from infinity_db.web.release_notes import render_current_release_notes_html
 from infinity_db.web.response import WebResponse
 from infinity_db.web.routes import (
@@ -43,6 +45,7 @@ ASSETS = {
     "/static/foundation.css": ("foundation.css", "text/css; charset=utf-8"),
     "/static/themes/light.css": ("themes/light.css", "text/css; charset=utf-8"),
     "/static/themes/dark.css": ("themes/dark.css", "text/css; charset=utf-8"),
+    "/static/themes/army.css": ("themes/army.css", "text/css; charset=utf-8"),
     "/static/components.css": ("components.css", "text/css; charset=utf-8"),
     "/static/page-overrides.css": ("page-overrides.css", "text/css; charset=utf-8"),
     "/static/units.js": ("units.js", "text/javascript; charset=utf-8"),
@@ -177,6 +180,7 @@ STYLESHEET_PARTS = (
     "foundation.css",
     "themes/light.css",
     "themes/dark.css",
+    "themes/army.css",
     "components.css",
     "page-overrides.css",
 )
@@ -519,7 +523,10 @@ def _packaged_static_hashes() -> dict[str, str]:
     """Hash immutable package assets once per process, without reading structured JSON."""
     static = files("infinity_db.web").joinpath("static")
     hashes = {
-        name: sha256(static.joinpath(*name.split("/")).read_bytes()).hexdigest()
+        name: sha256(
+            army_palette_stylesheet() if name == "themes/army.css"
+            else static.joinpath(*name.split("/")).read_bytes()
+        ).hexdigest()
         for name in _STATIC_REVISION_FILES
     }
 
@@ -569,7 +576,11 @@ def _composed_stylesheet() -> bytes:
     """Compose the stable stylesheet entry point from owned source layers."""
 
     static = files("infinity_db.web").joinpath("static")
-    return b"".join(static.joinpath(filename).read_bytes() for filename in STYLESHEET_PARTS)
+    return b"".join(
+        army_palette_stylesheet() if filename == "themes/army.css"
+        else static.joinpath(filename).read_bytes()
+        for filename in STYLESHEET_PARTS
+    )
 
 
 def _asset_cache_control(query: str, static_version: str) -> str:
@@ -685,7 +696,8 @@ def _render_page(
             f'<html lang="en" data-app-version="{__version__}" '
             f'data-static-version="{static_version}" '
             f'data-static-revision="{static_revision}" '
-            f'data-snapshot-revision="{snapshot_revision}">',
+            f'data-snapshot-revision="{snapshot_revision}" '
+            f'data-theme-options="{escape(json.dumps(palette_options()), quote=True)}">',
         )
         .replace(
             '<meta charset="utf-8">',
@@ -756,6 +768,8 @@ class PresentationHandler:
             filename, content_type = ASSETS[asset_path]
             if asset_path == "/static/styles.css":
                 body = _composed_stylesheet()
+            elif asset_path == "/static/themes/army.css":
+                body = army_palette_stylesheet()
             else:
                 body = files("infinity_db.web").joinpath(
                     "static", *filename.split("/")

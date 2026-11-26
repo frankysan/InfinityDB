@@ -522,11 +522,11 @@ branding.
 
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
 
-**Accepted design direction (not yet implemented):** Theme identity and theme
-mode are independent preferences. The InfinityDB palette remains the default;
-optional Army palettes derive semantic colors from imported Army color pairs.
-Auto, Light and Dark apply to every palette. Army identity colors must not
-replace semantic status colors or compromise the contrast contract below.
+Theme identity and theme mode are independent preferences. InfinityDB remains
+the default palette; eleven optional faction palettes derive appearance colors
+from established Army color pairs, ordered by numerical Army ID. Auto, Light
+and Dark apply to every palette. Semantic game colors remain independent of the
+selected palette, and the same contrast contract applies to every combination.
 
 ### Maintain measurable contrast and non-color meaning
 

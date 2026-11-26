@@ -117,6 +117,9 @@ function refreshScenarioDistances() {
   const url = new URL(image.src);
   url.searchParams.set("distance_unit", distanceUnit());
   url.searchParams.set("theme", document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  const palette = document.documentElement.dataset.themePalette;
+  if (palette && palette !== "infinitydb") url.searchParams.set("palette", palette);
+  else url.searchParams.delete("palette");
   if (image.src !== url.href) image.src = url.href;
 }
 
@@ -226,6 +229,8 @@ function mapCard(item) {
     army_points: String(item.selected_army_points), distance_unit: distanceUnit(),
     theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
   });
+  const palette = document.documentElement.dataset.themePalette;
+  if (palette && palette !== "infinitydb") params.set("palette", palette);
   if (selectedPublication.collection) params.set("collection", selectedPublication.collection);
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;

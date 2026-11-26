@@ -6,7 +6,6 @@ import math
 import re
 from functools import lru_cache
 from html import escape
-from pathlib import Path
 from typing import Literal
 
 from .scenario_geometry import (
@@ -28,6 +27,7 @@ from .scenario_geometry import (
     marker_radius_inches,
     resolve_coordinate,
 )
+from .theme_palette import DEFAULT_PALETTE, PALETTE_IDS, theme_tokens
 
 _RENDERABLE_ELEMENT_STYLES = frozenset(
     {
@@ -148,14 +148,10 @@ _RULER_CSS = """.placement-ruler{stroke-width:.11}
 """
 
 
-_THEME_TOKEN_RE = re.compile(r"(--color-scenario-map-[a-z-]+):\s*(#[0-9a-fA-F]{6});")
-
-
-@lru_cache(maxsize=2)
-def _theme_style(theme: Literal["light", "dark"]) -> str:
+@lru_cache(maxsize=2 * len(PALETTE_IDS))
+def _theme_style(theme: Literal["light", "dark"], palette: str = DEFAULT_PALETTE) -> str:
     """Embed canonical theme tokens so downloaded maps retain their appearance."""
-    path = Path(__file__).resolve().parent / "web" / "static" / "themes" / f"{theme}.css"
-    colors = dict(_THEME_TOKEN_RE.findall(path.read_text(encoding="utf-8")))
+    colors = {f"--{name}": value for name, value in theme_tokens(theme, palette).items()}
     required = set(re.findall(r"--color-scenario-map-[a-z-]+", _STYLE_CSS))
     if not required <= colors.keys():
         raise ScenarioMapRenderError(f"incomplete {theme} scenario-map theme palette")
@@ -604,7 +600,7 @@ def _validate_renderer_support(geometry: ScenarioGeometry) -> None:
 
 def render_scenario_map_svg(
     geometry: ScenarioGeometry, *, distance_unit: Literal["in", "cm"] = "in",
-    theme: Literal["light", "dark"] = "light",
+    theme: Literal["light", "dark"] = "light", palette: str = DEFAULT_PALETTE,
 ) -> str:
     """Render deterministic standalone SVG bytes from validated geometry."""
 
@@ -612,6 +608,8 @@ def render_scenario_map_svg(
         raise ValueError("distance_unit must be in or cm")
     if theme not in {"light", "dark"}:
         raise ValueError("theme must be light or dark")
+    if palette not in PALETTE_IDS:
+        raise ValueError("unknown theme palette")
     _validate_renderer_support(geometry)
     width = _number(geometry.table.width)
     height = _number(geometry.table.height)
@@ -713,7 +711,7 @@ def render_scenario_map_svg(
     theme_style = (
         f"--scenario-map-label-size:{_number(1.4 * text_scale)}px;"
         f"--scenario-map-measure-size:{_number(1.1 * text_scale)}px;"
-        f"{_theme_style(theme)}"
+        f"{_theme_style(theme, palette)}"
     )
     tokens = {name: value for entry in theme_style.split(";")
               for name, _, value in (entry.partition(":"),)}

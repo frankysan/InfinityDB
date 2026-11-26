@@ -364,9 +364,9 @@ known marker types resolve through canonical marker metadata, including physical
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
 Renderer-only styling remains separate. The SVG response embeds the canonical map palette
-from the selected Light or Dark theme, so it has the same appearance as a saved standalone file;
-the map API defaults to Light for existing callers and accepts an explicit `theme=light|dark`
-parameter. Scenario pages retain the SVG as a normal `<img>` element for native browser
+from the selected palette and Light or Dark mode, so it has the same appearance as a saved standalone file;
+the map API defaults to InfinityDB Light for existing callers and accepts explicit
+`theme=light|dark` and optional `palette=<army-slug>` parameters. Scenario pages retain the SVG as a normal `<img>` element for native browser
 Save Image As support. Theme changes update the image URL rather than inlining SVG or injecting
 styles into the page. Renderer typography scales with table width in viewBox coordinates
 without changing scenario geometry. The endpoint accepts `distance_unit=in|cm` for deterministic
@@ -623,30 +623,28 @@ accessibility are owned by `docs/web-design-guidelines.md`.
 
 The browser CSS separates theme-neutral geometry/typography from an explicit semantic theme
 contract. Component and layout rules consume semantic color/shadow roles rather than concrete
-palette literals. Light and Dark are the initial implementations of that contract. Domain identity
-colors such as faction and rules-category accents remain semantic data roles inside the theme layer
-so each theme can provide contrast-safe values without changing domain meaning.
+palette literals. Light and Dark provide the base InfinityDB palettes. Army palettes tint appearance roles
+while preserving relative luminance. Domain identity, rules-category, status, range and deployment
+colors retain their existing semantic meaning.
 
 CSS source ownership is explicit without introducing a build pipeline: `static/foundation.css` owns
-font declarations and theme-neutral foundational tokens, each explicit theme owns one semantic
-palette file under `static/themes/` (currently `light.css` and `dark.css`),
+font declarations and theme-neutral foundational tokens, the base modes own semantic
+palette files under `static/themes/` (`light.css` and `dark.css`),
 `static/components.css` owns the established shared layout/component rules, and
 `static/page-overrides.css` owns late page-specific exceptions that intentionally sit after the
 shared rules. `/static/styles.css` remains the stable public stylesheet URL; the presentation layer
-composes those sources in that order at request time. This preserves the existing cascade and cache
-contract while keeping maintainership boundaries visible in source. A new explicit theme therefore
-adds a registry entry plus its own `static/themes/<theme>.css` implementation instead of extending a
-shared theme stylesheet.
+composes those sources with generated Army palette overrides immediately after the base palettes.
+`theme_palette.py` derives eleven faction palettes from established color pairs in
+`themes/light.css`, sharing resolved tokens with the standalone SVG renderer. The generated
+stylesheet is cached and included in static-asset revision hashing.
 
-Theme preference defaults to **System**, which follows the operating-system color-scheme preference;
-an explicit user selection wins. The selected preference uses the same session-first, optional-cookie
-persistence contract as other Settings. `static/theme-startup.js` is the intentionally small
-synchronous bootstrap exception to normal browser-module loading: it reads that preference and sets
-the resolved `data-theme` before the stylesheet can produce the first meaningful paint. It also owns
-the data-driven theme registry consumed by `static/theme.js` and the Settings selector.
-`static/preferences.js` owns persistence of the selected theme, while `static/settings.js` owns the
-selector and live System-preference updates. Adding another explicit theme should require a registry
-entry and semantic-token implementation, not new persistence logic.
+Theme defaults to **InfinityDB**; Theme mode defaults to **Auto**, following the operating-system
+color scheme. Both use the existing session-first, optional-cookie persistence contract. The mode
+retains its original preference key and stored `system` value for compatibility. The backend embeds
+the ordered palette registry on the page root. The synchronous `static/theme-startup.js` bootstrap
+resolves both `data-theme` and `data-theme-palette` before first paint, without an API request.
+`static/preferences.js` owns persistence; `static/settings.js` owns both selectors and live
+Auto-mode updates. No separate sectorial palette is inferred without an established color pair.
 
 Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
 least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use

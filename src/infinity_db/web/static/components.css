@@ -273,6 +273,8 @@ html:not([data-developer-mode="true"]) .id-column {
   color: var(--color-nav-text-active);
   background: var(--color-nav-control-surface);
   font-size: var(--font-size-xs);
+  max-width: 65%;
+  text-overflow: ellipsis;
 }
 
 .setting-select:hover {
