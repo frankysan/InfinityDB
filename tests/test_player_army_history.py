@@ -157,4 +157,22 @@ def test_html_keeps_all_units_searchable_and_escapes_historical_text():
     assert "Army &lt;A&gt;" in html
     assert "No supported changes found" in html
     assert "<X>" not in html
-    assert html.index("2025-01-01 – 2025-03-01") < html.index("2025-01-01 – 2025-02-01")
+    assert html.index('<time datetime="2025-03-01">') < html.index('<time datetime="2025-02-01">')
+    assert "Observation window: 2025-01-01 – 2025-02-01" in html
+
+
+def test_same_observation_date_shares_heading_but_preserves_distinct_windows():
+    preview, semantic = fixture()
+    original = semantic["summaries"][0]
+    semantic["summaries"] = [original, {
+        **original, "earlierObservedDate": "2025-01-15",
+        "evidence": [{"armyId": 103}],
+    }]
+    units, counts = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    assert counts["timelineEntries"] == 3
+    html = player.render(units, {101: "Army A", 102: "Army B", 103: "Army C"}, {})
+    assert html.count('<time datetime="2025-02-01">') == 1
+    assert html.count("<strong>Points: 32 → 30</strong>") == 2
+    assert "Observation window: 2025-01-01 – 2025-02-01" in html
+    assert "Observation window: 2025-01-15 – 2025-02-01" in html
+    assert "Army C" in html

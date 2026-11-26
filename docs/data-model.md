@@ -132,10 +132,13 @@ belongs in developer review, not normal player copy.
 The separate private player-history renderer combines the four semantic
 summary streams with supported profile characteristic candidates. It resolves
 historical Group and owner labels against the pinned comparison endpoints,
-groups by exact observation window and Army scope, and combines equal
-group-wide effects even where the affected loadout definitions differ between
-Armies. Retain distinct cost pairs, partial scopes, source identities and
-underlying evidence. Display source-list membership as observed presence,
+consolidates changes by exact observation window and Army scope, and combines
+equal group-wide effects even where the affected loadout definitions differ
+between Armies. The player-facing timeline groups entries by their first
+observed date (the later endpoint), not an inferred publication date. Preserve
+each complete observation window in technical evidence, even when entries
+share a date heading. Retain distinct cost pairs, partial scopes, source
+identities and underlying evidence. Display source-list membership as observed presence,
 not playable availability. The offline preview exposes unresolved outcomes
 and provenance through optional technical controls; it is not a public API
 or publication approval.

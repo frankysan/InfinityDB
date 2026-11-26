@@ -409,11 +409,12 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
             f'data-history="{"yes" if unit["entries"] else "no"}">'
             f"{esc(title)}</option>"
         )
-        windows: dict[tuple[str, str], list[Document]] = defaultdict(list)
+        dates: dict[str, list[Document]] = defaultdict(list)
         for row in unit["entries"]:
-            windows[(row["earlierObservedDate"], row["laterObservedDate"])].append(row)
+            dates[row["laterObservedDate"]].append(row)
         articles = []
-        for (earlier, later), rows in windows.items():
+        for observed in sorted(dates, reverse=True):
+            rows = dates[observed]
             army_groups: dict[tuple[int, ...], list[Document]] = defaultdict(list)
             for row in rows:
                 army_groups[tuple(row["armyIds"])].append(row)
@@ -434,7 +435,11 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
                     heading = f'<h4 class="scope">{esc(scope)}</h4>' if scope else ""
                     items = []
                     for row in changes:
-                        review = details("Evidence", f"<pre>{raw(row['evidence'])}</pre>")
+                        window = f"{row['earlierObservedDate']} – {row['laterObservedDate']}"
+                        review = details(
+                            "Evidence", f"<p>Observation window: {esc(window)}</p>"
+                            f"<pre>{raw(row['evidence'])}</pre>",
+                        )
                         items.append(
                             f"<li><strong>{esc(row['text'])}</strong>"
                             f'<div class="technical-only">{review}</div></li>'
@@ -447,7 +452,8 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
                     + "".join(groups) + "</div>"
                 )
             articles.append(
-                f"<article><h3>{esc(earlier)} – {esc(later)}</h3>{''.join(blocks)}</article>"
+                f'<article><h3><time datetime="{esc(observed)}">{esc(observed)}</time></h3>'
+                f"{''.join(blocks)}</article>"
             )
         evidence = {k: unit[k] for k in (
             "reviewEvidence", "catalogEvidence", "sourceIdentities", "semanticReview",
@@ -464,7 +470,8 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>Unit version history — private preview</title>'
         f"<style>{STYLE}</style></head><body><header><h1>Unit version history</h1>"
-        '<p class="notice">Private N5 preview · Changes observed between the listed dates. '
+        '<p class="notice">Private N5 preview · '
+        "Dates indicate when each change was first observed. "
         "History is incomplete; dates are not confirmed publication dates. "
         "Army list presence does not establish playable availability. "
         "Army names use current labels. MOV is displayed in inches.</p>"
