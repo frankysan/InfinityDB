@@ -17,6 +17,27 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Validation host selection
+
+Use the dedicated Linux development worker (`linux-dev`) by default for
+complete local test suites, including mandatory release acceptance. Use the
+validated eight-worker, four-slot, four-lane Chromium profile with the
+Scenario FAQ split on that host. Keep Windows for development, focused
+regression checks and Windows-specific compatibility tests. Prefer moving
+a broad validation run to Linux over repeatedly tuning Windows browser
+fixtures or rerunning full suites after host transport/resource failures.
+Run a full Windows suite only when Windows-specific integration risk
+justifies it or Linux is unavailable.
+
+Synchronize the Linux checkout explicitly, pin the candidate SHA, and
+verify required assets and source inputs before testing. If required
+source-only checks cannot run on Linux, execute those checks separately
+on an exact-SHA host with verified inputs and account for their coverage
+in the release evidence; do not count missing-source skips as passes.
+Hosted CI and isolated Docker release acceptance remain independent gates.
+See [parallel validation](#parallel-windows-development-and-linux-validation)
+and [release validation](releasing.md#4-run-local-release-validation).
+
 ## Unit Explorer Peripheral attachment and option review — 2026-11-15
 
 The pinned `JSON 20260929-114335.zip` Army snapshot contains 58 Army
@@ -107,6 +128,30 @@ source parity counts for November 25. All 30 focused tests passed
 Explicit normalized source occupancy verification found zero
 occupied unrepresented fields out of 39. A clean full-suite pass
 remains mandatory.
+
+At `39ab02ebefc3418e66ae9adbfee41e3dbe36d3d2`, Windows passed 6950
+tests with 47 skips, seven subtests passed and one failure (1321.87 s).
+All five formerly skipped source checks and the previous release browser
+gate passed. The remaining Spec-Ops browser failure reported
+`net::ERR_NO_BUFFER_SPACE`; the exact test passed in isolation (17.81 s).
+All three hosted workflows and the release evidence rehearsal passed.
+The maintainer selected Linux as the default full-suite host. The Linux
+source preparation initially lacked the pinned Army ZIP/manifest; after
+verified transfer, the export generation matched but strict sibling
+metadata comparison rejected the reconstructed raw archive. Keep that
+check fail-closed and use the exact-commit Windows source-check results
+to cover the corresponding Linux skips.
+
+The Linux full-suite run at the same SHA passed 6666 tests, with 332 skips,
+seven subtests passed and two Python 3.14 fork deprecation warnings
+(761.14 s). All four Chromium lanes stayed on individual workers; both
+previous Windows browser failures passed. The grouped skip report shows
+missing private PDF/Wiki/Army source inputs, covered by the Windows run
+at the same commit, alongside host-specific and opt-in cases. Neither
+host's missing-input skips count as passes. The 17 tracked-database FAQ
+parity cases were skipped on both hosts and require a separate opt-in
+release run. The runtime and test files remain unchanged in this
+documentation-only closeout.
 
 ## Unit Explorer filter performance — 2026-11-25
 

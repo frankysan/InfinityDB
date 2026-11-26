@@ -369,17 +369,26 @@ the stable candidate. Re-run affected gates if the candidate changes.
   and writes only ignored local audit artifacts. An ordinary standalone
   normalization/export is not a matched release pair.
 
-  Windows PowerShell (from the repository root):
-
-  ```powershell
-  .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --report
-  ```
+  Follow the [validation host policy](testing.md#validation-host-selection):
+  Linux is the default for complete release suites; Windows supplies focused
+  or platform-specific evidence when needed.
 
   Linux (an explicitly synchronized, SHA-pinned checkout):
 
   ```sh
-  .venv/bin/python tools/run_checks.py --stage test --assets required --report
+  .venv/bin/python tools/run_checks.py --stage test --assets required --test-workers 8 --test-dist browserlanes --browser-slot-count 4 --browser-lane-count 4 --split-scenario-faq --report
   ```
+
+  Windows fallback (from the repository root, only when justified):
+
+  ```powershell
+  .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 8 --test-dist browserlanes --report
+  ```
+
+- [ ] Run the tracked-database FAQ parity gate in [testing](testing.md)
+  after rebuilding the matched release databases. Set
+  `INFINITYDB_RELEASE_FAQ_PARITY=1` for the 17 opt-in API/browser cases;
+  the ordinary full suite skips them.
 
 - [ ] Pass Ruff, Pyright, Markdownlint, document links, backlog checks and the
   maintained Army/Rules build stages using the canonical runner, plus the
