@@ -364,6 +364,22 @@ Use these links to jump directly to a workstream:
     Keep detailed acceptance procedures in `docs/releasing.md` and
     `docs/deployment.md`, not duplicated in this backlog.
 
+- [ ] **Fix identical-tree release CI evidence collection (v1.3.0).**
+  During v1.2.2 release verification, GitHub API version `2026-03-10`
+  returned a null `merge_commit_sha` in the commit-to-PR association
+  response for [PR #35](https://github.com/frankysan/InfinityDB/pull/35),
+  despite the PR being merged. A process-local override to API version
+  `2022-11-28` allowed the unchanged collector to verify the identical
+  tree and all three required workflows.
+  In `tools/ci/prepare_release_ci_evidence.py`, use the association
+  endpoint to discover PR numbers, then retrieve authoritative individual
+  PR metadata before validating merge identity. Preserve unique-match,
+  same-repository, merged-into-main, exact merge/candidate SHA, identical
+  tree and successful candidate CI requirements. Apply the correction
+  to the shared post-merge CI reuse path as well. Add focused regression
+  coverage for incomplete association metadata and rejection of genuinely
+  mismatched or ambiguous PRs.
+
 - [ ] **Support direct production deployment probes with an explicit Host header.**
   The v1.2.0 public smoke probe received HTTP 403 while browser access worked;
   direct requests to the loopback listener succeeded with the configured
