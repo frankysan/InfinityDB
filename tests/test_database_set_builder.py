@@ -119,6 +119,7 @@ def project(
     # This synthetic builder fixture deliberately writes "build-only" instead
     # of a real normalized document. Keep its existing raw-pair overlay path;
     # real normalized-source acceptance is covered by the pinned ZIP rebuild.
+    monkeypatch.setattr(builder, "attest_normalized_source", lambda _army, path: path)
     for name in (
         "publish_equipment_encodings", "publish_skill_classifications",
         "publish_unit_filter_semantics", "publish_army_reference_data",

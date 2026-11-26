@@ -432,6 +432,25 @@ passed in 102.08 s. Rebuilt the runtime databases after the repository input
 change; the deployment provenance check (`--skip-svg`) passed. Aggregate
 Gunicorn memory remains a release/deployment measurement, not a pilot result.
 
+### Normalized source verification reuse
+
+Run the following read-only benchmark against a matched standalone Army export
+and normalized source (the integrated builder discards its intermediates):
+
+```powershell
+python -m tools.performance.benchmark_normalized_source local/work/build/army/army.db local/work/build/army/normalized.json
+```
+
+Windows, 2026-11-26, Python 3.14.10 / SQLite 3.50.4; normalized input
+25,511,032 bytes, SHA-256 `655297c86e23759ed5f68882007ba09c47be5a24162b2526648ae78c7d7d758f`.
+Three samples of five full generation verifications versus one attestation
+and five receipt checks: median 12.75 s versus 4.91 s. All generation
+fingerprints agreed. This diagnostic overlapped development checks; it is
+not an end-to-end build benchmark. The focused normalized-source suite
+passed 11 tests, including source-byte, base-row, shared-metadata and
+generation drift rejection. The normal history-enabled complete runtime
+build passed in 232.07 s; this is not a controlled before/after comparison.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

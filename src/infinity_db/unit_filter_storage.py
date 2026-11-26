@@ -13,7 +13,10 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from .database.normalized_source import verified_army_export_generation
+from .database.normalized_source import (
+    VerifiedNormalizedSource,
+    verified_army_export_generation,
+)
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -146,7 +149,8 @@ def read_unit_filter_semantics(connection: sqlite3.Connection) -> UnitFilterConf
 
 
 def publish_unit_filter_semantics(
-    army: Path, raw: Path | None, source: Path, *, normalized: Path | None = None,
+    army: Path, raw: Path | None, source: Path,
+    *, normalized: Path | VerifiedNormalizedSource | None = None,
 ) -> None:
     """Publish v29 from an explicitly verified raw or normalized Army source."""
     source_bytes = source.read_bytes()

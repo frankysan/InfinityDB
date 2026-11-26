@@ -191,7 +191,7 @@ def test_preview_groups_only_identical_target_window_and_scope():
     assert combined["status"] == "observedCandidate"
 
 
-def history_reference(identity, *, name="Weapon", metadata="a", quantity=1):
+def history_reference(identity, *, name="Weapon", metadata: str | None = "a", quantity=1):
     return {
         "filter": {"id": identity, "name": name},
         "metadataFingerprints": [metadata] if metadata else None,
@@ -277,11 +277,14 @@ def semantic_option(identity, skills=None, points=20):
             "points": points, "swc": 0}
 
 
-def semantic_summary(old, new, field, paths, rekeys=None, *, with_coverage=False):
+def semantic_summary_with_coverage(old, new, field, paths, rekeys=None):
     from tools.research.summarize_army_history import summarize_group
 
-    result = summarize_group(old, new, 42, 1, field, [{}], [{}], set(paths), rekeys)
-    return result if with_coverage else result[:2]
+    return summarize_group(old, new, 42, 1, field, [{}], [{}], set(paths), rekeys)
+
+
+def semantic_summary(old, new, field, paths, rekeys=None):
+    return semantic_summary_with_coverage(old, new, field, paths, rekeys)[:2]
 
 
 def test_effective_history_suppresses_relocation_and_counts_real_gain():
@@ -301,8 +304,8 @@ def test_effective_history_suppresses_relocation_and_counts_real_gain():
     unchanged = semantic_group([skill], [semantic_option(1)])
     previous = semantic_group([], [semantic_option(1, [skill])])
     assert semantic_summary(previous, unchanged, "skills", paths) == ([], "comparable")
-    partial, status, coverage = semantic_summary(
-        old, new, "skills", paths[:1], with_coverage=True,
+    partial, status, coverage = semantic_summary_with_coverage(
+        old, new, "skills", paths[:1],
     )
     assert status == "partial"
     assert partial == result
@@ -321,8 +324,8 @@ def test_effective_history_consolidates_cost_delta():
     assert result[0]["summary"] == "-2 Points"
     assert result[0]["allGroupLoadouts"]
     assert [(r["before"], r["after"]) for r in result[0]["loadouts"]] == [(20, 18), (30, 28)]
-    partial, status, coverage = semantic_summary(
-        old, new, "points", paths[:1], with_coverage=True,
+    partial, status, coverage = semantic_summary_with_coverage(
+        old, new, "points", paths[:1],
     )
     assert status == "partial"
     assert partial is not None and partial[0]["allGroupLoadouts"] is False
@@ -378,8 +381,8 @@ def test_effective_history_partial_continuity_with_added_and_removed_loadouts():
         ("units", 42, "profileGroups", 1, "profiles", 1, "skills"),
         ("units", 42, "profileGroups", 1, "options", 1, "skills"),
     ]
-    result, status, coverage = semantic_summary(
-        old, new, "skills", paths, with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "skills", paths,
     )
     assert status == "partial"
     assert result is not None and len(result) == 1
@@ -399,8 +402,8 @@ def test_effective_history_disabled_sibling_does_not_block_survivor():
     old = semantic_group([], [semantic_option(1), disabled])
     new = semantic_group([], [semantic_option(1, points=18), disabled])
     paths = [("units", 42, "profileGroups", 1, "options", 1, "points")]
-    result, status, coverage = semantic_summary(
-        old, new, "points", paths, with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "points", paths,
     )
     assert status == "partial"
     assert result is not None and result[0]["summary"] == "-2 Points"
@@ -413,8 +416,8 @@ def test_effective_history_disabled_sibling_does_not_block_survivor():
 def test_effective_history_partial_no_change_does_not_claim_complete_comparison():
     old = semantic_group([], [semantic_option(1), semantic_option(2)])
     new = semantic_group([], [semantic_option(1), semantic_option(3)])
-    result, status, coverage = semantic_summary(
-        old, new, "points", [], with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "points", [],
     )
     assert result == [] and status == "partial"
     assert coverage["unpairedBefore"] == [2] and coverage["unpairedAfter"] == [3]
@@ -424,8 +427,8 @@ def test_effective_history_partial_rekey_preserves_unpaired_keys():
     skill = {"id": 1}
     old = semantic_group([], [semantic_option(1, [skill]), semantic_option(3)])
     new = semantic_group([], [semantic_option(2, [skill], points=18), semantic_option(4)])
-    result, status, coverage = semantic_summary(
-        old, new, "points", [], {1: 2}, with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "points", [], {1: 2},
     )
     assert status == "partial"
     assert result is not None and result[0]["loadouts"][0]["laterOptionId"] == 2
@@ -595,8 +598,8 @@ def test_mult_profile_relocation_preserves_individual_profile_scope():
         ("units", 42, "profileGroups", 1, "profiles", 1, "skills"),
         ("units", 42, "profileGroups", 1, "options", 1, "skills"),
     ]
-    result, status, coverage = semantic_summary(
-        old, new, "skills", paths, with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "skills", paths,
     )
     assert status == "comparable"
     assert result is not None and len(result) == 2
@@ -638,8 +641,8 @@ def test_stable_peripheral_rekey_allows_direct_owner_comparison():
         data["filters"]["peripheral"] = [{"id": identity, "name": "Attached Model"}]
         data["units"][0]["profileGroups"][0]["options"][0]["peripheral"] = [{"id": identity}]
     paths = [("units", 42, "profileGroups", 1, "profiles", 1, "skills")]
-    result, status, coverage = semantic_summary(
-        old, new, "skills", paths, with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "skills", paths,
     )
     assert status == "comparable"
     assert result is not None and result[0]["summary"] == "Gained Mimetism"
@@ -661,8 +664,8 @@ def test_stable_include_edges_allow_direct_owner_changes_but_not_inheritance():
             ], "options": [semantic_option(7)],
         })
     paths = [("units", 42, "profileGroups", 1, "profiles", 1, "skills")]
-    result, status, coverage = semantic_summary(
-        old, new, "skills", paths, with_coverage=True,
+    result, status, coverage = semantic_summary_with_coverage(
+        old, new, "skills", paths,
     )
     assert status == "comparable"
     assert result is not None and result[0]["summary"] == "Gained Mimetism"

@@ -26,7 +26,7 @@ from .build_provenance import (
     file_sha256,
 )
 from .curated import load_curated_directory
-from .database.normalized_source import verified_normalized_generation
+from .database.normalized_source import attest_normalized_source, verified_normalized_generation
 from .database_set import (
     COMPLETE_RUNTIME_FILES,
     SEASON_DATABASE_SOURCES,
@@ -227,7 +227,7 @@ def build_database_set(
             raise ValueError("Army build failed before runtime publication")
         # Only the verified normalized model is needed by these overlays.
         # The legacy raw-pair publisher APIs remain available for standalone use.
-        normalized = stage / "normalized.json"
+        normalized = attest_normalized_source(stage / "army.db", stage / "normalized.json")
         publish_equipment_encodings(
             stage / "army.db", None,
             root / "config/catalogs/equipment-presentation-encodings.json",

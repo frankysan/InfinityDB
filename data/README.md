@@ -394,12 +394,16 @@ complete alternate destination and is independent of the serving-only
 retired from the integrated build. Lossless verification is mandatory.
 
 Disposable files under ignored `local/work/build/` hold normalization, the
-matched Army/raw pair, Rules and ITS construction. The variant-usage publication
+Army export, Rules and ITS construction. The variant-usage publication
 takes its source-only relationships from `normalized.json`, reconstructs
 the necessary source tables in memory, and verifies the complete normalized
 model against the selected Army database's export-generation fingerprint.
-Army v27–v31 overlays use the same verified normalized source without opening
-or updating the temporary raw SQLite sibling. The General-profile projection composes
+Army v27–v31 overlays reuse one build-local normalized-source receipt instead
+of repeatedly parsing and validating the full JSON document. Each reuse
+checks the exact source bytes, base Army table content, shared metadata and
+export generation. The receipt is neither persisted nor accepted as a CLI
+input; standalone source verification and export retain full validation.
+No raw SQLite sibling is required. The General-profile projection composes
 General profiles from the v31 Army and temporary core Rules model, before
 final Rules publications bind the resulting Army bytes. The standalone
 export and raw-pair inspection interfaces remain supported.
@@ -420,8 +424,9 @@ four-file set into its image. The cache revision hashes sorted active filenames 
 their exact file hashes.
 
 `infinity-army build --output-dir PATH` retains the source JSON pipeline;
-`infinity-db export NORMALIZED.json OUTPUT.db` explicitly creates an Army/raw
-development pair. Their work outputs are not complete serving sets.
+`infinity-db export NORMALIZED.json OUTPUT.db` creates an Army database;
+`--with-raw` optionally creates the matched raw sibling. Their work outputs
+are not complete serving sets.
 `build-rules` retains a narrow standalone v10 export in ignored
 `local/work/build/rules-standalone.db`, without runtime assembly or promotion.
 Research tools receive an explicit raw archive path; normal serving never opens it.

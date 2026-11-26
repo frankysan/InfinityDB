@@ -379,16 +379,11 @@ make v1.3.0 depend on them.
   performance and deployment portability/multi-platform suitability before
   deciding whether a storage/query abstraction is justified.
 
-- [ ] Extend recorded-source build/export benchmarks to isolate the remaining
-  validation and serialization costs on a fixed host before changing the
-  combined build/export path.
-
-- [ ] Remove redundant whole-document work in the combined build/export path.
-  Export validation serializes the complete normalized object to reject invalid
-  JSON, while the raw archive serializes every row again and normalization has
-  already run `validate_normalized`. Consider a hash-attested validation report
-  or an in-memory hand-off that skips only the duplicate build-path pass; the
-  standalone `export` command must retain full untrusted-input validation.
+- [ ] Measure remaining duplicate JSON parsing, validation and serialization
+  in the initial Army build/export and Rules publication stages. Optimize only
+  where justified; standalone export must retain full untrusted-input validation.
+  The five sequential Army overlays already reuse one verified source receipt
+  (see [benchmark](testing.md#normalized-source-verification-reuse)).
 
 - [ ] **Retire the remaining explicit raw-SQLite interfaces** once independent
   research and source-audit consumers no longer need them. Complete runtime
