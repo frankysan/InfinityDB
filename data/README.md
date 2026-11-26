@@ -209,6 +209,14 @@ the retired source roots.
   The tool pins the preview and linked databases, reads accepted evidence
   and archive endpoints, and records both summaries and excluded/review
   outcomes. No runtime publication is created.
+  Generate the separate private player-facing timeline with
+  `python -m tools.research.render_player_army_history --preview
+  local/data/history/generated/unit_history_preview.json --preview-sha256 HASH
+  --semantic local/data/history/generated/effective_history_pilot.json
+  --semantic-sha256 HASH --output local/data/history/generated/unit_history_player.html`.
+  Both input hashes and the linked databases/archive are verified. Optional
+  repeatable `--inspect-unit ID` emits representative timelines for review.
+  The output is standalone HTML, remains ignored and must not be published.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not

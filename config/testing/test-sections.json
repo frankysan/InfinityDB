@@ -249,6 +249,7 @@
         "test_army_history_catalogs",
         "test_army_history_consolidation",
         "test_army_history_database",
+        "test_player_army_history",
         "test_army_history_loadouts",
         "test_army_history_membership",
         "test_army_history_pilot",

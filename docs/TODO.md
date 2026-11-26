@@ -285,6 +285,11 @@ make v1.3.0 depend on them.
   remain unresolved. Preserve the remaining replacement hints for review;
   prioritize the streamlined private player-facing preview rather than
   progressively weakening automatic continuity criteria.
+  A separate private player-history renderer now combines the semantic
+  summary streams and 127 supported profile characteristic candidates.
+  It resolves historical labels, consolidates equivalent Group-wide changes,
+  and provides searchable Unit navigation with optional technical evidence.
+  Review the generated preview before promoting any historical content.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,
