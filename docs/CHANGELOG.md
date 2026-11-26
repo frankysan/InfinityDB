@@ -8,6 +8,20 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.3.0] - Unreleased
+
+### Player summary
+
+- No player-facing changes.
+
+### Added
+
+- **Deployment:** Added a public Host-header override for direct Caddy release verification.
+
+### Fixed
+
+- **Project infrastructure:** Corrected identical-tree CI reuse when GitHub's newer API omits PR merge identity.
+
 ## [1.2.2] - 2026-11-26
 
 ### Player summary

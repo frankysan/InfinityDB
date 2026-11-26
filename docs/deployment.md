@@ -182,8 +182,21 @@ sh ./scripts/deploy-local-test.sh
 The probe defaults to `http://localhost:8080` for the Caddy public host
 and `http://127.0.0.1:8081` for the metrics listener. Use
 `--public-base` and `--metrics-base` for custom test ports. For production,
-use the public HTTPS URL and loopback metrics port, plus
+use the public HTTPS URL and configured metrics listener, plus
 `--expected-version <version>` to reject an accidental `+dev` footer.
+
+To verify production directly through Caddy when the external TLS proxy
+rejects the probe, use its loopback HTTP listener and the configured
+public hostname as an explicit Host header:
+
+```sh
+.venv/bin/python -m tools.ci.verify_running_deployment --public-base http://127.0.0.1 --public-host YOUR-HOST --metrics-base http://127.0.0.1:9090 --expected-version <version>
+```
+
+Adjust the listener addresses/ports to the deployment configuration.
+`--public-host` applies to every public probe request, never to metrics.
+This verifies the running Caddy/application path, not external TLS or
+reverse-proxy availability; check public browser access separately.
 
 This creates a separate `infinitydb-test` Compose project, binds Caddy only to
 `127.0.0.1:8080`, deploys the current tracked runtime/symbol artifacts, and disables production

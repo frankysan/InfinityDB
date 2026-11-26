@@ -780,12 +780,29 @@ def _mock_merge_api(monkeypatch, *, problem: str = "") -> None:
         pr["head"]["repo"]["full_name"] = "other/InfinityDB"
     elif problem == "unmerged":
         pr["merged_at"] = None
+    elif problem == "wrong-base":
+        pr["base"]["ref"] = "other"
 
     def fake_payload(url, *, token):
         assert url.endswith(f"/commits/{FINAL}/pulls?per_page=100")
-        return [pr, pr] if problem == "ambiguous" else [pr]
+        # Regression: API 2026-03-10 can omit the merge SHA in this response.
+        association = {"number": 42, "merge_commit_sha": None}
+        if problem == "missing-number":
+            return [{}]
+        if problem == "invalid-number":
+            return [{"number": 0}]
+        if problem == "duplicate-association":
+            return [association, association]
+        if problem == "ambiguous":
+            return [association, {"number": 43}]
+        return [association]
 
-    def fake_json(url, *, token):
+    def fake_json(url, *, token, api_version=release_ci.GITHUB_API_VERSION):
+        if "/pulls/" in url:
+            assert api_version == "2022-11-28"
+            number = int(url.rsplit("/", 1)[-1])
+            assert number in (42, 43)
+            return dict(pr, number=99 if problem == "wrong-detail-number" else number)
         if "/git/commits/" in url:
             sha = url.rsplit("/", 1)[-1]
             return {"sha": sha, "tree": {
@@ -838,8 +855,9 @@ def test_identical_merge_records_actual_candidate_workflow_shas(monkeypatch) -> 
 
 
 @pytest.mark.parametrize("problem", [
-    "different-pr", "fork", "unmerged", "ambiguous", "tree", "missing", "failed",
-    "wrong-event", "checkout", "smoke-reused",
+    "different-pr", "fork", "unmerged", "wrong-base", "ambiguous", "tree",
+    "missing-number", "invalid-number", "duplicate-association", "wrong-detail-number",
+    "missing", "failed", "wrong-event", "checkout", "smoke-reused",
 ])
 def test_identical_merge_rejects_unverified_evidence(monkeypatch, problem) -> None:
     _mock_merge_api(monkeypatch, problem=problem)

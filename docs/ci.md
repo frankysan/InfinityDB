@@ -80,6 +80,13 @@ and manual dispatches do not use this shortcut. Required status job names remain
 unchanged; the Source matrix emits reuse acknowledgments rather than rerunning
 builds. No external branch-protection configuration changes are needed.
 
+The commit-to-PR association endpoint is used only to discover PR numbers.
+The collector retrieves each individual PR before verifying merge identity;
+the newer API version can omit the merge SHA. Individual PR metadata uses
+the compatible API version `2022-11-28`; other requests retain
+`2026-03-10`. Incomplete or ambiguous authoritative metadata still fails
+closed and triggers fresh validation.
+
 The release collector does not count those acknowledgments as fresh execution.
 Use the explicit approved candidate SHA for identical-tree release evidence;
 see [the release checklist](releasing.md#reuse-ci-for-identical-merge-trees-v122).

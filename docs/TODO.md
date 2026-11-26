@@ -36,11 +36,12 @@ retire this milestone summary when the release closes.
 
 ### Committed scope and implementation order
 
-1. **Project infrastructure:** CI efficiency and release tooling
+1. **Project infrastructure:** CI efficiency and release tooling (implemented)
    ([release and deployment robustness](#release-and-deployment-robustness)).
-   Eliminate redundant CI runs for identical trees without weakening
-   required validation or exact-SHA evidence. Complete the authoritative
-   PR metadata fix and explicit Host-header deployment probe.
+   Corrected identical-tree reuse with authoritative PR metadata; live replay
+   verified PR #35 and all three candidate workflows. Added the direct Caddy
+   Host-header probe. Hosted merge behavior and live production probing remain
+   subject to normal release verification.
 2. **Data processing + Web backend:** Performance and build-time
    materialization ([performance and build tooling](#performance-storage-and-build-tooling)).
    Benchmark the existing application and build pipeline; pilot persisted
@@ -435,32 +436,6 @@ make v1.3.0 depend on them.
     image path and hosted CI remain to be verified before closeout.
     Keep detailed acceptance procedures in `docs/releasing.md` and
     `docs/deployment.md`, not duplicated in this backlog.
-
-- [ ] **Fix identical-tree release CI evidence collection (v1.3.0).**
-  During v1.2.2 release verification, GitHub API version `2026-03-10`
-  returned a null `merge_commit_sha` in the commit-to-PR association
-  response for [PR #35](https://github.com/frankysan/InfinityDB/pull/35),
-  despite the PR being merged. A process-local override to API version
-  `2022-11-28` allowed the unchanged collector to verify the identical
-  tree and all three required workflows.
-  In `tools/ci/prepare_release_ci_evidence.py`, use the association
-  endpoint to discover PR numbers, then retrieve authoritative individual
-  PR metadata before validating merge identity. Preserve unique-match,
-  same-repository, merged-into-main, exact merge/candidate SHA, identical
-  tree and successful candidate CI requirements. Apply the correction
-  to the shared post-merge CI reuse path as well. Add focused regression
-  coverage for incomplete association metadata and rejection of genuinely
-  mismatched or ambiguous PRs.
-
-- [ ] **Support direct production deployment probes with an explicit Host header.**
-  The v1.2.0 public smoke probe received HTTP 403 while browser access worked;
-  direct requests to the loopback listener succeeded with the configured
-  Caddy Host header. Extend `tools/ci/verify_running_deployment.py` with an
-  optional public Host override, leaving the metrics listener and existing
-  default behavior unchanged. Add focused regression tests and document the
-  direct-production invocation in `deployment.md` and `releasing.md`. Verify
-  exact release identity, snapshot/static revisions, representative routes,
-  health and metrics without relying on the external proxy.
 
 ### Performance, storage, and build tooling
 

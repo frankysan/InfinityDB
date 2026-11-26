@@ -573,6 +573,10 @@ the production host must not substitute newly built data.
   .venv/bin/python -m tools.ci.verify_running_deployment --public-base https://YOUR-HOST --metrics-base http://127.0.0.1:9090 --expected-version <version>
   ```
 
+  If the external proxy rejects the probe, use the
+  [direct Caddy invocation with an explicit Host header](deployment.md#isolated-local-deployment-test)
+  and separately verify public browser access.
+
   Use the available paired database/source verifier when the release changes
   data publications.
 - [ ] Smoke-test the main application route and the release's changed
