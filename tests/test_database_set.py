@@ -46,9 +46,9 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
                  "weapon-profile-sources.json"):
         (runtime_set / name).write_text("invalid", encoding="utf-8")
     result = validate_database_set(Path("selected"), require_complete=True)
-    assert result["layout"] == "v17-four-file"
+    assert result["layout"] == "v18-four-file"
     assert result["integrityCheck"] == "full"
-    assert result["schemaVersion"] == 17
+    assert result["schemaVersion"] == 18
     assert result["deployedObjects"] == 17
     assert result["unresolvedDeliveries"] == 1
     assert result["variantPublicationVersion"] == 2
@@ -225,7 +225,7 @@ def test_complete_startup_rejects_transitional_set_without_fallback(
     with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
         connection.execute("PRAGMA user_version=16")
     before = fingerprints(runtime_set)
-    with pytest.raises(ValueError, match="require Rules schema v17"):
+    with pytest.raises(ValueError, match="require Rules schema v18"):
         create_app_from_database_set(runtime_set)
     assert fingerprints(runtime_set) == before
 

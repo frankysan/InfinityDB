@@ -23,6 +23,9 @@ are not retroactively relabeled.
 - **Data processing + Web backend:** Materialized deduplicated General-profile
   selections during database generation; Extended Explorer and Unit details
   share them while preserving public profile and availability semantics.
+- **Data processing + Web backend:** Materialized composed current N5 Rules
+  records during database generation for faster reference and catalog lookups,
+  preserving scoped contributions, reverse relations and citations.
 
 ### Fixed
 

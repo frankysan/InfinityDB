@@ -203,12 +203,13 @@ selection still uses the shared runtime composer. The existing
 [General profile contract](data-model.md#general-profile) remains authoritative;
 both surfaces agree for equivalent selections.
 
-Potential subsequent candidates include canonical Unit details, composed
-Rules records and relations, Skill/Equipment/Weapon enrichment, search
-identity indexes, Glossary entries, catalog usage associations and Scenario
-map SVGs for bounded presentation variants. Respect publication/season scope,
-requested Army context and presentation parameters; materialize only the
-snapshot-dependent portion when a result also depends on a request.
+Rules v18 additionally publishes composed current Rules records with
+their contributions, citations, reverse relations and Army links, indexed
+by identity, kind and applicable N5 scenario context. The canonical
+composer remains the build implementation and legacy reader. Potential
+subsequent candidates include maintained-text tokens, catalog summaries,
+search identities, Glossary entries and Scenario map SVGs. Respect
+publication/season scope and materialize only snapshot-dependent portions.
 Arbitrary filter combinations, prospective counts, pagination and user
 preferences remain runtime selection/query work; precompute reusable
 associations or indexes rather than enumerating unbounded query results.
@@ -458,7 +459,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v33, Rules v17 and ITS v2,
+The complete serving contract requires Army v33, Rules v18 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

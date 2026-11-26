@@ -268,6 +268,16 @@ and Army catalog usage (216 ms). Cumulative profiler times overlap and
 include instrumentation overhead; these are prioritization evidence, not
 unprofiled latency or projected savings.
 
+Rules v18: recorded-source build 108.9 s; Rules database grew from
+5,365,760 to 8,077,312 bytes. All current ordinary and scenario-specific
+record selections, kind reads, Army-link and Label reverse lookups matched
+the v17 composer. Missing and corrupted projection data failed validation.
+Single profiled Windows Chrome samples before and after this change show
+global search Rules-kind lookup time falling from 302 to 64 ms, and search
+composition from 718 to 446 ms. Skills API profiling fell from 668 to
+434 ms, and Unit detail from 318 to 209 ms. These are diagnostic comparisons,
+not controlled repeated measurements; browser wall times varied independently.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

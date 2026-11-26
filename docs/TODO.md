@@ -448,9 +448,9 @@ make v1.3.0 depend on them.
   - [ ] Extend full Unit-detail parity coverage to remaining availability
     combinations; evaluate worker memory and cross-platform performance at
     release validation; retire redundant runtime caches only when justified.
-  - [ ] Evaluate materializing composed current Rules records, Army links,
-    reverse relations and reusable maintained-text reference tokens; preserve
-    source contributions, scenario scope and publication ownership.
+  - [ ] Evaluate materializing reusable maintained-text reference tokens
+    on top of the Rules v18 composed-record projection, preserving
+    consumer-local routes, scenario scope and publication ownership.
   - [ ] Pilot a compact global search index from canonical public identities,
     normalized aliases, Unit search terms and scoped route metadata across
     Army, Rules and ITS. Preserve existing substring matching and ranking.

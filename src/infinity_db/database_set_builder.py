@@ -147,7 +147,7 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
         documents, rules, variant_usage=variants, weapon_citations=weapons,
         restriction_chart=chart, trait_wiki_links=trait_links,
         combined_saving_rolls=saving_rolls, ammunition_references=ammunition,
-        weapon_properties=properties,
+        weapon_properties=properties, materialize_composed_records=True,
         army_database=army, **export_options,
     )
 

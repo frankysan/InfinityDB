@@ -8,7 +8,7 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The complete serving runtime uses Army v33 in `army.db`, Rules v17 in
+The complete serving runtime uses Army v33 in `army.db`, Rules v18 in
 `rules_n5.db` and ITS schema v2 in `its_17.db` and `its_18.db`.
 Structured references, source/citation identity, symbol mappings and
 shared General-profile projections are embedded. Serving requires all four,
@@ -2884,6 +2884,30 @@ Glossary/search links, origin previews and Weapon detail payload.
 Historical schemas and explicit source-review calls keep the
 validated JSON adapter; current serving uses the v17 SQLite projection.
 
+### Composed current records in Rules v18
+
+Rules v18/compatibility 20 retains the authoritative relational tables and
+all v17 publications. The final build derives `composed_rule_records` using
+the existing composition and reverse-relation functions. Each row has a
+semantic record ID, a scenario-context key (empty for the ordinary current
+view), kind and serialized composed record, including source contributions,
+citations, labels, resolved relation endpoints and Army links.
+
+Only affected record IDs receive contextual rows, not a copy of every record
+for each scenario. A contextual read prefers its exact selection, otherwise
+uses the ordinary record; scenario-only records have no ordinary row.
+Kind and reverse-lookup queries retain their ordinary current scope and
+ordering. Army links remain opt-in on the public read model.
+
+Validation checks the selection matrix against current source definitions
+and scenario scopes and verifies its content fingerprint. The final build
+binds the projection to the existing matched publication provenance.
+Historical/standalone Rules v8–v17 retain canonical runtime composition.
+ITS season databases remain separate; this projection does not change
+their composition or ownership. Maintained-text token resolution that
+depends on consumer-local routes, Army identities or ITS context remains
+request-time work.
+
 ### Equipment presentation encodings in Army v27
 
 The editable `config/catalogs/equipment-presentation-encodings.json`
@@ -3123,7 +3147,7 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `infinity-db build` creates Army v33 and Rules v17 together in the
+Normal `infinity-db build` creates Army v33 and Rules v18 together in the
 selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded
@@ -4512,10 +4536,10 @@ DDL; the rules schema script starts its transaction internally because `executes
 previously pending transaction.
 
 The complete Rules builder still constructs its initial v8 relational schema
-and adds the reviewed embedded projections through v9–v17 as build-time
-stages. These stages are used to produce the current v17 publication, not
+and adds the reviewed embedded projections through v9–v18 as build-time
+stages. These stages are used to produce the current v18 publication, not
 an invitation to serve a historical database in place of a complete set.
-Normal checkout/Docker serving requires the validated current Rules v17
+Normal checkout/Docker serving requires the validated current Rules v18
 publication together with matched Army v33 and both ITS v2 seasons; separately
 selected non-complete databases are only for explicit inspection or
 targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)

@@ -149,7 +149,7 @@ release/audit narrative belongs in the changelog and Git history.
 - `data/generated/army.db`: tracked Army-derived application runtime database.
 - `data/generated/rules_n5.db`: tracked curated-rules runtime database.
 - `data/generated/its_17.db` and `its_18.db`: current published revisions of the two ITS seasons.
-- Army v33 and Rules v17 embed exact variants, reviewed Weapon citations,
+- Army v33 and Rules v18 embed exact variants, reviewed Weapon citations,
   deployed objects, maintained reference facts, symbol mappings/hashes and
   shared General-profile projections.
 - Build-only raw Army exports and intermediate JSON belong in ignored
