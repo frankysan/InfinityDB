@@ -470,6 +470,38 @@ complete-build duration. These are component measurements, not a timed
 alternative exporter. Retain the full export validation and existing
 file-based handoff; no additional trusted-input interface is justified.
 
+### Rules publication validation cost
+
+Run the diagnostic against a matching complete published Army/Rules pair:
+
+```powershell
+python -m tools.performance.benchmark_rules_publication
+```
+
+Windows, 2026-11-26, Python 3.14.10 / SQLite 3.50.4. The selected Army
+and Rules SHA-256 values were respectively
+`c47df730945526b41df806a26462946bdace71a6ae044f87030342cf0931ad9e` and
+`7f05e27f025510ecefce6525a37244e598fe93fb77b14537d61f7b6cae2b0446`.
+The tool reconstructs the four Rules export stages in disposable files,
+reusing published deployed-object and variant facts, and validates the
+final Rules database before search publication. This isolates export cost;
+it does not time source projection, General-profile composition or the
+complete build.
+
+Before and after the delimiter-search parser change, respectively, the
+General-profile core export took 1.65/1.02 s, deployed-object export
+1.73/1.08 s, variant export 2.84/2.36 s, and final Rules export
+3.96/3.51 s (10.18/7.97 s combined). Document validation accounted for
+6.33/3.81 s. The repeat optimized run was not concurrent with tests;
+these are diagnostic single-run totals, not controlled end-to-end
+medians. All four stages retain full validation and canonical output
+finalization as before. Repeated insertion and vacuuming are too cheap
+to justify a separate staged export architecture. The maintained-text
+suite passed 46 tests, including seven new delimiter-boundary cases.
+The history-enabled complete runtime build passed in 230.73 s;
+deployment database/reference verification also passed (SVG validation
+skipped). Both ITS databases remained byte-identical.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

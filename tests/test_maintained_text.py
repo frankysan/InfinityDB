@@ -69,6 +69,31 @@ def test_maintained_text_parser_preserves_text_references_distances_and_escapes(
     ]
 
 
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("", []),
+        ("Ordinary [prose] with a \\ and Unicode é.", [
+            {"type": "text", "text": "Ordinary [prose] with a \\ and Unicode é."},
+        ]),
+        (r"\[[literal", [{"type": "text", "text": "[[literal"}]),
+        (r"a\\[[literal]]b", [{"type": "text", "text": r"a\[[literal]]b"}]),
+        (r"\[[literal]]\[[another]]", [{"type": "text", "text": "[[literal]][[another]]"}]),
+        ("[[skill:jump]][[skill:dodge]]", [
+            {"type": "reference", "target": "skill:jump"},
+            {"type": "reference", "target": "skill:dodge"},
+        ]),
+        (r"before \[[literal]] [[skill:jump]] after", [
+            {"type": "text", "text": "before [[literal]] "},
+            {"type": "reference", "target": "skill:jump"},
+            {"type": "text", "text": " after"},
+        ]),
+    ],
+)
+def test_maintained_text_delimiter_boundaries(value: str, expected: list[dict]) -> None:
+    assert parse_maintained_text(value) == expected
+
+
 def test_maintained_text_parser_supports_glossary_game_terms() -> None:
     assert parse_maintained_text(
         "Through [[term:zero-visibility-zone:plural]] and "

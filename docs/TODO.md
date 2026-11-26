@@ -379,11 +379,6 @@ make v1.3.0 depend on them.
   performance and deployment portability/multi-platform suitability before
   deciding whether a storage/query abstraction is justified.
 
-- [ ] Profile Rules publication stages and remove redundant work only where
-  justified by measured build-time costs. The initial Army export benchmark
-  found no substantial remaining optimization opportunity worth weakening or
-  complicating validation; see [measurements](testing.md#initial-army-export-validation-cost).
-
 - [ ] **Retire the remaining explicit raw-SQLite interfaces** once independent
   research and source-audit consumers no longer need them. Complete runtime
   builds and default standalone exports already omit `army.raw.db`; verified

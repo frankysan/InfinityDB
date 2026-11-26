@@ -35,6 +35,7 @@ _UNMARKED_DISTANCE_PATTERN = re.compile(
     r"(?<![\w.])[+-]?\d+(?:\.\d+)?\s*(?:cm\b|inches?\b|[\"″])",
     re.IGNORECASE,
 )
+_TOKEN_DELIMITER_PATTERN = re.compile(r"\\\[\[|\[\[|\]\]")
 
 
 def _number(value: Decimal) -> int | float:
@@ -166,7 +167,16 @@ def parse_maintained_text(value: str, *, context: str = "maintained text") -> li
 
     index = 0
     while index < len(value):
-        if value.startswith(r"\[[", index):
+        # Find delimiters without visiting every prose character in Python.
+        # Escaped openings retain precedence over unescaped openings.
+        match = _TOKEN_DELIMITER_PATTERN.search(value, index)
+        if match is None:
+            buffer.append(value[index:])
+            break
+        if match.start() > index:
+            buffer.append(value[index:match.start()])
+        index = match.start()
+        if match.group() == r"\[[":
             end = value.find("]]", index + 3)
             if end < 0:
                 buffer.append("[[")
@@ -175,7 +185,7 @@ def parse_maintained_text(value: str, *, context: str = "maintained text") -> li
                 buffer.append(value[index + 1 : end + 2])
                 index = end + 2
             continue
-        if value.startswith("[[", index):
+        if match.group() == "[[":
             flush()
             end = value.find("]]", index + 2)
             if end < 0:
@@ -189,10 +199,7 @@ def parse_maintained_text(value: str, *, context: str = "maintained text") -> li
             tokens.append(token if token is not None else _parse_reference(body, context))
             index = end + 2
             continue
-        if value.startswith("]]", index):
-            raise ValueError(f"{context}: unmatched maintained-text closing delimiter")
-        buffer.append(value[index])
-        index += 1
+        raise ValueError(f"{context}: unmatched maintained-text closing delimiter")
     flush()
     return tokens
 
