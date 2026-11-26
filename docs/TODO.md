@@ -241,8 +241,12 @@ make v1.3.0 depend on them.
   17,685 raw changes, 1,809 composition candidates and the separate membership,
   loadout and catalog streams. See the
   [private history data model](data-model.md#private-army-history-research-database).
-  - [ ] Design the player-facing history projection and identity resolution
-    using the indexed N5 candidate and evidence reports.
+  Private Unit-history projection implemented: all 921 current source IDs
+  matched directly to 738 logical Units; four historical-only IDs retained.
+  1,806 composition candidates group into 1,282 observed-window groups
+  across 330 logical Units; 265 Army observations remain separate.
+  - [ ] Review and promote the player-facing history projection, including
+    unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,
     missing definitions, unresolved reference shapes and same-day alternatives
     as explicit review or coverage states. Preserve army scope, edition-scoped

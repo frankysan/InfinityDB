@@ -189,6 +189,12 @@ the retired source roots.
   The database remains outside the tracked generated runtime set and is not
   a build, serving, packaging or deployment input. Its persistence model is
   described in the [data model](../docs/data-model.md#private-army-history-research-database).
+  Run `python -m tools.research.project_army_history --history-sha256 HASH
+  --output local/data/history/generated/unit_history_preview.json` with the
+  exact SHA-256 of the generated history database to prepare a private Unit
+  history read model. It uses the tracked Army database and the pinned source
+  archive, records both database hashes, and refuses a different current
+  source snapshot. The output remains private and requires no runtime change.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not

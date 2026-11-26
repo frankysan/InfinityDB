@@ -75,6 +75,22 @@ bodies remain available as JSON. No record is promoted to a confirmed change
 or selected for public exposure by this builder. See the
 [data lifecycle](../data/README.md) for the explicit build command.
 
+The private Unit-history preview binds this research index to a current
+Army database whose recorded source archive matches an accepted direct N5
+observation. Require the historical identity disposition, direct source ID,
+slug, canonical faction and `idArmy` to agree before following the current
+`logical_unit_sources` mapping. Historical-only and conflicting identities
+remain explicit and are not assigned to a present-day Unit by name alone.
+A logical Unit can contain several historical source identities; keep their
+source paths and Army contexts distinct. Composition candidates group fields
+only for the same source target, observed window, endpoint comparison scope
+and historical labels. They retain before/after values and evidence record
+references, not inferred exact release dates. Army list and AVA observations
+are separate from composition. Unresolved structural, membership and loadout
+records and catalog evidence remain separate drilldown references; raw
+comparison categories and ambiguous Army windows retain coverage context.
+The preview is not a published history API or a verified event log.
+
 ### Accepted authoring direction: one source family, version-tagged facts
 
 For maintained curation, **prefer one file per logical source family** rather

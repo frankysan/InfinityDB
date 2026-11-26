@@ -129,3 +129,63 @@ def test_report_pin_rejects_modified_bytes(tmp_path, monkeypatch):
     report.write_bytes(original + b" ")
     with pytest.raises(ValueError, match="SHA-256 differs"):
         history.selected_reports(tmp_path, source)
+
+
+@pytest.mark.parametrize(("status", "direct", "current", "expected"), [
+    ("consistentObservedIdAndSlug", {3}, True, "matched"),
+    ("reviewedSpellingAlias", {3}, True, "matched"),
+    ("reviewedSeparateArmyIdentity", {3}, True, "matched"),
+    ("review", {3}, True, "historicalIdentityReview"),
+    ("consistentObservedIdAndSlug", set(), True, "noDirectEvidence"),
+    ("consistentObservedIdAndSlug", set(), False, "historicalOnly"),
+    ("consistentObservedIdAndSlug", {3}, False, "missingCurrentSource"),
+])
+def test_preview_requires_direct_identity_evidence(status, direct, current, expected):
+    from tools.research.project_army_history import resolve_identity
+
+    historical = {
+        "unitId": 42, "status": status,
+        "slugEvidence": [{"slug": "test", "occurrences": [
+            {"observationIndices": [3], "canonical": 101, "idArmy": 42},
+        ]}],
+    }
+    row = {"sourceSlug": "test", "canonicalFactionId": 101, "idArmy": 42,
+           "logicalUnitId": 7}
+    result = resolve_identity(historical, row if current else None, direct)
+    assert result["status"] == expected
+    assert result["logicalUnitId"] == (7 if expected == "matched" else None)
+    if expected == "matched":
+        for field, changed in (("sourceSlug", "other"), ("canonicalFactionId", 102),
+                               ("idArmy", 43)):
+            conflict = resolve_identity(historical, {**row, field: changed}, direct)
+            assert conflict["status"] == "currentSourceConflict"
+            assert conflict["logicalUnitId"] is None
+
+
+def test_preview_groups_only_identical_target_window_and_scope():
+    from tools.research.project_army_history import composition_groups
+
+    def candidate(field, comparison, army=101, end="2025-02-01"):
+        return {
+            "ref": {"stream": "compositionCandidate", "position": comparison},
+            "historicalLabels": [[{"id": 42, "name": "Historical name"}]],
+            "body": {
+                "candidateId": f"{field}-{comparison}-{end}",
+                "path": ["units", 42, "profileGroups", 1, "profiles", 2, field],
+                "earlierObservedDate": "2025-01-01", "laterObservedDate": end,
+                "before": {"present": True, "value": 11},
+                "after": {"present": True, "value": 12},
+                "evidence": [{"factionId": army, "comparisonIndex": comparison}],
+            },
+        }
+
+    rows = [candidate("bs", 0), candidate("cc", 0), candidate("ph", 1),
+            candidate("wip", 0, end="2025-03-01")]
+    result = composition_groups(rows)
+    assert len(result) == 3
+    assert sum(len(group["changes"]) for group in result) == 4
+    combined = next(group for group in result if len(group["changes"]) == 2)
+    assert [c["field"] for c in combined["changes"]] == ["bs", "cc"]
+    assert combined["historicalLabels"][0][0]["name"] == "Historical name"
+    assert combined["comparisonIndices"] == [0]
+    assert combined["status"] == "observedCandidate"
