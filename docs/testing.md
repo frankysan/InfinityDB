@@ -296,6 +296,21 @@ Mimetism 317.17/17.66 vs 2.27/1.62; Activate Console 326.21/18.99 vs
 Fresh application construction medians were 2.82–3.15 s; these are not
 browser timings or controlled startup comparisons.
 
+### Catalog materialization
+
+Rules v20 embeds all 249 raw Army catalog items (88 Skills, 28 Equipment,
+133 Weapons), public list/filter summaries and shared logical Unit usage
+display records. The recorded-source build took 132.03 s; Rules grew from
+8,298,496 to 9,965,568 bytes; Army and ITS sizes were unchanged.
+
+Run `python -m tools.performance.benchmark_catalog_projection --iterations 3`.
+Windows standalone pilot medians (canonical vs projected, ms): Skills cold
+summary 275.96/4.73, Equipment 160.35/0.76, Weapons 179.05/1.82.
+Most-used raw item detail: Skills 151.19/10.03, Equipment 123.71/3.95,
+Weapons 213.27/8.64. The pilot took 2.492 s to build and occupied
+1,695,744 bytes. These are server-side component timings, not browser,
+startup or complete enriched detail measurements.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

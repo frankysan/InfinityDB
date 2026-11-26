@@ -34,6 +34,8 @@ COMPOSED_SCHEMA_VERSION = 18
 COMPOSED_COMPATIBILITY_VERSION = 20
 SEARCH_INDEX_SCHEMA_VERSION = 19
 SEARCH_INDEX_COMPATIBILITY_VERSION = 21
+CATALOG_SCHEMA_VERSION = 20
+CATALOG_COMPATIBILITY_VERSION = 22
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -1007,7 +1009,7 @@ class RulesDatabase:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
             if schema_version not in {
-                RULES_SCHEMA_VERSION, *range(9, SEARCH_INDEX_SCHEMA_VERSION + 1),
+                RULES_SCHEMA_VERSION, *range(9, CATALOG_SCHEMA_VERSION + 1),
             }:
                 raise ValueError("Unsupported rules database schema; rebuild rules_n5.db")
             metadata_rows = connection.execute(
@@ -1020,6 +1022,7 @@ class RulesDatabase:
                 12: 14, 13: 15, 14: 16, 15: 17, 16: 18, 17: 19,
                 COMPOSED_SCHEMA_VERSION: COMPOSED_COMPATIBILITY_VERSION,
                 SEARCH_INDEX_SCHEMA_VERSION: SEARCH_INDEX_COMPATIBILITY_VERSION,
+                CATALOG_SCHEMA_VERSION: CATALOG_COMPATIBILITY_VERSION,
             }[schema_version]
             if (
                 metadata.get("databaseCompatibilityVersion") != expected_compatibility
@@ -1110,6 +1113,13 @@ class RulesDatabase:
                     validate_search_index(connection)
                 except (sqlite3.Error, TypeError, KeyError) as exc:
                     raise ValueError("Invalid global search publication") from exc
+            if schema_version >= CATALOG_SCHEMA_VERSION:
+                from .catalog_projection import validate_catalog_projection
+
+                try:
+                    validate_catalog_projection(connection)
+                except (sqlite3.Error, TypeError, KeyError) as exc:
+                    raise ValueError("Invalid catalog projection") from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -1121,7 +1131,7 @@ class RulesDatabase:
 
         with self._connect() as connection:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema not in range(10, SEARCH_INDEX_SCHEMA_VERSION + 1):
+            if schema not in range(10, CATALOG_SCHEMA_VERSION + 1):
                 return None
             return read_deployed_objects(connection, army_database)
 
@@ -1134,7 +1144,7 @@ class RulesDatabase:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
             if schema in {RULES_SCHEMA_VERSION, 9, 10}:
                 return None
-            if schema not in range(11, SEARCH_INDEX_SCHEMA_VERSION + 1):
+            if schema not in range(11, CATALOG_SCHEMA_VERSION + 1):
                 raise ValueError("Unsupported Rules schema for exact variant usage")
             publication = read_variant_usage(connection, army_database)
         publication["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(self.path)
@@ -1146,7 +1156,7 @@ class RulesDatabase:
 
         with self._connect() as connection:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema not in range(12, SEARCH_INDEX_SCHEMA_VERSION + 1):
+            if schema not in range(12, CATALOG_SCHEMA_VERSION + 1):
                 raise ValueError("Embedded Weapon citations require Rules v12 or newer")
             return read_weapon_profile_citations(connection, army_database)
 
@@ -1222,7 +1232,7 @@ class RulesDatabase:
                     "items": [],
                     "evaluationSupported": False,
                 }
-            if schema not in range(9, SEARCH_INDEX_SCHEMA_VERSION + 1):
+            if schema not in range(9, CATALOG_SCHEMA_VERSION + 1):
                 raise ValueError("Unsupported rules database schema")
             payload = candidate_restrictions_payload(
                 connection, subject=subject, record_id=record_id,

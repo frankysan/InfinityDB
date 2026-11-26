@@ -13,6 +13,7 @@ are not retroactively relabeled.
 ### Player summary
 
 - Faster global search through a compact prebuilt search index.
+- Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
@@ -32,6 +33,10 @@ are not retroactively relabeled.
 - **Data processing + Web backend:** Materialize global search identities and
   normalized search terms across Army, Rules and ITS; preserve matching,
   ranking and public routes.
+
+- **Data processing + Web backend:** Materialized catalog summaries, filter
+  identities and canonical Army detail usage with shared Unit display records.
+  Contextual matching and curated detail enrichment remain dynamic.
 
 ### Fixed
 

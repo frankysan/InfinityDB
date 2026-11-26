@@ -286,7 +286,7 @@ the retired source roots.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — four tracked runtime databases: `army.db`
-  (Army v33/compatibility 42), `rules_n5.db` (Rules v19/compatibility 21),
+  (Army v33/compatibility 42), `rules_n5.db` (Rules v20/compatibility 22),
   `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
   Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
   symbol mappings and General profiles remain embedded in Army/Rules. The ITS databases
@@ -386,7 +386,7 @@ exist for independent development commands; they are not serving dependencies.
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
 `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
-Army v33 / Rules v19 / ITS v2, with matched provenance
+Army v33 / Rules v20 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -414,6 +414,7 @@ N5 records and the selected Army. Their source-authority and content
 fingerprints are checked without creating official rules records.
 Rules v18 adds composed records; v19 validates the compact global search
 projection and its binding to the selected Army and ordered ITS publications.
+Rules v20 adds scope-bound catalog summaries and deduplicated detail usage.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.

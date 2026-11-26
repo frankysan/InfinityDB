@@ -17,6 +17,7 @@ from infinity_db.army_overview import (
     army_overview_out_of_catalog,
 )
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
+from infinity_db.catalog_projection import CatalogProjection
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database import ArmySelectionError, Database
@@ -531,6 +532,7 @@ class ApiHandler:
         weapon_profile_citations: ProfileCitations | None = None,
         publication_registry: PublicationRegistry | None = None,
         search_index: PublishedSearchIndex | None = None,
+        catalog_projection: CatalogProjection | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
@@ -558,8 +560,12 @@ class ApiHandler:
             if publication_registry is not None else {}
         )
         self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
-        self.skill_catalog = SkillCatalog(database, rules_database, self.scenario_catalog)
-        self.equipment_catalog = EquipmentCatalog(database, rules_database)
+        self.skill_catalog = SkillCatalog(
+            database, rules_database, self.scenario_catalog, projection=catalog_projection,
+        )
+        self.equipment_catalog = EquipmentCatalog(
+            database, rules_database, projection=catalog_projection,
+        )
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)

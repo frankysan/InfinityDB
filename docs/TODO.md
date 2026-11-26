@@ -451,9 +451,6 @@ make v1.3.0 depend on them.
   - [ ] Evaluate materializing reusable maintained-text reference tokens
     on top of the Rules v18 composed-record projection, preserving
     consumer-local routes, scenario scope and publication ownership.
-  - [ ] Evaluate catalog summaries and usage associations for Skills,
-    Equipment and Weapons, reusable by detail pages and filter choices;
-    avoid duplicating full usage payloads across records.
   - [ ] Evaluate invariant Unit detail enrichment, Unit graph and contextual
     filter-index inputs. Keep arbitrary selections, prospective counts and
     pagination dynamic. Include bounded Specialist qualification candidates.

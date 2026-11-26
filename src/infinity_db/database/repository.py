@@ -15,7 +15,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 from pathlib import Path
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from infinity_army_data.availability import (
     MERCENARY_AVAILABILITY,
@@ -75,6 +75,9 @@ from .schema import (
 )
 from .unit_filter_matching import MatchContext, matches_selected
 from .unit_filter_matching import evaluate as evaluate_unit_filter_contexts
+
+if TYPE_CHECKING:
+    from infinity_db.catalog_projection import CatalogProjection
 
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
@@ -677,6 +680,7 @@ def visible_armies_for_group(
 class Database:
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
+        self.catalog_projection: CatalogProjection | None = None
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
@@ -2169,6 +2173,8 @@ class Database:
     @instance_lru_cache(maxsize=3)
     def list_catalog_filter_items(self, catalog: str) -> list[dict[str, Any]]:
         """Return filter identities and source aliases without catalog usage queries."""
+        if self.catalog_projection is not None and catalog in {"skills", "equipment", "weapons"}:
+            return self.catalog_projection.summary(catalog, "army-filter")
         graph = self._application_catalog_graph(catalog)
         return sorted(
             [
@@ -2187,6 +2193,8 @@ class Database:
         """Return the named records in one of the public rules reference catalogs."""
         if catalog not in {"skills", "equipment", "weapons"}:
             raise ValueError(f"Unknown catalog: {catalog}")
+        if self.catalog_projection is not None:
+            return self.catalog_projection.summary(catalog, "army")
         graph = self._application_catalog_graph(catalog)
         suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
         profile_usage = _canonical_usage_select("profile", catalog, collapse_payloads=True)
@@ -2976,6 +2984,8 @@ class Database:
         application_item_id = self.application_catalog_id(catalog, item_ref)
         if application_item_id is None:
             return None
+        if self.catalog_projection is not None:
+            return self.catalog_projection.detail(catalog, application_item_id)
         item = graph["items"].get(application_item_id)
         if item is None:
             return None
@@ -3152,6 +3162,8 @@ class Database:
         application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
             return None
+        if self.catalog_projection is not None:
+            return self.catalog_projection.detail("skills", application_skill_id)
         skill = graph["items"].get(application_skill_id)
         if skill is None:
             return None

@@ -52,6 +52,7 @@
         "test_availability",
         "test_availability_schema",
         "test_catalog_rules",
+        "test_catalog_projection",
         "test_composed_rules_publication",
         "test_search_index_publication",
         "test_combined_saving_roll_storage",

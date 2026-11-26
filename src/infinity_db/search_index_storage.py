@@ -12,6 +12,11 @@ from pathlib import Path
 from typing import Any
 
 from .build_provenance import canonical_bytes, file_sha256
+from .catalog_projection import (
+    collect_catalog_projection,
+    record_catalog_projection,
+    stage_catalog_projection,
+)
 from .database.repository import Database, accent_insensitive_key
 from .equipment_catalog import EquipmentCatalog
 from .glossary_catalog import GlossaryCatalog
@@ -19,9 +24,10 @@ from .hacking_program_catalog import HackingProgramCatalog
 from .publication_registry import PublicationRegistry
 from .reference_catalog import LabelCatalog, RulesRecordCatalog
 from .rules_database import (
+    CATALOG_COMPATIBILITY_VERSION,
+    CATALOG_SCHEMA_VERSION,
     COMPOSED_SCHEMA_VERSION,
     RULES_METADATA_TABLE,
-    SEARCH_INDEX_COMPATIBILITY_VERSION,
     SEARCH_INDEX_SCHEMA_VERSION,
     RulesDatabase,
 )
@@ -133,7 +139,7 @@ class PublishedSearchIndex:
 def publish_search_index(
     army_path: Path, rules_path: Path, season_paths: Mapping[str, Path],
 ) -> None:
-    """Finalize Rules after the other database bytes are stable."""
+    """Finalize cross-publication projections after the other database bytes are stable."""
     database = Database(army_path)
     rules = RulesDatabase(rules_path, immutable_snapshot=True)
     registry = PublicationRegistry(rules, season_paths)
@@ -151,6 +157,7 @@ def publish_search_index(
         database.army_reference_data()[1],
     )
     entries = list(catalog.entries())
+    catalog_rows = collect_catalog_projection(database, rules, registry)
     scope = search_scope(file_sha256(army_path), registry.season_manifest())
     with closing(sqlite3.connect(rules_path)) as db:
         with db:
@@ -162,10 +169,12 @@ def publish_search_index(
                 f"INSERT INTO {RULES_METADATA_TABLE} VALUES (?,?)",
                 ("searchIndex", canonical_bytes(metadata).decode("utf-8")),
             )
-            db.execute(f"PRAGMA user_version={SEARCH_INDEX_SCHEMA_VERSION}")
+            stage_catalog_projection(db, catalog_rows)
+            record_catalog_projection(db)
+            db.execute(f"PRAGMA user_version={CATALOG_SCHEMA_VERSION}")
             for key, value in (
-                ("formatVersion", SEARCH_INDEX_SCHEMA_VERSION),
-                ("databaseCompatibilityVersion", SEARCH_INDEX_COMPATIBILITY_VERSION),
+                ("formatVersion", CATALOG_SCHEMA_VERSION),
+                ("databaseCompatibilityVersion", CATALOG_COMPATIBILITY_VERSION),
             ):
                 db.execute(
                     f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?", (str(value), key),

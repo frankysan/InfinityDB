@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database, instance_lru_cache
@@ -15,13 +15,20 @@ from infinity_db.equipment_config import (
 )
 from infinity_db.rules_database import RulesDatabase
 
+if TYPE_CHECKING:
+    from infinity_db.catalog_projection import CatalogProjection
+
 
 class EquipmentCatalog:
     """Expose canonical Equipment regardless of how Army presents its occurrence."""
 
-    def __init__(self, database: Database, rules_database: RulesDatabase | None) -> None:
+    def __init__(
+        self, database: Database, rules_database: RulesDatabase | None,
+        *, projection: CatalogProjection | None = None,
+    ) -> None:
         self.database = database
         self.rules_database = rules_database
+        self._projection = projection
         embedded = database.equipment_presentation_encodings()
         self._encodings = (
             embedded if embedded is not None else load_equipment_presentation_config()
@@ -81,6 +88,10 @@ class EquipmentCatalog:
     def list_equipment(self, *, filter_only: bool = False) -> list[dict[str, Any]]:
         """Return Army, presentation-encoded, and curated-only Equipment."""
 
+        if self._projection is not None:
+            return self._projection.summary(
+                "equipment", "public-filter" if filter_only else "public",
+            )
         items = deepcopy(
             self.database.list_catalog_filter_items("equipment") if filter_only
             else self.database.list_catalog_items("equipment")

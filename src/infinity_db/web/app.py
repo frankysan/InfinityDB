@@ -12,6 +12,7 @@ from time import perf_counter
 from typing import Any
 
 from infinity_db import __display_version__, __version__
+from infinity_db.catalog_projection import CatalogProjection
 from infinity_db.database import Database
 from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
@@ -134,6 +135,10 @@ class Application:
             )
             if self.rules_database is not None else None
         )
+        catalog_projection = (
+            CatalogProjection.select(search_index.path) if search_index is not None else None
+        )
+        self.database.catalog_projection = catalog_projection
         symbols = SymbolCatalog(publication=self.database.symbol_publication())
         static_revision = static_asset_revision(symbols)
         self.presentation = PresentationHandler(
@@ -154,6 +159,7 @@ class Application:
             weapon_profile_citations=self.weapon_profile_citations,
             publication_registry=self.publication_registry,
             search_index=search_index,
+            catalog_projection=catalog_projection,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.

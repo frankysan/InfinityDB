@@ -8,7 +8,7 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The complete serving runtime uses Army v33 in `army.db`, Rules v19 in
+The complete serving runtime uses Army v33 in `army.db`, Rules v20 in
 `rules_n5.db` and ITS schema v2 in `its_17.db` and `its_18.db`.
 Structured references, source/citation identity, symbol mappings and
 shared General-profile projections are embedded. Serving requires all four,
@@ -2924,6 +2924,23 @@ binding the Rules file to its own hash. Complete serving rejects missing, corrup
 or scope-mismatched projections; explicitly selected older or partial fixtures
 retain the canonical composer. Normalized source tables remain authoritative.
 
+### Catalog projections in Rules v20
+
+Rules v20/compatibility 22 publishes `catalog_summaries` (raw Army and
+composed public list/filter views), `catalog_details` (canonical raw Army
+detail records, with ordered Unit IDs in each source-specific variant),
+and `catalog_usage_units` (one all-availability display record per logical
+Unit referenced by those variants). The canonical composers generate all
+three; the same summary count semantics and source-specific extras are
+retained. Details reconstruct the Unit lists using shared records rather than
+storing repeated Unit payloads. Curated enrichment, contextual matching and
+prospective counts continue to use their existing runtime paths.
+
+The projection is fingerprinted against the same Army and ordered ITS scope
+as global search. Complete serving requires it; explicitly selected older or
+partial sets use canonical runtime composition. The projection does not
+replace normalized occurrences or encode arbitrary filter combinations.
+
 ### Equipment presentation encodings in Army v27
 
 The editable `config/catalogs/equipment-presentation-encodings.json`
@@ -3163,7 +3180,7 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `infinity-db build` creates Army v33 and Rules v19 together in the
+Normal `infinity-db build` creates Army v33 and Rules v20 together in the
 selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded
@@ -4552,10 +4569,10 @@ DDL; the rules schema script starts its transaction internally because `executes
 previously pending transaction.
 
 The complete Rules builder still constructs its initial v8 relational schema
-and adds the reviewed embedded projections through v9–v19 as build-time
-stages. These stages are used to produce the current v19 publication, not
+and adds the reviewed embedded projections through v9–v20 as build-time
+stages. These stages are used to produce the current v20 publication, not
 an invitation to serve a historical database in place of a complete set.
-Normal checkout/Docker serving requires the validated current Rules v19
+Normal checkout/Docker serving requires the validated current Rules v20
 publication together with matched Army v33 and both ITS v2 seasons; separately
 selected non-complete databases are only for explicit inspection or
 targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)

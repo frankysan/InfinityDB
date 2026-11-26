@@ -11,6 +11,7 @@ from time import perf_counter
 
 import pytest
 
+from infinity_db.catalog_projection import CatalogProjection
 from infinity_db.database.repository import accent_insensitive_key
 from infinity_db.database_set import SEASON_DATABASE_SOURCES
 from infinity_db.rules_database import RulesDatabase
@@ -24,15 +25,22 @@ SEASONS = {
 }
 
 
-def test_search_projection_pilot(tmp_path: Path) -> None:
+def test_search_projection_pilot(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     app = create_app(
         RELEASE / "army.db", RELEASE / "rules_n5.db", season_databases=SEASONS,
     )
     catalog = app.api.search_catalog
     assert catalog.published_search is not None
+    with monkeypatch.context() as context:
+        context.setattr(CatalogProjection, "select", lambda path: None)
+        legacy = create_app(
+            RELEASE / "army.db", RELEASE / "rules_n5.db", season_databases=SEASONS,
+        ).api.search_catalog
     path = tmp_path / "search.db"
     started = perf_counter()
-    entries = list(catalog.entries())
+    entries = list(legacy.entries())
     with closing(sqlite3.connect(path)) as db, db:
         stage_search_index(db, entries)
     build_seconds = perf_counter() - started
@@ -68,7 +76,7 @@ def test_search_projection_pilot(tmp_path: Path) -> None:
             assert query_search_index(published_db, query) == expected, query
         for query in queries + terms[::max(1, len(terms)//12)]:
             started = perf_counter()
-            expected = catalog.search_composed(query)
+            expected = legacy.search_composed(query)
             legacy_times.append(perf_counter() - started)
             started = perf_counter()
             actual = query_search_index(db, query)
