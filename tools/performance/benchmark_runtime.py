@@ -308,7 +308,16 @@ def benchmark_unit_explorer(
         "/equipment": "#catalog-table-container",
         "/weapons": "#catalog-table-container",
         "/armies": "#army-overview-groups",
+        "/scenarios": "#scenario-grid",
+        "/scenarios/domination": "#scenario-content",
+        "/search?q=mimetism": "#search-list",
     }
+    if with_seasons:
+        page_cases.update({
+            "/scenarios?collection=its-18": "#scenario-grid",
+            "/scenarios/hardlock?collection=its-18&army_points=300": "#scenario-content",
+            "/search?q=activate%20console": "#search-list",
+        })
 
     if page_names:
         page_names = tuple("/" + name.lstrip("/") for name in page_names)
@@ -318,15 +327,19 @@ def benchmark_unit_explorer(
         page_cases = {route: page_cases[route] for route in page_names}
 
     def run_sample(browser: Any, selected_route: str = "") -> None:
+        started = time.perf_counter()
         app = create_app(
             path, rules_database_path=path.with_name("rules_n5.db"),
             season_databases=season_databases,
         )
+        samples.setdefault("application startup", []).append(time.perf_counter() - started)
+
         def serve(environ, start_response):
             if (
                 profile and (
                     (pages and environ.get("PATH_INFO") in {
-                        "/api" + selected_route, "/api/variant-usage", "/api/visible-unit-ids",
+                        "/api" + selected_route.partition("?")[0],
+                        "/api/variant-usage", "/api/visible-unit-ids",
                     })
                     or (not pages and (
                         environ.get("PATH_INFO") == "/api/unit-filters"
@@ -378,43 +391,37 @@ def benchmark_unit_explorer(
             origin = f"http://127.0.0.1:{server.server_port}"
             if pages:
                 ready = page_cases[selected_route]
-                observed = ready in {
-                    "#skill-content", "#item-content", "#catalog-table-container",
-                }
-                if observed:
-                    page.add_init_script("""(() => {
-                        window.detailRenderTimes = [];
-                        const observer = new MutationObserver(records => {
-                            if (records.some(record =>
-                                record.target.id === 'skill-content'
-                                || record.target.id === 'item-content'
-                                || (record.target.id === 'catalog-list'
-                                    && record.target.childElementCount > 0))) {
-                                window.detailRenderTimes.push(performance.now());
-                            }
-                        });
-                        observer.observe(document, {subtree: true, childList: true});
-                    })()""")
+                target_id = "catalog-list" if ready == "#catalog-table-container" else ready[1:]
+                page.add_init_script("""(() => {
+                    window.detailRenderTimes = [];
+                    const targetId = """ + json.dumps(target_id) + """;
+                    const observer = new MutationObserver(records => {
+                        if (records.some(record => record.target.id === targetId
+                                && record.target.childElementCount > 0)) {
+                            window.detailRenderTimes.push(performance.now());
+                        }
+                    });
+                    observer.observe(document, {subtree: true, childList: true});
+                })()""")
                 for phase in ("cold", "repeat"):
                     started = time.perf_counter()
                     page.goto(origin + selected_route, wait_until="domcontentloaded")
                     page.locator(ready).wait_for(state="visible", timeout=15_000)
                     elapsed = time.perf_counter() - started
                     samples.setdefault(f"{selected_route} {phase}", []).append(elapsed)
-                    if observed:
-                        # Wait for follow-up requests, but report observed render
-                        # timestamps rather than networkidle's fixed quiet interval.
-                        page.wait_for_load_state("networkidle", timeout=15_000)
-                        times = page.evaluate("window.detailRenderTimes")
-                        if not times:
-                            raise ValueError("No detail render observed")
-                        samples.setdefault(f"{selected_route} {phase} first DOM", []).append(
-                            times[0] / 1000,
-                        )
-                        samples.setdefault(f"{selected_route} {phase} final DOM", []).append(
-                            times[-1] / 1000,
-                        )
-                        print(f"{selected_route} {phase} renders: {times}", flush=True)
+                    # Wait for follow-up requests, but report observed render
+                    # timestamps rather than networkidle's fixed quiet interval.
+                    page.wait_for_load_state("networkidle", timeout=15_000)
+                    times = page.evaluate("window.detailRenderTimes")
+                    if not times:
+                        raise ValueError(f"No render observed for {selected_route}")
+                    samples.setdefault(f"{selected_route} {phase} first DOM", []).append(
+                        times[0] / 1000,
+                    )
+                    samples.setdefault(f"{selected_route} {phase} final DOM", []).append(
+                        times[-1] / 1000,
+                    )
+                    print(f"{selected_route} {phase} renders: {times}", flush=True)
                     resources = page.evaluate("""() => performance.getEntriesByType('resource')
                         .filter(e => new URL(e.name).pathname.startsWith('/api/'))
                         .map(e => ({

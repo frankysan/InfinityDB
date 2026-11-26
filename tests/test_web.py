@@ -5759,6 +5759,72 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
     assert json.loads(body)["items"] == [expected[catalog]]
 
 
+def test_global_search_lightweight_projections_match_full_catalogs(monkeypatch) -> None:
+    directory = Path("data/generated")
+    application = create_app(
+        directory / "army.db", directory / "rules_n5.db",
+        season_databases={
+            "its-17": directory / "its_17.db",
+            "its-18": directory / "its_18.db",
+        },
+    )
+    api = application.api
+    search = api.search_catalog
+    full_skills = api.skill_catalog.list_skills()
+    full_equipment = api.equipment_catalog.list_equipment()
+    full_weapons = api.database.list_catalog_items("weapons")
+    full_glossary = [
+        item for item in api.glossary_catalog.entries() if item["embedded"]
+    ]
+
+    def search_fields(items):
+        return [
+            {key: item[key] for key in (
+                "id", "slug", "name", "aliases", "alternate_names", "scenario",
+            ) if key in item}
+            for item in items
+        ]
+
+    assert search_fields(api.skill_catalog.list_skills(filter_only=True)) == search_fields(
+        full_skills
+    )
+    assert search_fields(api.equipment_catalog.list_equipment(filter_only=True)) == search_fields(
+        full_equipment
+    )
+    assert search_fields(api.database.list_catalog_filter_items("weapons")) == search_fields(
+        full_weapons
+    )
+
+    from infinity_db.glossary_catalog import GlossaryCatalog
+
+    fresh_glossary = GlossaryCatalog(api.database, api.rules_database)
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("Search must not construct a full catalog or Glossary")
+
+    monkeypatch.setattr(fresh_glossary, "entries", unexpected)
+    assert fresh_glossary.embedded_entries() == full_glossary
+    # Compare complete ranked search results with the original full projections.
+    queries = (
+        "mimetism", "activate console", "hack consoles", "combi", "cube",
+        "firewall", "dragoes", "casevac", "close combat", "spiral", "a",
+        "nonexistent search term",
+    )
+    with monkeypatch.context() as old:
+        old.setattr(api.skill_catalog, "list_skills", lambda **kwargs: full_skills)
+        old.setattr(api.equipment_catalog, "list_equipment", lambda **kwargs: full_equipment)
+        old.setattr(
+            api.database, "list_catalog_filter_items", lambda catalog: full_weapons,
+        )
+        old.setattr(api.glossary_catalog, "embedded_entries", lambda: full_glossary)
+        expected = {query: search.search(query) for query in queries}
+
+    monkeypatch.setattr(search, "glossary_catalog", fresh_glossary)
+    monkeypatch.setattr(api.database, "list_catalog_items", unexpected)
+    for query in queries:
+        assert search.search(query) == expected[query]
+
+
 def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None:
     status, headers, body = request(app, "/search?q=alpha")
     assert status == 200

@@ -159,6 +159,56 @@ is unchanged. Skill detail parity against the original detached enrichment
 pipeline is regression-tested. Profile remaining cold catalog generation
 and detail construction before further optimizing them.
 
+### Consolidated full-season baseline — 2026-11-26
+
+Windows Chrome, commit `d6e30b8d`, both ITS seasons registered, three fresh
+application/browser-context samples per page and one repeat navigation per
+sample. The benchmark records the first and last direct content DOM mutation
+for all selected pages. Application startup is reported separately (median
+2.53 s across page samples). These are local loopback measurements, not
+production network or browser paint timings.
+
+Run the complete page and Unit Explorer cases separately:
+
+```powershell
+python -m tools.performance.benchmark_runtime data/generated/army.db --pages --with-seasons --cold-iterations 3
+python -m tools.performance.benchmark_runtime data/generated/army.db --browser --with-seasons --cold-iterations 3
+```
+
+Median first DOM update, cold / repeat (ms):
+
+- Units: Minutemen 331 / 51; Dragoes 337 / 49.
+- Catalogs: Skills 538 / 53; Equipment 290 / 55; Weapons 299 / 44.
+- Details: Mimetism 454 / 113; Hack Consoles 243 / 44; MediKit 484 / 111;
+  Combi Rifle 454 / 89.
+- Armies: 186 / 68.
+- Scenarios: Core overview 189 / 50; ITS 18 overview 187 / 42;
+  Domination 317 / 180; Hardlock (ITS 18, 300 points) 247 / 63.
+  Scenario DOM times exclude subsequent map-image and policy loading.
+- Global search: Mimetism 1246 / 65; Activate Console 1250 / 74.
+
+Unit Explorer interaction medians (visibility-based timing, ms): initial
+882, compact next/previous 210/179, first Extended 1131, Extended next/previous
+973/131, return to compact 54, text search 317. Initial API 657 ms; first
+Extended API 939 ms; Extended next API 762 ms.
+
+Global search was the slowest measured page on cold entry. The instrumented
+Mimetism search spent 497 ms building the entire Glossary, 417 ms constructing
+the Skills catalog, and 206 ms across three Army catalog usage queries
+(overlapping cumulative times, not additive). Search now consumes existing
+filter-only Skill/Equipment/Weapon identities and a selective embedded Glossary
+projection. The complete Glossary and ordinary public usage catalogs retain
+their existing outputs. Search identity fields, ranked results and the embedded
+Glossary projection are regression-tested against the full catalogs.
+
+With the same three-sample procedure, cold first DOM medians changed to 781 ms
+(Mimetism, 37% lower) and 760 ms (Activate Console, 39% lower). Median API
+durations fell from 1122/1126 ms to 643/623 ms respectively (rounded resource
+timings). Decoded payload sizes stayed at 80 and 105 bytes. Repeat DOM medians
+were 73 and 64 ms. Further optimization should focus on broad Rules record
+composition and uncached Extended Unit Explorer pages only if justified by
+additional profiling.
+
 ### Full-season Skill initialization — 2026-11-26
 
 The browser benchmark's optional `--with-seasons` flag registers both ITS

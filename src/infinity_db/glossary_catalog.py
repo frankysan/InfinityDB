@@ -24,6 +24,7 @@ class GlossaryCatalog:
         self.database = database
         self.rules_database = rules_database
         self._entries_cache: list[dict[str, Any]] | None = None
+        self._embedded_entries_cache: list[dict[str, Any]] | None = None
         self._weapon_properties = (
             WeaponProperties(rules_database, database=database)
             if rules_database is not None else None
@@ -41,7 +42,9 @@ class GlossaryCatalog:
             return None
         return f"/{catalog}/{identifier}"
 
-    def _record_entries(self, *, domain_slug: str | None = None) -> list[dict[str, Any]]:
+    def _record_entries(
+        self, *, domain_slug: str | None = None, embedded_only: bool = False,
+    ) -> list[dict[str, Any]]:
         if self.rules_database is None:
             return []
         entries: list[dict[str, Any]] = []
@@ -53,12 +56,14 @@ class GlossaryCatalog:
                 ).list_equipment(filter_only=True)
                 if isinstance(item.get("slug"), str)
             )
-            if domain_slug in (None, "equipment") else frozenset()
+            if not embedded_only and domain_slug in (None, "equipment") else frozenset()
         )
         for domain in APPLICATION_DOMAINS:
             if not domain.published or not domain.glossary:
                 continue
             if domain_slug is not None and domain.slug != domain_slug:
+                continue
+            if embedded_only and domain.level != "embedded":
                 continue
             for kind in domain.record_kinds:
                 for record in self.rules_database.composed_records_by_kind(
@@ -205,8 +210,12 @@ class GlossaryCatalog:
                     item["id"],
                 ),
             )
+        return self._detached_entries(self._entries_cache)
+
+    @staticmethod
+    def _detached_entries(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         entries = []
-        for item in self._entries_cache:
+        for item in items:
             entry = dict(item, aliases=list(item["aliases"]))
             if "citations" in item:
                 entry["citations"] = deepcopy(item["citations"])
@@ -223,4 +232,19 @@ class GlossaryCatalog:
     def embedded_entries(self) -> list[dict[str, Any]]:
         """Return embedded concepts for global search without duplicating catalogs."""
 
-        return [item for item in self.entries() if item["embedded"]]
+        if self._entries_cache is not None:
+            return self._detached_entries(
+                [item for item in self._entries_cache if item["embedded"]]
+            )
+        if self._embedded_entries_cache is None:
+            self._embedded_entries_cache = sorted(
+                [
+                    *self._record_entries(embedded_only=True),
+                    *self._profile_help_entries(),
+                    *self._weapon_property_entries(),
+                ],
+                key=lambda item: (
+                    accent_insensitive_key(item["name"]), item["kind"], item["id"],
+                ),
+            )
+        return self._detached_entries(self._embedded_entries_cache)
