@@ -45,6 +45,23 @@ Focused verification passed 16 scoped-filter, 22 Peripheral identity and
 establish conservative filter behavior, not complete list-building legality
 or missing upstream semantic data.
 
+## Scenario SVG standalone visual acceptance — 2026-11-26
+
+At `a3f31f833709bec36e71dac82196f4909b898313`, reviewed Crossing Lines,
+Double Bind, The Dig and Critical Intervention (ITS 18, 300–400 Army Points).
+The standalone preview mode opens unmodified SVG files directly in Chromium,
+after checking byte equality with the published scenario API response. All 16
+combinations of light/dark and inches/centimeters at 630 px, plus four dark
+metric maps at 360 px, preserved theme colors, patterns, labels and measurements.
+Contrasting endcaps remained distinguishable at zone overlaps and table edges.
+Minor metric label spacing is deferred; the labels remain readable. Playwright
+Firefox was unavailable on Windows, so this acceptance covers standalone
+Chromium, not every external SVG viewer.
+
+Reproduce with `python -m tools.research.render_its_map_previews --standalone
+--theme dark --distance-unit cm --width-px 360`. Previews are retained under
+`local/work/its/map-previews/`.
+
 ## Unit Explorer filter performance — 2026-11-25
 
 Windows development checkout based on `caae1c2c`, using the November 25

@@ -28,20 +28,6 @@ Use these links to jump directly to a workstream:
 
 ## Active development
 
-### v1.2.2 reference refinements
-
-- [ ] **Web backend + Web frontend:** Fix standalone scenario SVG appearance.
-  Saved SVGs must retain the selected theme, colors, labels, patterns and
-  measurements outside InfinityDB. Literal theme colors and font sizes now replace
-  CSS variable references in the generated stylesheet and patterns; focused tests
-  pass. Remaining: confirm standalone visual appearance in the affected viewer
-  in both themes and distance units.
-- [ ] **Web backend:** Make range helper endcaps visible over map and zone edges
-  in the shared SVG renderer, including at table boundaries. Preserve exact
-  measurement coordinates. A contrasting halo and stronger stroke are implemented;
-  focused geometry tests pass. Remaining: visually confirm overlapping and boundary
-  cases at typical map display sizes.
-
 ### External source clarifications
 
 **Project domain:** Data processing
@@ -399,6 +385,11 @@ diagram and focused browser acceptance. All 36 season-mission definitions
 See [release browser acceptance](its-season-database.md#release-browser-acceptance).
 Final-candidate acceptance is governed by [the release checklist](releasing.md).
 Season 16 Part II remains later scope.
+
+- [ ] **Web backend:** Refine metric placement-ruler label spacing near table edges
+  (e.g. Critical Intervention and Double Bind) without changing ruler geometry.
+  Labels remain readable in the v1.2.2 standalone visual acceptance; this is
+  deferred visual polish.
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
