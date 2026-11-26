@@ -277,10 +277,11 @@ def semantic_option(identity, skills=None, points=20):
             "points": points, "swc": 0}
 
 
-def semantic_summary(old, new, field, paths, rekeys=None):
+def semantic_summary(old, new, field, paths, rekeys=None, *, with_coverage=False):
     from tools.research.summarize_army_history import summarize_group
 
-    return summarize_group(old, new, 42, 1, field, [{}], [{}], set(paths), rekeys)
+    result = summarize_group(old, new, 42, 1, field, [{}], [{}], set(paths), rekeys)
+    return result if with_coverage else result[:2]
 
 
 def test_effective_history_suppresses_relocation_and_counts_real_gain():
@@ -300,9 +301,14 @@ def test_effective_history_suppresses_relocation_and_counts_real_gain():
     unchanged = semantic_group([skill], [semantic_option(1)])
     previous = semantic_group([], [semantic_option(1, [skill])])
     assert semantic_summary(previous, unchanged, "skills", paths) == ([], "comparable")
-    assert semantic_summary(old, new, "skills", paths[:1]) == (
-        None, "unacceptedReferenceChange",
+    partial, status, coverage = semantic_summary(
+        old, new, "skills", paths[:1], with_coverage=True,
     )
+    assert status == "partial"
+    assert partial == result
+    assert coverage["reviewPairs"] == [
+        {"beforeOptionId": 1, "afterOptionId": 1, "reason": "unacceptedReferenceChange"},
+    ]
 
 
 def test_effective_history_consolidates_cost_delta():
@@ -315,7 +321,14 @@ def test_effective_history_consolidates_cost_delta():
     assert result[0]["summary"] == "-2 Points"
     assert result[0]["allGroupLoadouts"]
     assert [(r["before"], r["after"]) for r in result[0]["loadouts"]] == [(20, 18), (30, 28)]
-    assert semantic_summary(old, new, "points", paths[:1]) == (None, "unacceptedCostChange")
+    partial, status, coverage = semantic_summary(
+        old, new, "points", paths[:1], with_coverage=True,
+    )
+    assert status == "partial"
+    assert partial is not None and partial[0]["allGroupLoadouts"] is False
+    assert coverage["reviewPairs"] == [
+        {"beforeOptionId": 2, "afterOptionId": 2, "reason": "unacceptedCostChange"},
+    ]
 
 
 def test_effective_history_accepts_only_complete_reconciled_rekeys():
@@ -354,3 +367,67 @@ def test_effective_reference_comparison_ignores_definition_only_and_default_quan
     assert reference_summary(effective_delta([old], [changed])) == (
         "Changed Mimetism → Mimetism (-3)"
     )
+
+def test_effective_history_partial_continuity_with_added_and_removed_loadouts():
+    skill = {"id": 1}
+    old = semantic_group([], [semantic_option(1, [skill]), semantic_option(2),
+                              semantic_option(3)])
+    new = semantic_group([skill], [semantic_option(1), semantic_option(2),
+                                   semantic_option(4)])
+    paths = [
+        ("units", 42, "profileGroups", 1, "profiles", 1, "skills"),
+        ("units", 42, "profileGroups", 1, "options", 1, "skills"),
+    ]
+    result, status, coverage = semantic_summary(
+        old, new, "skills", paths, with_coverage=True,
+    )
+    assert status == "partial"
+    assert result is not None and len(result) == 1
+    assert result[0]["summary"] == "Gained Mimetism"
+    assert [row["optionId"] for row in result[0]["loadouts"]] == [2]
+    assert result[0]["allGroupLoadouts"] is False
+    assert coverage["unpairedBefore"] == [3]
+    assert coverage["unpairedAfter"] == [4]
+    assert coverage["comparedPairs"] == [
+        {"beforeOptionId": 1, "afterOptionId": 1, "changed": False},
+        {"beforeOptionId": 2, "afterOptionId": 2, "changed": True},
+    ]
+
+
+def test_effective_history_disabled_sibling_does_not_block_survivor():
+    disabled = {**semantic_option(2), "disabled": True}
+    old = semantic_group([], [semantic_option(1), disabled])
+    new = semantic_group([], [semantic_option(1, points=18), disabled])
+    paths = [("units", 42, "profileGroups", 1, "options", 1, "points")]
+    result, status, coverage = semantic_summary(
+        old, new, "points", paths, with_coverage=True,
+    )
+    assert status == "partial"
+    assert result is not None and result[0]["summary"] == "-2 Points"
+    assert result[0]["allGroupLoadouts"] is False
+    assert coverage["reviewPairs"] == [
+        {"beforeOptionId": 2, "afterOptionId": 2, "reason": "disabledLoadout"},
+    ]
+
+
+def test_effective_history_partial_no_change_does_not_claim_complete_comparison():
+    old = semantic_group([], [semantic_option(1), semantic_option(2)])
+    new = semantic_group([], [semantic_option(1), semantic_option(3)])
+    result, status, coverage = semantic_summary(
+        old, new, "points", [], with_coverage=True,
+    )
+    assert result == [] and status == "partial"
+    assert coverage["unpairedBefore"] == [2] and coverage["unpairedAfter"] == [3]
+
+
+def test_effective_history_partial_rekey_preserves_unpaired_keys():
+    skill = {"id": 1}
+    old = semantic_group([], [semantic_option(1, [skill]), semantic_option(3)])
+    new = semantic_group([], [semantic_option(2, [skill], points=18), semantic_option(4)])
+    result, status, coverage = semantic_summary(
+        old, new, "points", [], {1: 2}, with_coverage=True,
+    )
+    assert status == "partial"
+    assert result is not None and result[0]["loadouts"][0]["laterOptionId"] == 2
+    assert result[0]["allGroupLoadouts"] is False
+    assert coverage["unpairedBefore"] == [3] and coverage["unpairedAfter"] == [4]

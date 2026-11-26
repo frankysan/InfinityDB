@@ -56,11 +56,7 @@ def stable_context(
     oa, ob = indexed(a[1].get("options")), indexed(b[1].get("options"))
     if not oa or not ob:
         return None, "changedLoadoutKeys"
-    if any(not same_labels(oa[i], ob[i]) for i in oa.keys() & ob.keys()):
-        return None, "changedLoadoutLabels"
-    if any(row.get("disabled") for row in (*oa.values(), *ob.values())):
-        return None, "disabledLoadout"
-    if any(row.get(key) not in (None, []) for row in (pa, pb, *oa.values(), *ob.values())
+    if any(row.get(key) not in (None, []) for row in (pa, pb)
            for key in ("includes", "peripheral")):
         return None, "includesOrPeripheral"
     return (pa, oa, pb, ob), "comparable"
@@ -69,10 +65,10 @@ def stable_context(
 def loadout_pairs(
     old: dict[int, Document], new: dict[int, Document], rekeys: dict[int, int],
 ) -> dict[int, int] | None:
-    """Only complete bijections, with accepted same-composition rekeys."""
+    """Pair surviving keys and accepted rekeys; leave other keys unpaired."""
     shared = old.keys() & new.keys()
     removed, added = old.keys() - shared, new.keys() - shared
-    if set(rekeys) != removed or set(rekeys.values()) != added:
+    if not set(rekeys) <= removed or not set(rekeys.values()) <= added:
         return None
     if len(set(rekeys.values())) != len(rekeys):
         return None
@@ -179,91 +175,126 @@ def describe_option(option: Document, data: Document,
     return name + (" — " + "; ".join(parts) if parts else "")
 
 
+def pair_delta(
+    pa: Document, pb: Document, oa: Document, ob: Document,
+    old: Document, new: Document, unit: int, group: int, field: str,
+    contexts_a: list[dict[str, dict[int, tuple[str, ...]]]],
+    contexts_b: list[dict[str, dict[int, tuple[str, ...]]]],
+    approved_paths: set[tuple[Any, ...]],
+) -> tuple[Document | None, str]:
+    i, j = oa["id"], ob["id"]
+    if i == j and not same_labels(oa, ob):
+        return None, "changedLoadoutLabels"
+    if oa.get("disabled") or ob.get("disabled"):
+        return None, "disabledLoadout"
+    if any(row.get(key) not in (None, []) for row in (oa, ob)
+           for key in ("includes", "peripheral")):
+        return None, "includesOrPeripheral"
+    if i != j:
+        left, _ = composition(oa, old, contexts_a)
+        right, _ = composition(ob, new, contexts_b)
+        if left is None or right is None or encode(left) != encode(right):
+            return None, "rekeyCompositionConflict"
+    if field in CATALOGS:
+        a, status_a = effective(pa, oa, field, old, contexts_a)
+        b, status_b = effective(pb, ob, field, new, contexts_b)
+        if a is None or b is None:
+            return None, status_a if a is None else status_b
+        for left_owner, right_owner, path in (
+            (pa, pb, ("units", unit, "profileGroups", group, "profiles", pa["id"], field)),
+            (oa, ob, ("units", unit, "profileGroups", group, "options", i, field)),
+        ):
+            if left_owner is oa and i != j:
+                continue  # rekey composition was checked above
+            if path not in approved_paths:
+                left_refs, _ = resolve_references(
+                    left_owner.get(field, []), field, old, contexts_a,
+                )
+                right_refs, _ = resolve_references(
+                    right_owner.get(field, []), field, new, contexts_b,
+                )
+                if left_refs is None or right_refs is None:
+                    return None, "unresolvedOwner"
+                if Counter(map(occurrence_key, left_refs)) != Counter(
+                    map(occurrence_key, right_refs)
+                ):
+                    return None, "unacceptedReferenceChange"
+        delta = effective_delta(a, b)
+        return (delta if delta["lost"] or delta["gained"] else {}), "comparable"
+    if field not in oa or field not in ob:
+        return None, "missingCost"
+    a, b = oa[field], ob[field]
+    if a == b:
+        return {}, "comparable"
+    if (i == j and ("units", unit, "profileGroups", group, "options", i, field)
+            not in approved_paths):
+        return None, "unacceptedCostChange"
+    change = cost_delta(a, b)
+    if change is None:
+        return None, "invalidCost"
+    return ({"delta": change} if Decimal(change) else {}), "comparable"
+
+
 def summarize_group(
     old: Document, new: Document, unit: int, group: int, field: str,
     contexts_a: list[dict[str, dict[int, tuple[str, ...]]]],
     contexts_b: list[dict[str, dict[int, tuple[str, ...]]]],
     approved_paths: set[tuple[Any, ...]],
     rekeys: dict[int, int] | None = None,
-) -> tuple[list[Document] | None, str]:
+) -> tuple[list[Document] | None, str, Document]:
     context, status = stable_context(old, new, unit, group)
     if context is None:
-        return None, status
+        return None, status, {"groupReview": status}
     pa, oa, pb, ob = context
     pairs = loadout_pairs(oa, ob, rekeys or {})
     if pairs is None:
-        return None, "changedLoadoutKeys"
-    for i, j in pairs.items():
-        if i != j:
-            left, _ = composition(oa[i], old, contexts_a)
-            right, _ = composition(ob[j], new, contexts_b)
-            if left is None or right is None or encode(left) != encode(right):
-                return None, "rekeyCompositionConflict"
+        return None, "invalidRekeyMapping", {"groupReview": "invalidRekeyMapping"}
+    coverage: Document = {
+        "beforeOptionIds": sorted(oa), "afterOptionIds": sorted(ob),
+        "unpairedBefore": sorted(oa.keys() - pairs.keys()),
+        "unpairedAfter": sorted(ob.keys() - set(pairs.values())),
+        "comparedPairs": [], "reviewPairs": [],
+    }
     buckets: dict[str, Document] = {}
     for i, j in sorted(pairs.items()):
-        if field in CATALOGS:
-            a, status_a = effective(pa, oa[i], field, old, contexts_a)
-            b, status_b = effective(pb, ob[j], field, new, contexts_b)
-            if a is None or b is None:
-                return None, status_a if a is None else status_b
-            for left_owner, right_owner, path in (
-                (pa, pb, ("units", unit, "profileGroups", group, "profiles", pa["id"], field)),
-                (oa[i], ob[j], ("units", unit, "profileGroups", group, "options", i, field)),
-            ):
-                if left_owner is oa[i] and i != j:
-                    continue  # rekey composition was checked above
-                if path not in approved_paths:
-                    left_refs, _ = resolve_references(
-                        left_owner.get(field, []), field, old, contexts_a,
-                    )
-                    right_refs, _ = resolve_references(
-                        right_owner.get(field, []), field, new, contexts_b,
-                    )
-                    if left_refs is None or right_refs is None:
-                        return None, "unresolvedOwner"
-                    if Counter(map(occurrence_key, left_refs)) != Counter(
-                        map(occurrence_key, right_refs)
-                    ):
-                        return None, "unacceptedReferenceChange"
-            delta = effective_delta(a, b)
-            if not delta["lost"] and not delta["gained"]:
-                continue
-            key = encode(delta)
-        else:
-            if field not in oa[i] or field not in ob[j]:
-                return None, "missingCost"
-            a, b = oa[i][field], ob[j][field]
-            if a == b:
-                continue
-            # Never introduce an unaccepted cost comparison.
-            if (i == j and ("units", unit, "profileGroups", group, "options", i, field)
-                    not in approved_paths):
-                return None, "unacceptedCostChange"
-            change = cost_delta(a, b)
-            if change is None:
-                return None, "invalidCost"
-            if Decimal(change) == 0:
-                continue
-            delta = {"delta": change}
-            key = encode(delta)
+        delta, reason = pair_delta(
+            pa, pb, oa[i], ob[j], old, new, unit, group, field,
+            contexts_a, contexts_b, approved_paths,
+        )
+        pair = {"beforeOptionId": i, "afterOptionId": j}
+        if delta is None:
+            coverage["reviewPairs"].append({**pair, "reason": reason})
+            continue
+        coverage["comparedPairs"].append({**pair, "changed": bool(delta)})
+        if not delta:
+            continue
+        key = encode(delta)
         bucket = buckets.setdefault(key, {"field": field, **delta, "loadouts": []})
         target = {"optionId": i, "label": describe_option(oa[i], old, contexts_a)}
         if i != j:
             target["laterOptionId"] = j
         if field not in CATALOGS:
-            target.update(before=a, after=b)
+            target.update(before=oa[i][field], after=ob[j][field])
         bucket["loadouts"].append(target)
+    compared = len(coverage["comparedPairs"])
+    if not compared:
+        reasons = {pair["reason"] for pair in coverage["reviewPairs"]}
+        status = next(iter(reasons)) if len(reasons) == 1 else (
+            "noComparableLoadouts" if pairs else "changedLoadoutKeys"
+        )
+        return None, status, coverage
+    complete = compared == len(oa) == len(ob)
     result = []
     for key in sorted(buckets):
         row = buckets[key]
-        row["allGroupLoadouts"] = len(row["loadouts"]) == len(oa)
+        row["allGroupLoadouts"] = complete and len(row["loadouts"]) == compared
         if field in CATALOGS:
             row["summary"] = reference_summary(row)
         else:
             sign = "+" if Decimal(row["delta"]) > 0 else ""
             row["summary"] = f"{sign}{row['delta']} {FIELDS[field]}"
         result.append(row)
-    return result, "comparable"
+    return result, "comparable" if complete else "partial", coverage
 
 
 def build(preview: Document, archive: Path) -> Document:
@@ -336,7 +367,7 @@ def build(preview: Document, archive: Path) -> Document:
         ev = entry["evidence"]
         a, b = ev["earlier"], ev["later"]
         old, new = data(a["sha256"]), data(b["sha256"])
-        result, status = summarize_group(
+        result, status, coverage = summarize_group(
             old, new, unit, group, field,
             [metadata(sha) for sha in a["metadataSha256"]],
             [metadata(sha) for sha in b["metadataSha256"]],
@@ -346,6 +377,7 @@ def build(preview: Document, archive: Path) -> Document:
             "comparisonIndex": ci, "armyId": ev["factionId"],
             "candidatePositions": sorted(set(entry["positions"])),
             "loadoutMatchPositions": rekey_positions.get((ci, unit, group), []),
+            "coverage": coverage,
         }
         identity = {
             "logicalUnitId": current[unit], "sourceUnitId": unit, "groupId": group,
@@ -356,11 +388,11 @@ def build(preview: Document, archive: Path) -> Document:
             counts[f"review:{status}"] += 1
             outcome = "review:" + status
         elif not result:
-            counts["unchangedEffective"] += 1
-            outcome = "unchangedEffective"
+            outcome = "partialNoChange" if status == "partial" else "unchangedEffective"
+            counts[outcome] += 1
         else:
-            counts["changedEffective"] += 1
-            outcome = "changedEffective"
+            outcome = "partialChanged" if status == "partial" else "changedEffective"
+            counts[outcome] += 1
             for change in result:
                 payload = {**identity, **change}
                 key = encode(payload)
@@ -368,6 +400,10 @@ def build(preview: Document, archive: Path) -> Document:
                 event["evidence"].append(evidence)
                 counts["armyScopedSummaries"] += 1
         outcomes.append({**identity, **evidence, "outcome": outcome})
+        for pair in coverage.get("reviewPairs", []):
+            counts[f"pairReview:{pair['reason']}"] += 1
+        counts["unpairedBefore"] += len(coverage.get("unpairedBefore", []))
+        counts["unpairedAfter"] += len(coverage.get("unpairedAfter", []))
     counts["acceptedRekeyCollections"] = len(rekeys)
     counts["outsidePilotScopeCandidates"] = len(outside_scope)
     counts["sourceGroupFieldComparisons"] = len(work)
@@ -375,7 +411,7 @@ def build(preview: Document, archive: Path) -> Document:
     counts["allGroupLoadoutSummaries"] = sum(e["allGroupLoadouts"] for e in events.values())
     counts["multiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in events.values())
     return {
-        "formatVersion": 1, "publicationStatus": "privateResearchOnly", "edition": "n5",
+        "formatVersion": 2, "publicationStatus": "privateResearchOnly", "edition": "n5",
         "archiveSha256": ARCHIVE_PIN, "armyDatabaseSha256": preview["armyDatabaseSha256"],
         "historyDatabaseSha256": preview["historyDatabaseSha256"],
         "counts": dict(counts), "summaries": list(events.values()), "outcomes": outcomes,
