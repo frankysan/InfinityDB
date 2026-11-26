@@ -180,6 +180,15 @@ the retired source roots.
   Every included occurrence retains its faction, endpoint and pilot location;
   excluded categories remain available in the pinned pilot. These are candidate
   groups, not canonical events or a claim of exact publication dates.
+  The private `python -m tools.research.build_army_history_database --output
+  local/data/history/generated/army_history_n5.db` command imports the
+  explicitly pinned full research corpus into a queryable SQLite evidence
+  index. It verifies the archive and receipt, report hashes and dependency
+  pins, all comparison endpoints and evidence links, and SQLite integrity.
+  Use a new output path for each rebuild; existing files are not overwritten.
+  The database remains outside the tracked generated runtime set and is not
+  a build, serving, packaging or deployment input. Its persistence model is
+  described in the [data model](../docs/data-model.md#private-army-history-research-database).
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not

@@ -59,6 +59,22 @@ resides in its own validated schema v2 database, with explicit current revision
 and N5 compatibility validation at serving time. Historical facts stay in the
 curated source family rather than a player-selectable historical database.
 
+### Private Army history research database
+
+The explicit offline N5 history builder produces a separate, ignored SQLite
+research artifact, not a fifth serving database. Its source report registry
+pins the accepted full reports and archive/receipt identities. The
+`source_observation`, `unit_identity`, `comparison`, `comparison_change`
+and `coverage_gap` tables preserve source evidence and provisional identity
+without equating observation dates with publication dates. The
+`history_record` table retains separate evidence streams for composition,
+structural occurrences, membership, loadout reconciliation and catalog
+transitions/review. Unit and comparison links are indexed; catalog usage
+links do not imply changes to Unit composition. The original research record
+bodies remain available as JSON. No record is promoted to a confirmed change
+or selected for public exposure by this builder. See the
+[data lifecycle](../data/README.md) for the explicit build command.
+
 ### Accepted authoring direction: one source family, version-tagged facts
 
 For maintained curation, **prefer one file per logical source family** rather

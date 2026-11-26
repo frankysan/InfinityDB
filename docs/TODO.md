@@ -236,8 +236,13 @@ make v1.3.0 depend on them.
   definitions among nine persistent-reference comparisons. Contextual metadata
   evidence remains distinct from army-local definitions and Unit composition.
   Private evidence: `local/data/history/reports/n5-catalogs-v1.summary.json`.
-  - [ ] Design the generated historical database and player-facing history
-    features using the accepted N5 candidate and evidence reports.
+  The first private SQLite evidence index is generated from the seven pinned
+  full reports; it retains all 505 comparisons, 180 ambiguous endpoint gaps,
+  17,685 raw changes, 1,809 composition candidates and the separate membership,
+  loadout and catalog streams. See the
+  [private history data model](data-model.md#private-army-history-research-database).
+  - [ ] Design the player-facing history projection and identity resolution
+    using the indexed N5 candidate and evidence reports.
     Keep unresolved loadout replacements, modification groups, changed labels,
     missing definitions, unresolved reference shapes and same-day alternatives
     as explicit review or coverage states. Preserve army scope, edition-scoped
