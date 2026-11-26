@@ -117,9 +117,9 @@ class SearchCatalog:
                 results.append(self._result("Unit", unit, f"/units/{quote(slug, safe='')}"))
 
         catalog_sources = (
-            ("Skill", "skills", self.skill_catalog.list_skills()),
-            ("Equipment", "equipment", self.equipment_catalog.list_equipment()),
-            ("Weapon", "weapons", self.database.list_catalog_items("weapons")),
+            ("Skill", "skills", self.skill_catalog.list_skills(filter_only=True)),
+            ("Equipment", "equipment", self.equipment_catalog.list_equipment(filter_only=True)),
+            ("Weapon", "weapons", self.database.list_catalog_filter_items("weapons")),
             ("Trait", "traits", self.trait_catalog.list_traits()),
             ("State", "states", self.state_catalog.list_states()),
             ("Hacking Program", "hacking-programs", self.hacking_program_catalog.list_programs()),
@@ -141,7 +141,7 @@ class SearchCatalog:
         )
         for domain, route, items in catalog_sources:
             for item in items:
-                labels = [item["name"], *item.get("aliases", [])]
+                labels = [item["name"], *item.get("aliases", []), *item.get("alternate_names", [])]
                 if not any(needle in accent_insensitive_key(label) for label in labels):
                     continue
                 identifier = item.get("slug")

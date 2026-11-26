@@ -336,8 +336,9 @@ def _canonical_usage_select(
     catalog: str,
     *,
     where: str = "",
+    collapse_payloads: bool = False,
 ) -> str:
-    """Return one canonical profile/loadout catalog-usage SELECT fragment."""
+    """Return usage rows, optionally collapsing identical payloads for catalog counts."""
     if payload_kind == "profile":
         occurrence_table = "profile_payload_occurrences"
         occurrence_alias = "ppo"
@@ -357,11 +358,27 @@ def _canonical_usage_select(
     ]
     payload_table = f"{payload_kind}_payload_{catalog}"
     extras_table = f"{payload_kind}_payload_{extra_stem}_extras"
+    if collapse_payloads:
+        if where:
+            raise ValueError("Collapsed payload usage does not support occurrence filters")
+        # Catalog counts deduplicate by visible logical Unit and ordered extras.
+        # Repeated uses of the same payload by one source Unit cannot add a count.
+        occurrence_table = (
+            f"(SELECT DISTINCT unit_id, {payload_id} FROM {occurrence_table})"
+        )
+        occurrence_key = (
+            f"printf('%d:%d:%d', {occurrence_alias}.unit_id, "
+            f"{occurrence_alias}.{payload_id}, o.position)"
+        )
+    else:
+        occurrence_key = (
+            f"printf('%d:%d:%d:%d:%d', {occurrence_alias}.army_id, "
+            f"{occurrence_alias}.unit_id, {occurrence_alias}.group_id, "
+            f"{occurrence_alias}.{parent_id}, o.position)"
+        )
     return (
         f"SELECT '{source_label}' AS source, o.item_id, {occurrence_alias}.unit_id, "
-        f"printf('%d:%d:%d:%d:%d', {occurrence_alias}.army_id, "
-        f"{occurrence_alias}.unit_id, {occurrence_alias}.group_id, "
-        f"{occurrence_alias}.{parent_id}, o.position) AS occurrence_key, "
+        f"{occurrence_key} AS occurrence_key, "
         "e.position AS extra_position, e.extra_id "
         f"FROM {occurrence_table} AS {occurrence_alias} "
         f"JOIN {payload_table} AS o "
@@ -498,9 +515,11 @@ def army_required_flags(
     group: Mapping[str, Any],
     canonical_faction_id: int | None = None,
     declared_faction_ids: Collection[int] | None = None,
+    *,
+    optional_modes: Collection[str] | None = None,
 ) -> set[str]:
     """Return the optional availability categories required by an occurrence."""
-    required = unit_optional_modes(group)
+    required = unit_optional_modes(group) if optional_modes is None else set(optional_modes)
     availability_kind = army.get("availability_kind")
     if availability_kind == MERCENARY_AVAILABILITY:
         required.add("mercs")
@@ -534,6 +553,21 @@ def army_required_flags(
     return required
 
 
+def _occurrence_required_flags(
+    occurrence: Mapping[str, Any],
+    group: Mapping[str, Any],
+    canonical_faction_id: int | None,
+    declared_faction_ids: Collection[int],
+) -> frozenset[str]:
+    """Reuse the immutable graph's source-occurrence requirements."""
+    cached = occurrence.get("_required_flags")
+    if cached is not None:
+        return cached
+    return frozenset(army_required_flags(
+        occurrence, group, canonical_faction_id, declared_faction_ids,
+    ))
+
+
 def minimal_availability_requirements(
     group: Mapping[str, Any],
     canonical_factions: Mapping[int, int | None],
@@ -557,13 +591,11 @@ def minimal_availability_requirements(
             if (source_id, source_army_id) not in occurrence_keys:
                 continue
         requirements.add(
-            frozenset(
-                army_required_flags(
-                    occurrence,
-                    group,
-                    canonical_factions[source_id],
-                    declared_faction_ids_by_unit[source_id],
-                )
+            _occurrence_required_flags(
+                occurrence,
+                group,
+                canonical_factions[source_id],
+                declared_faction_ids_by_unit[source_id],
             )
         )
 
@@ -631,7 +663,7 @@ def visible_armies_for_group(
     visible: dict[int, dict[str, Any]] = {}
     for occurrence in group["army_occurrences"]:
         source_id = occurrence["source_id"]
-        flags = army_required_flags(
+        flags = _occurrence_required_flags(
             occurrence,
             group,
             canonical_factions[source_id],
@@ -1392,6 +1424,7 @@ class Database:
                         faction["faction_id"]
                     )
 
+        canonical_factions = {row["id"]: row["canonical_faction_id"] for row in source_rows}
         groups: list[dict[str, Any]] = []
         for logical in logical_rows:
             logical_id = logical["logical_unit_id"]
@@ -1411,6 +1444,7 @@ class Database:
                 "armies": {},
                 "army_occurrences": [],
             }
+            optional_modes = unit_optional_modes(group)
             for source_id in source_ids:
                 for army in memberships[source_id]:
                     source_army_id = army["source_army_id"]
@@ -1424,6 +1458,11 @@ class Database:
                         {
                             **army,
                             "source_id": source_id,
+                            "_required_flags": frozenset(army_required_flags(
+                                army, group, canonical_factions[source_id],
+                                declared_faction_ids_by_unit[source_id],
+                                optional_modes=optional_modes,
+                            )),
                         }
                     )
             group["declared_faction_ids"] = set().union(
@@ -1572,7 +1611,18 @@ class Database:
             raise ValueError(f"Unknown catalog: {catalog}")
         return self.application_domain_id(catalog, item_ref)
 
-    @instance_lru_cache(maxsize=512)
+    @instance_lru_cache(maxsize=1)
+    def _application_slugs_by_id(self) -> dict[tuple[str, int], str]:
+        """Index resolved public slugs once for this immutable snapshot."""
+        with self._connect() as connection:
+            return {
+                (str(row["domain"]), int(row["application_id"])): str(row["slug"])
+                for row in connection.execute(
+                    "SELECT domain, application_id, slug FROM application_domain_slugs "
+                    "WHERE status = 'resolved' AND slug IS NOT NULL"
+                )
+            }
+
     def application_slug(self, domain: str, application_id: int) -> str | None:
         """Return the current domain-local slug for one application identity."""
 
@@ -1582,13 +1632,7 @@ class Database:
             raise ValueError(
                 "application_id must be an integer within SQLite's signed 64-bit range"
             )
-        with self._connect() as connection:
-            row = connection.execute(
-                "SELECT slug FROM application_domain_slugs "
-                "WHERE domain = ? AND application_id = ? AND status = 'resolved'",
-                (domain, application_id),
-            ).fetchone()
-        return None if row is None or row["slug"] is None else str(row["slug"])
+        return self._application_slugs_by_id().get((domain, application_id))
 
     @instance_lru_cache(maxsize=1)
     def list_hacking_programs(self) -> list[dict[str, Any]]:
@@ -2071,6 +2115,22 @@ class Database:
                     item["units"].append(unit)
             return list(combinations.values())
 
+    @instance_lru_cache(maxsize=3)
+    def list_catalog_filter_items(self, catalog: str) -> list[dict[str, Any]]:
+        """Return filter identities and source aliases without catalog usage queries."""
+        graph = self._application_catalog_graph(catalog)
+        return sorted(
+            [
+                {
+                    "id": item["id"],
+                    "name": item["name"],
+                    "source_ids": list(graph["source_ids_by_item"].get(item["id"], ())),
+                }
+                for item in graph["ordered_items"]
+            ],
+            key=lambda item: (unit_sort_key(item["name"]), item["id"]),
+        )
+
     @instance_lru_cache(maxsize=8)
     def list_catalog_items(self, catalog: str) -> list[dict[str, Any]]:
         """Return the named records in one of the public rules reference catalogs."""
@@ -2078,8 +2138,8 @@ class Database:
             raise ValueError(f"Unknown catalog: {catalog}")
         graph = self._application_catalog_graph(catalog)
         suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
-        profile_usage = _canonical_usage_select("profile", catalog)
-        loadout_usage = _canonical_usage_select("loadout", catalog)
+        profile_usage = _canonical_usage_select("profile", catalog, collapse_payloads=True)
+        loadout_usage = _canonical_usage_select("loadout", catalog, collapse_payloads=True)
         with self._connect() as connection:
             usage_rows = connection.execute(
                 "WITH uses AS ("
@@ -3598,9 +3658,12 @@ class Database:
         include_usage_counts: bool = False,
         and_filters: tuple[str, ...] = (),
         matching_scope: str | None = None,
+        include_raw_usage_counts: bool = True,
     ) -> dict[str, Any]:
         if matching_scope is not None and matching_scope not in {"profile", "loadout", "unit"}:
             raise ValueError("Invalid matching scope")
+        if not include_raw_usage_counts and matching_scope is None:
+            raise ValueError("Prospective-only counts require a matching scope")
         unresolved_army_filter = False
         if army_id is not None:
             resolved_army_id = self.application_army_id(army_id)
@@ -3972,7 +4035,7 @@ class Database:
                     if army_id is not None and occurrence["id"] != army_id:
                         continue
                     source_id = occurrence["source_id"]
-                    if not army_required_flags(
+                    if not _occurrence_required_flags(
                         occurrence, group, canonical_factions[source_id],
                         declared_faction_ids_by_unit[source_id],
                     ) <= selected_flags:
@@ -4031,7 +4094,8 @@ class Database:
                     base = counts.pop("__or_base__", 0)
                     if catalog in {"skills", "equipment", "weapons"}:
                         option_keys = {
-                            str(item["id"]) for item in self.list_catalog_items(catalog)
+                            str(item_id)
+                            for item_id in self._application_catalog_graph(catalog)["items"]
                         }
                     else:
                         option_keys = {
@@ -4052,7 +4116,7 @@ class Database:
                     }
             else:
                 prospective_counts = None
-        if include_usage_counts:
+        if include_usage_counts and include_raw_usage_counts:
             eligible_contexts: set[tuple[int, int, int, int | None, int | None]] = set()
             for group in grouped:
                 for occurrence in group["army_occurrences"]:
@@ -4060,7 +4124,7 @@ class Database:
                         continue
                     source_id = occurrence["source_id"]
                     source_army_id = occurrence["source_army_id"]
-                    required = army_required_flags(
+                    required = _occurrence_required_flags(
                         occurrence, group, canonical_factions[source_id],
                         declared_faction_ids_by_unit[source_id],
                     )
@@ -4148,7 +4212,14 @@ class Database:
             "availability": summary,
         }
         if include_usage_counts:
-            result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
+            # Count the visible memberships used by the result-row symbols.
+            army_usage_counts: dict[str, int] = defaultdict(int)
+            for group in grouped:
+                for visible_army_id in group["armies"]:
+                    army_usage_counts[str(visible_army_id)] += 1
+            result["army_usage_counts"] = dict(army_usage_counts)
+            if include_raw_usage_counts:
+                result["usage_counts"] = self._unit_filter_usage_counts(eligible_contexts)
             if prospective_counts is not None:
                 result["prospective_counts"] = prospective_counts
         if declared_faction_id is not None:
@@ -4501,7 +4572,7 @@ class Database:
                 source_id = occurrence["source_id"]
                 flags = tuple(
                     sorted(
-                        army_required_flags(
+                        _occurrence_required_flags(
                             occurrence,
                             group,
                             canonical_factions[source_id],

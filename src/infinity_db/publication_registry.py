@@ -18,9 +18,9 @@ from typing import Any
 
 from .domain_slugs import require_domain_slug, validate_typed_domain_id
 from .its_season_database import (
+    _read_validated_its_scenario,
     inspect_its_database,
     select_its_policies,
-    select_its_scenario,
 )
 from .rules_database import RulesDatabase
 
@@ -73,6 +73,7 @@ class PublicationRegistry:
         self._season_revisions: dict[str, str] = {}
         self._season_reports: dict[str, dict[str, Any]] = {}
         self._season_sources: dict[str, dict[str, dict[str, Any]]] = {}
+        self._scenario_records: dict[tuple[str, str], dict[str, Any]] = {}
         for registered, path in season_databases.items():
             season_id, separator, pinned_revision = registered.partition("@")
             require_domain_slug(season_id, context="registered ITS season")
@@ -108,7 +109,7 @@ class PublicationRegistry:
 
         # Validate cross-domain references at registration, before any HTTP read.
         # No policy is applied by default, but unresolved targets cannot be hosted.
-        for report in self._season_reports.values():
+        for registered, report in self._season_reports.items():
             season_id = report["inputIdentity"]["seasonId"]
             revision = report["inputIdentity"]["seasonRevision"]
             for policy in report["policies"]:
@@ -119,11 +120,17 @@ class PublicationRegistry:
                         f"{policy['target']!r}"
                     )
             for scenario in report["scenarios"]:
-                selected = self.resolve(PublicationReference(
-                    season_id, scenario["id"], revision,
-                ))
+                # The complete season was validated above. Read each published
+                # mission once, retaining its exact registered owner and revision.
+                selected = _read_validated_its_scenario(
+                    self._season_paths[registered], season_id=season_id,
+                    revision=revision, scenario_id=scenario["id"],
+                )
                 if selected is None:
                     raise ValueError(f"Missing registered ITS scenario: {scenario['id']}")
+                if selected["publication"]["contentSha256"] != scenario["contentSha256"]:
+                    raise ValueError(f"Registered ITS scenario changed: {scenario['id']}")
+                self._scenario_records[(registered, scenario["id"])] = selected
                 mission = selected["record"]["facts"]["mission"]
                 for inclusion in mission["rules"]:
                     definition_id = inclusion.get("definitionId")
@@ -202,11 +209,8 @@ class PublicationRegistry:
         key = self._registered_key(reference.domain, reference.revision or "")
         if key is None:
             return None
-        return select_its_scenario(
-            self._season_paths[key], season_id=reference.domain,
-            revision=reference.revision or "",
-            scenario_id=reference.record_id,
-        )
+        selected = self._scenario_records.get((key, reference.record_id))
+        return deepcopy(selected) if selected is not None else None
 
     def scenario_entries(self) -> list[tuple[dict[str, Any], dict[str, Any]]]:
         """Return validated ITS scenarios in the existing catalog's read format.
@@ -223,7 +227,7 @@ class PublicationRegistry:
                 ))
                 if selected is None:
                     raise ValueError(f"Missing ITS scenario: {scenario['id']}")
-                record = deepcopy(selected["record"])
+                record = selected["record"]
                 published = selected["publication"]
                 sources = {source["id"]: source for source in published["sources"]}
                 record["citations"] = [

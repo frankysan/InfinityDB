@@ -5,8 +5,8 @@ Equipment, Skills, Weapons, Core and ITS Scenarios, and relationships across Arm
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.2.0** (2026-11-23). See the
-[release notes](docs/CHANGELOG.md#120---2026-11-23)
+Current release: **1.2.2** (2026-11-26). See the
+[release notes](docs/CHANGELOG.md#122---2026-11-26)
 for changes and upgrade considerations, and the
 [deployment guide](docs/deployment.md) for updates.
 
@@ -57,6 +57,8 @@ its application metrics.
   choice, alongside numeric ranges and optional availability. Filter state is
   shareable, and old links retain their previous matching behavior; optional-unit
   Settings seed a new view without overwriting another user's saved preferences.
+  Extended results show only the General profiles, with shared Skills,
+  Equipment and Weapons as plain text.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Groups equivalent standard, reinforcement, and optional-mercenary source

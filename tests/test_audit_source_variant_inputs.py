@@ -301,12 +301,12 @@ def _expected_skill_statuses(rules_path: Path) -> dict[str, int]:
     camouflage_reviewed = "camouflage" in reviewed
     combat_jump_reviewed = "combat-jump" in reviewed
     return {
-        "family-only": 44,
+        "family-only": 45,
         "reviewed-distance-parameter": 3,
         "reviewed-exact-source": 10,
         "reviewed-numeric-parameter": 3,
         "reviewed-extra-parameter": (
-            (20 if commlink_reviewed else 19)
+            (19 if commlink_reviewed else 18)
             + int(lieutenant_reviewed) + int(terrain_reviewed)
             + int(camouflage_reviewed) + int(combat_jump_reviewed)
         ),
@@ -327,13 +327,13 @@ def test_commlink_source_260_exact_optional_reinforcements_variants() -> None:
     expected = {
         298: (
             "+1",
-            {999, 1230, 2592, 4442, 6300, 8806, 10713, 11734, 14909,
-             17154, 18497, 20208, 24963, 26446, 41919, 42461, 43008,
-             44128, 46578, 47107, 48719, 49107, 53242, 55244, 56920,
-             58965, 67570, 80003, 83095, 84652, 86515, 86749, 88318,
-             90408},
+            {1009, 1206, 2660, 4592, 6454, 8810, 10695, 11909, 14940,
+             17186, 18434, 20439, 25011, 26494, 41717, 42580, 43111,
+             44402, 46712, 47209, 48560, 49238, 53341, 55376, 57052,
+             59095, 67955, 80089, 83236, 84871, 86635, 86975, 88738,
+             90659},
         ),
-        299: ("+2", {22387, 27808, 29914, 31132, 34375, 36408, 37637, 39877}),
+        299: ("+2", {22630, 28022, 29965, 31332, 34356, 36441, 37885, 39974}),
     }
     [item] = select_source_variants(_inventory(), "skills", [260])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
@@ -427,17 +427,17 @@ def test_lieutenant_source_119_exact_command_token_and_order_qualifiers() -> Non
     expected = {
         245: (
             "+1 Command Token",
-            {463, 1483, 2680, 4543, 4719, 14297, 14303, 16268, 16274,
-             22764, 23254, 26531, 28275, 28279, 29339, 29348, 34370,
-             34579, 36403, 37632, 39872, 50549, 50562, 50999, 52824,
-             68502, 68526, 76721, 80658, 82587},
+            {246, 1492, 2748, 4289, 4728, 14116, 14122, 16763, 16769,
+             22509, 23299, 26579, 28323, 28327, 29597, 29606, 34351,
+             34613, 36436, 37880, 39969, 50727, 51047, 51060, 53048,
+             68673, 68697, 76904, 80844, 82828},
             30,
         ),
         246: ("+1 Order", None, 53),
     }
     [item] = select_source_variants(_inventory(), "skills", [119])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
-        "Lieutenant", 119, 438,
+        "Lieutenant", 119, 440,
     )
     assert item["status"] == "reviewed-extra-parameter"
     assert item["reviewedExtra"] == RulesDatabase(
@@ -507,7 +507,7 @@ def test_lieutenant_resource_extras_fail_closed_on_semantic_drift(mutation) -> N
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) -> None:
-    """Review all source-119 signatures, including 355 unqualified occurrences."""
+    """Review all source-119 signatures, including 357 unqualified occurrences."""
     records = {
         record["id"]: record
         for _, document in load_curated_directory(ROOT / "data/curated/rules")
@@ -549,13 +549,13 @@ def test_lieutenant_reviewed_resource_extras_fresh_release_pair(tmp_path: Path) 
     )["items"]
     assert item["status"] == "reviewed-extra-parameter"
     assert item["reviewedExtra"] == typed
-    assert item["occurrences"] == 438
+    assert item["occurrences"] == 440
     assert item["rawValues"] == []
     assert item["extraSignatures"] == [
         {"extras": [[245, "TEXT", "+1 Command Token"]], "reviewed": True, "count": 30},
         {"extras": [[246, "TEXT", "+1 Order"]], "reviewed": True, "count": 53},
     ]
-    assert 438 - sum(row["count"] for row in item["extraSignatures"]) == 355
+    assert 440 - sum(row["count"] for row in item["extraSignatures"]) == 357
     assert item["reviewedNumericMod"] is None
     assert all("modifier" not in row["effect"] for row in typed["extra_values"])
     assert RulesDatabase(current).skill_reviewed_extra_semantics()["lieutenant"] == typed
@@ -671,11 +671,11 @@ def test_doctor_source_53_exact_qualifiers_preserve_2w_and_reroll_boundary() -> 
         1: ("+3", 85, None, None),
         253: (
             "2W", 15,
-            {33478, 34014, 34181, 35960, 37682, 38372, 39421,
-             39890, 40147, 46484, 61555, 61573, 66315, 79845, 82775},
+            {33268, 34047, 34240, 35980, 37930, 38428, 39645,
+             39987, 40233, 46359, 61676, 61694, 66486, 80271, 82982},
             {"option": 11, "profile": 4},
         ),
-        366: ("ReRoll -3", 3, {767, 8714, 12414}, {"profile": 3}),
+        366: ("ReRoll -3", 3, {725, 8718, 12419}, {"profile": 3}),
     }
     [item] = select_source_variants(_inventory(), "skills", [53])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
@@ -731,10 +731,10 @@ def test_engineer_source_49_qualifiers_remain_unreviewed_and_owner_exact() -> No
     from collections import Counter
 
     expected = {
-        1: ("+3", {61556, 79846, 82776}, {"profile": 3}),
-        277: ("ReRoll", {14386, 19104, 20688, 61587, 65741}, {"profile": 5}),
-        282: ("WIP=14", {17019}, {"profile": 1}),
-        366: ("ReRoll -3", {61698, 66205, 18992, 20658, 22194, 67282},
+        1: ("+3", {61677, 80272, 82983}, {"profile": 3}),
+        277: ("ReRoll", {14069, 19136, 20720, 61708, 65913}, {"profile": 5}),
+        282: ("WIP=14", {17051}, {"profile": 1}),
+        366: ("ReRoll -3", {19024, 20690, 22226, 61869, 66376, 67519},
               {"profile": 6}),
     }
     [item] = select_source_variants(_inventory(), "skills", [49])["items"]
@@ -786,18 +786,17 @@ def test_infiltration_source_47_exact_ph_and_reroll_owners() -> None:
     # N5.3 p. 97 scopes bracketed PH replacements to the PH-3
     # Infiltration Roll; bare ReRoll is a distinct source signature.
     expected = {
-        250: ("PH=12", {51187, 51194, 58587, 58594}, {"profile": 4}),
-        277: ("ReRoll", {44546, 74177, 61511, 65105, 67248}, {"profile": 5}),
-        317: ("PH=18", {86311, 90562}, {"profile": 2}),
-        318: ("PH=19", {86574, 90140, 22696, 25017, 31744},
+        250: ("PH=12", {51318, 51325, 58599, 58606}, {"profile": 4}),
+        277: ("ReRoll", {44683, 61767, 65589, 67485, 74390}, {"profile": 5}),
+        317: ("PH=18", {86825, 90788}, {"profile": 2}),
+        318: ("PH=19", {22441, 25065, 31795, 86694, 90563},
               {"profile": 5}),
-        340: ("PH=16", {46149, 58240}, {"profile": 2}),
-        353: ("PH=15", {82925, 63815, 65316, 82466},
-              {"option": 1, "profile": 3}),
+        340: ("PH=16", {46463, 58673, 83431}, {"option": 1, "profile": 2}),
+        353: ("PH=15", {63985, 65128, 82493}, {"profile": 3}),
     }
     [item] = select_source_variants(_inventory(), "skills", [47])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
-        "Infiltration", 47, 216,
+        "Infiltration", 47, 218,
     )
     assert item["status"] == "unresolved-occurrence-parameter"
     assert item["reviewedExtra"] == RulesDatabase(
@@ -881,13 +880,14 @@ def test_combat_jump_exact_source_35_landings_and_explosion(tmp_path: Path) -> N
         ), "skills", [35])["items"]
         reviewed = True
         assert (source["name"], source["applicationId"], source["occurrences"]) == (
-            "Combat Jump", 35, 211,
+            "Combat Jump", 35, 219,
         )
         assert source["status"] == (
             "reviewed-extra-parameter" if reviewed else "unresolved-occurrence-parameter"
         )
         assert source["extraSignatures"] == [
-            {"extras": [[extra_id, "TEXT", raw]], "reviewed": reviewed, "count": count}
+            {"extras": [[extra_id, "TEXT", raw]], "reviewed": reviewed,
+             "count": 10 if extra_id == 52 else count}
             for extra_id, raw, count in COMBAT_JUMP_SOURCE_SPECS
         ]
         assert source["rawValues"] == []
@@ -936,7 +936,7 @@ def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
     reviewed = RulesDatabase(ROOT / "data/generated/rules_n5.db").skill_reviewed_extra_semantics()
     [item] = select_source_variants(_inventory(), "skills", [29])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
-        "Camouflage", 29, 597,
+        "Camouflage", 29, 604,
     )
     assert item["status"] == (
         "reviewed-extra-parameter" if "camouflage" in reviewed
@@ -946,13 +946,13 @@ def test_camouflage_one_use_source_29_signature_and_faq_scope() -> None:
     assert item["reviewedExtra"] == reviewed.get("camouflage")
     assert item["extraSignatures"] == [{
         "extras": [[43, "TEXT", "1 Use"]],
-        "reviewed": "camouflage" in reviewed, "count": 223,
+        "reviewed": "camouflage" in reviewed, "count": 230,
     }]
     owners = source_extra_owner_context(
         ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=29, extra_id=43,
     )
-    assert len(owners) == 223
+    assert len(owners) == 230
     assert all(
         row["extra_id"] == 43
         and row["extra_type"] == "TEXT"
@@ -1013,10 +1013,10 @@ def test_camouflage_one_use_fresh_v9_effect_and_source_29(tmp_path: Path) -> Non
     ), "skills", [29])["items"]
     assert source["status"] == "reviewed-extra-parameter"
     assert source["reviewedExtra"] == typed
-    assert source["occurrences"] == 597
+    assert source["occurrences"] == 604
     assert source["rawValues"] == []
     assert source["extraSignatures"] == [{
-        "extras": [[43, "TEXT", "1 Use"]], "reviewed": True, "count": 223,
+        "extras": [[43, "TEXT", "1 Use"]], "reviewed": True, "count": 230,
     }]
     assert RulesDatabase(base).skill_reviewed_extra_semantics()["camouflage"] == typed
 
@@ -1082,7 +1082,7 @@ def test_religious_troop_total_source_83_is_unresolved_and_owner_pinned() -> Non
         )
     } == {
         "owner": "profile",
-        "occurrence_id": 5240,
+        "occurrence_id": 5249,
         "unit_id": 1927,
         "unit_slug": "confessor-team-ops",
         "army_id": 103,
@@ -1122,7 +1122,7 @@ def test_parachutist_deployment_zone_source_33_exact_owners() -> None:
 
     [item] = select_source_variants(_inventory(), "skills", [33])["items"]
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
-        "Parachutist", 33, 305,
+        "Parachutist", 33, 314,
     )
     assert item["rawValues"] == []
     assert item["status"] == "reviewed-extra-parameter"
@@ -1149,9 +1149,8 @@ def test_parachutist_deployment_zone_source_33_exact_owners() -> None:
     assert len(owners) == 17
     assert Counter(row["owner"] for row in owners) == {"option": 5, "profile": 12}
     assert {row["occurrence_id"] for row in owners} == {
-        54851, 34224, 38292, 1450, 12013,
-        22725, 27821, 22524, 22541, 26352, 26369,
-        31334, 31351, 45157, 45177, 50392, 52988,
+        1459, 11793, 22470, 22767, 22784, 26346, 26363, 28035,
+        31534, 31551, 34447, 38580, 45294, 45314, 50890, 53119, 54855,
     }
     assert all(
         row["extra_position"] == 1
@@ -1215,18 +1214,18 @@ def test_discover_131_exact_source_extras_and_owners() -> None:
     assert item["reviewedExtra"]["kind"] == "reviewed-extra"
     expected = {
         1: (
-            {4278, 6423, 16516, 41502, 41515, 48170, 48183, 50841,
-             50920, 53448, 54720, 56674, 56893, 58393, 58426, 58524,
-             60806, 66106, 68389, 69537, 80498, 80650, 82705, 84912},
+            {4428, 6333, 16291, 41972, 41985, 48586, 48599, 50569,
+             50648, 53580, 54742, 56806, 57025, 58405, 58438, 58536,
+             60690, 66277, 68560, 69676, 80683, 80836, 82912, 85109},
             {"option": 9, "profile": 15}, "+3",
         ),
         2: (
-            {25171, 26785, 31511, 34673, 38006, 41626, 46537, 49175,
-             58340, 71102, 76097, 80980, 82136},
+            {25219, 26833, 31205, 34680, 38108, 42096, 46412, 49306,
+             58773, 71091, 76038, 81143, 82605},
             {"profile": 13}, "+6",
         ),
         277: (
-            {1309, 6622, 16348, 16879, 54571, 78075},
+            {1267, 6615, 16586, 16891, 54956, 78260},
             {"option": 1, "profile": 5}, "ReRoll",
         ),
     }
@@ -1407,7 +1406,7 @@ def test_hacker_skill_source_1000_exact_direct_programs_in_both_exports(
         )
         [item] = select_source_variants(report, "skills", [1000])["items"]
         assert (item["name"], item["applicationId"], item["occurrences"]) == (
-            "Hacker", 1000, 1094,
+            "Hacker", 1000, 1096,
         )
         assert item["status"] == "reviewed-extra-parameter"
         assert item["reviewedExtra"] == params
@@ -1430,7 +1429,7 @@ def test_journalist_plus_three_stays_unreviewed_pending_src_027() -> None:
         owner["unit_slug"], owner["army_id"], owner["parent_id"],
         owner["extra_type"], owner["extra_raw"],
     ) == (
-        "option", 68471, 658, "tohaa-diplomatic-delegates",
+        "option", 68642, 658, "tohaa-diplomatic-delegates",
         801, 3, "TEXT", "+3",
     )
     row = select_source_variants(_inventory(), "skills", [272])["items"][0]
@@ -1465,7 +1464,7 @@ def test_charontid_unqualified_sr_owners_are_exact_source_loadouts() -> None:
     ) == []
     assert [(row["owner"], row["occurrence_id"], row["parent_id"])
             for row in owners] == [
-        ("option", 51441, 4), ("option", 51461, 9),
+        ("option", 51572, 4), ("option", 51592, 9),
     ]
     for row in owners:
         assert row["unit_id"] == 498
@@ -1518,11 +1517,11 @@ def _assert_unreviewed_source_extras(
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_bs_attack_source_201_exact_signatures_and_sr2_owners() -> None:
     """VD-0015: exact BS Attack strings and nine profile-owned SR-2 rows."""
-    _assert_unreviewed_source_extras("skills", 201, "BS Attack", 1531, (
-        (6, "-3", 77), (8, "+1B", 273), (30, "Shock", 231),
+    _assert_unreviewed_source_extras("skills", 201, "BS Attack", 1547, (
+        (6, "-3", 81), (8, "+1B", 269), (30, "Shock", 231),
         (31, "Guided", 63), (249, "AP", 116),
-        (292, "Continous Damage", 26), (294, "T2", 53),
-        (305, "SR-1", 507), (308, "+1SD", 176), (337, "SR-2", 9),
+        (292, "Continous Damage", 33), (294, "T2", 53),
+        (305, "SR-1", 504), (308, "+1SD", 188), (337, "SR-2", 9),
     ))
     owners = source_extra_owner_context(
         ROOT / "local/work/build/army/army.raw.db",
@@ -1530,8 +1529,8 @@ def test_bs_attack_source_201_exact_signatures_and_sr2_owners() -> None:
     )
     assert len(owners) == 9
     assert {row["occurrence_id"] for row in owners} == {
-        25072, 42566, 44046, 51704, 54767,
-        60450, 50781, 56876, 13814,
+        13819, 25120, 42685, 44320, 50509,
+        51835, 54789, 57008, 60605,
     }
     assert {row["unit_id"] for row in owners} == {
         251, 432, 533, 1618, 1624, 1642,
@@ -1561,8 +1560,8 @@ def test_cc_attack_source_240_exact_signatures_and_damage_owners() -> None:
         (row["owner"], row["occurrence_id"], row["unit_id"], row["army_id"])
         for row in owners
     ] == [
-        ("profile", 13859, 1639, 199),
-        ("profile", 69477, 1675, 899),
+        ("profile", 13864, 1639, 199),
+        ("profile", 69741, 1675, 899),
     ]
     assert all(
         row["extra_position"] == 1
@@ -1647,7 +1646,7 @@ def test_transmutation_source_246_exact_signatures_and_profile_owners() -> None:
             assert {
                 (row["occurrence_id"], row["unit_id"], row["army_id"])
                 for row in owners
-            } == {(41956, 1848, 501), (48271, 1848, 504)}
+            } == {(41754, 1848, 501), (48687, 1848, 504)}
         if extra_id == 254:
             assert {
                 row["parent_name"] for row in owners
@@ -1714,15 +1713,15 @@ def test_pinned_source_variant_inventory_is_complete_and_conservative() -> None:
     assert skills["summary"] == {
         "publishedSourceIds": 96,
         "sourceIdsWithDirectRows": 96,
-        "directSourceRows": 33153,
+        "directSourceRows": 33262,
         "reviewedExactSourceIds": 10,
         "statuses": _expected_skill_statuses(ROOT / "data/generated/rules_n5.db"),
-        "extraTypes": {"DISTANCE": 5, "TEXT": 39},
+        "extraTypes": {"DISTANCE": 5, "TEXT": 38},
     }
     assert equipment["summary"] == {
         "publishedSourceIds": 34,
         "sourceIdsWithDirectRows": 34,
-        "directSourceRows": 5427,
+        "directSourceRows": 5418,
         "reviewedExactSourceIds": 6,
         "statuses": {
             "family-only": 19,
@@ -1884,17 +1883,17 @@ def test_n53_numeric_skill_modifiers_preserve_exact_source_meaning() -> None:
     # N5.3 p. 102: these target enemy LoF-dependent BS Attacks/Discover,
     # never the owner's roll or CC Attacks. TEXT is the upstream type.
     assert _single_extra_counts(mimetism) == {
-        (6, "TEXT", "-3"): 1612,
-        (7, "TEXT", "-6"): 392,
+        (6, "TEXT", "-3"): 1623,
+        (7, "TEXT", "-6"): 390,
     }
-    assert mimetism["occurrences"] == 2004
+    assert mimetism["occurrences"] == 2013
     assert mimetism["status"] == "reviewed-numeric-parameter"
 
     berserk = skills[24]
     # N5.3 p. 86: bracketed positive MODs affect the owner's Berserk
     # CC Attack. They do not become a generic modifier on every CC roll.
     berserk_extras = _single_extra_counts(berserk)
-    assert berserk_extras[(1, "TEXT", "+3")] == 243
+    assert berserk_extras[(1, "TEXT", "+3")] == 244
     assert berserk_extras[(2, "TEXT", "+6")] == 3
     assert berserk["status"] == "reviewed-numeric-parameter"
 
@@ -2036,8 +2035,8 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
     fresh = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
     expected = [
-        {"extras": [[44, "TEXT", "1"]], "reviewed": True, "count": 132},
-        {"extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 24},
+        {"extras": [[44, "TEXT", "1"]], "reviewed": True, "count": 130},
+        {"extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 20},
     ]
     for path in (ROOT / "data/generated/rules_n5.db", fresh):
         rules = RulesDatabase(path)
@@ -2062,7 +2061,7 @@ def test_decoy_215_exact_deployment_replica_counts_in_both_exports(
         )
         [row] = select_source_variants(result, "skills", [215])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
-            "Decoy", 215, 162,
+            "Decoy", 215, 157,
         )
         assert row["status"] == "reviewed-extra-parameter"
         assert row["extraSignatures"] == expected
@@ -2432,11 +2431,11 @@ def test_surprise_attack_signatures_preserve_conditional_target_mods(tmp_path: P
         )
         source = next(row for row in report["catalogs"]["skills"]["items"] if row["id"] == 191)
         assert source["status"] == "reviewed-numeric-parameter"
-        assert source["occurrences"] == 767
+        assert source["occurrences"] == 793
         assert {
             tuple(signature["extras"][0]): signature["count"]
             for signature in source["extraSignatures"]
-        } == {(6, "TEXT", "-3"): 762, (7, "TEXT", "-6"): 5}
+        } == {(6, "TEXT", "-3"): 788, (7, "TEXT", "-6"): 5}
         assert all(len(s["extras"]) == 1 and s["reviewed"] for s in source["extraSignatures"])
         rule = rules.composed_record("skill:surprise-attack")
         assert rule is not None
@@ -2452,7 +2451,7 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
     report = _inventory()
     skills = select_source_variants(report, "skills", [74, 263, 271])["items"]
     assert [item["id"] for item in skills] == [74, 263, 271]
-    assert [item["occurrences"] for item in skills] == [670, 26, 6]
+    assert [item["occurrences"] for item in skills] == [657, 26, 6]
     assert [item["status"] for item in skills] == [
         "reviewed-extra-parameter", "reviewed-distance-parameter",
         "reviewed-distance-parameter",
@@ -2467,8 +2466,8 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
     } == {
         74: [
             (((260, "DISTANCE", "+7.5"),), 4, True),
-            (((304, "TEXT", "Jet Propulsion"),), 198, True),
-            (((372, "DISTANCE", "7.5"),), 43, True),
+            (((304, "TEXT", "Jet Propulsion"),), 207, True),
+            (((372, "DISTANCE", "7.5"),), 21, True),
         ],
         263: [(((372, "DISTANCE", "7.5"),), 26, True)],
         271: [(((372, "DISTANCE", "7.5"),), 6, True)],
@@ -2484,12 +2483,12 @@ def test_pinned_movement_and_tinbot_source_extra_signatures() -> None:
     assert tinbot["reviewedExtra"] == RulesDatabase(
         ROOT / "data/generated/rules_n5.db"
     ).equipment_reviewed_extra_semantics()[169]
-    assert tinbot["occurrences"] == 147
+    assert tinbot["occurrences"] == 145
     assert [
         (tuple(signature["extras"][0]), signature["count"], signature["reviewed"])
         for signature in tinbot["extraSignatures"]
     ] == [
-        ((6, "TEXT", "-3"), 92, True),
+        ((6, "TEXT", "-3"), 90, True),
         ((7, "TEXT", "-6"), 55, True),
     ]
 
@@ -2540,8 +2539,8 @@ def test_albedo_183_modifiers_match_pinned_source_and_both_rules_exports(
     fresh = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
     expected = [
-        {"extras": [[6, "TEXT", "-3"]], "reviewed": True, "count": 55},
-        {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 87},
+        {"extras": [[6, "TEXT", "-3"]], "reviewed": True, "count": 57},
+        {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 85},
     ]
     for rules_path in (ROOT / "data/generated/rules_n5.db", fresh):
         report = inventory_source_variants(
@@ -2771,9 +2770,9 @@ def test_tinbot_firewall_source_extras_match_fresh_export(tmp_path: Path) -> Non
         assert item["reviewedExtra"] == (
             RulesDatabase(path).equipment_reviewed_extra_semantics()[169]
         )
-        assert item["occurrences"] == 147
+        assert item["occurrences"] == 145
         assert item["extraSignatures"] == [
-            {"extras": [[6, "TEXT", "-3"]], "reviewed": True, "count": 92},
+            {"extras": [[6, "TEXT", "-3"]], "reviewed": True, "count": 90},
             {"extras": [[7, "TEXT", "-6"]], "reviewed": True, "count": 55},
         ]
         assert next(row for row in rows if row["id"] == 100)["status"] == (
@@ -3078,10 +3077,10 @@ def test_neurocinetics_burst_is_identical_in_fresh_and_published_rules(
 def test_minelayer_two_deployment_count_matches_pinned_source() -> None:
     """Source 56 permits two placed items, without extra Disposable uses."""
     [item] = select_source_variants(_inventory(), "skills", [56])["items"]
-    assert (item["name"], item["occurrences"]) == ("Minelayer", 546)
+    assert (item["name"], item["occurrences"]) == ("Minelayer", 543)
     assert item["status"] == "reviewed-extra-parameter"
     assert item["extraSignatures"] == [{
-        "extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 15,
+        "extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 20,
     }]
     assert item["reviewedCombinations"] is None
     assert item["rawValues"] == []
@@ -3105,6 +3104,7 @@ def test_minelayer_two_deployment_count_matches_pinned_source() -> None:
         catalog="skills", source_id=56, extra_id=267,
     )
     assert sorted((o["army_id"], o["unit_slug"], o["owner"]) for o in owners) == [
+        (104, "aida-swanson", "profile"),
         (201, "zhencha", "option"),
         (204, "zhencha", "option"),
         (301, "scouts", "option"),
@@ -3113,13 +3113,17 @@ def test_minelayer_two_deployment_count_matches_pinned_source() -> None:
         (402, "hassassin-shujae", "option"),
         (501, "tsyklon-sputniks", "option"),
         (504, "tsyklon-sputniks", "option"),
+        (601, "aida-swanson", "profile"),
         (601, "victor-messer", "option"),
+        (603, "aida-swanson", "profile"),
         (603, "victor-messer", "option"),
         (701, "dasyus", "option"),
         (703, "dasyus", "option"),
+        (902, "aida-swanson", "profile"),
         (905, "tsyklon-sputniks", "option"),
         (908, "zhencha", "option"),
         (1002, "saladin-naval-liaison-officer", "profile"),
+        (1102, "aida-swanson", "profile"),
     ]
     assert all(o["extra_type"] == "TEXT" and o["extra_raw"] == "2"
                for o in owners)
@@ -3127,15 +3131,15 @@ def test_minelayer_two_deployment_count_matches_pinned_source() -> None:
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_minelayer_unparameterized_rows_do_not_inherit_two_items() -> None:
-    """Only 15 exact occurrences, not all 546 Minelayer rows, carry (2)."""
+    """Only 20 exact occurrences, not all 543 Minelayer rows, carry (2)."""
     [row] = select_source_variants(_inventory(), "skills", [56])["items"]
-    assert row["occurrences"] == 546
+    assert row["occurrences"] == 543
     assert row["extraSignatures"] == [
-        {"extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 15},
+        {"extras": [[267, "TEXT", "2"]], "reviewed": True, "count": 20},
     ]
     assert row["occurrences"] - sum(
         signature["count"] for signature in row["extraSignatures"]
-    ) == 531
+    ) == 523
     reviewed_values = {(267, "TEXT", "2")}
     assert reviewed_extra_signature(
         [(1, 267, "TEXT", "2")],
@@ -3153,10 +3157,15 @@ def test_minelayer_unparameterized_rows_do_not_inherit_two_items() -> None:
         catalog="skills", source_id=56, extra_id=267,
     )
     profile_owners = [owner for owner in owners if owner["owner"] == "profile"]
-    assert [(owner["army_id"], owner["unit_slug"]) for owner in profile_owners] == [
+    assert sorted((owner["army_id"], owner["unit_slug"]) for owner in profile_owners) == [
+        (104, "aida-swanson"),
+        (601, "aida-swanson"),
+        (603, "aida-swanson"),
+        (902, "aida-swanson"),
         (1002, "saladin-naval-liaison-officer"),
+        (1102, "aida-swanson"),
     ]
-    assert len(owners) == 15
+    assert len(owners) == 20
 
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
@@ -3219,10 +3228,10 @@ def test_forward_observer_special_die_exact_profile_owners() -> None:
     assert (item["name"], item["applicationId"], item["occurrences"]) == (
         "Forward Observer", 59, 609,
     )
-    assert item["status"] == "reviewed-extra-parameter"
-    assert item["extraSignatures"] == [{
-        "extras": [[308, "TEXT", "+1SD"]], "reviewed": True, "count": 2,
-    }]
+    # The November 25 Army snapshot removed both +1SD occurrences.
+    # The reviewed definition remains available, but it has no direct owners.
+    assert item["status"] == "family-only"
+    assert item["extraSignatures"] == []
     assert item["rawValues"] == []
     assert item["reviewedCombinations"] is None
     expected = {
@@ -3244,12 +3253,7 @@ def test_forward_observer_special_die_exact_profile_owners() -> None:
         ROOT / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=59, extra_id=308,
     )
-    assert sorted((o["army_id"], o["unit_slug"], o["owner"]) for o in owners) == [
-        (701, "tarkshya-interception-wing", "profile"),
-        (703, "tarkshya-interception-wing", "profile"),
-    ]
-    assert all(o["extra_type"] == "TEXT" and o["extra_raw"] == "+1SD"
-               for o in owners)
+    assert owners == []
 
     document = json.loads(
         (ROOT / "data/curated/rules/n5-core-v5.3.json").read_text(encoding="utf-8")
@@ -3267,7 +3271,7 @@ def test_forward_observer_special_die_exact_profile_owners() -> None:
 def test_forward_observer_special_die_fresh_export_preserves_exact_scope(
     tmp_path: Path,
 ) -> None:
-    """A family metadata entry never assigns +1SD to the other 607 rows."""
+    """A retained family metadata entry never assigns +1SD to the 609 bare rows."""
     fresh = tmp_path / "rules_n5.db"
     export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
     published = ROOT / "data/generated/rules_n5.db"
@@ -3301,15 +3305,10 @@ def test_forward_observer_special_die_fresh_export_preserves_exact_scope(
             ),
             "skills", [59],
         )["items"]
-        assert row["status"] == "reviewed-extra-parameter"
+        assert row["status"] == "family-only"
         assert row["reviewedExtra"] == expected
-        assert row["extraSignatures"] == [
-            {"extras": [[308, "TEXT", "+1SD"]], "reviewed": True, "count": 2},
-        ]
+        assert row["extraSignatures"] == []
         assert row["occurrences"] == 609
-        assert row["occurrences"] - sum(
-            signature["count"] for signature in row["extraSignatures"]
-        ) == 607
         assert row["reviewedNumericMod"] is None
         assert "modifier" not in typed["forward-observer"]["extra_values"][0]["effect"]
 
@@ -3321,7 +3320,7 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
     export_rules_database(load_curated_directory(ROOT / "data/curated/rules"), fresh)
     signatures = [
         {"extras": [[extra_id, "TEXT", f"PH={value}"]],
-         "reviewed": True, "count": count}
+         "reviewed": True, "count": {353: 3, 340: 3}.get(extra_id, count)}
         for extra_id, value, count in INFILTRATION_PH_SOURCE_SPECS
     ] + [{
         "extras": [[277, "TEXT", "ReRoll"]],
@@ -3355,14 +3354,14 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
             ROOT / "local/work/build/army/army.raw.db", path,
         ), "skills", [47])["items"]
         assert (row["name"], row["applicationId"], row["occurrences"]) == (
-            "Infiltration", 47, 216,
+            "Infiltration", 47, 218,
         )
         # ReRoll PH=X from p.97 lacks X in the Army source: stay unresolved.
         assert row["status"] == "unresolved-occurrence-parameter"
         assert row["extraSignatures"] == signatures
         assert row["rawValues"] == []
         assert row["reviewedCombinations"] is None
-        assert row["occurrences"] - sum(sig["count"] for sig in signatures) == 194
+        assert row["occurrences"] - sum(sig["count"] for sig in signatures) == 196
         assert row["reviewedExtra"] == typed
     reviewed = {(extra_id, "TEXT", f"PH={ph}")
                 for extra_id, ph, _count in INFILTRATION_PH_SOURCE_SPECS}
@@ -3387,7 +3386,7 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
             ROOT / "local/work/build/army/army.raw.db",
             catalog="skills", source_id=47, extra_id=extra_id,
         )
-        assert len(owners) == count
+        assert len(owners) == {353: 3, 340: 3}.get(extra_id, count)
         assert all(
             owner["extra_position"] == 1
             and owner["extra_type"] == "TEXT"
@@ -3406,11 +3405,11 @@ def test_infiltration_ph_exact_source_47_and_unreviewed_reroll(tmp_path: Path) -
         (row["occurrence_id"], row["unit_id"], row["army_id"], row["source_position"])
         for row in bare_owners
     } == {
-        (44546, 400, 502, 9),   # Corregidor Bandits / Corregidor
-        (74177, 400, 905, 9),   # Corregidor Bandits / StarCo
-        (61511, 587, 701, 7),  # Dasyus / ALEPH
-        (65105, 587, 703, 7),  # Dasyus / OSS
-        (67248, 1727, 799, 7), # REINF: Dasyus / Ank Program
+        (44683, 400, 502, 9),   # Corregidor Bandits / Corregidor
+        (74390, 400, 905, 9),   # Corregidor Bandits / StarCo
+        (61767, 587, 701, 7),  # Dasyus / ALEPH
+        (65589, 587, 703, 7),  # Dasyus / OSS
+        (67485, 1727, 799, 7), # REINF: Dasyus / Ank Program
     }
     assert all(
         row["owner"] == "profile"

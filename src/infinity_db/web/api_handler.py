@@ -20,6 +20,7 @@ from infinity_db.army_slugs import attach_public_army_slug, enrich_army_referenc
 from infinity_db.catalog_rules import CatalogRules
 from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
 from infinity_db.database import ArmySelectionError, Database
+from infinity_db.database.repository import instance_lru_cache
 from infinity_db.declaration_matrix import (
     core_declaration_matrix,
     core_scenario_declaration_extension,
@@ -55,6 +56,7 @@ from infinity_db.unit_presentation import (
     enrich_unit_filter_presentation,
     enrich_unit_list_presentation,
     enrich_unit_presentation,
+    extended_general_profiles,
 )
 from infinity_db.unit_slugs import (
     attach_public_unit_slug,
@@ -474,6 +476,9 @@ def _unit_query(query: str) -> dict:
     matching_scope = params.get("matching_scope", [""])[0]
     if matching_scope not in {"", "profile", "loadout", "unit"}:
         raise ValueError("Invalid matching scope")
+    prospective_only = params.get("counts", [""])[0] == "prospective"
+    if prospective_only and not matching_scope:
+        raise ValueError("Prospective-only counts require a matching scope")
     return {
         "and_filters": tuple(sorted(and_keys)),
         "matching_scope": matching_scope or None,
@@ -504,7 +509,8 @@ def _unit_query(query: str) -> dict:
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
         "extended": _flag(params, "extended"),
-        "include_usage_counts": _flag(params, "counts"),
+        "include_usage_counts": prospective_only or _flag(params, "counts"),
+        **({"include_raw_usage_counts": False} if prospective_only else {}),
     }
 
 
@@ -580,6 +586,114 @@ class ApiHandler:
             self.fireteam_rules_reference = enrich_maintained_text_references(
                 database, rules_database, self.fireteam_rules_reference
             )
+
+    def _present_unit(
+        self, unit: dict[str, Any], *,
+        optional_filters: dict[str, bool], requested_army: str | None = None,
+        general_only: bool = False,
+    ) -> dict[str, Any]:
+        """Use the same General profile semantics for detail and Explorer."""
+        if general_only:
+            # General profiles need occurrence data, not source notes, charts,
+            # selection constraints, composite options or Army detail metadata.
+            # Keep every Army's profiles for snapshot-wide symbol resolution,
+            # including occurrences excluded by the current optional filters.
+            unit = {
+                **{key: unit[key] for key in ("id", "name", "isc", "slug") if key in unit},
+                "armies": [
+                    {
+                        "id": army["id"],
+                        "availability_flags": army.get("availability_flags", []),
+                        "profiles": [
+                            {key: value for key, value in profile.items() if key in {
+                                "profile_identity", "display_name", "name", "group_id",
+                                "type", "classification", "move_1", "move_2", "cc", "bs",
+                                "ph", "wip", "arm", "bts", "vitality", "silhouette",
+                                "is_structure", "ava", "logo_urls", "skills", "equipment",
+                                "characteristics",
+                            }}
+                            for profile in army.get("profiles", ())
+                        ],
+                        "loadouts": [
+                            {key: value for key, value in loadout.items() if key in {
+                                "group_id", "skills", "equipment", "weapons", "orders",
+                            }}
+                            for loadout in army.get("loadouts", ())
+                        ],
+                    }
+                    for army in unit.get("armies", ())
+                ],
+            }
+        # Skill enrichment detaches the cached repository payload. All further
+        # enrichment owns this copy, so no intermediate deep copies are needed.
+        unit = self.skill_catalog.enrich_unit(unit)
+        unit = self.equipment_catalog.enrich_unit(unit, in_place=True)
+        unit = enrich_nested_catalog_slugs(
+            self.database, unit, frozenset({"equipment", "weapons"}), in_place=True,
+        )
+        if not general_only:
+            attach_public_unit_slug(self.database, unit)
+            unit = enrich_army_references(self.database, unit, in_place=True)
+        self.symbol_catalog.enrich_unit(unit)
+        return enrich_unit_presentation(
+            unit, optional_filters=optional_filters, requested_army=requested_army,
+            source_skill_classifications=self._source_skill_classifications(),
+            general_only=general_only,
+        )
+
+    @instance_lru_cache(maxsize=1)
+    def _source_skill_classifications(self):
+        return self.database.skill_source_classifications()
+
+    @instance_lru_cache(maxsize=512)
+    def _extended_profiles(
+        self, unit_id: int, enabled_flags: frozenset[str],
+    ) -> list[dict[str, Any]]:
+        """Cache the immutable snapshot's small, availability-specific projection."""
+        detail = self.database.get_unit(unit_id)
+        if detail is None:
+            return []
+        return extended_general_profiles(self._present_unit(
+            detail,
+            optional_filters={flag: flag in enabled_flags for flag in OPTIONAL_AVAILABILITY_FLAGS},
+            general_only=True,
+        ))
+
+    @instance_lru_cache(maxsize=1)
+    def _unit_filter_catalogs(self) -> dict[str, list[dict[str, Any]]]:
+        """Initialize the Explorer with the public catalog identities, not usage stats."""
+        weapons = [
+            dict(item) for item in self.database.list_catalog_filter_items("weapons")
+        ]
+        for item in weapons:
+            attach_public_catalog_slug(self.database, "weapons", item)
+        catalogs = {
+            "skills": self.skill_catalog.list_skills(filter_only=True),
+            "equipment": self.equipment_catalog.list_equipment(filter_only=True),
+            "weapons": weapons,
+        }
+        return {
+            catalog: [
+                {key: value for key, value in item.items()
+                 if key in {"id", "slug", "name", "source_ids"}}
+                for item in items
+            ]
+            for catalog, items in catalogs.items()
+        }
+
+    @instance_lru_cache(maxsize=1)
+    def _unit_profile_help_payload(self) -> dict[str, Any]:
+        """Cache the snapshot-wide, Unit-independent notation and Attribute help."""
+        items = (
+            self.rules_database.unit_profile_help()
+            if self.rules_database is not None else []
+        )
+        tokens = maintained_text_tokens_batch(
+            self.database, self.rules_database, (item["summary"] for item in items),
+        )
+        for item, summary_tokens in zip(items, tokens, strict=True):
+            item["summary_tokens"] = summary_tokens
+        return {"items": items, "attributes": self.glossary_catalog.attribute_entries()}
 
     def validate_health(self) -> None:
         """Exercise the minimum database paths required by the health endpoint."""
@@ -897,21 +1011,7 @@ class ApiHandler:
         elif path == "/api/unit-profile-help":
             cache_control = API_CACHE_CONTROL
             try:
-                items = (
-                    self.rules_database.unit_profile_help()
-                    if self.rules_database is not None
-                    else []
-                )
-                for item in items:
-                    item["summary_tokens"] = maintained_text_tokens(
-                        self.database, self.rules_database, item["summary"]
-                    )
-                attributes = [
-                    item
-                    for item in self.glossary_catalog.embedded_entries()
-                    if item["domain_slug"] == "attributes"
-                ]
-                payload = {"items": items, "attributes": attributes}
+                payload = self._unit_profile_help_payload()
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit Profile help")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1056,14 +1156,17 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
                 else:
+                    # The first enrichment detaches the complete catalog payload.
+                    # Subsequent transforms own that copy, not the catalog cache.
                     payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
+                    enrich_army_references(self.database, payload, in_place=True)
+                    self.symbol_catalog.enrich_nested_units(payload, in_place=True)
+                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         scenario_id=(payload.get("scenario") or {}).get("id"),
                         additional_records=self._season_rule_records,
+                        in_place=True,
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
@@ -1088,11 +1191,11 @@ class ApiHandler:
                     payload = self.trait_catalog.enrich_catalog_item(payload)
                     payload = self.catalog_rules.enrich_catalog_item("equipment", payload)
                     payload = enrich_nested_unit_slugs(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
-                    payload = enrich_maintained_text_references(
-                        self.database, self.rules_database, payload
+                    enrich_army_references(self.database, payload, in_place=True)
+                    self.symbol_catalog.enrich_nested_units(payload, in_place=True)
+                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_maintained_text_references(
+                        self.database, self.rules_database, payload, in_place=True,
                     )
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
@@ -1478,10 +1581,19 @@ class ApiHandler:
         elif path == "/api/unit-filters":
             cache_control = API_CACHE_CONTROL
             try:
+                include_catalogs = _flag(parse_qs(query_string, keep_blank_values=True), "catalogs")
+            except ValueError as exc:
+                return WebResponse.json(
+                    {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
+                    cache_control=cache_control,
+                )
+            try:
                 payload = enrich_unit_filter_presentation(
                     self.database.list_unit_filter_values(),
                     filter_semantics=self.database.unit_filter_semantics(),
                 )
+                if include_catalogs:
+                    payload["catalogs"] = self._unit_filter_catalogs()
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read Unit filter values")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1542,7 +1654,7 @@ class ApiHandler:
                     if logical_unit_ids is not None:
                         query["_logical_unit_ids"] = frozenset(logical_unit_ids)
                     payload = self.database.list_units(**query)
-                    if "usage_counts" in payload:
+                    if "army_usage_counts" in payload:
                         encoded_ids = (
                             self.equipment_catalog.presentation_equipment_characteristic_ids()
                         )
@@ -1572,6 +1684,7 @@ class ApiHandler:
                         baseline = self.database.list_units(
                             limit=1, include_usage_counts=True,
                             matching_scope=query["matching_scope"],
+                            include_raw_usage_counts=query["matching_scope"] is None,
                             **{key: query[key] for key in (
                                 "mercs", "specops", "teamops", "reinforcement"
                             )},
@@ -1582,7 +1695,10 @@ class ApiHandler:
                             )
                         payload = {
                             **payload,
-                            "usage_counts": public_counts(payload["usage_counts"]),
+                            **(
+                                {"usage_counts": public_counts(payload["usage_counts"])}
+                                if "usage_counts" in payload else {}
+                            ),
                             "baseline_usage_counts": (
                                 public_counts(baseline["usage_counts"])
                                 if query["matching_scope"] is None
@@ -1601,6 +1717,14 @@ class ApiHandler:
                     payload = enrich_army_references(self.database, payload)
                     self.symbol_catalog.enrich_units(payload["items"])
                     enrich_unit_list_presentation(payload["items"])
+                    if query["extended"]:
+                        enabled_flags = frozenset(
+                            flag for flag in OPTIONAL_AVAILABILITY_FLAGS if query[flag]
+                        )
+                        for item in payload["items"]:
+                            item["general_profiles"] = self._extended_profiles(
+                                item["id"], enabled_flags,
+                            )
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": "Choose a playable Army list to browse its units."}
@@ -1624,21 +1748,8 @@ class ApiHandler:
                 unit_ref = int(identifier) if identifier.isdigit() else identifier
                 payload = self.database.get_unit(unit_ref)
                 if payload is not None:
-                    payload = self.skill_catalog.enrich_unit(payload)
-                    payload = self.equipment_catalog.enrich_unit(payload)
-                    payload = enrich_nested_catalog_slugs(
-                        self.database,
-                        payload,
-                        frozenset({"equipment", "weapons"}),
-                    )
-                    attach_public_unit_slug(self.database, payload)
-                    payload = enrich_army_references(self.database, payload)
-                    self.symbol_catalog.enrich_unit(payload)
-                    payload = enrich_unit_presentation(
-                        payload,
-                        optional_filters=optional_filters,
-                        requested_army=requested_army,
-                        source_skill_classifications=self.database.skill_source_classifications(),
+                    payload = self._present_unit(
+                        payload, optional_filters=optional_filters, requested_army=requested_army,
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

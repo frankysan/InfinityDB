@@ -190,12 +190,14 @@ def test_normalized_inspection_rejects_changed_source_and_conflicting_inputs(
 
 @pytest.mark.usefixtures("requires_pinned_raw_army_archive")
 def test_pinned_real_raw_archive_has_same_export_pair() -> None:
-    app = Path(__file__).resolve().parents[1] / "data/generated/army.db"
-    report = inspect_raw_archive(app, command="tables")
+    root = Path(__file__).resolve().parents[1]
+    app = root / "data/generated/army.db"
+    raw = root / "local/work/build/army/army.raw.db"
+    report = inspect_raw_archive(app, raw, command="tables")
     assert report["pairStatus"] == "verified"
     assert {entry["name"] for entry in report["tables"]} <= set(TABLES)
     assert {"skills", "army_lists", "units"} <= {
         entry["name"] for entry in report["tables"]
     }
-    sample = inspect_raw_archive(app, command="row", table="skills", position=0)
+    sample = inspect_raw_archive(app, raw, command="row", table="skills", position=0)
     assert isinstance(sample["row"], dict)

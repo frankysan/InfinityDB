@@ -157,7 +157,10 @@ def test_reviewed_its_release_baseline_changes_only_affected_routes() -> None:
         (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-current.json")
         .read_text(encoding="utf-8")
     )
-    release = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    release = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json")
+        .read_text(encoding="utf-8")
+    )
     old_rows = {row["path"]: row for row in earlier["probes"]}
     new_rows = {row["path"]: row for row in release["probes"]}
     assert old_rows.keys() == new_rows.keys()
@@ -166,6 +169,52 @@ def test_reviewed_its_release_baseline_changes_only_affected_routes() -> None:
         "/api/scenarios",
         "/api/scenarios?collection=its-18",
         "/api/scenarios/battleground?army_points=300&collection=its-18",
+    }
+
+
+def test_v121_baseline_preserves_routes_and_pins_reviewed_update_scope() -> None:
+    earlier = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2-release.json")
+        .read_text(encoding="utf-8")
+    )
+    current = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.1.json")
+        .read_text(encoding="utf-8")
+    )
+    old_rows = {row["path"]: row for row in earlier["probes"]}
+    new_rows = {row["path"]: row for row in current["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    assert {path for path in old_rows if old_rows[path] != new_rows[path]} == {
+        "/api/armies",
+        "/api/units?limit=5&extended=1",
+        "/api/skills",
+        "/api/equipment",
+        "/api/weapons",
+        "/api/fireteams",
+        "/api/deployed-objects",
+        "/api/scenarios",
+        "/api/scenarios?collection=its-18",
+        "/api/scenarios/domination?army_points=300",
+        "/api/scenarios/battleground?army_points=300&collection=its-18",
+        "/api/weapons/akrylat-kanone",
+        "/api/variant-usage?record_id=skill%3Aberserk",
+        "/api/variant-usage?record_id=equipment%3Aalbedo",
+    }
+
+
+def test_v122_baseline_changes_only_reviewed_routes() -> None:
+    earlier = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.1.json")
+        .read_text(encoding="utf-8")
+    )
+    current = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    old_rows = {row["path"]: row for row in earlier["probes"]}
+    new_rows = {row["path"]: row for row in current["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    assert {path for path in old_rows if old_rows[path] != new_rows[path]} == {
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
+        "/api/units?limit=5&extended=1",
+        "/api/skills",
     }
 
 

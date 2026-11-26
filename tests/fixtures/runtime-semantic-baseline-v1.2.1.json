@@ -1,0 +1,253 @@
+{
+  "artifacts": {
+    "armyDbSha256": "a006c35d3cdb20b3f8cb5745454ab6ffad1560c4584966bee33f9469d9eb33d5",
+    "rulesDbSha256": "6a7400b7eb60402eb16fcd42c6e5f4dc8d27f804bf620ba381fc8199c8b1a7cd",
+    "symbolPublicationSha256": "66b86773021ebf77da7abe947b49b0e01c9de46061449cdd1aadba432401f5c7"
+  },
+  "format": "InfinityDB P1 runtime semantic baseline",
+  "formatVersion": 1,
+  "probes": [
+    {
+      "kind": "json",
+      "path": "/api/armies",
+      "semanticSha256": "969e18e2ba4cc33bbfd50ce26c23f55458b995884b10b0e7059933c280fc71fe"
+    },
+    {
+      "kind": "json",
+      "path": "/api/version",
+      "semanticSha256": "e9a4ad097fd214351db036a008fc18dbb96fd13693db9a682757e920b9e9af1b"
+    },
+    {
+      "kind": "json",
+      "path": "/static/restrictions-reference.json",
+      "semanticSha256": "f36578c4af93530428562233512ddc15d46e48828798d2d0cc3df7c1fcba54a3"
+    },
+    {
+      "kind": "json",
+      "path": "/api/unit-filters",
+      "semanticSha256": "bd0de4ea29a09534ac56c76dacaebb7e769f1a9e4d4e9ba310f739445201a94c"
+    },
+    {
+      "kind": "json",
+      "path": "/api/units?limit=5&extended=1",
+      "semanticSha256": "cb9a4d50ff4c76dcafd683f00c13c881edb7acf91d217952f7b06aa76d7c7998"
+    },
+    {
+      "kind": "json",
+      "path": "/api/skills",
+      "semanticSha256": "3a0b8f13f765f0effcbbba20825ab73fb21f752165202704e7ee24a28882e318"
+    },
+    {
+      "kind": "json",
+      "path": "/api/equipment",
+      "semanticSha256": "983f3574ea17efca7de2ebcde1e23194547eb5a568ff9b975a05ddeb3d72a316"
+    },
+    {
+      "kind": "json",
+      "path": "/api/weapons",
+      "semanticSha256": "b0dc8d0a38806f052314eb5a752db8f627a0bb9fec003db15b464f820edbf324"
+    },
+    {
+      "kind": "json",
+      "path": "/api/traits",
+      "semanticSha256": "7739a4e45e68a3d4998b6cb053ea0c118129412c2991c35db1a933e1ebb96637"
+    },
+    {
+      "kind": "json",
+      "path": "/api/fireteams",
+      "semanticSha256": "0584d0f6d39041c2542458759bce205b50dfea10b3db3f8982a579e8003bad18"
+    },
+    {
+      "kind": "json",
+      "path": "/api/orders-aros",
+      "semanticSha256": "0e39d4df4ab4931260b3e18ba86041f3457737fe394b430e28f4f7c70c6855c3"
+    },
+    {
+      "kind": "json",
+      "path": "/api/restrictions",
+      "semanticSha256": "3611fb78d36ddf86b54e899349a5b6c06c24c7d30bc735e93d800f18a7d5f437"
+    },
+    {
+      "kind": "json",
+      "path": "/api/deployed-objects",
+      "semanticSha256": "51dcd22e7c73447f6748c64eda834ef6fcb60fc9cfd16bc0629e845782ae6ca5"
+    },
+    {
+      "kind": "json",
+      "path": "/api/glossary",
+      "semanticSha256": "d27f21883ce8fa1603bbf67d44d6ca6fff13712e0fd70fd3e45990d1a2ab5fd4"
+    },
+    {
+      "kind": "json",
+      "path": "/api/scenarios",
+      "semanticSha256": "79ff68c60303e2ea752266d5694c707314a38f0b7ad89a59ac8bd3be0f8b6bed"
+    },
+    {
+      "kind": "json",
+      "path": "/api/scenarios?collection=its-18",
+      "semanticSha256": "2bed2da703deabdcb983809f11b78b924a641761ff639aed7c31e2781df40694"
+    },
+    {
+      "kind": "json",
+      "path": "/api/search?q=camouflage",
+      "semanticSha256": "debc671cb2662c073c110368c1ac65d83549ff1ec10b8098a704d77d7769fb87"
+    },
+    {
+      "kind": "json",
+      "path": "/api/faq-rulings?topic_id=skill%3Acamouflage&rules_revision=5.3&as_of=2026-10-15",
+      "semanticSha256": "9e9e4f837d6f39c6ea38ed0b57e6bc342bf22e9ca5331f6d119ce73ce03579bc"
+    },
+    {
+      "kind": "json",
+      "path": "/api/scenarios/domination?army_points=300",
+      "semanticSha256": "06a3bca36e027defc686d0d6f8b2c02a1bca5090e9b5f89d2ff429255929855a"
+    },
+    {
+      "kind": "json",
+      "path": "/api/scenarios/battleground?army_points=300&collection=its-18",
+      "semanticSha256": "b5dc5baa20f4a9449a5c27ebe74e48e28d8740b7d6a136c98d67b0bfa218f879"
+    },
+    {
+      "kind": "json",
+      "path": "/api/units/112-emergency-service",
+      "semanticSha256": "982d5ab18930840b777adc1f5e4c004f46083db112231f69ce7052381b6d36ca"
+    },
+    {
+      "kind": "json",
+      "path": "/api/skills/aerial",
+      "semanticSha256": "69f97110a280a1212551f1dafafaba14398048b5f5d7c14fde0172a22dc46287"
+    },
+    {
+      "kind": "json",
+      "path": "/api/equipment/360o-visor",
+      "semanticSha256": "d1ce64a20c26f3f8bafb26f9bc7b603c0f4c2a95898bfdc19abbfb8dffc306d2"
+    },
+    {
+      "kind": "json",
+      "path": "/api/weapons/akrylat-kanone",
+      "semanticSha256": "29fb862be9ecd860c6296285fbdde1511332dafb812789c6cf350d34652b6f3e"
+    },
+    {
+      "kind": "json",
+      "path": "/api/variant-usage?record_id=skill%3Aberserk",
+      "semanticSha256": "67f458f989aea850f8a0402f8d13e455c112605f00f9ca052866e894303f204f"
+    },
+    {
+      "kind": "json",
+      "path": "/api/variant-usage?record_id=equipment%3Aalbedo",
+      "semanticSha256": "d2054749103539be543696725c5a3d54bbc338f6440623d5fc7e7131cd4be5ed"
+    },
+    {
+      "bytesSha256": "0d647d0d0116d8847f3221f1e7a54c24fac9f32e0ac74cd078c4f9ecb2d1cfed",
+      "kind": "svg",
+      "markers": [
+        "id=\"sector-center\"",
+        "id=\"sector-near-a\"",
+        "id=\"sector-near-b\"",
+        "id=\"deployment-a\"",
+        "id=\"deployment-b\""
+      ],
+      "path": "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/armies"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/units"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/fireteams"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/rules"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "Restrictions chart",
+        "/static/restrictions-page.js"
+      ],
+      "path": "/rules/restrictions"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/scenarios"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/scenarios/battleground"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/deployed-objects"
+    },
+    {
+      "kind": "html",
+      "markers": [
+        "<html"
+      ],
+      "path": "/changes"
+    },
+    {
+      "kind": "javascript",
+      "markers": [
+        "getRestrictionsReference(controller.signal)"
+      ],
+      "path": "/static/restrictions-page.js"
+    },
+    {
+      "kind": "javascript",
+      "markers": [
+        "developer-only",
+        "not a complete list of legal actions"
+      ],
+      "path": "/static/restrictions-reference.js"
+    },
+    {
+      "kind": "javascript",
+      "markers": [
+        "getJson(\"/api/restrictions/chart\""
+      ],
+      "path": "/static/api.js"
+    },
+    {
+      "kind": "stylesheet",
+      "markers": [
+        "html:not([data-developer-mode=\"true\"]) .developer-only"
+      ],
+      "path": "/static/styles.css"
+    }
+  ]
+}

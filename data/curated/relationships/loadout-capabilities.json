@@ -1,8 +1,8 @@
 {
   "format": "InfinityDB reviewed loadout capabilities",
   "formatVersion": 1,
-  "snapshotArchiveSha256": "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75",
-  "sourceArchive": "JSON 20260929-114335.zip",
+  "snapshotArchiveSha256": "8e2c53fc3425ab80627ba99c88629bc33df6403971465ba1fcccef7882da0715",
+  "sourceArchive": "JSON 20261125-162328.zip",
   "facts": [
     {
       "armyId": 601,
@@ -15,8 +15,8 @@
       "itemName": "Repeater",
       "review": {
         "status": "reviewed",
-        "reviewedOn": "2026-11-15",
-        "reason": "The selected KISS! variant is explicitly labelled (Repeater), but its Army loadout has no corresponding Equipment entry. The connected alternate KISS! loadout instead carries Deployable Repeater (111). Preserve Repeater (63) on KISS!'s specific loadout without inferring it from arbitrary names."
+        "reviewedOn": "2026-11-25",
+        "reason": "The November 25 Army source still labels this exact option KISS! (Repeater) without a corresponding Equipment entry. The alternate KISS! option carries Deployable Repeater (111). Preserve the previously reviewed loadout-specific Repeater (63) correction."
       }
     },
     {
@@ -30,8 +30,8 @@
       "itemName": "Repeater",
       "review": {
         "status": "reviewed",
-        "reviewedOn": "2026-11-15",
-        "reason": "The selected KISS! variant is explicitly labelled (Repeater), but its Army loadout has no corresponding Equipment entry. The connected alternate KISS! loadout instead carries Deployable Repeater (111). Preserve Repeater (63) on KISS!'s specific loadout without inferring it from arbitrary names."
+        "reviewedOn": "2026-11-25",
+        "reason": "The November 25 Army source still labels this exact option KISS! (Repeater) without a corresponding Equipment entry. The alternate KISS! option carries Deployable Repeater (111). Preserve the previously reviewed loadout-specific Repeater (63) correction."
       }
     },
     {
@@ -45,8 +45,8 @@
       "itemName": "Repeater",
       "review": {
         "status": "reviewed",
-        "reviewedOn": "2026-11-15",
-        "reason": "The selected KISS! variant is explicitly labelled (Repeater), but its Army loadout has no corresponding Equipment entry. The connected alternate KISS! loadout instead carries Deployable Repeater (111). Preserve Repeater (63) on KISS!'s specific loadout without inferring it from arbitrary names."
+        "reviewedOn": "2026-11-25",
+        "reason": "The November 25 Army source still labels this exact option KISS! (Repeater) without a corresponding Equipment entry. Repeater (63) is present in metadata. Preserve the previously reviewed loadout-specific correction; Next Wave has no alternate KISS! loadout."
       }
     }
   ]

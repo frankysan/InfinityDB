@@ -214,10 +214,11 @@ def enrich_maintained_text_references(
     scenario_id: str | None = None,
     local_rule_ids: frozenset[str] = frozenset(),
     additional_records: dict[str, dict[str, Any]] | None = None,
+    in_place: bool = False,
 ) -> dict[str, Any]:
-    """Attach resolved inline-text tokens to nested current rules records."""
+    """Attach resolved inline-text tokens to nested rules records, copying by default."""
 
-    result = deepcopy(value)
+    result = value if in_place else deepcopy(value)
     if rules_database is None:
         return result
     resolver = _Resolver(

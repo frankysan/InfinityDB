@@ -8,7 +8,12 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database import Database
-from infinity_db.database.unit_filter_matching import MatchContext, evaluate
+from infinity_db.database.unit_filter_matching import (
+    CATEGORIES,
+    MatchContext,
+    evaluate,
+    matches_selected,
+)
 
 
 def context(
@@ -109,6 +114,83 @@ def test_prospective_counts_match_reselection_and_deduplicate() -> None:
             expected += counts["skills"].get("__or_base__", 0)
             assert expected == len(added)
             assert len(current) == 2
+
+
+@pytest.mark.parametrize("scope", ["profile", "loadout", "unit"])
+def test_prospective_counts_match_independent_option_addition(scope: str) -> None:
+    from itertools import product
+
+    property_sets = [
+        frozenset({("skills", 1), ("equipment", 1), ("weapons", 1)}),
+        frozenset({("skills", 2), ("equipment_characteristics", 2), ("weapons", 2)}),
+        frozenset({("skills", 1), ("skills", 2), ("equipment", 1), ("equipment", 3)}),
+        frozenset({("skills", 3), ("troop_types", 1), ("classifications", 1)}),
+        frozenset({("skills", 1), ("characteristics", 2), ("equipment_characteristics", 2)}),
+        frozenset(),
+    ]
+    contexts = [
+        MatchContext(unit, unit, army, index, index, index, property_sets[prop])
+        for unit, props in enumerate(((0, 1, 0), (2,), (3, 4), (5,)), start=1)
+        for index, prop in enumerate(props, start=1)
+        for army in (101, 102)
+    ]
+    by_unit = {
+        unit: [candidate for candidate in contexts if candidate.logical_id == unit]
+        for unit in range(1, 5)
+    }
+
+    def expected_matches(selected, modes):
+        result = {}
+        for unit, candidates in by_unit.items():
+            if scope == "unit":
+                properties = frozenset().union(*(c.properties for c in candidates))
+                matched = candidates if matches_selected(properties, selected, modes) else []
+            else:
+                matched = [c for c in candidates if matches_selected(c.properties, selected, modes)]
+            if matched:
+                result[unit] = frozenset(
+                    (c.source_unit_id, c.source_army_id, c.group_id) for c in matched
+                )
+        return result
+
+    skill_choices = (
+        (), (frozenset({("skills", 1)}),),
+        (frozenset({("skills", 1)}), frozenset({("skills", 2)})),
+        (frozenset(),),
+        (frozenset({("skills", 2), ("skills", 3)}),),
+    )
+    equipment_choices = (
+        (), (frozenset({("equipment", 1)}),),
+        (frozenset({("equipment_characteristics", 2)}),),
+    )
+    for skills, equipment, skill_and, equipment_and in product(
+        skill_choices, equipment_choices, (False, True), (False, True),
+    ):
+        selected = {"skills": skills, "equipment": equipment}
+        modes = frozenset(
+            category for category, enabled in (("skills", skill_and), ("equipment", equipment_and))
+            if enabled
+        )
+        actual, counts = evaluate(contexts, selected, modes, scope)
+        assert actual == expected_matches(selected, modes)
+        for category in CATEGORIES:
+            options = {
+                (name, value) for props in property_sets for name, value in props
+                if name == category or (
+                    category == "equipment" and name == "equipment_characteristics"
+                )
+            } | {(category, 999)}
+            for name, value in options:
+                key = (
+                    f"characteristic:{value}" if name == "equipment_characteristics" else str(value)
+                )
+                new_selection = {
+                    **selected,
+                    category: selected.get(category, ()) + (frozenset({(name, value)}),),
+                }
+                expected = len(expected_matches(new_selection, modes))
+                predicted = counts[category].get(key, 0) + counts[category].get("__or_base__", 0)
+                assert predicted == expected
 
 
 def test_materialized_profile_loadout_include_and_peripheral_boundaries(

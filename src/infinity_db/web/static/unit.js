@@ -4,8 +4,7 @@ import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteValuePreview } from "./silhouette-diagrams.js";
 import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
-import { formatMovement } from "./unit-presentation.js";
-import { formatSkillDistanceExtra } from "./distance.js";
+import { formatMovement, formatProfileItem } from "./unit-presentation.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
 import { referenceLoadMessage } from "./view-components.js";
 
@@ -364,19 +363,7 @@ function profileItems(items, catalog, fallbackLabel) {
   if (!items.length) return "—";
   const result = document.createDocumentFragment();
   items.forEach((item, index) => {
-    const name = item.name || fallbackLabel;
-    const hiddenIds = [];
-    if (!item.name) hiddenIds.push(`${fallbackLabel} #${text(item.id)}`);
-    const extras = (item.extras || []).map((extra) => {
-      const extraName = extra.name || "Extra";
-      if (!extra.name) hiddenIds.push(`Extra #${text(extra.id)}`);
-      if (!extra.is_distance) return extraName;
-      return formatSkillDistanceExtra(extraName, item.parameter_semantics);
-    });
-    const decoratedName = extras.length ? `${name} (${extras.join(", ")})` : name;
-    const label = item.quantity != null && Number(item.quantity) !== 1
-      ? `${decoratedName} ×${item.quantity}`
-      : decoratedName;
+    const { label, hiddenIds } = formatProfileItem(item, fallbackLabel);
     const link = document.createElement(catalog ? "a" : "span");
     if (catalog) {
       const routeId = item.slug || item.id;

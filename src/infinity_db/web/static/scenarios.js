@@ -135,8 +135,8 @@ function populateCollections(collections) {
     const unavailable = document.createElement("option");
     unavailable.value = "";
     unavailable.textContent = selection.collection
-      ? `Collection unavailable: ${selection.collection} · ${selection.revision}`
-      : "No current core scenarios";
+      ? "Selected rules set or season unavailable"
+      : "Core scenarios unavailable";
     unavailable.disabled = true;
     options.unshift(unavailable);
   }
@@ -169,7 +169,7 @@ async function initialize() {
   } catch (error) {
     if (error.name === "AbortError") return;
     elements.errorMessage.textContent = error.status === 400
-      ? "This scenario collection or revision is not supported. Open Scenarios to choose another collection."
+      ? "This rules set, ITS season or rules revision is unavailable. Choose another from Scenarios."
       : collectionLoadMessage(error, "scenarios");
     console.error("Could not load scenarios", error);
     show(elements.error);

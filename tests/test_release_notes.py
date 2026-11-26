@@ -16,12 +16,24 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     all_releases = load_release_notes()
     releases = tuple(release for release in all_releases if release.released_on is not None)
 
-    assert releases[0].version == "1.2.0"
-    assert releases[0].released_on == date(2026, 11, 23)
+    assert releases[0].version == "1.2.2"
+    assert releases[0].released_on == date(2026, 11, 26)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("ITS Season 17" in item and "ITS Season 18" in item
-               for item in releases[0].player_summary)
+    assert any("General profiles" in item for item in releases[0].player_summary)
     assert [section.heading for section in releases[0].detail_sections] == [
+        "Added", "Changed", "Fixed",
+    ]
+
+    release_121 = next(release for release in releases if release.version == "1.2.1")
+    assert release_121.released_on == date(2026, 11, 25)
+    assert any("Shadowcrow Operator" in item for item in release_121.player_summary)
+    assert [section.heading for section in release_121.detail_sections] == ["Changed"]
+
+    release_120 = next(release for release in releases if release.version == "1.2.0")
+    assert release_120.released_on == date(2026, 11, 23)
+    assert any("ITS Season 17" in item and "ITS Season 18" in item
+               for item in release_120.player_summary)
+    assert [section.heading for section in release_120.detail_sections] == [
         "Added", "Changed", "Fixed", "Upgrade notes",
     ]
     assert all(release.version is not None for release in releases)

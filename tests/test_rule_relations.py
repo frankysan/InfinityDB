@@ -141,6 +141,14 @@ def test_rules_database_projects_curated_summaries_labels_and_relation_semantics
                 assert relation["presentation"] == expected
 
 
+def test_batched_relations_match_single_record_reads() -> None:
+    database = RulesDatabase(Path("data/generated/rules_n5.db"))
+    for kind in ("skill", "equipment", "weapon", "state", "rule", "trait"):
+        for record in database.composed_records_by_kind(kind, include_army_links=True):
+            single = database.composed_record(record["id"], include_army_links=True)
+            assert single == record, record["id"]
+
+
 def test_two_source_scoped_legacy_edges_are_qualified_in_both_directions(
     tmp_path: Path,
 ) -> None:

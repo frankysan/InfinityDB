@@ -417,6 +417,8 @@ def test_multiselect_availability_and_result_views_are_consistent() -> None:
         {"search": "unit-name-that-does-not-exist"},
         {"skill_id": ("aerial", "berserk")},
         {"army_id": "does-not-exist"},
+        {"matching_scope": "profile", "skill_id": "berserk"},
+        {"matching_scope": "loadout", "skill_id": "berserk", "reinforcement": True},
         {"mercs": True, "specops": True, "teamops": True, "reinforcement": True},
     ],
 )
@@ -436,6 +438,15 @@ def test_usage_counts_match_filtered_population(filters: dict) -> None:
         )
     if not first["total"]:
         assert all(not counts for counts in first["usage_counts"].values())
+    assert first["army_usage_counts"] == last["army_usage_counts"]
+    full = database.list_units(limit=10_000, _unbounded=True, **filters)
+    expected: dict[str, int] = {}
+    for unit in full["items"]:
+        for army_id in unit["army_ids"]:
+            key = str(army_id)
+            expected[key] = expected.get(key, 0) + 1
+    assert first["army_usage_counts"] == expected
+    assert "army_usage_counts" not in full
 
 
 def test_usage_counts_include_selected_item_and_logical_unit_deduplication() -> None:
@@ -499,6 +510,22 @@ def test_http_usage_counts_are_opt_in_and_stable_across_requests() -> None:
         f"search=impossible-unique-unit-name&counts=1&{optional_query}"
     )
     assert filtered_optional["baseline_usage_counts"] == optional["baseline_usage_counts"]
+
+    # Scoped browser requests need only prospective and Army availability counts.
+    for filters in (
+        "matching_scope=profile",
+        "matching_scope=loadout&skill_id=engineer&points_min=10&reinforcement=1",
+        "matching_scope=unit&search=impossible-unique-unit-name",
+    ):
+        legacy_counts = request(f"limit=1&counts=1&{filters}")
+        browser_counts = request(f"limit=1&counts=prospective&{filters}")
+        assert "usage_counts" in legacy_counts
+        assert "usage_counts" not in browser_counts
+        assert browser_counts == {
+            key: value for key, value in legacy_counts.items() if key != "usage_counts"
+        }
+    with pytest.raises(ValueError, match="require a matching scope"):
+        _unit_query("counts=prospective")
 
 @pytest.mark.parametrize(
     ("catalog", "slug", "filter_name"),

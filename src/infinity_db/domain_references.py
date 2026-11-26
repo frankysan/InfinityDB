@@ -186,6 +186,7 @@ def enrich_rule_relation_references(
     value: dict[str, Any],
     *,
     local_rule_ids: frozenset[str] = frozenset(),
+    in_place: bool = False,
 ) -> dict[str, Any]:
     """Attach browser-routable references to structured rules relations.
 
@@ -195,7 +196,7 @@ def enrich_rule_relation_references(
     their typed semantic ID as the route source.
     """
 
-    result = deepcopy(value)
+    result = value if in_place else deepcopy(value)
 
     def walk(node: Any) -> None:
         if isinstance(node, dict):

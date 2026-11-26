@@ -66,6 +66,8 @@ def test_discover_cases_covers_representative_runtime_paths() -> None:
         "units-counts",
         "units-counts-numeric",
         "traits",
+        "units-scoped-initial-full",
+        "units-scoped-initial-prospective",
         "units-by-army",
         "units-counts-by-army",
         "unit-detail",
@@ -79,6 +81,9 @@ def test_discover_cases_covers_representative_runtime_paths() -> None:
         "units-scoped-profile-after-index",
         "units-scoped-loadout-after-index",
         "units-scoped-unit-after-index",
+        "units-prospective-profile-after-index",
+        "units-prospective-loadout-after-index",
+        "units-prospective-unit-after-index",
         "skills-detail",
         "equipment-catalog",
         "equipment-detail",
@@ -107,6 +112,14 @@ def test_discover_cases_covers_representative_runtime_paths() -> None:
             "include_usage_counts": True,
         }
         interaction.action(cast(Database, fake))
+        assert fake.unit_queries[-1]["skill_id"] == (11, 12)
+
+        optimized = by_name[f"units-prospective-{scope}-after-index"]
+        assert optimized.setup is not None
+        optimized.setup(cast(Database, fake))
+        assert fake.unit_queries[-1]["include_raw_usage_counts"] is False
+        optimized.action(cast(Database, fake))
+        assert fake.unit_queries[-1]["include_raw_usage_counts"] is False
         assert fake.unit_queries[-1]["skill_id"] == (11, 12)
 
     by_name["units-scoped-loadout-numeric-counts"].action(cast(Database, fake))

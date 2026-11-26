@@ -182,19 +182,29 @@ def test_scenario_map_typography_scales_with_table_width(
 
 
 @pytest.mark.parametrize("theme", ["light", "dark"])
-def test_scenario_map_saves_standalone_with_canonical_theme_palette(theme: str) -> None:
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_scenario_map_saves_standalone_with_canonical_theme_palette(
+    theme: Literal["light", "dark"], distance_unit: Literal["in", "cm"],
+) -> None:
     geometry = parse_scenario_geometry(
         {
             "format": "InfinityDB scenario geometry",
             "formatVersion": 1,
             "title": "Portable theme",
             "table": {"width": 24, "height": 32, "unit": "in"},
-            "elements": [],
+            "elements": [{
+                "id": "zone", "kind": "rectangle", "style": "exclusion",
+                "x1": 0, "y1": 8, "x2": 24, "y2": 16,
+            }],
+            "annotations": [{
+                "id": "guide", "kind": "ruler",
+                "x1": 0, "y1": 12, "x2": 24, "y2": 12,
+            }],
         }
     )
-    root = ElementTree.fromstring(
-        render_scenario_map_svg(geometry, theme=theme)  # type: ignore[arg-type]
-    )
+    svg = render_scenario_map_svg(geometry, theme=theme, distance_unit=distance_unit)
+    assert "var(" not in svg
+    root = ElementTree.fromstring(svg)
     assert root.attrib["data-theme"] == theme
     style = root.attrib["style"]
     palette = (
@@ -204,6 +214,30 @@ def test_scenario_map_saves_standalone_with_canonical_theme_palette(theme: str) 
     assert len(entries) >= 10
     for key, color in entries:
         assert f"{key}:{color}" in style
+    colors = dict(entries)
+    ns = "{http://www.w3.org/2000/svg}"
+    css = root.findtext(f"{ns}style") or ""
+    assert f'.table{{fill:{colors["--color-scenario-map-table"]};' in css
+    assert "font-size:1.1px" in css
+    assert "font-size:1.4px" in css
+    pattern = root.find(f".//{ns}pattern")
+    assert pattern is not None
+    rect = pattern.find(f"{ns}rect")
+    line = pattern.find(f"{ns}line")
+    assert rect is not None and line is not None
+    assert rect.get("fill") == colors["--color-scenario-map-deployment-b"]
+    assert line.get("stroke") == colors["--color-scenario-map-deployment-b-edge"]
+    ruler = root.find(f".//{ns}g[@id='guide']")
+    assert ruler is not None
+    endcaps = ruler.findall(f"{ns}line[@class='endcap']")
+    halos = ruler.findall(f"{ns}path[@class='endcap-halo']")
+    assert len(endcaps) == len(halos) == 2
+    for endcap, halo, x in zip(endcaps, halos, ("0", "24"), strict=True):
+        assert (endcap.get("x1"), endcap.get("y1")) == (x, "11.75")
+        assert (endcap.get("x2"), endcap.get("y2")) == (x, "12.25")
+        assert halo.get("d") == f"M{x} 11.75 L{x} 12.25"
+    assert f'stroke:{colors["--color-scenario-map-text-halo"]};' in css
+    assert ruler.findtext(f"{ns}text") == ("24″" if distance_unit == "in" else "60 cm")
 
 
 @pytest.mark.parametrize(

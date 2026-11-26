@@ -67,7 +67,7 @@ affected acceptance before the merge.
   intentional, and the required PR Source, installed-wheel and Docker smoke
   checks (and chosen additional browser checks) have passed for the candidate
   SHA. Obtain merge approval; after the merge, verify the resulting exact
-  `main` SHA again before tagging.
+  `main` SHA again before tagging, using fresh CI or verified identical-tree reuse.
 
 ## Version 1.0 data-completeness gate
 
@@ -362,19 +362,33 @@ the stable candidate. Re-run affected gates if the candidate changes.
   browser coverage that is available on the selected test host. Save the
   transcript, test counts, host, SHA and skip reasons. Required cohorts cannot
   be silently skipped; review platform-specific and opt-in skips rather than
-  treating them as successful tests.
+  treating them as successful tests. For source-backed tests requiring the
+  legacy raw SQLite archive, run `python -m tools.testing.prepare_source_audit`
+  from the checkout root before the suite. It uses the pinned Army ZIP and
+  complete runtime build provenance, verifies the published export generation,
+  and writes only ignored local audit artifacts. An ordinary standalone
+  normalization/export is not a matched release pair.
 
-  Windows PowerShell (from the repository root):
-
-  ```powershell
-  .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --report
-  ```
+  Follow the [validation host policy](testing.md#validation-host-selection):
+  Linux is the default for complete release suites; Windows supplies focused
+  or platform-specific evidence when needed.
 
   Linux (an explicitly synchronized, SHA-pinned checkout):
 
   ```sh
-  .venv/bin/python tools/run_checks.py --stage test --assets required --report
+  .venv/bin/python tools/run_checks.py --stage test --assets required --test-workers 8 --test-dist browserlanes --browser-slot-count 4 --browser-lane-count 4 --split-scenario-faq --report
   ```
+
+  Windows fallback (from the repository root, only when justified):
+
+  ```powershell
+  .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 8 --test-dist browserlanes --report
+  ```
+
+- [ ] Run the tracked-database FAQ parity gate in [testing](testing.md)
+  after rebuilding the matched release databases. Set
+  `INFINITYDB_RELEASE_FAQ_PARITY=1` for the 17 opt-in API/browser cases;
+  the ordinary full suite skips them.
 
 - [ ] Pass Ruff, Pyright, Markdownlint, document links, backlog checks and the
   maintained Army/Rules build stages using the canonical runner, plus the
@@ -431,6 +445,33 @@ is not a second default full-suite run.
 
 ## 5. Approve the candidate, merge, verify main, and tag
 
+### Reuse CI for identical merge trees (v1.2.2)
+
+Avoid repeating equivalent hosted validation solely because merging produces a
+new commit SHA. The mandatory pre-merge acceptance and exact candidate CI
+remain unchanged. The release-evidence collector implements this policy:
+
+- Accept green candidate CI for the final release commit when both commits
+  have the same Git tree SHA and the required workflow coverage and validation
+  semantics are equivalent. Verify the approved candidate and resulting
+  `main` commit belong to the intended merge; record both commit SHAs, their
+  verified tree identity and the actual workflow run SHAs in release evidence.
+- Require fresh applicable CI on the final commit when the trees differ or
+  equivalence cannot be established. Never reuse incomplete, failed or
+  otherwise ineligible candidate evidence.
+- Retain final-commit, tag and artifact-identity checks wherever the result
+  depends on the release SHA, ref, event or generated deployment artifact.
+  Tree equivalence does not establish equality of commit-dependent image
+  metadata or release version identity. The tag still points to the verified
+  final `main` commit.
+
+The three core `main`-push workflows independently verify the merged PR and
+candidate evidence before omitting their expensive steps. A changed tree,
+missing PR/evidence or inaccessible API falls back to fresh validation. Manual
+workflow dispatch always permits fresh checks. The final release collector
+requires the explicit approved candidate SHA to use this exception; it does
+not treat a reuse acknowledgment as a newly executed smoke or Source run.
+
 ### Development freeze and release-only handoff
 
 The **pre-merge sign-off above is mandatory**; it is not retroactively
@@ -466,10 +507,11 @@ Do not create a routine second PR to finish release prose or TODO cleanup.
   accessibility acceptance are all complete. Obtain merge approval, then
   merge the verified candidate through the intended PR workflow.
 - [ ] After merging, identify the resulting exact `main` SHA (which may
-  differ from the branch tip after a merge/squash). Verify the three
-  mandatory hosted workflows and any selected additional checks on this
-  exact SHA **before tagging**. The hosted Deployment smoke workflow validates
-  the immutable image but does not replace the pre-merge Docker test stack.
+  differ from the branch tip after a merge/squash). Verify the three mandatory
+  hosted workflows and any selected additional checks **before tagging**,
+  either on this exact SHA or through the verified identical-tree exception.
+  Investigate any actual failed post-merge checks; reuse is not a failure waiver.
+  The hosted Deployment smoke workflow does not replace the pre-merge Docker test stack.
 - [ ] If any check fails, correct the development branch, run the applicable
   local acceptance again (including the complete suite and running Docker
   test for changed runtime behavior), and obtain green hosted evidence for
@@ -481,6 +523,13 @@ Do not create a routine second PR to finish release prose or TODO cleanup.
   ```text
   python -m tools.ci.prepare_release_ci_evidence --repository OWNER/REPO --commit <release-sha> --tag v<version> --json-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/evidence.json --tag-message-output local/validation/project-infrastructure/release-ci/<UTC-run-id>-<short-SHA>/annotated-tag.txt
   ```
+
+  For an identical merged tree, add `--candidate <approved-candidate-sha>` to
+  that command. The collector verifies the actual same-repository PR merged into
+  `main`, both commit trees, and complete candidate workflow coverage. If reuse
+  cannot be established, obtain fresh final-SHA CI (dispatch manually if needed)
+  and run the command without `--candidate`. Optional selected workflows must
+  also have successful evidence on the chosen validation SHA.
 
   The collector rejects both files if either already exists or the two output
   selections resolve to the same file. Re-running a completed check requires a

@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import sqlite3
-import zipfile
 from collections import Counter
 from pathlib import Path
 
@@ -13,40 +12,37 @@ import pytest
 
 from infinity_db.database import Database
 from infinity_db.web import create_app
+from tests.current_army_source import CURRENT_ARMY_ZIP as ARMY_ZIP
+from tests.current_army_source import open_current_army_archive
 from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
-ARMY_ZIP = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
 ARMY_DB = ROOT / "data/generated/army.db"
 
 
 @pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
 def test_named_chart_annotations_preserve_exact_local_profile_context() -> None:
     """Parentheses are source syntax, not a universal counts-as/eligibility rule."""
-    assert hashlib.sha256(ARMY_ZIP.read_bytes()).hexdigest() == (
-        "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
-    )
     cases = (
-        (105, "105-varuna-immediate-reaction-division.json", "7.26246.158",
+        (105, "105-varuna-immediate-reaction-division.json",
          {(1, 4), (2, 1), (2, 4)}),
-        (1102, "1102-shindenbutai.json", "7.26246.159", {(3, 5)}),
-        (801, "801-tohaa.json", "7.26246.159",
+        (1102, "1102-shindenbutai.json", {(3, 5)}),
+        (801, "801-tohaa.json",
          {(1, member) for member in (*range(1, 13), 15, 17)}),
-        (899, "899-deras-kaar.json", "7.26246.159",
+        (899, "899-deras-kaar.json",
          {(1, member) for member in range(1, 5)} | {(3, 1)}),
     )
     application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules_n5.db")
     database = Database(ARMY_DB)
     reviewed_rows = 0
-    with zipfile.ZipFile(ARMY_ZIP) as archive:
+    with open_current_army_archive() as archive:
         metadata = json.loads(archive.read("metadata.json"))
         assert next(item["name"] for item in metadata["skills"] if item["id"] == 251) == (
             "Strategic\u00a0Deployment"
         )
-        for army_id, member, version, row_keys in cases:
+        for army_id, member, row_keys in cases:
             raw = archive.read(member)
             source = json.loads(raw)
-            assert source["version"] == version
             chart = database.get_fireteam_chart(army_id)
             assert chart is not None
             assert chart["source"]["file"] == member
@@ -108,13 +104,10 @@ def test_named_chart_annotations_preserve_exact_local_profile_context() -> None:
 @pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
 def test_army_01_all_pinned_chart_constraints_reach_public_api() -> None:
     """Compare original archive rows independently of the chart materializer."""
-    assert hashlib.sha256(ARMY_ZIP.read_bytes()).hexdigest() == (
-        "f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75"
-    )
     database = Database(ARMY_DB)
     application = create_app(ARMY_DB, rules_database_path=ROOT / "data/generated/rules_n5.db")
     chart_count = team_count = member_count = 0
-    with zipfile.ZipFile(ARMY_ZIP) as archive:
+    with open_current_army_archive() as archive:
         # Cover raw contexts too: a publication-only inventory would miss dropped
         # sources. Alternate sources must agree with their selected application chart.
         with sqlite3.connect(ARMY_DB.as_uri() + "?mode=ro", uri=True) as connection:
@@ -186,13 +179,13 @@ def test_army_01_all_pinned_chart_constraints_reach_public_api() -> None:
                     assert member["min_count"] == original_member.get("min")
                     assert member["max_count"] == original_member.get("max")
                     assert member["required"] == bool(original_member.get("required"))
-    assert (chart_count, team_count, member_count) == (57, 268, 1249)
+    assert (chart_count, team_count, member_count) == (57, 271, 1254)
 
 
 @pytest.mark.skipif(not ARMY_ZIP.exists(), reason="Pinned Army ZIP unavailable")
 def test_pinned_member_reference_gaps_are_disclosed_without_replacement() -> None:
     database = Database(ARMY_DB)
-    with zipfile.ZipFile(ARMY_ZIP) as archive:
+    with open_current_army_archive() as archive:
         documents = {
             name: json.loads(archive.read(name)) for name in archive.namelist()
             if name.endswith(".json") and name != "metadata.json"
@@ -220,18 +213,24 @@ def test_pinned_member_reference_gaps_are_disclosed_without_replacement() -> Non
                     }
                     assert member["loadouts"] == []
                 elif member["fto_marker"] and not member["loadouts"]:
-                    assert army["id"] == 499
-                    assert member["source_unit_id"] == 1656
+                    assert (army["id"], member["source_unit_id"]) in {
+                        (301, 1942), (499, 1656),
+                    }
                     source = documents[chart["source"]["file"]]
-                    korsan = next(unit for unit in source["units"] if unit["id"] == 1656)
-                    options = [option for group in korsan["profileGroups"]
+                    unit = next(
+                        unit for unit in source["units"]
+                        if unit["id"] == member["source_unit_id"]
+                    )
+                    options = [option for group in unit["profileGroups"]
                                for option in group["options"]]
-                    assert len(options) == 3
+                    assert options
+                    if member["source_unit_id"] == 1656:
+                        assert len(options) == 3
                     assert all("FTO" not in option["name"] for option in options)
-    assert (affected, unresolved) == (13, 11)
+    assert (affected, unresolved) == (14, 11)
     assert codes == {
         "unit-reference-unresolved": 11, "unit-not-in-army": 1,
-        "fto-unit-context-mismatch": 1, "fto-option-unresolved": 1,
+        "fto-unit-context-mismatch": 1, "fto-option-unresolved": 2,
     }
 
 

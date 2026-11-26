@@ -415,6 +415,7 @@ PROBED_DIRECT_METHODS = {
     "list_booty_results",
     "list_skill_extras",
     "list_catalog_items",
+    "list_catalog_filter_items",
     "get_catalog_item",
     "skill_source_ids",
     "skill_source_classifications",
@@ -578,6 +579,9 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ),
         ("equipment-list", lambda db: db.list_catalog_items("equipment")),
         ("weapons-list", lambda db: db.list_catalog_items("weapons")),
+        ("skills-filter-items", lambda db: db.list_catalog_filter_items("skills")),
+        ("equipment-filter-items", lambda db: db.list_catalog_filter_items("equipment")),
+        ("weapons-filter-items", lambda db: db.list_catalog_filter_items("weapons")),
         ("skill-detail", lambda db: db.get_skill(int(skill["id"]))),
         ("skill-source-ids", lambda db: db.skill_source_ids(int(skill["id"]))),
         (

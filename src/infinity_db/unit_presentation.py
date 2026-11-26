@@ -525,8 +525,7 @@ def enrich_unit_filter_presentation(
 
 
 def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Attach backend-owned labels/symbol roles to extended Unit-list profiles."""
-
+    """Retain labels and symbols in the legacy compact profile response."""
     for unit in items:
         for profile in unit.get("profiles", ()):
             profile["type_label"] = troop_type_label(profile.get("type"))
@@ -535,6 +534,38 @@ def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str,
                 for characteristic in profile.get("characteristics", ())
             ]
     return items
+
+
+def extended_general_profiles(unit: dict[str, Any]) -> list[dict[str, Any]]:
+    """Project the detail page's visible General profiles with Army availability."""
+    result = []
+    for general in unit.get("general_profiles", ()):
+        if general.get("presentation_visible") is False:
+            continue
+        availability: dict[int, list[str]] = {}
+        for army in unit.get("armies", ()):
+            if not army.get("presentation_visible"):
+                continue
+            for profile in army.get("profiles", ()):
+                if str(profile.get("profile_identity") or "") != general["profile_identity"]:
+                    continue
+                raw = profile.get("ava")
+                value = (
+                    "total" if raw == 255 or str(raw).casefold() in {"t", "total"}
+                    else str(raw) if isinstance(raw, int) and raw >= 0
+                    else "—"
+                )
+                values = availability.setdefault(army["id"], [])
+                if value not in values:
+                    values.append(value)
+        result.append({
+            **general,
+            "availability": [
+                {"army_id": army_id, "ava": " / ".join(values)}
+                for army_id, values in sorted(availability.items())
+            ],
+        })
+    return result
 
 
 def _separate_loadout_attribute_overrides(
@@ -607,6 +638,7 @@ def enrich_unit_presentation(
     optional_filters: dict[str, bool] | None = None,
     requested_army: str | None = None,
     source_skill_classifications: tuple[SkillSourceClassification, ...] | None = None,
+    general_only: bool = False,
 ) -> dict[str, Any]:
     """Compose General-profile and Unit-detail presentation semantics in the backend.
 
@@ -626,12 +658,13 @@ def enrich_unit_presentation(
         )
     }
     armies = [army for army in unit.get("armies", ()) if isinstance(army, dict)]
-    unit["peripheral_types"] = [
-        {"id": type_id, "label": _PERIPHERAL_TYPE_LABELS.get(type_id, str(type_id))}
-        for type_id in unit.get("peripheral_type_ids", ())
-    ]
-    _annotate_peripheral_presentations(unit)
-    for army in armies:
+    if not general_only:
+        unit["peripheral_types"] = [
+            {"id": type_id, "label": _PERIPHERAL_TYPE_LABELS.get(type_id, str(type_id))}
+            for type_id in unit.get("peripheral_type_ids", ())
+        ]
+        _annotate_peripheral_presentations(unit)
+    for army in armies if not general_only else ():
         army["availability_badges"] = [
             {
                 "flag": flag,
@@ -651,7 +684,8 @@ def enrich_unit_presentation(
                 characteristic_presentation(characteristic)
                 for characteristic in profile.get("characteristics", ())
             ]
-    _annotate_composite_option_presentations(armies)
+    if not general_only:
+        _annotate_composite_option_presentations(armies)
 
     for army in armies:
         army["presentation_requested"] = _army_requested(army, requested_army)
@@ -736,6 +770,12 @@ def enrich_unit_presentation(
 
     _annotate_general_profile_visibility(general_profiles)
     unit["general_profiles"] = general_profiles
+
+    if general_only:
+        # Extended Explorer rows consume only the General profiles and visibility.
+        for general in general_profiles:
+            _classify_skill_source_presentations(general["shared_items"], source_classifications)
+        return unit
 
     for army in selected_armies:
         profiles_by_group: dict[Any, list[dict[str, Any]]] = {}

@@ -201,6 +201,89 @@ def test_pinned_army_overview_api_links_and_keyboard_navigation(
         page.locator(f'[id="{target_id}"]').wait_for(state="visible", timeout=5000)
 
 
+@pytest.mark.parametrize("width", [1440, 320])
+def test_army_links_and_filtered_availability_counts(
+    army_app: Any, origin: str, chrome: Any, width: int,
+) -> None:
+    with _overview_page(army_app, origin, chrome, width) as page:
+        page.add_init_script(
+            "sessionStorage.setItem('infinity-db-reinforcement', 'false')"
+        )
+        armies = page.request.get(f"{origin}/api/armies").json()["items"]
+        section = next(army for army in armies if army["role"] == "reinforcement")
+        page.goto(f"{origin}/armies", wait_until="domcontentloaded")
+        card = page.locator(f'[id="army-{_slug(section)}"]')
+        with page.expect_response(
+            lambda response: "/api/units?" in response.url and "counts=prospective" in response.url,
+            timeout=60000,
+        ) as result:
+            card.get_by_role("link", name="Browse units").click()
+        payload = result.value.json()
+        assert payload["total"] > 0
+        page.wait_for_function(
+            "() => document.querySelector('#army-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        params = page.evaluate(
+            "async () => Object.fromEntries((await import('/static/share-state.js'))"
+            ".readShareState('units').params)"
+        )
+        assert params["army_id"] == _slug(section)
+        assert params["matching_scope"] == "profile"
+        assert params["and_filters"] == (
+            "skill,equipment,weapon,troop_type,classification,characteristic"
+        )
+        assert params["reinforcement"] == "1"
+        assert page.locator("#army-filter").input_value() == _slug(section)
+        counts = payload["army_usage_counts"]
+        assert counts[str(section["id"])] == payload["total"]
+        total_armies = sum(
+            army.get("playable") is not False or (army["unit_count"] or 0) > 0
+            for army in armies
+        )
+        assert page.locator("#army-count").inner_text() == f"{len(counts)} / {total_armies}"
+        disclosure = page.locator("#army-count-details")
+        breakdown = page.locator("#army-count-shown-breakdown")
+        assert not breakdown.is_visible()
+        disclosure.locator("summary").click()
+        assert breakdown.is_visible()
+        role_labels = {
+            "main": "Main armies", "sectorial": "Sectorials",
+            "non_aligned": "Non-Aligned Armies", "reinforcement": "Reinforcements",
+        }
+        expected = dict.fromkeys(role_labels.values(), 0)
+        for army in armies:
+            if str(army["id"]) in counts:
+                label = role_labels.get(army["role"], "Other Army availability")
+                expected[label] = expected.get(label, 0) + 1
+        assert sum(expected.values()) == len(counts)
+        assert dict(zip(
+            breakdown.locator("dt").all_inner_texts(),
+            map(int, breakdown.locator("dd").all_inner_texts()),
+            strict=True,
+        )) == expected
+        assert page.evaluate("""() => {
+            const card = document.querySelector('#army-count-details .unit-count-card');
+            const rect = card.getBoundingClientRect();
+            return rect.left >= 0 && rect.right <= innerWidth + 1;
+        }"""), width
+        disclosure.locator("summary").click()
+        assert page.locator("#army-filter option:checked").inner_text().endswith(
+            f"({payload['total']})"
+        )
+        with page.expect_response(
+            lambda response: "/api/units?" in response.url and "counts=prospective" in response.url,
+            timeout=60000,
+        ) as empty_result:
+            page.locator("#unit-search").fill("impossible-unique-unit-name")
+        assert empty_result.value.json()["army_usage_counts"] == {}
+        page.wait_for_function(
+            "total => document.querySelector('#army-count')?.textContent === `0 / ${total}`",
+            arg=total_armies,
+        )
+        assert breakdown.locator("dd").all_text_contents() == ["0"] * 4
+        assert page.locator("#army-filter option:checked").inner_text().endswith("(0)")
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 def test_overview_ignores_missing_nonplayable_and_legacy_targets(
     army_app: Any, origin: str, chrome: Any, width: int

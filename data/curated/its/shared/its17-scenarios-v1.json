@@ -19,7 +19,7 @@
         "id": "scenario:evacuation",
         "kind": "scenario",
         "name": "Evacuation",
-        "summary": "ITS Season 17 Seekers Evacuation: extract map-placed Civilians or enemy HVTs using Extraction Consoles, with two Classified Objectives.",
+        "summary": "Extract map-placed Civilians or enemy HVTs using Extraction Consoles, with two Classified Objectives.",
         "composition": {
           "role": "definition"
         },
@@ -247,7 +247,7 @@
                     "objectivePoints": 2,
                     "condition": {
                       "kind": "reviewed-prose",
-                      "text": "Each player has two Classified Objectives, worth 2 Objective Points each when completed (up to four), as specified explicitly in the English publication."
+                      "text": "Each player has two Classified Objectives, worth 2 Objective Points each when completed (up to four), under the English rules."
                     }
                   }
                 ]
@@ -312,7 +312,7 @@
                 },
                 "paragraphs": [
                   "Attack, Scenario Short Skill. Only a Specialist Troop in Silhouette contact with an Extraction Console and CivEvacing at least one Civilian or enemy HVT may declare this Skill.",
-                  "The English publication prohibits this Skill in the first Game Round. The Spanish publication instead uses 'primer Turno de Juego'; the different timing term is retained as a source issue.",
+                  "The English publication prohibits this Skill in the first Game Round. The Spanish publication instead uses 'primer Turno de Juego', meaning the first Game Turn rather than the first Game Round.",
                   "Spend a Short Skill and make a Normal WIP Roll. If it fails, another attempt can be made by spending another Short Skill. On success, choose one of the Civilians or enemy HVTs currently CivEvaced by that Specialist Troop, mark it Extracted and remove it from the table.",
                   "The Spanish source expressly states that a Console may be Activated after the opponent has Activated it; the English text is silent. Extraction is per successful action, not permanent Console Control."
                 ]
@@ -367,7 +367,7 @@
                 ],
                 "objectiveId": "classified-objectives",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 55 explicitly gives 2 Objective Points per Classified Objective for two Objectives. ES p. 50 instead states two Classified Objectives and '2 Puntos de Objetivo' without 'each'. Preserve this language-scope ambiguity; follow the explicit English scoring."
+                "description": "ITS 17 V0.2 EN p. 55 explicitly gives 2 Objective Points per Classified Objective for two Objectives. ES p. 50 instead states two Classified Objectives and '2 Puntos de Objetivo' without 'each'. The Spanish text is unclear on whether 2 OP are awarded per card or in total. The scoring table uses the English value."
               },
               {
                 "id": "activation-first-round-bilingual",
@@ -381,7 +381,7 @@
                 ],
                 "objectiveId": "extracted-civilians",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 57 prohibits Activate Extraction Console in the first Game Round; ES p. 52 uses 'primer Turno de Juego' (first Game Turn), not the usual Spanish term for Game Round. Preserve the unresolved timing distinction."
+                "description": "ITS 17 V0.2 EN p. 57 prohibits Activate Extraction Console in the first Game Round; ES p. 52 uses 'primer Turno de Juego' (first Game Turn), not the usual Spanish term for Game Round. The two versions may allow activation at different times."
               },
               {
                 "id": "reactivation-english-omission",
@@ -1283,12 +1283,12 @@
                   "restrictions": [],
                   "clarifications": [],
                   "sourceNotes": [
-                    "The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; the wording remains an unresolved source discrepancy."
+                    "The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; it is unclear whether a different condition is intended."
                   ]
                 },
                 "paragraphs": [
                   "Pick Up Beacon is an Attack, Scenario Short Skill, requiring that the player has an Activated Console. The Trooper must also be in Silhouette contact either with a friendly Trooper in Normal State carrying the Enemy Beacon, or with an unaccompanied Enemy Beacon with no opposing non-Null Trooper in contact.",
-                  "Spend one Short Skill to pick up the Enemy Beacon without a Roll. Follow the Common Rules of Beacons. The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; see the source issue below."
+                  "Spend one Short Skill to pick up the Enemy Beacon without a Roll. Follow the Common Rules of Beacons. The Spanish source calls the prerequisite a Connected Console rather than an Activated Console; see the Source notes."
                 ]
               },
               {
@@ -1379,7 +1379,7 @@
                 ],
                 "objectiveId": "control-enemy-beacon",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 60 requires an Activated Console to Pick Up Beacon, whereas ES p. 55 says 'Consola Conectada'; its activation procedure on ES pp. 56-57 uses both Conectada and Activada. Preserve the terminology discrepancy without asserting a second Console state."
+                "description": "ITS 17 V0.2 EN p. 60 requires an Activated Console to Pick Up Beacon, whereas ES p. 55 says 'Consola Conectada'; its activation procedure on ES pp. 56-57 uses both Conectada and Activada. It is unclear whether these are different conditions."
               },
               {
                 "id": "allied-beacon-carrier-normal-state",
@@ -1393,7 +1393,7 @@
                 ],
                 "objectiveId": "control-enemy-beacon",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 60 requires a friendly Beacon carrier in Normal State for transfer; ES p. 55 does not repeat the Normal State qualification. Preserve the English restriction and the bilingual gap."
+                "description": "ITS 17 V0.2 EN p. 60 requires a friendly Beacon carrier in Normal State for transfer; ES p. 55 does not repeat the Normal State qualification. The transfer requirement differs between the two versions."
               }
             ]
           },
@@ -2253,7 +2253,7 @@
                 ],
                 "objectiveId": "activate-communication-antennas",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 94 explicitly groups 300/350/400-point games for the [[distance:12:inch]] Antenna offset, but ES p. 100 lists only 400/300. Both printed mission maps (EN p. 93, ES p. 99) group 300/350/400 in the same layout. Treat the Spanish sentence as an omission, not an alternate 350-point placement."
+                "description": "ITS 17 V0.2 EN p. 94 explicitly groups 300/350/400-point games for the [[distance:12:inch]] Antenna offset, but ES p. 100 lists only 400/300. Both printed mission maps (EN p. 93, ES p. 99) group 300/350/400 in the same layout. Both maps show the same placement for 350-point games."
               }
             ]
           },
@@ -2704,7 +2704,7 @@
         "id": "scenario:battleground",
         "kind": "scenario",
         "name": "Battleground",
-        "summary": "ITS Season 17 Seekers Battleground: dominate three Sectors for 1/3/4 Objective Points and Kill or alternatively Threaten the enemy Key Ops.",
+        "summary": "Dominate three Sectors for 1/3/4 Objective Points and Kill or alternatively Threaten the enemy Key Ops.",
         "composition": {
           "role": "definition"
         },
@@ -3139,7 +3139,7 @@
                 ],
                 "objectiveId": "enemy-key-ops",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 85 forbids REM and VH Troop Types from Key Ops designation, but ES p. 90 names only REM. The English exclusion is retained while the bilingual difference remains unresolved."
+                "description": "ITS 17 V0.2 EN p. 85 forbids REM and VH Troop Types from Key Ops designation, but ES p. 90 names only REM. The English rules exclude VH Troopers; the Spanish rules do not specify this restriction."
               },
               {
                 "id": "shasvastii-embryo-eligibility-en-es",
@@ -3153,7 +3153,7 @@
                 ],
                 "objectiveId": "central-sector",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 84 says Shasvastii Troopers count in Unconscious or any non-Null State. ES p. 89 instead specifies Normal or Shasvastii Embryo. Do not silently equate those state sets; the English rule is retained."
+                "description": "ITS 17 V0.2 EN p. 84 says Shasvastii Troopers count in Unconscious or any non-Null State. ES p. 89 instead specifies Normal or Shasvastii Embryo. The two versions differ on which States count for Domination."
               }
             ]
           },
@@ -3728,7 +3728,7 @@
         "id": "scenario:annihilation",
         "kind": "scenario",
         "name": "Annihilation",
-        "summary": "ITS Season 17 Seekers Annihilation: score by enemy Army Points Killed, surviving Victory Points and the enemy Lieutenant Killed. The original English and Spanish survival bands conflict.",
+        "summary": "Score by enemy Army Points Killed, surviving Victory Points and the enemy Lieutenant Killed. The original English and Spanish survival bands conflict.",
         "composition": {
           "role": "definition"
         },
@@ -4412,7 +4412,7 @@
                 ],
                 "objectiveId": "preserve-forces",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 81 awards 1/3/4 OP for the low/middle/high surviving Victory Point bands, while ES p. 85 prints 3/4/4 OP for those same numerical bands. The English chart is retained, not silently reconciled with the Spanish table."
+                "description": "ITS 17 V0.2 EN p. 81 awards 1/3/4 OP for the low/middle/high surviving Victory Point bands, while ES p. 85 prints 3/4/4 OP for those same numerical bands. The scoring table uses the English awards."
               },
               {
                 "id": "its17-150-point-deployment-units",
@@ -4424,7 +4424,7 @@
                   "deployment-b"
                 ],
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 82 prints [[distance:8:inch]] x [[distance:32:cm]] as the 150-point Deployment Zone size; its own diagram instead depicts an [[distance:8:inch]]-deep zone spanning the [[distance:24:inch]] table width. ES p. 86 prints [[distance:20:cm]] x [[distance:60:cm]] and shows that geometry. Retain the reviewed map, not an invented mixed-unit zone."
+                "description": "ITS 17 V0.2 EN p. 82 prints [[distance:8:inch]] x [[distance:32:cm]] as the 150-point Deployment Zone size; its own diagram instead depicts an [[distance:8:inch]]-deep zone spanning the [[distance:24:inch]] table width. ES p. 86 prints [[distance:20:cm]] x [[distance:60:cm]] and shows that geometry. The map follows the diagrams rather than the conflicting English measurements."
               },
               {
                 "id": "its17-350-point-destroy-forces-gap",
@@ -4442,7 +4442,7 @@
                 ],
                 "objectiveId": "preserve-forces",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 81 and ES p. 85 print 176-274 and more than 275 surviving Victory Points for adjacent bands, leaving exactly 275 without a printed award. The language editions additionally disagree on the awarded OP as documented separately."
+                "description": "ITS 17 V0.2 EN p. 81 and ES p. 85 print 176-274 and more than 275 surviving Victory Points for adjacent bands, leaving exactly 275 without a printed award. The language editions additionally disagree on the awarded OP (see the other scoring note)."
               }
             ]
           },
@@ -5130,7 +5130,7 @@
                 ],
                 "objectiveId": "kill-enemy-key-ops",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 87 excludes REM and VH from Key Ops designation, while ES p. 92 excludes REM but omits VH. Retain the English exclusion and flag the disagreement."
+                "description": "ITS 17 V0.2 EN p. 87 excludes REM and VH from Key Ops designation, while ES p. 92 excludes REM but omits VH. The English rules exclude VH Troopers; the Spanish rules do not specify this restriction."
               },
               {
                 "id": "lieutenant-more-kills-minimum-en-es",
@@ -5144,7 +5144,7 @@
                 ],
                 "objectiveId": "kill-more-lieutenants",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 ES p. 91 adds a condition requiring at least one Lieutenant Killed to the more-Lieutenants objective, which EN p. 86 does not explicitly state. Retain the English objective wording and the language difference."
+                "description": "ITS 17 V0.2 ES p. 91 adds a condition requiring at least one Lieutenant Killed to the more-Lieutenants objective, which EN p. 86 does not explicitly state. The two versions differ on whether at least one kill is required."
               },
               {
                 "id": "killed-lieutenant-history-en-es",
@@ -5490,7 +5490,7 @@
         "id": "scenario:superiority",
         "kind": "scenario",
         "name": "Superiority",
-        "summary": "ITS Season 17 Superiority: dominate more Quadrants at each round end, Hack up to three Consoles for points, and have a Dominant Key Ops at game end.",
+        "summary": "Dominate more Quadrants at each round end, Hack up to three Consoles for points, and have a Dominant Key Ops at game end.",
         "composition": {
           "role": "definition"
         },
@@ -5865,7 +5865,7 @@
                 ],
                 "objectiveId": "dominate-more-quadrants",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 90 counts Shasvastii Troopers in Unconscious or any non-Null State, whereas ES p. 95 names Normal or Shasvastii Embryo. The English wording is retained; do not silently equate the state sets."
+                "description": "ITS 17 V0.2 EN p. 90 counts Shasvastii Troopers in Unconscious or any non-Null State, whereas ES p. 95 names Normal or Shasvastii Embryo. The two versions differ on which States count for Domination."
               },
               {
                 "id": "its17-key-ops-vh-eligibility-en-es",
@@ -5879,7 +5879,7 @@
                 ],
                 "objectiveId": "dominant-key-ops",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 92 excludes Irregular, REM and VH Troopers as Key Ops; ES p. 97 omits VH. Preserve the English exclusion and record the bilingual gap."
+                "description": "ITS 17 V0.2 EN p. 92 excludes Irregular, REM and VH Troopers as Key Ops; ES p. 97 omits VH. The English rules exclude VH Troopers; the Spanish rules do not specify this restriction."
               }
             ]
           },
@@ -6617,7 +6617,7 @@
         "id": "scenario:provisioning",
         "kind": "scenario",
         "name": "Provisioning",
-        "summary": "ITS Season 17 Provisioning: extract four Supply Boxes from three Tech-Coffins, secure player-placed Safe Areas, and score end-game Control with one Classified Objective.",
+        "summary": "Extract four Supply Boxes from three Tech-Coffins, secure player-placed Safe Areas, and score end-game Control with one Classified Objective.",
         "composition": {
           "role": "definition"
         },
@@ -6921,7 +6921,7 @@
                   "restrictions": [],
                   "clarifications": [],
                   "sourceNotes": [
-                    "ITS 17 EN p. 74 requires base contact with a Tech-Coffin, while ES p. 71 requires Silhouette contact. The historical requirement preserves this unresolved language distinction.",
+                    "ITS 17 EN p. 74 requires base contact with a Tech-Coffin, while ES p. 71 requires Silhouette contact. The required type of contact differs between the two versions.",
                     "Both ITS 17 editions require marking a Tech-Coffin with a Player A/B Token once all its Supply Boxes are extracted; neither directs removal of the emptied Tech-Coffin Token."
                   ]
                 },
@@ -7036,7 +7036,7 @@
                 ],
                 "objectiveId": "control-supply-boxes",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 74 requires base contact to Extract from a Tech-Coffin; ES p. 71 says Silhouette contact. The terms are not assumed equivalent in the historical record."
+                "description": "ITS 17 V0.2 EN p. 74 requires base contact to Extract from a Tech-Coffin; ES p. 71 says Silhouette contact. The required type of contact differs between the two versions."
               }
             ]
           },
@@ -7757,7 +7757,7 @@
                 "paragraphs": [
                   "A player Dominates an Area of Interest when they have more Victory Points from eligible Troops inside that Area than their opponent. More than half of a Trooper's base must lie within the Area.",
                   "Eligible Troops include Models, Markers representing Troopers, Proxies, and Peripherals. Troops in Null States, fake Holoechoes, weapons or equipment Tokens, and Tokens not representing Troops do not count.",
-                  "ITS 17 English counts Troopers with [[skill:shasvastii|Shasvastii]] while Unconscious or in any non-Null State; Spanish names Normal or Unconscious. This bilingual state-set distinction is unresolved. Non-Null Troopers with [[equipment:baggage|Baggage]] add 20 Victory Points for Domination.",
+                  "ITS 17 English counts Troopers with [[skill:shasvastii|Shasvastii]] while Unconscious or in any non-Null State; Spanish names Normal or Unconscious. It is unclear which States are intended to count. Non-Null Troopers with [[equipment:baggage|Baggage]] add 20 Victory Points for Domination.",
                   "At game end, earn 1 Objective Point per Area Dominated, maximum 3; each Game Round, Dominate the Special Area for another 1 Objective Point."
                 ]
               },
@@ -7812,7 +7812,7 @@
                 ],
                 "objectiveId": "dominate-areas",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 77 explicitly marks Area of Interest suitable for Reinforcements (YES), but ES p. 80 explicitly states NO. Do not select one language as an unqualified season-wide permission."
+                "description": "ITS 17 V0.2 EN p. 77 explicitly marks Area of Interest suitable for Reinforcements (YES), but ES p. 80 explicitly states NO. Reinforcements suitability is disputed."
               },
               {
                 "id": "its17-hacker-aro-optional-vs-mandatory",
@@ -7840,7 +7840,7 @@
                 ],
                 "objectiveId": "dominate-areas",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 79 counts Shasvastii Troopers Unconscious or in any non-Null State; ES p. 83 specifies Normal or Unconscious. The state sets must not be silently equated."
+                "description": "ITS 17 V0.2 EN p. 79 counts Shasvastii Troopers Unconscious or in any non-Null State; ES p. 83 specifies Normal or Unconscious. The two versions differ on which States count for Domination."
               },
               {
                 "id": "its17-intelcom-final-vs-third-round",
@@ -8186,7 +8186,7 @@
         "id": "scenario:last-launch",
         "kind": "scenario",
         "name": "Last Launch",
-        "summary": "ITS Season 17 Last Launch: download and transfer IDs, extract identified Troopers from the Launching Tower, and score extracted points, Specialists, Tower Domination and three Classified Objectives.",
+        "summary": "Download and transfer IDs, extract identified Troopers from the Launching Tower, and score extracted points, Specialists, Tower Domination and three Classified Objectives.",
         "composition": {
           "role": "definition"
         },
@@ -8498,7 +8498,7 @@
                 "paragraphs": [
                   "Both sides deploy in opposite edge Deployment Zones of game-size-specific depth, and no Trooper can deploy inside the centrally located Launching Tower.",
                   "The Launching Tower is a [[distance:8:inch]] × [[distance:8:inch]] Zone of Operations at the table center. Its walls count as infinitely high and completely block Line of Fire. Four Wide Gates are centered in its four walls and start open; the published diagram is schematic and does not specify their opening width.",
-                  "ITS 17 EN p. 65 specifies an [[distance:8:inch]] × [[distance:8:inch]] Launching Tower; ES p. 77 says [[distance:20:cm]] × [[distance:20:cm]]. This small unit difference is preserved as a bilingual source issue."
+                  "ITS 17 EN p. 65 specifies an [[distance:8:inch]] × [[distance:8:inch]] Launching Tower; ES p. 77 says [[distance:20:cm]] × [[distance:20:cm]]. The two sizes differ slightly."
                 ]
               },
               {
@@ -8601,12 +8601,12 @@
                   ],
                   "clarifications": [],
                   "sourceNotes": [
-                    "ITS 17 EN p. 66 refers to adding the removed Troopers' points (plural, including Peripherals removed inside the Tower), while ES p. 79 says the removed Trooper's cost (singular). Whether Peripheral costs contribute is not explicitly equivalent."
+                    "ITS 17 EN p. 66 refers to adding the removed Troopers' points (plural, including Peripherals removed inside the Tower), while ES p. 79 says the removed Trooper's cost (singular). It is unclear whether to include the Peripherals' points."
                   ]
                 },
                 "paragraphs": [
                   "A Trooper carrying an ID Token and in Silhouette contact with the central ID Checker may declare this Attack, Scenario Short Skill, unless participating in a Coordinated Order. Extraction succeeds without a Roll.",
-                  "Remove the extracting Trooper and any of its Peripherals inside the Launching Tower. Extracted Army Points are Open Information; ITS 17 EN p. 66 refers to the removed Troopers' points, while ES p. 79 refers to the extracting Trooper's points alone. The Peripheral-cost interpretation remains unresolved.",
+                  "Remove the extracting Trooper and any of its Peripherals inside the Launching Tower. Extracted Army Points are Open Information; ITS 17 EN p. 66 refers to the removed Troopers' points, while ES p. 79 refers to the extracting Trooper's points alone. It is unclear whether to include the Peripherals' points.",
                   "Extracted Troops continue contributing to their owner's Victory Points, even if they entered a Null or Dead State during the Order they were Extracted. A previously Extracted Lieutenant triggers the normal Loss of Lieutenant rule during the player's Tactical Phase."
                 ]
               },
@@ -8665,7 +8665,7 @@
                 ],
                 "objectiveId": "dominate-launching-tower",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 65 specifies an [[distance:8:inch]] × [[distance:8:inch]] Launching Tower; ES p. 77 gives [[distance:20:cm]] × [[distance:20:cm]]. Geometry uses the English dimensions without declaring these exact equivalents."
+                "description": "ITS 17 V0.2 EN p. 65 specifies an [[distance:8:inch]] × [[distance:8:inch]] Launching Tower; ES p. 77 gives [[distance:20:cm]] × [[distance:20:cm]]. The map uses the English dimensions."
               },
               {
                 "id": "its17-last-launch-gate-access-en-es",
@@ -8707,7 +8707,7 @@
                 ],
                 "objectiveId": "extract-more-army-points",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 66 adds the removed Troopers' points after extracting a Trooper and its Peripherals inside the Tower; ES p. 79 refers to the removed Trooper's points in the singular. Whether Peripheral points count is not explicitly identical."
+                "description": "ITS 17 V0.2 EN p. 66 adds the removed Troopers' points after extracting a Trooper and its Peripherals inside the Tower; ES p. 79 refers to the removed Trooper's points in the singular. It is unclear whether to include the Peripherals' points."
               }
             ]
           },
@@ -9200,7 +9200,7 @@
         "id": "scenario:b-pong",
         "kind": "scenario",
         "name": "B-Pong",
-        "summary": "ITS Season 17 B-Pong: reposition the central Tracking Beacon toward the enemy half, Control it and a Console each round, and complete two Classified Objectives.",
+        "summary": "Reposition the central Tracking Beacon toward the enemy half, Control it and a Console each round, and complete two Classified Objectives.",
         "composition": {
           "role": "definition"
         },
@@ -9550,7 +9550,7 @@
                 "paragraphs": [
                   "Attack, Scenario Short Skill. A Specialist Troop in Silhouette contact with a Console may make a Normal WIP Roll to Activate it; failed attempts can be retried with another Short Skill.",
                   "The Beacon cannot be in Silhouette contact with any Trooper. Each Specialist Troop may successfully Activate a Console only once per Game Round. Both ITS 17 editions state these limits.",
-                  "On success choose to Nudge the Beacon within [[distance:2:inch]] (ES [[distance:5:cm]]) of its position, or Magnetize it up to [[distance:6:inch]] toward the center, without passing it. Spanish uses [[distance:15:cm]] toward the center without explicitly saying 'up to', and calls successful Activation 'Connected'; these wording distinctions remain unresolved."
+                  "On success choose to Nudge the Beacon within [[distance:2:inch]] (ES [[distance:5:cm]]) of its position, or Magnetize it up to [[distance:6:inch]] toward the center, without passing it. Spanish uses [[distance:15:cm]] toward the center without explicitly saying 'up to', and calls successful Activation 'Connected'; the two versions differ on distance and terminology."
                 ]
               },
               {
@@ -10112,7 +10112,7 @@
         "id": "scenario:crossing-lines",
         "kind": "scenario",
         "name": "Crossing Lines",
-        "summary": "ITS Season 17 Crossing Lines: Dominate both Dead Zones across a split deployment, Activate the two Antennas, and score without Classified Objectives.",
+        "summary": "Dominate both Dead Zones across a split deployment, Activate the two Antennas, and score without Classified Objectives.",
         "composition": {
           "role": "definition"
         },
@@ -11065,7 +11065,7 @@
                 ],
                 "objectiveId": "dominate-dead-zone-a",
                 "status": "needs-verification",
-                "description": "ITS 17 EN pp. 51-52 describe central strips of [[distance:4:inch]] × [[distance:32:inch]] at 150 points and [[distance:4:inch]] × [[distance:48:inch]] at 200/250 points, whereas ES p. 42 describes [[distance:10:cm]] × [[distance:60:cm]] and [[distance:10:cm]] × [[distance:80:cm]] respectively. The English strip length conflicts with table width. Geometry follows the Spanish widths and published layout."
+                "description": "ITS 17 EN pp. 51-52 describe central strips of [[distance:4:inch]] × [[distance:32:inch]] at 150 points and [[distance:4:inch]] × [[distance:48:inch]] at 200/250 points, whereas ES p. 42 describes [[distance:10:cm]] × [[distance:60:cm]] and [[distance:10:cm]] × [[distance:80:cm]] respectively. The English strip length conflicts with table width. The map follows the Spanish measurements and the published diagrams."
               },
               {
                 "id": "its17-crossing-lines-shasvastii-states-en-es",
@@ -11093,7 +11093,7 @@
                 ],
                 "objectiveId": "activate-antennas",
                 "status": "needs-verification",
-                "description": "ITS 17 EN p. 53 represents an Antenna with a Transmission Antenna Token; ES p. 44 instead says Console A Token. Both allow scenery matching that Token's diameter both Token types are 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 chart, despite the naming conflict."
+                "description": "ITS 17 EN p. 53 represents an Antenna with a Transmission Antenna Token; ES p. 44 instead says Console A Token. Both allow scenery matching that Token's diameter; both Token types are 40 mm under the ITS 17 V0.2 EN p. 13 / ES p. 14 chart, despite the naming conflict."
               },
               {
                 "id": "its17-crossing-lines-hvt-source-gap",
@@ -11107,7 +11107,7 @@
                 ],
                 "objectiveId": "dominate-both-dead-zones",
                 "status": "needs-verification",
-                "description": "ITS 17 EN p. 54 / ES p. 45 disable Secure HVT and Secure Treasure but do not exclude HVT Model deployment. The general one-HVT requirement (EN pp. 26–27 / ES pp. 27–28) therefore applies unless officially clarified otherwise. ITS 18's explicit no-HVT clause is not attributed to ITS 17."
+                "description": "ITS 17 EN p. 54 / ES p. 45 disable Secure HVT and Secure Treasure but do not exclude HVT Model deployment. The general one-HVT requirement (EN pp. 26–27 / ES pp. 27–28) therefore applies unless officially clarified otherwise. Unlike ITS 18, this mission does not explicitly exclude HVT deployment."
               }
             ]
           }
@@ -11207,7 +11207,7 @@
         "id": "scenario:corporate-appropriation",
         "kind": "scenario",
         "name": "Corporate Appropriation",
-        "summary": "ITS Season 17 Corporate Appropriation: Capture or Destroy Prototypes, collect Panoply equipment and complete three Classified Objectives.",
+        "summary": "Capture or Destroy Prototypes, collect Panoply equipment and complete three Classified Objectives.",
         "composition": {
           "role": "definition"
         },
@@ -11379,7 +11379,7 @@
                     "objectivePoints": 2,
                     "condition": {
                       "kind": "reviewed-prose",
-                      "text": "At game end, a non-Null Model (not Marker) carries the enemy Prototype without disqualifying enemy Silhouette contact. EN p. 43 says any enemy Model; ES p. 35 disregards Null-state Models. Preserve the bilingual source issue."
+                      "text": "At game end, a non-Null Model (not Marker) carries the enemy Prototype without disqualifying enemy Silhouette contact. EN p. 43 says any enemy Model; ES p. 35 disregards Null-state Models. The required enemy-contact condition differs between the two versions."
                     }
                   }
                 ]
@@ -11582,7 +11582,7 @@
                 "id": "capture-prototype",
                 "name": "Capturing Enemy Prototype",
                 "paragraphs": [
-                  "A player Captures the enemy Prototype at game end when a non-Null Model, not a Marker, carries it. ITS 17 EN p. 43 disallows contact with any enemy Model; ES p. 35 says enemy Trooper contact and explicitly disregards Null-state Models. The exact enemy-contact scope remains a source issue."
+                  "A player Captures the enemy Prototype at game end when a non-Null Model, not a Marker, carries it. ITS 17 EN p. 43 disallows contact with any enemy Model; ES p. 35 says enemy Trooper contact and explicitly disregards Null-state Models. The required enemy-contact condition differs between the two versions."
                 ]
               },
               {
@@ -11676,7 +11676,7 @@
                 ],
                 "objectiveId": "more-panoply-gear",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 40 says Suitable for Reinforcements YES, while ES p. 32 says NO. This source-level conflict does not alter the independently reviewed objective facts."
+                "description": "ITS 17 V0.2 EN p. 40 says Suitable for Reinforcements YES, while ES p. 32 says NO. Reinforcements suitability is disputed."
               },
               {
                 "id": "its17-corporate-appropriation-capture-contact-en-es",
@@ -12197,7 +12197,7 @@
         "id": "scenario:critical-intervention",
         "kind": "scenario",
         "name": "Critical Intervention",
-        "summary": "ITS Season 17 Critical Intervention: asymmetrical Attacker/Defender objectives for extracting a Data Pack, holding the Server Room, and commanding or bypassing its defensive turret system.",
+        "summary": "Asymmetrical Attacker/Defender objectives for extracting a Data Pack, holding the Server Room, and commanding or bypassing its defensive turret system.",
         "composition": {
           "role": "definition"
         },
@@ -12899,7 +12899,7 @@
                 "paragraphs": [
                   "After selecting the Classified Objective but before the game begins, each player declares whether the card will be used as Classified or INTELCOM. Both roll a die; the high roller announces first, while the mission/number on the card stays Private Information.",
                   "At the end of the final Game Round, in Initiative order, a player with at least one non-Null Trooper in the Server Room may apply the INTELCOM numeric value in Support and Control Mode to that Zone's Domination comparison.",
-                  "ITS 17 EN p. 50 calls this adding the card's value to Victory Points inside a chosen ZO; ES p. 69 says Army Points (Puntos de Ejército). Preserve the source terminology difference."
+                  "ITS 17 EN p. 50 calls this adding the card's value to Victory Points inside a chosen ZO; ES p. 69 says Army Points (Puntos de Ejército). The English and Spanish rules use different terms for the points added."
                 ]
               }
             ],
@@ -12936,7 +12936,7 @@
                 ],
                 "objectiveId": "defender-prevent-extract",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 45 and ES pp. 63–64 each print Defender Main Objectives worth 1 + 3 + 2 + 3 + 2 = 11 OP, plus one Classified OP, for a possible 12. Preserve the printed awards without silently imposing a 10-point cap."
+                "description": "ITS 17 V0.2 EN p. 45 and ES pp. 63–64 each print Defender Main Objectives worth 1 + 3 + 2 + 3 + 2 = 11 OP, plus one Classified OP, for a possible 12. The Defender can therefore score up to 12 OP according to both versions."
               },
               {
                 "id": "its17-critical-intervention-room-dimension-en-es",
@@ -12950,7 +12950,7 @@
                 ],
                 "objectiveId": "attacker-dominate-room",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 47 gives an [[distance:8:inch]] square Server Room while ES p. 65 says [[distance:20:cm]] square. The geometry follows English inches; these are not exact physical equivalents."
+                "description": "ITS 17 V0.2 EN p. 47 gives an [[distance:8:inch]] square Server Room while ES p. 65 says [[distance:20:cm]] square. The map uses the English dimensions; the two sizes differ slightly."
               },
               {
                 "id": "its17-critical-intervention-gate-access-es",
@@ -13006,7 +13006,7 @@
                 ],
                 "objectiveId": "attacker-kill-threshold",
                 "status": "needs-verification",
-                "description": "ITS 17 V0.2 EN p. 46 places the exclusion boundary [[distance:4:inch]] either side of center; ES p. 65 says [[distance:10:cm]]. Geometry follows English inches."
+                "description": "ITS 17 V0.2 EN p. 46 places the exclusion boundary [[distance:4:inch]] either side of center; ES p. 65 says [[distance:10:cm]]. The map uses the English distance."
               }
             ]
           },
@@ -13560,7 +13560,7 @@
         "id": "scenario:outbreak",
         "kind": "scenario",
         "name": "Outbreak",
-        "summary": "ITS Season 17 Outbreak: Scan up to three Infected, Stabilize more and the Alpha Infected, CivEvac more and the Stabilized Alpha Infected, and Secure an Infected; historical scoring differs from ITS 18.",
+        "summary": "Scan up to three Infected, Stabilize more and the Alpha Infected, CivEvac more and the Stabilized Alpha Infected, and Secure an Infected.",
         "composition": {
           "role": "definition"
         },
@@ -13901,7 +13901,7 @@
                 "name": "Player-Placed Stabilization Zones",
                 "paragraphs": [
                   "There are two Circular Template Stabilization Zones ([[distance:12:cm]] diameter each), one placed by each player. After placing the Infected and before deployment, each player places one Template totally inside their own Deployment Zone on a surface large enough for the full Template.",
-                  "The player who kept Deployment places the first Stabilization Zone. Its precise position is not specified by the published map and is not invented here.",
+                  "The player who kept Deployment places the first Stabilization Zone.",
                   "At the end of each Player Turn, an Infected being CivEvaced is Stabilized if both the Infected and their CivEvacing Trooper are totally inside a Stabilization Zone. Mark which player Stabilized the Infected with a Player A or B Token.",
                   "An Infected already Stabilized by one player cannot be Stabilized by the other, including by a Stabilization Zone."
                 ]
@@ -14012,7 +14012,7 @@
                   400
                 ],
                 "objectiveId": "secure-infected",
-                "description": "ITS 17 V0.2 EN p. 69 requires placement at least [[distance:4:inch]] outside the enemy Deployment Zone and [[distance:8:inch]] between Infected; ES p. 47 prints [[distance:10:cm]] and [[distance:20:cm]]. Geometry uses English units; both measurements are preserved without treating them as exactly equivalent."
+                "description": "ITS 17 V0.2 EN p. 69 requires placement at least [[distance:4:inch]] outside the enemy Deployment Zone and [[distance:8:inch]] between Infected; ES p. 47 prints [[distance:10:cm]] and [[distance:20:cm]]. The distances differ slightly; the map uses the English measurements."
               }
             ]
           },
@@ -14339,7 +14339,7 @@
         "id": "scenario:akial-interference",
         "kind": "scenario",
         "name": "Akial Interference",
-        "summary": "ITS Season 17 Akial Interference: complete Common Classified Objectives, use the central Antenna to cancel or replace public cards, and score one private Classified Objective.",
+        "summary": "Complete Common Classified Objectives, use the central Antenna to cancel or replace public cards, and score one private Classified Objective.",
         "composition": {
           "role": "definition"
         },
@@ -14663,7 +14663,7 @@
                   "requirements": [
                     "Only a Specialist Troop in Silhouette contact with the Akial Antenna may declare this Attack, Scenario Short Skill.",
                     "The player's completed Common Classified Objective must bear one of the four symbols pictured in ITS 17 EN p. 34 / ES p. 61. Each such Common card may be chosen only once.",
-                    "Each Specialist Troop may Emit Akial Interference only once per Game Round, subject to the source's unresolved wording about retrying failed WIP Rolls."
+                    "Each Specialist Troop may Emit Akial Interference only once per Game Round, but the rules are unclear on whether this limit counts failed attempts or successful emissions."
                   ],
                   "effects": [
                     "Make a Normal WIP Roll to Emit Akial Interference. A failed Roll may be retried by spending another Short Skill.",

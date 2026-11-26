@@ -3,6 +3,8 @@ const TOKEN_PARAMETER = "s";
 const TOKEN_VERSION = "v1";
 const MAX_TOKEN_LENGTH = 8192;
 
+export const UNIT_EXPLORER_DEFAULT_AND_FILTERS = "skill,equipment,weapon,troop_type,classification,characteristic";
+
 const SCHEMAS = Object.freeze({
   units: Object.freeze({
     scope: "u",

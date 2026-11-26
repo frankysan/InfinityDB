@@ -1,5 +1,6 @@
 import { getArmies } from "./api.js";
-import { shareStateHref } from "./share-state.js";
+import { optionalUnitFilters } from "./preferences.js";
+import { shareStateHref, UNIT_EXPLORER_DEFAULT_AND_FILTERS } from "./share-state.js";
 import { staticSymbolPath } from "./unit-symbols.js";
 import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
@@ -125,7 +126,18 @@ function renderArmy(army, visibleArmies) {
     count.textContent = `${number.format(army.unit_count || 0)} units`;
     const link = document.createElement("a");
     link.className = "button button-primary";
-    link.href = shareStateHref("/units", "units", { army_id: armyValue(army) });
+    const filters = {
+      army_id: armyValue(army),
+      matching_scope: "profile",
+      and_filters: UNIT_EXPLORER_DEFAULT_AND_FILTERS,
+    };
+    if (army.role === "reinforcement") {
+      for (const [key, enabled] of Object.entries(optionalUnitFilters())) {
+        filters[key] = enabled ? "1" : "0";
+      }
+      filters.reinforcement = "1";
+    }
+    link.href = shareStateHref("/units", "units", filters);
     link.textContent = "Browse units";
     footer.append(count, link);
   }

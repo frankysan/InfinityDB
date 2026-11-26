@@ -1059,6 +1059,11 @@ h1>span {
   box-shadow: var(--shadow-popover);
 }
 
+#army-count-details .unit-count-card {
+  right: 0;
+  left: auto;
+}
+
 .unit-count-card section+section {
   margin-top: 14px;
   padding-top: 12px;
@@ -3393,11 +3398,6 @@ tbody tr:last-child>* {
   background: var(--color-surface-translucent);
 }
 
-.unit-extended-profile-subordinate {
-  margin-left: 24px;
-  border-left-color: var(--color-profile-accent-subordinate);
-}
-
 .unit-extended-profile-heading {
   display: flex;
   align-items: baseline;
@@ -3405,11 +3405,6 @@ tbody tr:last-child>* {
   gap: 6px 10px;
   margin-bottom: 8px;
   color: var(--color-text-heading);
-}
-
-.unit-profile-attachment {
-  color: var(--color-profile-attachment);
-  font-size: var(--font-size-sm);
 }
 
 .unit-extended-profile-meta {
@@ -3426,6 +3421,19 @@ tbody tr:last-child>* {
   grid-template-columns: minmax(360px, 1.5fr) minmax(180px, 1fr) auto;
   align-items: center;
   gap: 12px 20px;
+}
+
+.unit-extended-capability-section {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+}
+
+.unit-extended-capabilities {
+  display: grid;
+  gap: 2px;
 }
 
 .unit-extended-statline {
@@ -4265,10 +4273,6 @@ html[data-distance-unit="in"] .unit-extended-statline {
     padding-inline: 10px;
   }
 
-  .unit-extended-profile-subordinate {
-    margin-left: 12px;
-  }
-
   .unit-extended-statline {
     grid-template-columns: minmax(76px, 1.4fr) repeat(4, minmax(42px, 1fr));
     row-gap: 8px;
@@ -4450,18 +4454,32 @@ html[data-distance-unit="in"] .unit-extended-statline {
   }
 
   .catalog-stats {
+    position: relative;
     padding-top: 25px;
+  }
+
+  #army-count-details {
+    position: static;
+  }
+
+  #army-count-details .unit-count-card {
+    right: auto;
+    left: 0;
   }
 
   .catalog-stats>div {
     padding-left: 0;
-    min-width: 130px;
+    min-width: 0;
     gap: 5px;
   }
 
   .catalog-stats>div+div {
     margin-left: 0;
-    padding-left: 25px;
+    padding-left: 16px;
+  }
+
+  .unit-count-disclosure {
+    min-width: 0;
   }
 
   .stat-value {

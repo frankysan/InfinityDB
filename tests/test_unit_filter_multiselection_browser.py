@@ -181,6 +181,30 @@ def test_unit_multiselect_legacy_invalid_and_empty_links(
     finally:
         page.close()
 
+def test_initial_results_failure_preserves_filter_initialization(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page(viewport={"width": 1280, "height": 900})
+    route_browser_page(page, app, origin)
+    requests: list[str] = []
+    page.on("request", lambda request: requests.append(request.url))
+    pattern = "**/api/units?*"
+    page.route(pattern, lambda route: route.abort())
+    try:
+        page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        page.locator("#error-state").wait_for(state="visible")
+        assert page.locator(".unit-multi-option").count() > 0
+        assert page.locator("#army-filter").is_enabled()
+        assert sum("/api/unit-filters?" in url for url in requests) == 1
+        page.unroute(pattern)
+        page.locator("#retry").click()
+        page.locator("#table-container").wait_for(state="visible")
+        assert sum("/api/unit-filters?" in url for url in requests) == 1
+        assert sum("/api/units?" in url for url in requests) == 2
+    finally:
+        page.close()
+
+
 def test_contextual_counts_accessible_loading_and_failure(
     app: Any, origin: str, browser: Any,
 ) -> None:
@@ -522,6 +546,54 @@ def test_bit_and_kiss_includes_one_linked_peripheral_per_loadout(
         # The distinct KISS Trooper profile and its own loadouts remain visible.
         assert combined.locator(".profile-details-table").count() == 2
         assert combined.locator(".loadout-table").count() == 2
+        assert not errors, errors
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1280, 390])
+def test_extended_profiles_show_plain_text_capabilities(
+    app: Any, origin: str, browser: Any, width: int,
+) -> None:
+    page = browser.new_page(
+        viewport={"width": width, "height": 900},
+        has_touch=width == 390, is_mobile=width == 390,
+    )
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda exc: errors.append(str(exc)))
+    try:
+        with page.expect_response(
+            lambda response: "/api/units?" in response.url
+            and "extended=1" in response.url and response.status == 200
+        ) as response_info:
+            page.goto(f"{origin}/units?search=fusiliers&extended=1", wait_until="domcontentloaded")
+        expected = [
+            general
+            for unit in response_info.value.json()["items"]
+            for general in unit["general_profiles"]
+        ]
+        profile = page.locator(".unit-extended-profile").first
+        try:
+            profile.wait_for(state="visible", timeout=10000)
+        except Exception:
+            pytest.fail(
+                f"Extended results missing: {errors}; {page.locator('body').inner_text()[-2000:]}"
+            )
+        assert page.locator("#extended-results").is_checked()
+        capabilities = profile.locator(".unit-extended-capability-section")
+        assert capabilities.is_visible()
+        assert "Weapons:" in capabilities.inner_text()
+        assert "Shared by all variants of this profile" in capabilities.inner_text()
+        assert "Combi Rifle" not in capabilities.inner_text()
+        assert page.locator(".unit-extended-profile").count() == len(expected)
+        assert [
+            heading.text_content()
+            for heading in page.locator(".unit-extended-profile-heading > strong").all()
+        ] == [f"General profile — {general['display_name']}" for general in expected]
+        assert page.locator(".unit-extended-loadout").count() == 0
+        assert capabilities.locator("a").count() == 0
         assert not errors, errors
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
     finally:

@@ -60,13 +60,31 @@ prerequisite for v1.1+; they are chosen by browser risk. Missing API access,
 failed/incomplete evidence or uncertain ancestry falls back to full validation.
 The exact new SHA still receives fast checks and focused affected tests.
 
-This optimization applies to **Source checks only**. The release evidence
+This path-delta optimization applies to **Source checks only**. The release evidence
 collector verifies the individual Source jobs: either the complete full matrix
 plus deterministic-output job, or a passed fast job with affected tests and
 explicit, successful baseline-reuse steps. The tag annotation records scoped
 reuse. Partial, mixed or missing Source jobs block release evidence **even
 when the optional cross-browser workflow is not requested**. Installed-wheel
 and deployment smoke remain independent mandatory workflows.
+
+### Identical merged-tree reuse
+
+The three core workflows explicitly check out the PR head SHA. On a push to
+`main`, each runs `tools.ci.identical_merge` before expensive work. It requires
+one actual closed, merged, same-repository PR targeting `main`, its exact merge
+commit and head SHA, identical Git tree IDs, and successful original candidate
+PR workflows with the required Source and smoke job execution evidence. Missing,
+failed or ambiguous evidence or unequal trees retains fresh validation. PR runs
+and manual dispatches do not use this shortcut. Required status job names remain
+unchanged; the Source matrix emits reuse acknowledgments rather than rerunning
+builds. No external branch-protection configuration changes are needed.
+
+The release collector does not count those acknowledgments as fresh execution.
+Use the explicit approved candidate SHA for identical-tree release evidence;
+see [the release checklist](releasing.md#reuse-ci-for-identical-merge-trees-v122).
+A verified identical merge may also supply the existing focused Source baseline.
+Final tag, packaged version and actual deployment identity checks still apply.
 
 ## Cross-browser release compatibility gate
 
@@ -526,16 +544,22 @@ overlay served by the current application.
 ## Release evidence retention
 
 `tools/ci/prepare_release_ci_evidence.py` verifies the three required hosted workflows for one exact
-40-character candidate release commit: `Source checks`, `Installed wheel smoke`, and
+40-character validation commit: `Source checks`, `Installed wheel smoke`, and
 `Deployment smoke test`. It queries each workflow by its maintained workflow filename and commit SHA,
 uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
 older successful run therefore cannot hide a later failed rerun for the same candidate.
+It checks actual Source matrix and installed-wheel/Docker smoke job execution.
+With `--candidate`, it separately verifies the approved candidate and final
+merge tree; the final release SHA is still the tag target.
 
 The tool writes two ignored local files under `local/validation/` during release preparation:
 
 - machine-readable JSON containing the repository, candidate commit, workflow/run identity, attempt,
   trigger, timestamps, conclusion, and GitHub run URL; and
-- an annotated-tag message containing the candidate commit and the successful run identities/URLs.
+- an annotated-tag message containing the final release commit and successful run identities/URLs.
+
+Identical-tree reuse records both commit SHAs, the shared tree SHA, merged PR
+number and actual workflow run SHAs in both records.
 
 The JSON is local release-working evidence and must not be committed back into the candidate release
 commit. The annotated Git tag is the durable project record: it can be created only after the hosted
@@ -545,7 +569,8 @@ the exact run IDs, attempts, outcomes, and URLs in Git history.
 
 The GitHub REST workflow-runs endpoint is readable without authentication for public repositories;
 set `GITHUB_TOKEN` when authentication is required or to avoid anonymous API rate limits. A token used
-for this read-only collection needs Actions read access, not repository write access. When the
+for this read-only collection needs Actions read access and, for merge reuse,
+Contents and Pull requests read access, not repository write access. When the
 checksum-pinned external bundle should also be part of release evidence, pass `--include-full-assets`;
 that makes a successful `Full-asset checks` run for the same commit mandatory without changing the
 normal three-workflow release gate. The canonical release commands and tag ordering live in
@@ -606,10 +631,10 @@ validated candidate.
 
 A successful pre-merge candidate run satisfies the optional pre-merge full-assets step in
 [the release checklist](releasing.md#5-approve-the-candidate-merge-verify-main-and-tag).
-If the final protected-`main` release commit has a different SHA because the pull request is
-merged or squashed, that earlier run does not count as exact-SHA release evidence. When
-`tools/ci/prepare_release_ci_evidence.py --include-full-assets` is used, dispatch **Full-asset checks**
-again for the final release SHA and require that exact run just like the other hosted workflows.
+If the final protected-`main` release commit differs, the earlier run is eligible
+only through the same verified identical-tree exception as the core workflows.
+Otherwise, dispatch **Full-asset checks** again for the final release SHA when
+`--include-full-assets` is selected.
 
 Environment configuration for this optional workflow is repository administration and is tracked as
 unfinished work only in `docs/TODO.md` when applicable. Do not commit the generated ZIP or its

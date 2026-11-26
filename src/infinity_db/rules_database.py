@@ -973,8 +973,13 @@ def _variant_semantics(value: str | None) -> dict[str, Any] | None:
 class RulesDatabase:
     """Read-only queries over the independent curated rules snapshot."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, *, immutable_snapshot: bool = False) -> None:
         self.path = Path(path)
+        # Only serving instances bind to an immutable publication for their lifetime.
+        # Offline readers may inspect files that are rebuilt in place.
+        self._composed_kind_cache: dict[tuple[str, bool], list[dict[str, Any]]] | None = (
+            {} if immutable_snapshot else None
+        )
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
@@ -1427,72 +1432,97 @@ class RulesDatabase:
             return {}
         placeholders = ", ".join("?" for _ in record_ids)
         rows = connection.execute(
-            "SELECT r.collection_id, r.id, r.kind, r.name, r.facts_json "
+            "SELECT r.collection_id, r.id, r.kind, r.name, r.facts_json, "
+            "l.entity, l.external_id, l.external_name "
             "FROM records AS r JOIN collections AS c ON c.id = r.collection_id "
+            "LEFT JOIN record_army_links AS l ON l.collection_id = r.collection_id "
+            "AND l.record_id = r.id "
             "WHERE r.id IN (" + placeholders + ") "
             "AND r.composition_role = 'definition' AND c.status = 'current' "
-            "ORDER BY r.id",
+            "ORDER BY r.id, r.collection_id, l.position",
             tuple(sorted(record_ids)),
         ).fetchall()
         endpoints: dict[str, dict[str, Any]] = {}
+        previous_key = None
         for row in rows:
-            links: list[dict[str, str]] = []
-            for link in connection.execute(
-                "SELECT entity, external_id, external_name FROM record_army_links "
-                "WHERE collection_id = ? AND record_id = ? ORDER BY position",
-                (row["collection_id"], row["id"]),
-            ).fetchall():
-                item = {"entity": link["entity"]}
-                if link["external_id"] is not None:
-                    item["id"] = link["external_id"]
-                if link["external_name"] is not None:
-                    item["name"] = link["external_name"]
-                links.append(item)
-            endpoints[row["id"]] = {
-                "id": row["id"],
-                "kind": row["kind"],
-                "name": row["name"],
-                "army_links": links,
-            }
-            if row["kind"] == "rule":
-                facts = _decode_json(row["facts_json"], {})
-                category = facts.get("category") if isinstance(facts, dict) else None
-                if isinstance(category, str):
-                    endpoints[row["id"]]["facts"] = {"category": category}
+            key = (row["collection_id"], row["id"])
+            if key != previous_key:
+                endpoints[row["id"]] = {
+                    "id": row["id"],
+                    "kind": row["kind"],
+                    "name": row["name"],
+                    "army_links": [],
+                }
+                if row["kind"] == "rule":
+                    facts = _decode_json(row["facts_json"], {})
+                    category = facts.get("category") if isinstance(facts, dict) else None
+                    if isinstance(category, str):
+                        endpoints[row["id"]]["facts"] = {"category": category}
+                previous_key = key
+            if row["entity"] is not None:
+                item = {"entity": row["entity"]}
+                if row["external_id"] is not None:
+                    item["id"] = row["external_id"]
+                if row["external_name"] is not None:
+                    item["name"] = row["external_name"]
+                endpoints[row["id"]]["army_links"].append(item)
         return endpoints
 
     @classmethod
     def _attach_reverse_relations(
         cls, connection: sqlite3.Connection, records: list[dict[str, Any]]
     ) -> None:
-        for record in records:
+        if not records:
+            return
+        record_ids = sorted({record["id"] for record in records})
+        reverse_by_id: dict[str, list[dict[str, Any]]] = {}
+        # Bound SQL parameter counts even for larger curated corpora.
+        for start in range(0, len(record_ids), 500):
+            batch = record_ids[start:start + 500]
+            placeholders = ", ".join("?" for _ in batch)
             rows = connection.execute(
-                "SELECT rr.collection_id, rr.record_id, rr.relation_type "
+                "SELECT rr.related_record_id, rr.collection_id, rr.record_id, rr.relation_type "
                 "FROM record_relations AS rr JOIN collections AS c "
                 "ON c.id = rr.collection_id "
-                "WHERE rr.related_record_id = ? AND c.status = 'current' "
-                "ORDER BY rr.collection_id, rr.record_id, rr.position",
-                (record["id"],),
+                "WHERE rr.related_record_id IN (" + placeholders + ") AND c.status = 'current' "
+                "ORDER BY rr.related_record_id, rr.collection_id, rr.record_id, rr.position",
+                batch,
             ).fetchall()
-            reverse_relations = [
-                {
+            for row in rows:
+                reverse_by_id.setdefault(row["related_record_id"], []).append({
                     "type": row["relation_type"],
                     "record_id": row["record_id"],
                     "collection_id": row["collection_id"],
-                }
-                for row in rows
+                })
+        endpoint_ids = sorted({
+            relation["record_id"]
+            for record in records
+            for relation in [
+                *record.get("relations", []), *reverse_by_id.get(record["id"], []),
             ]
+        })
+        endpoints: dict[str, dict[str, Any]] = {}
+        for start in range(0, len(endpoint_ids), 500):
+            endpoints.update(cls._relation_endpoint_index(
+                connection, set(endpoint_ids[start:start + 500]),
+            ))
+        for record in records:
+            reverse_relations = reverse_by_id.get(record["id"], [])
             if reverse_relations:
                 record["reverse_relations"] = reverse_relations
 
             display_source = [
                 {**relation, "direction": "outbound"} for relation in record.get("relations", [])
             ] + [{**relation, "direction": "inbound"} for relation in reverse_relations]
-            endpoint_ids = {relation["record_id"] for relation in display_source}
-            endpoints = cls._relation_endpoint_index(connection, endpoint_ids)
+            # Keep endpoints detached between different records, as in single-record reads.
+            record_endpoints = {
+                identifier: deepcopy(endpoints[identifier])
+                for identifier in {relation["record_id"] for relation in display_source}
+                if identifier in endpoints
+            }
             display_relations = []
             for relation in display_source:
-                endpoint = endpoints.get(relation["record_id"])
+                endpoint = record_endpoints.get(relation["record_id"])
                 if endpoint is None:
                     continue
                 item = {**relation, "record": endpoint}
@@ -1614,19 +1644,41 @@ class RulesDatabase:
         include_army_links: bool = False,
     ) -> list[dict[str, Any]]:
         """Return current records of a kind, optionally including Army route links."""
-        with self._connect() as connection:
-            rows = connection.execute(
-                "SELECT r.* FROM records AS r JOIN collections AS c "
-                "ON c.id = r.collection_id "
-                "WHERE r.kind = ? AND c.status = 'current' "
-                "ORDER BY r.id, r.collection_id",
-                (kind,),
-            ).fetchall()
-            records = self._compose_records(self._records_from_rows(connection, rows))
-            self._attach_reverse_relations(connection, records)
+        cache = self._composed_kind_cache
+        if cache is None:
+            with self._connect() as connection:
+                records = self._read_composed_kind(connection, kind)
+                if include_army_links:
+                    self._attach_current_army_links(connection, records)
+                return records
+
+        key = (kind, include_army_links)
+        if key not in cache:
+            base_key = (kind, False)
+            if base_key not in cache:
+                with self._connect() as connection:
+                    base = self._read_composed_kind(connection, kind)
+                cache.setdefault(base_key, base)
             if include_army_links:
-                self._attach_current_army_links(connection, records)
-            return records
+                linked = deepcopy(cache[base_key])
+                with self._connect() as connection:
+                    self._attach_current_army_links(connection, linked)
+                cache.setdefault(key, linked)
+        return deepcopy(cache[key])
+
+    def _read_composed_kind(
+        self, connection: sqlite3.Connection, kind: str,
+    ) -> list[dict[str, Any]]:
+        rows = connection.execute(
+            "SELECT r.* FROM records AS r JOIN collections AS c "
+            "ON c.id = r.collection_id "
+            "WHERE r.kind = ? AND c.status = 'current' "
+            "ORDER BY r.id, r.collection_id",
+            (kind,),
+        ).fetchall()
+        records = self._compose_records(self._records_from_rows(connection, rows))
+        self._attach_reverse_relations(connection, records)
+        return records
 
     def current_core_scenario_revision(self) -> str:
         """Return the one current core scenario revision, or fail on ambiguity."""

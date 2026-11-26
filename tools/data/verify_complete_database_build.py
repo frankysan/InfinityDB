@@ -20,7 +20,7 @@ from infinity_db.database_set_builder import build_database_set
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.web import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
-from tools.runtime_semantic_baseline import DEFAULT_BASELINE, capture, check
+from tools.runtime_semantic_baseline import CURRENT_BASELINE, capture, check
 
 ROOT = Path(__file__).resolve().parents[2]
 ORIGIN = "http://database-set-acceptance.test"
@@ -66,7 +66,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 report["variantGroups"], report["reviewedWeapons"], report["restrictionChartRows"],
             )
             if (
-                inventory != (151, 62, 6) or report["traitWikiLinks"] != 33
+                inventory != (150, 62, 6) or report["traitWikiLinks"] != 33
                 or report["combinedSavingRollProfiles"] != 6
                 or report["ammunitionReferences"] != 16
                 or report["weaponProperties"] != 12
@@ -76,8 +76,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 or report["sourceClassificationMemberships"] != 1
                 or report["armyOverviewSummaries"] != 58
                 or report["legacyArmyIdentities"] != 2
-                or report["publishedSymbolMappings"] != 2019
-                or report["publishedSymbolAssets"] != 808
+                or report["publishedSymbolMappings"] != 2021
+                or report["publishedSymbolAssets"] != 809
             ):
                 raise ValueError("Complete build changed the reviewed source inventory")
 
@@ -245,7 +245,7 @@ def verify(source: Path, expected_sha256: str) -> dict:
             version = _api(app, "/api/version")
             if version["static_revision"] != app.presentation.static_revision:
                 raise ValueError("Server and presentation disagree on selected asset revision")
-            baseline = json.loads(DEFAULT_BASELINE.read_text(encoding="utf-8"))
+            baseline = json.loads(CURRENT_BASELINE.read_text(encoding="utf-8"))
             observed = capture(
                 app, paths=tuple(item["path"] for item in baseline["probes"]),
             )
@@ -259,8 +259,8 @@ def verify(source: Path, expected_sha256: str) -> dict:
                 f"12 Weapon Properties, 2 Equipment encodings, "
                 f"6 Skill classifications, 2 hidden characteristics, "
                 f"1 classification membership, 58 Army summaries, "
-                f"2 historical Army identities, 2019 symbol mappings, "
-                f"808 verified SVGs, 41 baseline routes; "
+                f"2 historical Army identities, 2021 symbol mappings, "
+                f"809 verified SVGs, 41 baseline routes; "
                 f"hashes {json.dumps(report['sha256'], sort_keys=True)}",
                 flush=True,
             )

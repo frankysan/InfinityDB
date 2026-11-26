@@ -147,7 +147,10 @@ def _join_url(base_url: str, path: str) -> str:
 def _report_path(path: str) -> str:
     parsed = urllib.parse.urlsplit(path)
     query = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
-    sanitized = [(key, "<synthetic>") if key == "q" else (key, value) for key, value in query]
+    sanitized = [
+        (key, "<synthetic>") if key in {"q", "search"} else (key, value)
+        for key, value in query
+    ]
     return urllib.parse.urlunsplit(
         (
             parsed.scheme,
@@ -227,6 +230,7 @@ def discover_scenario(
     *,
     timeout: float,
     fetch_json: Callable[[str, str], Mapping[str, Any]] | None = None,
+    scenario: str = "general",
 ) -> tuple[dict[str, str], list[ScenarioCase]]:
     """Discover stable public identities and build the representative capacity scenario."""
 
@@ -243,6 +247,16 @@ def discover_scenario(
         raise ValueError("/api/version did not identify an InfinityDB deployment")
     if not isinstance(static_revision, str) or not static_revision:
         raise ValueError("/api/version did not identify an InfinityDB deployment")
+
+    target = {
+        "version": version,
+        "snapshotRevision": snapshot_revision,
+        "staticRevision": static_revision,
+    }
+    if scenario == "unit-explorer":
+        return target, discover_unit_explorer_cases(base_url, fetch_json)
+    if scenario != "general":
+        raise ValueError(f"Unknown capacity scenario: {scenario}")
 
     unit = _first_item(fetch_json(base_url, "/api/units?limit=1"), "/api/units")
     unit_identifier = _identifier(unit, "Unit")
@@ -274,12 +288,76 @@ def discover_scenario(
             ]
         )
 
-    target = {
-        "version": version,
-        "snapshotRevision": snapshot_revision,
-        "staticRevision": static_revision,
-    }
     return target, cases
+
+
+def discover_unit_explorer_cases(
+    base_url: str,
+    fetch_json: Callable[[str, str], Mapping[str, Any]],
+) -> list[ScenarioCase]:
+    """Exercise the actual Explorer API, including scoped counts and Extended pages."""
+    base = {
+        "limit": "50", "offset": "0", "counts": "prospective",
+        "matching_scope": "profile",
+        "and_filters": "skill,equipment,weapon,troop_type,classification,characteristic",
+        "mercs": "1", "specops": "1", "teamops": "1", "reinforcement": "1",
+    }
+
+    def units(**changes: str) -> str:
+        return "/api/units?" + urllib.parse.urlencode({**base, **changes})
+
+    initial = fetch_json(base_url, units())
+    unit = _first_item(initial, "Unit Explorer")
+    name = unit.get("name")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("Discovered Unit has no usable name")
+    counts = initial.get("prospective_counts")
+    if not isinstance(counts, dict):
+        raise ValueError("Target does not support prospective Unit Explorer counts")
+
+    def popular(category: str) -> str:
+        options = counts.get(category, {})
+        if not isinstance(options, dict):
+            raise ValueError(f"Missing prospective counts for {category}")
+        eligible = [
+            (str(key), count) for key, count in options.items()
+            if str(key).isdigit() and isinstance(count, int) and count > 0
+        ]
+        if not eligible:
+            raise ValueError(f"No usable {category} filter in target")
+        return max(eligible, key=lambda item: (item[1], item[0]))[0]
+
+    skill = popular("skills")
+    equipment = popular("equipment")
+    cases = [
+        ScenarioCase("explorer-page", "/units", "page"),
+        ScenarioCase("explorer-armies", "/api/armies", "api"),
+        ScenarioCase("explorer-filters", "/api/unit-filters?catalogs=1", "api"),
+        ScenarioCase("explorer-initial", units(), "api"),
+        ScenarioCase("explorer-next", units(offset="50"), "api"),
+        ScenarioCase("explorer-sort", units(order="desc"), "api"),
+        ScenarioCase("explorer-search", units(search=name.strip().split()[0]), "api"),
+        ScenarioCase("explorer-skill", units(skill_id=skill), "api"),
+        ScenarioCase("explorer-equipment", units(equipment_id=equipment), "api"),
+        ScenarioCase(
+            "explorer-profile", units(skill_id=skill, equipment_id=equipment), "api",
+        ),
+        ScenarioCase(
+            "explorer-loadout",
+            units(skill_id=skill, equipment_id=equipment, matching_scope="loadout"), "api",
+        ),
+        ScenarioCase(
+            "explorer-unit",
+            units(skill_id=skill, equipment_id=equipment, matching_scope="unit"), "api",
+        ),
+        ScenarioCase("explorer-extended", units(extended="1"), "api"),
+        ScenarioCase("explorer-extended-next", units(extended="1", offset="50"), "api"),
+        ScenarioCase(
+            "explorer-standard",
+            units(mercs="0", specops="0", teamops="0", reinforcement="0"), "api",
+        ),
+    ]
+    return cases
 
 
 def _warm_scenario(
@@ -354,8 +432,9 @@ def capacity_test(
     steady_concurrency: int,
     burst_seconds: float,
     burst_concurrency: int,
+    scenario: str = "general",
 ) -> dict[str, Any]:
-    target, cases = discover_scenario(base_url, timeout=timeout)
+    target, cases = discover_scenario(base_url, timeout=timeout, scenario=scenario)
     warmup_results = _warm_scenario(
         base_url,
         cases,
@@ -397,6 +476,7 @@ def capacity_test(
             **target,
         },
         "scenario": {
+            "name": scenario,
             "warmupPasses": warmup_passes,
             "cases": [
                 {
@@ -440,6 +520,10 @@ def _base_url(value: str) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("base_url", type=_base_url, help="deployed InfinityDB base URL")
+    parser.add_argument(
+        "--scenario", choices=("general", "unit-explorer"), default="general",
+        help="Select general site traffic or the scoped Unit Explorer workload.",
+    )
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--warmup-passes", type=int, default=DEFAULT_WARMUP_PASSES)
     parser.add_argument("--steady-seconds", type=float, default=DEFAULT_STEADY_SECONDS)
@@ -485,6 +569,17 @@ def _render_summary(report: Mapping[str, Any]) -> str:
             f"{phase['requestsPerSecond']:.1f} req/s | "
             f"{phase['errorRate'] * 100:.2f}% errors | {latency_text}"
         )
+        if report["scenario"].get("name") == "unit-explorer":
+            for case in phase.get("cases", []):
+                timing = case["latency"]
+                detail = (
+                    f"p50 {timing['p50Ms']:.1f} ms | p95 {timing['p95Ms']:.1f} ms"
+                    if timing is not None else "no successful samples"
+                )
+                lines.append(
+                    f"  {case['name']}: {case['requests']} requests, "
+                    f"{case['errors']} errors | {detail}"
+                )
     return "\n".join(lines)
 
 
@@ -505,6 +600,7 @@ def main(argv: list[str] | None = None) -> int:
             steady_concurrency=args.steady_concurrency,
             burst_seconds=args.burst_seconds,
             burst_concurrency=args.burst_concurrency,
+            scenario=args.scenario,
         )
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

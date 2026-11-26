@@ -830,6 +830,11 @@ applicable loadout, or present with different quantities, is not promoted.
 Existing identical-extra shared variants retain their own identity. Source
 profile/loadout payloads, relationship semantics and filtering remain unchanged.
 
+The accepted [build-time materialization direction](architecture.md#design-direction-build-time-materialization)
+will change when General profiles are composed, not their identity, semantics
+or provenance. The v1.3.0 pilot is tracked in the performance backlog;
+current publication still uses runtime composition.
+
 ### Unit and General-profile symbols
 
 Every published logical Unit has exactly one effective graphical symbol. A General profile inherits
@@ -3190,10 +3195,12 @@ disabled loadouts does not generate a synthetic root; a profile-only group
 with no loadouts retains its normal profile context. Such Units remain
 visible without filters, without inventing selectable configurations.
 
-The Army 2026-09-29 snapshot has one reviewed omission: Unit #965
-KISS! (Repeater) loadout option 3 has no source Equipment array, while
-its name identifies Repeater (source Equipment 63). Its alternative
-KISS! loadout instead explicitly carries Deployable Repeater (111).
+The reviewed Unit #965 KISS! (Repeater) omission persists in the
+2026-11-25 Army snapshot: loadout option 3 has no Equipment entry for
+Repeater (source Equipment 63), despite its explicit name. In Combined
+Army and Onyx, the alternate KISS! loadout carries Deployable Repeater
+(111); Next Wave has no alternate KISS! loadout. The three occurrences
+were revalidated against the November archive before publication.
 The authored, snapshot-hash-bound additions in
 `data/curated/relationships/loadout-capabilities.json` are checked
 against exact Army/source-Unit/group/option coordinates, loadout name,
@@ -3272,7 +3279,26 @@ player-facing menus. An **unselected** option has exactly the result `total`
 after selecting it under current AND/OR and matching scope; a **selected**
 option displays the current `total`. Both result membership and prospective
 counts use one shared scope evaluator and an indexed source occurrence graph,
-not separate database queries for each menu option.
+not separate database queries for each menu option. Explicit scoped browser
+requests use `counts=prospective`, which returns the same prospective, baseline
+and Army counts without calculating the unused legacy `usage_counts` map.
+Existing `counts=1` clients retain the full response and legacy unscoped browser
+links continue to use that mode. The immutable Unit graph precomputes optional
+availability requirements per source occurrence. The scoped evaluator reuses
+selection outcomes for identical property sets within a query, retaining all
+matching occurrence identities; prospective counts deduplicate logical Units.
+Catalog option IDs come from the same application identity graph as the
+public catalogs, without calculating catalog usage statistics.
+
+`/api/unit-filters?catalogs=1` adds a `catalogs` object containing the
+Skills, Equipment and Weapons filter choices (IDs, names, public slugs
+and source aliases) in the same order as the public catalogs. The default
+response shape is unchanged. This projection skips catalog use counts
+and unused rules presentation metadata. The browser overlaps initial Unit
+results with filter initialization unless saved Army or categorical
+selections require normalization. Public slug reads reuse a resolved
+ID-to-slug index scoped to the immutable snapshot; unresolved identities
+still return no slug.
 
 `baseline_usage_counts` ignores discovery filters, Army selection and search,
 but retains the optional-unit Settings flags (Mercenaries, Spec-Ops, Team
@@ -3282,7 +3308,16 @@ Includes. Without a scope, the legacy raw usage baseline is unchanged.
 Options absent from the baseline are hidden unless already selected; baseline
 options with zero current prospective matches remain selectable and dimmed.
 Unlisted count keys mean zero. Count extensions are opt-in; API clients without
-`counts=1` retain their previous response shape.
+`counts=1` retain their previous response shape. The separate `army_usage_counts`
+map counts distinct matching logical Units per visible application Army ID, using
+the same memberships as the availability symbols across all result pages.
+The Matching armies summary compares the number of visible Army IDs with
+all playable or source-backed availability identities from `/api/armies`,
+including Reinforcement sections and non-selectable grouping identities with
+Unit memberships, but excluding historical-only identities. The collapsed
+Currently shown breakdown groups visible identities by application role.
+These are usage counts within the filtered population, not prospective Army
+replacement counts. Optional-unit flags apply to both symbols and shown counts.
 
 Unit Explorer keeps the last displayed matching-Unit and per-option numbers
 visible while an updated request is pending; accessible loading/error states
@@ -3296,6 +3331,17 @@ sets are identical on the current snapshot; a regression test guards this
 assumption. The API still accepts their context keys, and older UI URLs
 normalize these equivalent choices to Standard set. Actual Specialist status
 remains determined by the chosen scenario and profile.
+
+The opt-in `extended=1` Unit list exposes the visible General profiles
+from the same detail presentation pipeline, using the selected optional-unit
+flags. Extended results render only these General profiles, with shared Skills,
+Equipment and Weapons as plain text, including quantities and extras as on
+the Unit page. Attribute differences are marked, and Army availability is
+aggregated by General profile identity without conflating distinct AVA values.
+Distinct General profile identities (such as a trooper and its peripheral)
+remain separate. Army-specific profiles and loadouts are not rendered in
+the Explorer. The existing compact `profiles` response is retained for
+compatibility; the ordinary list response is unchanged.
 
 Unit Explorer filter vocabulary may also apply a maintained application overlay without rewriting
 the source facts. A combined source Classification can participate in more than one public
@@ -3836,14 +3882,19 @@ applicable scenario IDs, reviewed source citations). The same library can build
 independent ITS 17/18 fixtures with different publication citations, including
 for a shared Skill; no runtime cross-database resolution is introduced.
 
-For genuinely shared pinned Skills, the Skill catalog and Search list one
-canonical typed identity with the applicable scenario/season bindings and
-combined citation evidence. The original season/scenario Skill URLs continue
-to resolve their context-specific records and work inside scenario cards.
-Identical names alone never trigger merging; differing Skill facts, types,
-versions or definition provenance fail closed. None of the 26 scenario action
-Skills has been migrated. The three repeated action names in ITS 18 have
-different structured facts and must not be merged by name.
+The reviewed presentation identities in `scenario_skill_identity.py` group
+exact scoped occurrences from Core N5, ITS 17 and ITS 18. Catalog and Search
+publish one entry per identity, retaining source names for search and scoped
+URLs as aliases. The canonical `rules` card contains the shared definition
+when identical, or reviewed common mechanics and exactly common clauses when
+different. `scenarios` identifies applicable publications and
+`context_variants` retains the exact source rules, facts, types, labels and
+citations grouped by matching definition. Scenario cards and scoped URLs
+continue to expose only their own definition. Explicit pinned shared Skill
+identities use the same projection. Differing facts under the same unmodified
+pinned version or conflicting origins still fail closed; a reviewed override
+or distinct pinned version may differ. Similar names alone do not establish
+equivalence. Core and season databases remain independently materialized.
 
 **Published ITS 18 season-wide Skills:** CivEvac (Common Basic Short Skill,
 pp. 22–23), Casevac (Common Short Skill, p. 25), Team-Ops (Automatic Special
@@ -3933,12 +3984,12 @@ do not make Team-Ops or Request a Tacball unconditional Skills.
 Resolved standalone Skills live in each season's own SQLite `records`
 table and are projected into catalog/Search; exact equivalent pinned Skills
 across seasons consolidate into one canonical identity with independent
-citations. Conflicting or unpinned same-version collisions fail closed. An
-explicit different pinned version from the same reviewed origin gets a
-season-qualified route instead, while the newest season retains the
-unqualified slug and both retain their own facts/citations. Compare
-actual ITS 17 facts before claiming cross-season equivalence. Existing
-scenario-specific Skill routes remain compatible.
+citations. Conflicting same-version facts fail closed. Explicit distinct
+pinned versions of one identity, and the reviewed source-local CivEvac and
+Casevac definitions, share the unqualified catalog route while retaining
+season-qualified exact rule routes and contextual cards. Other independently
+curated season Skills are not merged by name alone. Existing scenario-specific
+Skill routes remain compatible.
 
 Materialize the complete resolved payload in each season's SQLite artifact,
 including the selected definition version and relevant provenance, so
@@ -4217,8 +4268,10 @@ dimensions. Rendered measurement text carries the canonical inch value in
 `data-distance-inches` or `data-distance-size-inches`, separate from the user-facing display unit.
 The map API accepts optional `distance_unit=in|cm`, using the Infinity distance convention
 of 1 inch = 2.5 cm, and optional `theme=light|dark` (default Light). Its standalone SVG
-embeds the selected theme's canonical map palette. Browser pages retain it as a normal
-image element for Save Image As; theme and distance-unit preference events change the
+embeds the selected theme's canonical map palette and resolves CSS variable references
+in styles and hatch patterns to literal colors and font sizes for standalone viewers.
+Measurement endcaps use a contrasting under-stroke at their original coordinates.
+Browser pages retain it as a normal image element for Save Image As; theme and distance-unit preference events change the
 image URL without altering the inch viewBox or stored geometry. Marker `data-diameter-mm`
 remains unconverted physical metadata.
 It also supports `element-edge-distance` annotations for markers and rectangles: the

@@ -5,6 +5,7 @@ Only writes ignored local/work/its/map-previews; does not alter a publication.
 from __future__ import annotations
 
 import argparse
+import importlib
 import re
 from pathlib import Path
 from xml.etree import ElementTree
@@ -14,6 +15,8 @@ import pymupdf
 from infinity_db.curated import load_curated_document
 from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
+from infinity_db.web import create_app_from_database_set
+from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "data/curated/its/n5-its-season-18.json"
@@ -145,16 +148,43 @@ def _raster_friendly_svg(svg: str, colors: dict[str, str], *, theme: str, width:
     return ElementTree.tostring(root, encoding="utf-8")
 
 
+def _render_standalone_preview(
+    svg: str, output: Path, *, width: int, height: int, browser_name: str,
+) -> None:
+    """Open the exact generated file in a browser, without rewriting its styles."""
+    playwright = importlib.import_module("playwright.sync_api")
+
+    svg_path = output.with_suffix(".svg")
+    svg_path.write_bytes(svg.encode("utf-8"))
+    with playwright.sync_playwright() as driver:
+        browser = getattr(driver, browser_name).launch()
+        try:
+            page = browser.new_page(viewport={"width": width, "height": height})
+            page.goto(svg_path.resolve().as_uri())
+            page.locator("svg").wait_for()
+            page.screenshot(path=output)
+        finally:
+            browser.close()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--missions", default="crossing-lines,double-bind,the-dig,battleground",
-        help="Comma-separated exact mission slugs",
+        "--missions",
+        help="Comma-separated exact mission slugs (standalone mode uses current missions).",
     )
     parser.add_argument("--config", default="300-400-points")
     parser.add_argument("--theme", choices=("light", "dark"), default="light")
     parser.add_argument("--distance-unit", choices=("in", "cm"), default="in")
     parser.add_argument("--width-px", type=int, default=630)
+    parser.add_argument(
+        "--standalone", action="store_true",
+        help="Save the original SVG and render it directly in a browser.",
+    )
+    parser.add_argument(
+        "--browser", choices=("chromium", "firefox", "webkit"), default="chromium",
+        help="Browser engine for standalone previews.",
+    )
     args = parser.parse_args(argv)
     if args.width_px < 300 or args.width_px > 1200:
         parser.error("--width-px must be 300..1200")
@@ -162,12 +192,17 @@ def main(argv: list[str] | None = None) -> int:
         record["id"].removeprefix("scenario:"): record
         for record in load_curated_document(SOURCE)["records"]
     }
-    selected = args.missions.split(",")
+    default_missions = (
+        "crossing-lines,double-bind,the-dig,critical-intervention"
+        if args.standalone else "crossing-lines,double-bind,the-dig,battleground"
+    )
+    selected = (args.missions or default_missions).split(",")
     if not selected or any(slug not in records for slug in selected):
         parser.error("Unknown scenario slug")
     palette = (ROOT / "src/infinity_db/web/static/themes" / f"{args.theme}.css")
     colors = dict(COLOR_RE.findall(palette.read_text(encoding="utf-8")))
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    app = create_app_from_database_set(ROOT / "data/generated") if args.standalone else None
 
     for slug in selected:
         record = records[slug]
@@ -181,6 +216,29 @@ def main(argv: list[str] | None = None) -> int:
         svg = render_scenario_map_svg(
             geometry, theme=args.theme, distance_unit=args.distance_unit,
         )
+        if app is not None:
+            points = int(args.config.split("-", 1)[0])
+            status, headers, body = wsgi_response(
+                app, f"http://localhost/api/scenarios/{slug}/map.svg"
+                f"?army_points={points}&collection=its-18"
+                f"&theme={args.theme}&distance_unit={args.distance_unit}",
+            )
+            content_type = {key.lower(): value for key, value in headers}.get("content-type", "")
+            if status != 200 or not content_type.startswith("image/svg+xml"):
+                raise ValueError(f"{slug}: expected a published SVG, received {status}")
+            if body != svg.encode("utf-8"):
+                raise ValueError(f"{slug}: curated preview differs from the published SVG")
+            output = OUTPUT / (
+                f"{slug}-{args.config}-{args.theme}-{args.distance_unit}"
+                f"-standalone-{args.width_px}-{args.browser}.png"
+            )
+            _render_standalone_preview(
+                svg, output, width=args.width_px,
+                height=round(args.width_px * geometry.table.height / geometry.table.width),
+                browser_name=args.browser,
+            )
+            print(output.relative_to(ROOT))
+            continue
         # MuPDF's SVG importer does not universally implement CSS custom properties.
         # Resolve the already-pinned palette for faithful standalone preview rasterization.
         preview_svg = _raster_friendly_svg(svg, colors, theme=args.theme,

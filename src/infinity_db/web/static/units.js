@@ -1,11 +1,11 @@
-import { getArmies, getCatalogItems, getUnitFilters, getUnits } from "./api.js";
+import { getArmies, getUnitFilters, getUnits } from "./api.js";
 import {
   optionalUnitDefaultFilters, optionalUnitFilters, saveUnitAdvancedFiltersOpen,
   unitAdvancedFiltersOpen,
 } from "./preferences.js";
 import { renderUnitRows } from "./unit-list.js";
 import { createUnitMultiSelect, normalizeMultiSelection, parseMultiSelection } from "./unit-multiselect.js";
-import { readShareState, writeShareState } from "./share-state.js";
+import { readShareState, writeShareState, UNIT_EXPLORER_DEFAULT_AND_FILTERS } from "./share-state.js";
 import { collectionLoadMessage, createPanelSwitcher } from "./view-components.js";
 
 const PAGE_SIZE = 50;
@@ -28,6 +28,7 @@ const elements = {
   clear: byId("clear-filters"), unitCount: byId("unit-count"), armyCount: byId("army-count"),
   declaredMembership: byId("declared-membership-context"),
   unitCountShown: byId("unit-count-shown-breakdown"),
+  armyCountShown: byId("army-count-shown-breakdown"),
   unitCountFiltered: byId("unit-count-filtered-breakdown"),
   unitCountFilteredTotal: byId("unit-count-filtered-total"),
   summary: byId("results-summary"), results: byId("results"), loading: byId("loading-state"),
@@ -46,7 +47,7 @@ const AND_FILTER_KEYS = [
   ["troopType", "troop_type"], ["classification", "classification"],
   ["characteristic", "characteristic"],
 ];
-const ALL_AND_FILTERS = AND_FILTER_KEYS.map(([, key]) => key).join(",");
+const ALL_AND_FILTERS = UNIT_EXPLORER_DEFAULT_AND_FILTERS;
 const MATCHING_SCOPE_DESCRIPTIONS = {
   profile: "All AND selections must occur on one Trooper profile and its compatible loadout.",
   loadout: "Selections may occur on different profiles in one loadout or an explicitly included model. Alternate states need not be active together.",
@@ -483,7 +484,10 @@ function normalizeArmyFilterState(armies) {
   return true;
 }
 
+let availabilityArmies = [];
+
 function populateArmies(armies) {
+  availabilityArmies = armies.filter((army) => army.playable !== false || army.unit_count > 0);
   // Keep source strings out of HTML so upstream data is always treated as text.
   elements.army.replaceChildren(new Option("All armies", ""));
   const playableArmies = armies.filter((army) => army.playable !== false);
@@ -501,15 +505,46 @@ function populateArmies(armies) {
       ? 2
       : Number(army.role === "sectorial" || army.role === "non_aligned");
     const indent = "\u00a0\u00a0\u00a0\u00a0".repeat(indentLevel);
-    elements.army.add(new Option(
-      `${indent}${army.name} (${number.format(army.unit_count)})`,
-      armyFilterValue(army),
-    ));
+    const option = new Option(`${indent}${army.name}`, armyFilterValue(army));
+    option.dataset.armyId = String(army.id);
+    option.dataset.armyLabel = option.textContent;
+    elements.army.add(option);
   }
   if (normalizedArmyFilter) writeLocation(true);
-  elements.armyCount.textContent = number.format(playableArmies.length);
   elements.army.disabled = false;
   syncFilters();
+}
+
+function renderArmyCounts(counts) {
+  const roles = new Map([
+    ["main", { label: "Main armies", count: 0 }],
+    ["sectorial", { label: "Sectorials", count: 0 }],
+    ["non_aligned", { label: "Non-Aligned Armies", count: 0 }],
+    ["reinforcement", { label: "Reinforcements", count: 0 }],
+  ]);
+  for (const option of elements.army.options) {
+    if (!option.dataset.armyId) continue;
+    const count = counts === undefined ? "—" : number.format(counts[option.dataset.armyId] || 0);
+    option.textContent = `${option.dataset.armyLabel} (${count})`;
+  }
+  // Grouping identities can have source-backed availability without being selectable.
+  const other = { label: "Other Army availability", count: 0 };
+  for (const army of availabilityArmies) {
+    if (!counts?.[army.id]) continue;
+    (roles.get(army.role) || other).count++;
+  }
+  if (other.count) roles.set("other", other);
+  elements.armyCount.textContent = counts === undefined
+    ? "—" : `${number.format(Object.keys(counts).length)} / ${number.format(availabilityArmies.length)}`;
+  elements.armyCountShown.replaceChildren();
+  if (counts === undefined) return;
+  for (const { label, count } of roles.values()) {
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const value = document.createElement("dd");
+    value.textContent = number.format(count);
+    elements.armyCountShown.append(term, value);
+  }
 }
 
 function catalogFilterValue(item) {
@@ -591,6 +626,7 @@ function renderUnits(data) {
   }
   renderUnitRows(elements.list, data.items, { extended: state.extended });
   renderAvailabilitySummary(data);
+  renderArmyCounts(data.army_usage_counts);
   renderDeclaredMembershipContext(data);
   const hasFilters = Boolean(hasActiveFilters());
   if (!data.total) {
@@ -628,30 +664,39 @@ async function load() {
   showPanel(elements.loading);
   for (const key of Object.keys(multiControls)) multiControls[key].setCounts(null);
   elements.unitCount.setAttribute("aria-busy", "true");
+  elements.armyCount.setAttribute("aria-busy", "true");
+  elements.army.setAttribute("aria-busy", "true");
   elements.summary.textContent = "Loading units…";
   try {
+    let data;
     if (!armiesLoaded) {
-      const [armies, skills, equipment, weapons, unitFilters] = await Promise.all([
-        getArmies(signal), getCatalogItems("skills", signal), getCatalogItems("equipment", signal), getCatalogItems("weapons", signal), getUnitFilters(signal),
-      ]);
+      // Saved Army/catalog selections must be normalized before requesting results.
+      // Otherwise fetch results alongside the two initialization requests.
+      const needsNormalization = state.armyId || AND_FILTER_KEYS.some(([key]) => state[key]);
+      const initialization = Promise.all([getArmies(signal), getUnitFilters(signal)]);
+      const initialRequest = needsNormalization ? null : getUnits(state, signal).then(
+        (data) => ({ data }), (error) => ({ error }),
+      );
+      const [armies, unitFilters] = await initialization;
       if (currentRequest !== requestNumber) return;
+      const { skills, equipment, weapons } = unitFilters.catalogs;
       populateArmies(armies.items);
       const normalizedCatalogFilters = [
-        normalizeCatalogFilterState(skills.items, "skillId"),
-        normalizeCatalogFilterState(equipment.items, "equipmentId"),
-        normalizeCatalogFilterState(weapons.items, "weaponId"),
+        normalizeCatalogFilterState(skills, "skillId"),
+        normalizeCatalogFilterState(equipment, "equipmentId"),
+        normalizeCatalogFilterState(weapons, "weaponId"),
         normalizeUnitFilterState(unitFilters.troop_types, "troopType"),
         normalizeUnitFilterState(unitFilters.classifications, "classification"),
         normalizeUnitFilterState(unitFilters.characteristics, "characteristic"),
       ].some(Boolean);
-      populateCatalogFilter(elements.skill, skills.items, "Skills");
-      populateCatalogFilter(elements.equipment, equipment.items, "Equipment");
-      populateCatalogFilter(elements.weapon, weapons.items, "Weapons");
-      multiControls.skillId.setItems(skills.items);
-      multiControls.equipmentId.setItems(equipment.items.map((item) => ({
+      populateCatalogFilter(elements.skill, skills, "Skills");
+      populateCatalogFilter(elements.equipment, equipment, "Equipment");
+      populateCatalogFilter(elements.weapon, weapons, "Weapons");
+      multiControls.skillId.setItems(skills);
+      multiControls.equipmentId.setItems(equipment.map((item) => ({
         ...item, hidden: ["cube", "cube-2"].includes(item.slug),
       })));
-      multiControls.weaponId.setItems(weapons.items);
+      multiControls.weaponId.setItems(weapons);
       populateCatalogFilter(
         elements.troopType, unitFilters.troop_types, "Troop types",
         (item) => item.display_name || item.name,
@@ -667,8 +712,13 @@ async function load() {
       syncFilters();
       if (normalizedCatalogFilters) writeLocation(true);
       armiesLoaded = true;
+      if (initialRequest) {
+        const result = await initialRequest;
+        if (result.error) throw result.error;
+        data = result.data;
+      }
     }
-    const data = await getUnits(state, signal);
+    data ??= await getUnits(state, signal);
     if (currentRequest !== requestNumber) return;
     // Shared links can point beyond the end after the database is refreshed.
     if (data.total > 0 && state.offset >= data.total) {
@@ -678,9 +728,14 @@ async function load() {
     }
     renderUnits(data);
     elements.unitCount.setAttribute("aria-busy", "false");
+    elements.armyCount.setAttribute("aria-busy", "false");
+    elements.army.setAttribute("aria-busy", "false");
   } catch (error) {
     if (signal.aborted || currentRequest !== requestNumber) return;
     elements.unitCount.setAttribute("aria-busy", "false");
+    elements.armyCount.setAttribute("aria-busy", "false");
+    elements.army.setAttribute("aria-busy", "false");
+    renderArmyCounts(undefined);
     for (const key of Object.keys(multiControls)) multiControls[key].setCounts(undefined);
     elements.errorMessage.textContent = error instanceof TypeError
       ? "Could not reach InfinityDB. Check your connection and try again."

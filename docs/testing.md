@@ -17,6 +17,27 @@ The type-check stage explicitly passes the runner's interpreter to Pyright for d
 resolution, so invoking the virtual-environment Python works without first activating that
 environment in the shell.
 
+## Validation host selection
+
+Use the dedicated Linux development worker (`linux-dev`) by default for
+complete local test suites, including mandatory release acceptance. Use the
+validated eight-worker, four-slot, four-lane Chromium profile with the
+Scenario FAQ split on that host. Keep Windows for development, focused
+regression checks and Windows-specific compatibility tests. Prefer moving
+a broad validation run to Linux over repeatedly tuning Windows browser
+fixtures or rerunning full suites after host transport/resource failures.
+Run a full Windows suite only when Windows-specific integration risk
+justifies it or Linux is unavailable.
+
+Synchronize the Linux checkout explicitly, pin the candidate SHA, and
+verify required assets and source inputs before testing. If required
+source-only checks cannot run on Linux, execute those checks separately
+on an exact-SHA host with verified inputs and account for their coverage
+in the release evidence; do not count missing-source skips as passes.
+Hosted CI and isolated Docker release acceptance remain independent gates.
+See [parallel validation](#parallel-windows-development-and-linux-validation)
+and [release validation](releasing.md#4-run-local-release-validation).
+
 ## Unit Explorer Peripheral attachment and option review — 2026-11-15
 
 The pinned `JSON 20260929-114335.zip` Army snapshot contains 58 Army
@@ -44,6 +65,368 @@ Focused verification passed 16 scoped-filter, 22 Peripheral identity and
 18 Peripheral relationship tests. The fixture and snapshot-bound audit
 establish conservative filter behavior, not complete list-building legality
 or missing upstream semantic data.
+
+## Scenario SVG standalone visual acceptance — 2026-11-26
+
+At `a3f31f833709bec36e71dac82196f4909b898313`, reviewed Crossing Lines,
+Double Bind, The Dig and Critical Intervention (ITS 18, 300–400 Army Points).
+The standalone preview mode opens unmodified SVG files directly in Chromium,
+after checking byte equality with the published scenario API response. All 16
+combinations of light/dark and inches/centimeters at 630 px, plus four dark
+metric maps at 360 px, preserved theme colors, patterns, labels and measurements.
+Contrasting endcaps remained distinguishable at zone overlaps and table edges.
+Minor metric label spacing is deferred; the labels remain readable. Playwright
+Firefox was unavailable on Windows, so this acceptance covers standalone
+Chromium, not every external SVG viewer.
+
+Reproduce with `python -m tools.research.render_its_map_previews --standalone
+--theme dark --distance-unit cm --width-px 360`. Previews are retained under
+`local/work/its/map-previews/`.
+
+## v1.2.2 player-facing acceptance — 2026-11-26
+
+The maintainer accepted both standalone SVG visual checks and the browser
+review. On Windows at `6ebe078941b024a687389dcb3a4fd61a04b5909c`, the
+Unit Explorer multi-selection, Army overview and exact-variant publication
+browser test batch returned 28 passed, 9 skipped (missing optional paired
+raw Army SQLite export), and no failures. Asset preflight verified 809/809
+published SVGs. Manual acceptance does not replace the outstanding
+source-backed cohort or final pinned full-suite release gate.
+
+The first frozen candidate `273b00dcdd2b6395fca8bed408244bff4fb4ecbf`
+passed all three hosted workflows, the pre-merge CI evidence collector and
+the isolated Linux Docker smoke/browser checks (21/21). The Windows
+full suite failed (6797 passed, 52 skipped, 70 failed, 79 setup errors,
+1451.84 s): a standalone raw export lacked release-matched identity and build
+provenance, Chromium slot admission timed out with auto workers/loadgroup,
+and six TinBot tests expected eager variant requests in normal mode.
+The corrected TinBot cohort passed 6/6. The source-audit preparation command
+reproduced the pinned release pair and verified the complete metadata before
+replacing the ignored local outputs. The subsequent 409-case focused run
+had 367 passes and 42 failures, with no setup errors or skips; the
+source-ownership and weapon browser cohorts ran successfully. Reconciled
+the November 25 source inventory and exact occurrence pins without
+changing reviewed semantics or runtime artifacts. The complete source
+audit module then passed 109/109 (37.37 s), and the five corrected
+pair/ownership checks passed (10.38 s). The failed full run is not
+release acceptance; use grouped browser lanes for the final rerun to
+avoid the observed Chromium slot admission timeouts.
+
+At `708528f4fee5fc1d00988eff5a504f5dd9054221`, the eight-worker,
+two-lane Windows run returned 6945 passed, 52 skipped, one failed,
+seven subtests passed (1362.28 s), with no setup errors. The single
+failure was a local Chromium connection refusal for two JavaScript
+requests. The full release browser verifier module passed 42/42
+in isolation (125.64 s); the real isolated Docker browser check
+passed 21/21 and all three hosted workflows and evidence preflight
+passed. Increased the test WSGI server listen backlog, without
+retrying or weakening assertions. Corrected five obsolete sibling
+raw-source lookups in the skipped source tests, using the verified
+normalized source or explicit paired archive. Updated the nested
+source parity counts for November 25. All 30 focused tests passed
+(29.25 s), with no skips, including all five newly enabled checks.
+Explicit normalized source occupancy verification found zero
+occupied unrepresented fields out of 39. A clean full-suite pass
+remains mandatory.
+
+At `39ab02ebefc3418e66ae9adbfee41e3dbe36d3d2`, Windows passed 6950
+tests with 47 skips, seven subtests passed and one failure (1321.87 s).
+All five formerly skipped source checks and the previous release browser
+gate passed. The remaining Spec-Ops browser failure reported
+`net::ERR_NO_BUFFER_SPACE`; the exact test passed in isolation (17.81 s).
+All three hosted workflows and the release evidence rehearsal passed.
+The maintainer selected Linux as the default full-suite host. The Linux
+source preparation initially lacked the pinned Army ZIP/manifest; after
+verified transfer, the export generation matched but strict sibling
+metadata comparison rejected the reconstructed raw archive. Keep that
+check fail-closed and use the exact-commit Windows source-check results
+to cover the corresponding Linux skips.
+
+The Linux full-suite run at the same SHA passed 6666 tests, with 332 skips,
+seven subtests passed and two Python 3.14 fork deprecation warnings
+(761.14 s). All four Chromium lanes stayed on individual workers; both
+previous Windows browser failures passed. The grouped skip report shows
+missing private PDF/Wiki/Army source inputs, covered by the Windows run
+at the same commit, alongside host-specific and opt-in cases. Neither
+host's missing-input skips count as passes. The 17 tracked-database FAQ
+parity cases were skipped on both hosts and require a separate opt-in
+release run. The runtime and test files remain unchanged in this
+documentation-only closeout.
+
+## Unit Explorer filter performance — 2026-11-25
+
+Windows development checkout based on `caae1c2c`, using the November 25
+`data/generated/army.db` (9,199,616 bytes). The runtime benchmark compares
+full counts with prospective-only counts on the same database and code,
+using three independent cold samples and six identical cached samples per
+case. Median / nearest-rank p95 times in milliseconds (p95 is the maximum
+of these three samples):
+
+- Cold initial profile-scope list: 1593 / 1608 to 1265 / 1331.
+- Fresh profile-scope query after index construction: 265 / 273 to 159 / 171.
+- Fresh loadout-scope query after index construction: 297 / 316 to 160 / 231.
+- Fresh unit-scope query after index construction: 251 / 262 to 111 / 112.
+
+These are repository timings, not end-to-end HTTP or browser timings.
+Use repeatable `--case` options to select individual runtime benchmark cases.
+
+Second optimization batch based on `b30653eb`, using the same database.
+A cumulative CPU profile identified full catalog usage queries, repeated
+availability derivation and repeated context comparisons. The revised query
+uses catalog identity keys, materialized occurrence requirements and one
+classification per distinct property set. Five independent samples and six
+identical cached samples per case gave median / nearest-rank p95 times (ms):
+
+- Cold initial profile-scope list: 1129 / 1180 to 529 / 566.
+- Fresh profile-scope query after index construction: 143 / 145 to 32 / 33.
+- Fresh loadout-scope query after index construction: 155 / 170 to 31 / 39.
+- Fresh unit-scope query after index construction: 110 / 153 to 24 / 28.
+
+The small-sample p95 is the maximum observed sample, not a production tail
+estimate. The benchmark's `--profile` mode reports cumulative function
+costs separately from timing measurements; setup runs before profiling.
+
+### Unit Explorer browser performance — 2026-11-25
+
+Windows checkout based on `e39c84f7`, same Army snapshot and adjacent N5 Rules
+database. Run
+`python -m tools.performance.benchmark_runtime data/generated/army.db --browser --cold-iterations 3`
+with Chrome installed. Each sample uses a fresh application and browser context,
+a threaded loopback WSGI server, and waits for the completed results DOM.
+Application startup is excluded. API timings use browser resource timings.
+Median / nearest-rank p95 before and after (ms):
+
+- Initial page: 2100 / 2109 to 2011 / 2110.
+- Compact next: 363 / 366 to 332 / 350.
+- Enable Extended: 3031 / 3452 to 1333 / 1337; API: 2834 / 3124 to 1018 / 1109.
+- Extended next: 3000 / 3086 to 1057 / 1327; API: 2708 / 2882 to 881 / 910.
+- Extended previous: 2477 / 2518 to 164 / 208; API: 2323 / 2397 to 18 / 19.
+- Search: 323 / 339 to 326 / 350, including the 250 ms debounce.
+
+The Extended API profile (`--browser --profile --cold-iterations 1`) identified
+repeated Equipment catalog composition, payload copying and detail-only
+presentation. Cache the immutable Equipment name mapping and the General
+profile projection (512 entries per application, keyed by Unit and enabled
+availability flags); preserve the existing full detail response. These local
+three-sample measurements do not establish production tail latency.
+
+### Detail and catalog browser performance — 2026-11-25
+
+Run `python -m tools.performance.benchmark_runtime data/generated/army.db
+--pages --cold-iterations 3` for the representative page set, optionally with
+repeatable `--case units/minutemen` (or another listed route without a leading
+slash). Fresh application and browser context per route/sample; repeat visit
+uses the same app/context. Timings end at visible main content, not all
+secondary asynchronous updates; Playwright visibility polling can inflate
+the observed time. API resource timings and decoded sizes are printed
+separately. Application construction is excluded.
+
+Windows Chrome baseline at `e5faa116`, same recorded Army/Rules inputs,
+three samples per case. Median cold/repeat visible times (ms): Minutemen
+950/136, Dragoes 959/129, Mimetism 952/231, MediKit 959/134, Combi Rifle
+944/128, Skills catalog 958/64, Equipment catalog 358/72, Weapons catalog
+958/63, Armies 229/167. These are diagnostic measurements, not production SLOs.
+
+Unit Profile help unnecessarily built all Glossary domains to obtain
+Attributes. A domain-scoped projection, shared maintained-text resolver
+and snapshot-wide cached help payload preserve its public structure.
+Median cold/repeat times after the change: Minutemen 410/57, Dragoes 382/56;
+cold help HTTP duration fell from roughly 540–650 ms to 89–119 ms.
+The remaining Unit detail request is now the main API dependency.
+Mimetism also transfers a 490 KB detail payload and 1.37 MB exact-variant
+usage payload (decoded); investigate their rendering/transfer costs before
+changing the public reference contract. Catalog details may render again
+as availability, FAQ and exact-variant data arrive.
+
+### Skill and Equipment detail follow-up — 2026-11-25
+
+The page benchmark now observes first/last direct content replacement
+timestamps for Skill and catalog detail pages, waiting for follow-up traffic
+to settle without including the fixed network-idle interval in those metrics.
+`--pages --profile` profiles the selected page API and variant/visibility
+requests. These DOM timestamps are not paint or production network timings.
+
+Windows Chrome, baseline `7347882c`, three fresh app/context samples per
+route and repeat visits. Mimetism normally fetched 490,127 bytes of detail
+and 1,365,742 bytes of exact-variant evidence (decoded), even with Developer
+Mode off. Skill/Equipment pages now request the evidence once when Developer
+Mode is enabled, including after page load; it remains cached for the page
+lifetime. Normal Mimetism API bytes fell from 1,865,232 to 499,490 (73%).
+Both tested pages rendered twice instead of three times. Successive server
+enrichments now mutate the first detached response copy, preserving the
+public response and default copy contracts.
+
+Median first/final DOM times, baseline to optimized (ms):
+
+- Mimetism cold 506.4/545.5 to 522.9/553.2; repeat 135.3/159.4 to 113.3/118.2.
+- MediKit cold 490.8/523.6 to 488.2/518.4; repeat 121.7/130.0 to 107.9/114.2.
+
+Cold latency was effectively unchanged in these small samples; repeat
+rendering and normal-mode transfer improved. Exact-occurrence API output
+is unchanged. Skill detail parity against the original detached enrichment
+pipeline is regression-tested. Profile remaining cold catalog generation
+and detail construction before further optimizing them.
+
+### Consolidated full-season baseline — 2026-11-26
+
+Windows Chrome, commit `d6e30b8d`, both ITS seasons registered, three fresh
+application/browser-context samples per page and one repeat navigation per
+sample. The benchmark records the first and last direct content DOM mutation
+for all selected pages. Application startup is reported separately (median
+2.53 s across page samples). These are local loopback measurements, not
+production network or browser paint timings.
+
+Run the complete page and Unit Explorer cases separately:
+
+```powershell
+python -m tools.performance.benchmark_runtime data/generated/army.db --pages --with-seasons --cold-iterations 3
+python -m tools.performance.benchmark_runtime data/generated/army.db --browser --with-seasons --cold-iterations 3
+```
+
+Median first DOM update, cold / repeat (ms):
+
+- Units: Minutemen 331 / 51; Dragoes 337 / 49.
+- Catalogs: Skills 538 / 53; Equipment 290 / 55; Weapons 299 / 44.
+- Details: Mimetism 454 / 113; Hack Consoles 243 / 44; MediKit 484 / 111;
+  Combi Rifle 454 / 89.
+- Armies: 186 / 68.
+- Scenarios: Core overview 189 / 50; ITS 18 overview 187 / 42;
+  Domination 317 / 180; Hardlock (ITS 18, 300 points) 247 / 63.
+  Scenario DOM times exclude subsequent map-image and policy loading.
+- Global search: Mimetism 1246 / 65; Activate Console 1250 / 74.
+
+Unit Explorer interaction medians (visibility-based timing, ms): initial
+882, compact next/previous 210/179, first Extended 1131, Extended next/previous
+973/131, return to compact 54, text search 317. Initial API 657 ms; first
+Extended API 939 ms; Extended next API 762 ms.
+
+Global search was the slowest measured page on cold entry. The instrumented
+Mimetism search spent 497 ms building the entire Glossary, 417 ms constructing
+the Skills catalog, and 206 ms across three Army catalog usage queries
+(overlapping cumulative times, not additive). Search now consumes existing
+filter-only Skill/Equipment/Weapon identities and a selective embedded Glossary
+projection. The complete Glossary and ordinary public usage catalogs retain
+their existing outputs. Search identity fields, ranked results and the embedded
+Glossary projection are regression-tested against the full catalogs.
+
+With the same three-sample procedure, cold first DOM medians changed to 781 ms
+(Mimetism, 37% lower) and 760 ms (Activate Console, 39% lower). Median API
+durations fell from 1122/1126 ms to 643/623 ms respectively (rounded resource
+timings). Decoded payload sizes stayed at 80 and 105 bytes. Repeat DOM medians
+were 73 and 64 ms. Further optimization should focus on broad Rules record
+composition and uncached Extended Unit Explorer pages only if justified by
+additional profiling.
+
+### Extended Unit Explorer projection — 2026-11-26
+
+Windows Chrome, three fresh application/browser-context samples, both ITS
+seasons registered. The previous full-season baseline is `d6e30b8d`.
+The profile at `e733491` identified full Unit-detail enrichment as the
+dominant cost of an uncached Extended page. General-profile computation now
+receives only the required occurrence fields, retains all Army occurrences
+for symbol resolution, skips detail-only annotations, and reuses the
+snapshot-wide source Skill classifications. The existing General-profile
+calculation and legacy compact profile response are retained.
+
+Median interaction time, before / after (ms):
+
+- First Extended: browser 1131 / 887; API 939 / 738.
+- Uncached Extended next page: browser 973 / 768; API 762 / 571.
+- Cached Extended previous page: browser 131 / 151; API 17 / 16.
+- Compact initial load: browser 882 / 890; API 657 / 669.
+- Text search: browser 317 / 316; API 15 / 16.
+
+The improvements target uncached Extended interactions; the other paths
+remain broadly unchanged. Complete General-profile projections are compared
+with full Unit details across the current snapshot, with optional availability
+modes enabled and disabled.
+
+### Rules composition reuse — 2026-11-26
+
+Windows Chrome, baseline `a46a7a1`, both ITS seasons registered, three
+independent cold samples and repeat navigations per page. The serving
+application binds a Rules database instance to its immutable publication
+and caches kind compositions, returning detached copies and retaining
+the opt-in Army links contract. Offline readers remain uncached.
+Reverse relations and their endpoint Army links use bounded batch queries
+instead of per-record queries.
+
+Median first DOM update, before / after (ms):
+
+- Mimetism search: cold 766 / 523; repeat 64 / 33.
+- Skills catalog: cold 480 / 486; repeat 57 / 48.
+- Mimetism detail: cold 451 / 421; repeat 106 / 106.
+- MediKit detail: cold 474 / 445; repeat 114 / 101.
+
+Decoded response sizes were unchanged. Application startup median was
+2484 / 2397 ms. The search improvement is substantial; other changes are
+modest or within sample variability. A concurrent-test benchmark was
+discarded due to CPU contention. These final measurements were isolated
+from the regression suite.
+
+### Full-season Skill initialization — 2026-11-26
+
+The browser benchmark's optional `--with-seasons` flag registers both ITS
+databases beside the Army and Rules snapshots. Earlier page measurements
+were Core-only; use the full-season mode for production-representative
+Scenario Skill and catalog comparisons. Example:
+`python -m tools.performance.benchmark_runtime data/generated/army.db --pages --with-seasons --case skills --case skills/hack-consoles --cold-iterations 3`.
+
+Windows Chrome, baseline `26442b06`, three fresh application/browser-context
+samples before and after, with both seasons registered. A cold profile
+identified 36 complete ITS database inspections during catalog initialization
+(2.35 s cumulative under instrumentation). Registration already validates
+each season, so exact scenario selections are read once and retained by the
+immutable publication registry. Public selectors outside that registry
+still inspect the database independently. Registry and Scenario Skill
+lookups return detached records; detail lookup no longer copies every Skill.
+
+Cold median first/final DOM update (ms):
+
+- Skills catalog: 1933/1933 to 589/589.
+- Hack Consoles (scoped alias): 1534/1636 to 250/367.
+- Mimetism: 497/524 to 484/511 (effectively unchanged).
+
+Decoded detail and catalog response sizes were unchanged. Timings exclude
+application startup, network latency and browser paint. Ordinary Skill detail
+still pays for Unit usage and broad Skill rule composition; the remaining
+cost is smaller than the removed redundant season validation.
+
+### Catalog initialization follow-up — 2026-11-26
+
+Windows Chrome, baseline `a3783359`, three fresh application/browser-context
+samples and repeat visits per route. Catalog benchmarks now observe direct
+catalog-list DOM replacements, avoiding the polling latency in visible timings.
+Cold median API durations changed from 455 to 332 ms for Skills and from
+352 to 179 ms for Weapons. Cold first DOM medians changed from 589 to 470 ms
+and from 483 to 313 ms respectively. Repeat DOM medians stayed within roughly
+40–46 ms. Response sizes were unchanged (35,342 and 31,486 decoded bytes).
+Application startup and production network latency are excluded.
+
+Catalog usage counts collapse repeated canonical payloads per source Unit
+before joining items and ordered extras; exact detail occurrence queries
+retain their original scope. Unit graph construction computes name-derived
+optional modes once per logical Unit, retaining per-occurrence requirements.
+Complete catalog results on the tracked Army snapshot are regression-tested
+against the uncollapsed query and recomputed availability flags.
+
+### Unit Explorer initialization — 2026-11-25
+
+Windows checkout based on `885b7757`, same Army and N5 Rules snapshot,
+three fresh application/browser-context samples per configuration. The
+browser benchmark also prints initial API resource start/end times and
+decoded response sizes. The initial page median / maximum (ms) changed
+from 1936 / 1952 to 1383 / 1389 with lightweight filter catalogs and
+overlapping initialization/results requests, then to 975 / 1077 with a
+snapshot-level resolved public slug index. Compact next page changed from
+334 / 370 to 272 / 353; search from 299 / 337 to 295 / 299.
+Skills, Equipment, Weapons and numeric/vocabulary filter payloads totalled
+74,409 bytes before the change and 24,322 bytes afterward. The initial
+Unit list request now starts alongside initialization on an unfiltered
+entry; saved Army or categorical selections still normalize first.
+Concurrent requests can take longer individually than sequential requests,
+so assess the completed browser render rather than isolated API duration.
+The benchmark excludes application startup and production network latency.
 
 ## Unit Explorer filter performance — 2026-11-15
 
@@ -639,10 +1022,17 @@ maintained v1.2.0 release snapshot is
 catalog, both scenario catalog probes and the current ITS 18 Battleground
 detail changed after the season/mission and Skill publication work; all other
 37 probes, including Battleground SVG bytes, retain their earlier identity.
-The historical fixtures are unchanged. `tools.verify_checkout_server` uses this current snapshot by default;
-explicit `--baseline` still permits historical comparisons when appropriate.
-Use
-`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2-release.json`
+The v1.2.1 snapshot is
+`tests/fixtures/runtime-semantic-baseline-v1.2.1.json`. The November 25 Army update
+and scenario copy corrections change 14 JSON probes; the other 27 probes,
+including the Battleground SVG, retain their earlier identity. All earlier
+fixtures remain unchanged. The v1.2.2 baseline updates the Battleground SVG
+bytes for standalone styling and ruler changes, the Extended Unit list response
+for shared General profile capabilities, and the Skill catalog for reviewed
+scenario identities. The other 38 probes retain their v1.2.1 identity. Checkout, image-preview and complete-build
+verification use the v1.2.2 snapshot by default; explicit `--baseline`
+still permits historical comparisons where supported. Use
+`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2.2.json`
 for the current selected four-file runtime; `--identical-artifacts` additionally
 requires byte-identical artifact metadata. A future baseline may be freshly
 captured with `--capture --db-dir` to a **new** path, never overwriting the

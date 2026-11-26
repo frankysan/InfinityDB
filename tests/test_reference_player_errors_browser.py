@@ -197,14 +197,14 @@ def test_collection_failures_are_player_readable(
         (
             "/scenarios?collection=its-18&revision=bad",
             "/api/scenarios",
-            "This scenario collection or revision is not supported. "
-            "Open Scenarios to choose another collection.",
+            "This rules set, ITS season or rules revision is unavailable. "
+            "Choose another from Scenarios.",
         ),
         (
             "/scenarios/annihilation?army_points=300",
             "/api/scenarios/annihilation",
-            "This scenario setup is unavailable for the selected publication "
-            "and Army Points value. Check the selection.",
+            "This setup is unavailable for your selected rules and game size. "
+            "Check your selection.",
         ),
         (
             "/orders-aros?scenario=unsupported",

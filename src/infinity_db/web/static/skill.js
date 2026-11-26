@@ -1,13 +1,13 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, getVariantUsages, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
 import { skillCategoryBadge } from "./skill-categories.js";
 import { restrictionsContextSection } from "./restrictions-reference.js";
 import { referenceLoadMessage, tableViewport } from "./view-components.js";
-import { exactVariantRuleIds, exactVariantUsageSection } from "./variant-usage.js";
+import { exactVariantUsageSection, loadExactVariantUsage } from "./variant-usage.js";
 
 const skillId = new URLSearchParams(window.location.search).get("id")
   || window.location.pathname.split("/").pop();
@@ -262,6 +262,85 @@ function variantSection(variant, parameterSemantics) {
   return section;
 }
 
+function collectionLabel(collection) {
+  if (collection === "n5-core") return "Core N5";
+  return collection.startsWith("its-") ? `ITS ${collection.slice(4)}` : collection;
+}
+
+function scenarioContextLink(scenario) {
+  const link = document.createElement("a");
+  const query = new URLSearchParams({ collection: scenario.collection, army_points: "300" });
+  if (scenario.revision) query.set("revision", scenario.revision);
+  link.href = `/scenarios/${encodeURIComponent(scenario.slug)}?${query}`;
+  link.textContent = `${collectionLabel(scenario.collection)} — ${scenario.name}`;
+  return link;
+}
+
+function applicableContexts(skill) {
+  const scenarios = skill.scenarios || [];
+  const seasons = skill.seasons || [];
+  if (!scenarios.length && !seasons.length) return null;
+  const section = document.createElement("section");
+  section.className = "detail-group scenario-skill-contexts";
+  const heading = document.createElement("h2");
+  heading.className = "detail-heading";
+  heading.textContent = scenarios.length ? "Applicable scenarios" : "Applicable seasons";
+  const list = document.createElement("ul");
+  list.className = "detail-list";
+  for (const scenario of scenarios) {
+    const item = document.createElement("li");
+    item.append(scenarioContextLink(scenario));
+    list.append(item);
+  }
+  for (const season of seasons) {
+    const item = document.createElement("li");
+    item.textContent = `${collectionLabel(season.collection)} — ${season.revision}`;
+    list.append(item);
+  }
+  section.append(heading, list);
+  return section;
+}
+
+function contextualSkillRules(skill) {
+  if (!skill.context_variants?.length) return null;
+  const section = document.createElement("section");
+  section.className = "detail-group scenario-skill-variants";
+  const heading = document.createElement("h2");
+  heading.className = "detail-heading";
+  heading.textContent = "Season and scenario differences";
+  const note = document.createElement("p");
+  note.className = "detail-copy";
+  note.textContent = "Use the exact rule for your selected season and scenario.";
+  section.append(heading, note);
+  for (const variant of skill.context_variants) {
+    const contexts = [
+      ...variant.scenarios.map((scenario) =>
+        `${collectionLabel(scenario.collection)} — ${scenario.name}`),
+      ...variant.seasons.map((season) =>
+        `${collectionLabel(season.collection)} — ${season.revision}`),
+    ];
+    // A variant groups mechanically identical definitions. Display one
+    // card with their combined context and citations, not repeated cards.
+    const rules = variant.rules;
+    const first = rules[0];
+    if (!first) continue;
+    const citations = [...new Map(rules.flatMap((rule) => rule.citations || [])
+      .map((citation) => [JSON.stringify(citation), citation])).values()];
+    const rule = {
+      ...first,
+      scope: {
+        ...first.scope,
+        seasons: [...new Set(rules.flatMap((entry) => entry.scope?.seasons || []))],
+        scenarios: [...new Set(rules.flatMap((entry) => entry.scope?.scenarios || []))],
+      },
+      applicable_scenarios: variant.scenarios,
+      citations,
+    };
+    section.append(rulesReferenceSection([rule], contexts.join(" · ")));
+  }
+  return section;
+}
+
 function render(skill) {
   displayedSkill = skill;
   document.title = `${skill.name} · InfinityDB`;
@@ -292,13 +371,27 @@ function render(skill) {
     const context = document.createElement("p");
     context.className = "detail-copy";
     context.append("Scenario-specific Skill for ");
-    const scenarioLink = document.createElement("a");
-    scenarioLink.href = `/scenarios/${encodeURIComponent(skill.scenario.slug)}?collection=${encodeURIComponent(skill.scenario.collection)}&army_points=300`;
-    scenarioLink.textContent = skill.scenario.name;
-    context.append(scenarioLink);
+    context.append(scenarioContextLink(skill.scenario));
     children.push(context);
   }
-  if (skill.rules?.length) children.push(rulesReferenceSection(skill.rules));
+  if (skill.canonical_slug) {
+    const context = document.createElement("p");
+    context.className = "detail-copy";
+    const link = document.createElement("a");
+    link.href = `/skills/${encodeURIComponent(skill.canonical_slug)}`;
+    link.textContent = "View all applicable contexts";
+    context.append(link);
+    children.push(context);
+  }
+  if (skill.rules?.length) {
+    children.push(rulesReferenceSection(
+      skill.rules, skill.context_variants?.length ? "Common mechanics" : "Rules reference",
+    ));
+  }
+  const applicable = applicableContexts(skill);
+  if (applicable) children.push(applicable);
+  const contextualRules = contextualSkillRules(skill);
+  if (contextualRules) children.push(contextualRules);
   const variantRules = gameplayVariantRules(variants);
   if (variantRules.length) children.push(rulesReferenceSection(variantRules, "Variant rules"));
   const context = restrictionsData && restrictionsContextSection(
@@ -342,18 +435,10 @@ if (!skillId) {
     render(skill);
     const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
       || `skill:${skillId}`;
-    const variantRuleIds = exactVariantRuleIds(skill, "skill");
-    if (skill.variant_usage_published && variantRuleIds.length) {
-      getVariantUsages(variantRuleIds, pageController.signal).then((payload) => {
-        if (pageController.signal.aborted) return;
-        exactUsage = payload;
-        if (displayedSkill) render(displayedSkill);
-      }).catch((error) => {
-        if (error.name !== "AbortError" && !error.message?.includes("not published")) {
-          console.error("Exact Skill occurrences unavailable", error);
-        }
-      });
-    }
+    loadExactVariantUsage(skill, "skill", pageController.signal, (payload) => {
+      exactUsage = payload;
+      if (displayedSkill) render(displayedSkill);
+    });
     fetchReviewedFaqRulings(topicId, { signal: pageController.signal })
       .then((payload) => {
         if (pageController.signal.aborted) return;

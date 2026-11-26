@@ -6,7 +6,7 @@ from copy import deepcopy
 from typing import Any
 
 from infinity_db.catalog_slugs import attach_public_catalog_slug
-from infinity_db.database.repository import Database
+from infinity_db.database.repository import Database, instance_lru_cache
 from infinity_db.domain_slugs import route_slug_from_typed_domain_id
 from infinity_db.equipment_config import (
     CURATED_ONLY_EQUIPMENT_SLUGS,
@@ -42,6 +42,15 @@ class EquipmentCatalog:
             records[slug] = record
         return records
 
+    @instance_lru_cache(maxsize=1)
+    def _presentation_equipment_names(self) -> dict[str, str]:
+        """Cache the immutable name lookup needed by characteristic enrichment."""
+        records = self._records_by_slug()
+        return {
+            encoding.equipment_id: records[encoding.equipment_id]["name"]
+            for encoding in self._encodings if encoding.equipment_id in records
+        }
+
     def _encoding_by_slug(self) -> dict[str, EquipmentPresentationEncoding]:
         return {item.equipment_id: item for item in self._encodings}
 
@@ -69,10 +78,13 @@ class EquipmentCatalog:
         )
         return [item for item in payload["items"] if item["id"] in logical_ids]
 
-    def list_equipment(self) -> list[dict[str, Any]]:
+    def list_equipment(self, *, filter_only: bool = False) -> list[dict[str, Any]]:
         """Return Army, presentation-encoded, and curated-only Equipment."""
 
-        items = deepcopy(self.database.list_catalog_items("equipment"))
+        items = deepcopy(
+            self.database.list_catalog_filter_items("equipment") if filter_only
+            else self.database.list_catalog_items("equipment")
+        )
         represented_slugs: set[str] = set()
         for item in items:
             attach_public_catalog_slug(self.database, "equipment", item)
@@ -94,12 +106,11 @@ class EquipmentCatalog:
                     "name": record["name"],
                     "wiki": None,
                     "source_ids": [],
-                    "use_count": len(
-                        self._units_for_encoding(
-                            encoding,
-                            include_all_optional=False,
-                        )
-                    ),
+                    **({} if filter_only else {
+                        "use_count": len(self._units_for_encoding(
+                            encoding, include_all_optional=False,
+                        )),
+                    }),
                 }
             )
             represented_slugs.add(encoding.equipment_id)
@@ -205,11 +216,13 @@ class EquipmentCatalog:
             None,
         )
 
-    def enrich_unit(self, unit: dict[str, Any]) -> dict[str, Any]:
+    def enrich_unit(
+        self, unit: dict[str, Any], *, in_place: bool = False,
+    ) -> dict[str, Any]:
         """Link presentation characteristics to their canonical Equipment identity."""
 
-        result = deepcopy(unit)
-        records = self._records_by_slug()
+        result = unit if in_place else deepcopy(unit)
+        names = self._presentation_equipment_names()
         encodings = self._encoding_by_characteristic()
 
         def walk(value: Any) -> None:
@@ -225,13 +238,13 @@ class EquipmentCatalog:
                         encoding = encodings.get(name.casefold())
                         if encoding is None:
                             continue
-                        record = records.get(encoding.equipment_id)
-                        if record is None:
+                        equipment_name = names.get(encoding.equipment_id)
+                        if equipment_name is None:
                             continue
                         characteristic["equipment_reference"] = {
                             "id": encoding.equipment_id,
                             "slug": encoding.equipment_id,
-                            "name": record["name"],
+                            "name": equipment_name,
                         }
                 for child in value.values():
                     walk(child)

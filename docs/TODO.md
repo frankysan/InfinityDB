@@ -1,7 +1,7 @@
 # InfinityDB backlog
 
 This file tracks unfinished development work, including maintenance, research
-and product expansion. Merge, exact-main-SHA CI, tagging, deployment and
+and product expansion. Merge, final-main CI evidence, tagging, deployment and
 post-deployment verification belong to the [release checklist](releasing.md),
 not to the development backlog.
 
@@ -314,6 +314,29 @@ Use these links to jump directly to a workstream:
 
 ### Performance, storage, and build tooling
 
+- [ ] **Data processing + Web backend (v1.3.0):** Begin the transition to
+  [build-time materialized application projections](architecture.md#design-direction-build-time-materialization).
+  Keep this separate from v1.2.2 release preparation.
+  - [ ] Pilot materialized General profiles in the existing runtime database
+    build. Cover all 16 optional availability combinations per logical Unit,
+    deduplicate identical projections where useful, and preserve explicit
+    requested-Army behavior on Unit details. Retain the canonical composition
+    logic and source occurrence provenance; select the persisted representation
+    at runtime instead of rebuilding full Unit details for Extended Explorer.
+  - [ ] Compare generated projections with the current runtime reference across
+    the snapshot and all availability combinations, including contextual symbols,
+    AVA, shared items, distinct identities and requested-Army exceptions.
+    Verify deterministic complete-set builds and public API compatibility.
+    Measure build duration, database size, startup, worker memory, and cold
+    and repeated request latency against the existing browser/API baseline.
+    Remove redundant runtime composition/caching only after successful cutover.
+  - [ ] If the pilot demonstrates worthwhile benefits, extend incrementally to
+    canonical Unit details and composed Rules records/relations. Evaluate
+    catalog enrichment, search identities, Glossary, usage associations and
+    bounded Scenario SVG variants next, using measurements to select scope.
+    Leave arbitrary request filtering and prospective counts dynamic; consider
+    reusable materialized associations/indexes for them.
+
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.
   The current set includes 17 normalized deployed objects (one unresolved
@@ -340,6 +363,14 @@ Use these links to jump directly to a workstream:
 - [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
   skills, equipment, and weapons. Record median and p95 timings against a
   representative snapshot before and after each performance change.
+  - [ ] Unit Explorer follow-up: benchmark the optimized path under the
+    deployed worker configuration and representative concurrent traffic.
+    Profile remaining Extended first-visit costs or cold scoped-index
+    construction only if measured latency warrants it.
+  - [ ] Detail/catalog follow-up: profile cold Skills/Weapons catalog generation
+    and large Skill/Equipment/Weapon detail payloads, especially exact-variant
+    usage and repeated rendering. Measure final asynchronous updates as well
+    as first visible content. Preserve canonical source references.
 
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.
@@ -398,6 +429,11 @@ diagram and focused browser acceptance. All 36 season-mission definitions
 See [release browser acceptance](its-season-database.md#release-browser-acceptance).
 Final-candidate acceptance is governed by [the release checklist](releasing.md).
 Season 16 Part II remains later scope.
+
+- [ ] **Web backend:** Refine metric placement-ruler label spacing near table edges
+  (e.g. Critical Intervention and Double Bind) without changing ruler geometry.
+  Labels remain readable in the v1.2.2 standalone visual acceptance; this is
+  deferred visual polish.
 
 - [x] **Data processing: consolidate source-family curation.** ITS 18 now
   uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
