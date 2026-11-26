@@ -451,6 +451,25 @@ passed 11 tests, including source-byte, base-row, shared-metadata and
 generation drift rejection. The normal history-enabled complete runtime
 build passed in 232.07 s; this is not a controlled before/after comparison.
 
+### Initial Army export validation cost
+
+On 2026-11-26, two five-iteration runs on the same Windows host and normalized
+source as above measured the individual initial-export passes:
+
+```powershell
+python -m tools.performance.benchmark_normalized_source local/work/build/army/army.db local/work/build/army/normalized.json --initial-export --iterations 5
+```
+
+Repeat-run medians: JSON parsing 464 ms, strict JSON serialization 297 ms,
+normalized relationship validation 87 ms, full export input validation
+1,086 ms (including serialization and relationships), and source anomaly
+audit 0.30 ms (baseline applicable). The normalized-source SHA-256 matched
+the earlier benchmark. Even eliminating both reloads and both repeated
+validation components would save about 1.31 s, under 0.6% of the previous
+complete-build duration. These are component measurements, not a timed
+alternative exporter. Retain the full export validation and existing
+file-based handoff; no additional trusted-input interface is justified.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db
