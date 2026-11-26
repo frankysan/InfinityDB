@@ -210,6 +210,32 @@ profile projection (512 entries per application, keyed by Unit and enabled
 availability flags); preserve the existing full detail response. These local
 three-sample measurements do not establish production tail latency.
 
+### General-profile materialization pilot
+
+Run the disposable prototype against an unchanged complete runtime set:
+
+```powershell
+python -m tools.performance.benchmark_general_profiles data/generated/army.db --iterations 5 --output local/performance/web-backend/general-profiles/RUN-ID.json
+```
+
+Replace `RUN-ID` with a fresh identifier. It composes every logical Unit
+under all 16 optional availability masks using the existing Explorer
+composer, deduplicates exact JSON payloads and verifies all persisted
+selections. The temporary SQLite projection is deleted; the original four
+runtime databases are not modified. Retire the prototype when the integrated
+benchmark and production projection supersede it.
+
+Windows baseline at `72adf32`, Python 3.14.10, SQLite 3.50.4, Army DB
+SHA-256 `ecc3de742e705b6b240dd6e4e18af92875da45c6c80fe44bbf7ac215664c1eee`:
+738 logical Units, 11,808 selections and 932 distinct payloads. Generation
+took 51.95 s; the disposable SQLite file was 2,727,936 bytes (Army DB:
+9,199,616 bytes). Median/p95 for 50 Units (five samples): cold composition
+596.3/617.0 ms, after compact list 610.7/617.8 ms, repeated cached composition
+0.32/0.36 ms, persisted batch 2.61/2.77 ms. Application startup median 2489 ms.
+These are component timings, not HTTP/browser latency. Integrated database
+size, deterministic builds, detail parity, requested-Army handling, startup
+and worker memory remain to be validated.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

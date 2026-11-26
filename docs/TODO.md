@@ -441,7 +441,11 @@ make v1.3.0 depend on them.
 
 - [ ] **Data processing + Web backend (v1.3.0):** Begin the transition to
   [build-time materialized application projections](architecture.md#design-direction-build-time-materialization).
-  Keep this separate from v1.2.2 release preparation.
+  Disposable General-profile projection pilot: all 11,808 selections (738
+  logical Units, 16 masks each), 932 distinct payloads, complete JSON
+  round-trip parity. The
+  [measured baseline](testing.md#general-profile-materialization-pilot)
+  supports proceeding to production storage and serving.
   - [ ] Pilot materialized General profiles in the existing runtime database
     build. Cover all 16 optional availability combinations per logical Unit,
     deduplicate identical projections where useful, and preserve explicit
