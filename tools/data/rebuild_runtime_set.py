@@ -46,6 +46,8 @@ def main(argv: list[str] | None = None) -> int:
         "--db-dir", type=Path, default=Path("data/generated"),
         help="Complete runtime set destination (default: data/generated)",
     )
+    parser.add_argument("--with-unit-history", action="store_true",
+                        help="Embed the accepted local Army history corpus")
     args = parser.parse_args(argv)
     if args.use_recorded_source:
         if args.manifest is not None:
@@ -63,6 +65,7 @@ def main(argv: list[str] | None = None) -> int:
         "--snapshot-manifest", str(manifest),
         "--db-dir", str(args.db_dir),
         "--compact",
+        *(["--with-unit-history"] if args.with_unit_history else []),
     ])
 
 

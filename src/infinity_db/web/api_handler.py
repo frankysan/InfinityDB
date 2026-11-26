@@ -1753,8 +1753,11 @@ class ApiHandler:
                             profiles[payload["id"]] if profiles is not None else None
                         ),
                     )
-                if payload is not None and self.unit_histories is not None:
-                    attach_unit_history(payload, self.unit_histories)
+                if payload is not None:
+                    if self.unit_histories is not None:
+                        attach_unit_history(payload, self.unit_histories)
+                    elif (history := self.database.unit_history(payload["id"])) is not None:
+                        attach_unit_history(payload, {str(payload["id"]): history})
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

@@ -206,17 +206,23 @@ and disabled loadouts remain excluded. Ambiguous or removed Army cards retain
 a separate historical context. This remains a conservative projection. The maintainer confirmed that the
 existing Army data permission covers historical use on 2026-11-26.
 
-The contextual renderer can additionally export a compact versioned player
-history JSON projection with the Army database SHA-256. It contains date,
-scope, category and typed display rows, keyed by logical Unit ID, General
-profile identity and Army card ID plus sorted availability flags; unmatched
-historical contexts remain separate. Raw research evidence stays offline.
-The local web server accepts an explicitly selected projection through
-`serve --unit-history PATH` and rejects a mismatched Army database hash.
-Unit detail responses with this projection are not cached. General history
-describes the all-optional-categories profile scope, regardless of current
-browser filters, which is stated in the disclosure. Normal database-set
-publication integration remains pending.
+Army schema v35 (compatibility 44) embeds the contextual player history
+projection in `unit_history_payloads`, keyed by logical Unit ID. The payload
+contains date, scope, category and typed display rows, keyed internally by
+General profile identity and Army card ID plus sorted availability flags;
+unmatched historical contexts remain separate. Raw research evidence stays
+offline. The explicit `build --with-unit-history` selection validates the
+accepted archive and historical research database hashes and recomputes the
+projection against the staged v34 Army database before publishing Rules.
+Its build provenance includes the corpus hashes and history builder sources.
+The embedded table is covered by the Army published-content checksum and the
+final database-set fingerprint. Unit details automatically read the selected
+Unit's history; the normal revision-aware API cache applies. Older v34 sets
+remain supported without history. The explicit `serve --unit-history PATH`
+preview override remains available and rejects mismatched database hashes;
+override responses are not cached. General history describes the
+all-optional-categories profile scope, regardless of current browser filters,
+which is stated in the disclosure.
 
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets

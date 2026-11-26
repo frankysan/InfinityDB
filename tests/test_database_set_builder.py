@@ -188,6 +188,7 @@ def _fake_army(args: argparse.Namespace, record: dict[str, Any]) -> int:
             "symbol_path_metadata",
             "published_symbol_assets",
             "published_symbol_paths",
+            "unit_history_payloads",
             "unit_filter_contexts",
             "general_profile_selections",
             "general_profile_payloads",
@@ -396,6 +397,69 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert not (root / "data/work/build").exists()
     second = builder.build_database_set(args, _fake_army, root=root)
     assert second == first
+
+
+def test_history_build_embeds_payload_and_serves_without_sidecar(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db.database.repository import Database
+    from infinity_db.unit_history_storage import write_unit_history
+
+    root, args = project
+    args.with_unit_history = True
+    pins = {"archiveSha256": "a" * 64, "databaseSha256": "b" * 64}
+    monkeypatch.setattr(builder, "history_input_identity", lambda _: pins)
+    for name in ("build_army_history_database.py", "project_army_history.py",
+                 "summarize_army_history.py", "render_player_army_history.py",
+                 "render_army_history.py"):
+        (root / "tools/research" / name).write_text("# fixture", encoding="utf-8")
+    change = {"date": "2025-10-15", "scope": "", "category": "Skills",
+              "actions": [{"action": "Gained", "text": "Dodge"}]}
+    selected: dict[str, Any] = {}
+
+    def publish(army: Path, history_root: Path) -> None:
+        assert history_root == root / "local/data/history"
+        database = Database(army)
+        with database._connect() as connection:
+            unit_id = connection.execute(
+                "SELECT id FROM logical_units ORDER BY id LIMIT 1"
+            ).fetchone()[0]
+        unit = database.get_unit(unit_id)
+        assert unit is not None
+        profiles = database.general_profiles(
+            [unit_id], frozenset({"mercs", "specops", "teamops", "reinforcement"}),
+        )
+        assert profiles is not None
+        identity = profiles[unit_id][0]["profile_identity"]
+        body = {"general": {identity: [change]}, "armies": {}, "unmatched": []}
+        selected.update(id=unit_id, body=body)
+        projection = {"formatVersion": 1, "armyDatabaseSha256": file_sha256(army),
+                      "units": {str(unit_id): body}}
+        with pytest.raises(ValueError, match="does not match"):
+            write_unit_history(army, {**projection, "armyDatabaseSha256": "wrong"})
+        write_unit_history(army, projection)
+
+    monkeypatch.setattr(builder, "publish_unit_history", publish)
+    monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
+    report = builder.build_database_set(args, _fake_army, root=root)
+    assert report["buildProvenance"]["history"] == pins
+    assert set(_digests(args.db_dir)) == COMPLETE_RUNTIME_FILES
+    army = args.db_dir / "army.db"
+    database = Database(army)
+    assert database.unit_history(selected["id"]) == selected["body"]
+    app = create_app_from_database_set(args.db_dir)
+    status, headers, body = wsgi_response(
+        app, f"http://local.test/api/units/{selected['id']}",
+    )
+    assert status == 200
+    assert any(profile.get("history") == [change]
+               for profile in json.loads(body)["general_profiles"])
+    assert any(name.lower() == "etag" for name, _ in headers)
+    with closing(sqlite3.connect(army)) as db, db:
+        db.execute("UPDATE unit_history_payloads SET body=?",
+                   (json.dumps({"general": {}, "armies": {}, "unmatched": []}),))
+    with pytest.raises(ValueError, match="checksum"):
+        Database(army).validate()
 
 
 def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(

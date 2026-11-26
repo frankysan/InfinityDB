@@ -320,12 +320,12 @@ make v1.3.0 depend on them.
     incomplete observations or differing later revision dates where evidence
     permits; review remaining Army-context and unresolved entries before
     public integration.
-  - [ ] Integrate the snapshot-bound player history projection into the normal
-    database build and release selection. The Unit details page can already
-    render it when explicitly selected at local server startup; validate the
-    release-matched projection and normal deployment before enabling by default.
-    The maintainer confirmed the existing Army data permission covers this
-    historical use (2026-11-26).
+  - [ ] Include the embedded v35 Unit history projection in the v1.3.0 release
+    build (`--with-unit-history`), review the actual browser presentation and
+    validate normal deployment. The builder and runtime reader support the
+    accepted local historical corpus without a runtime sidecar. Extend the
+    accepted corpus for newer direct Army snapshots before publishing their
+    history.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
   **historical FAQ edition replay and source-date/season selection**,

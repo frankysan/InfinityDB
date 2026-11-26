@@ -929,15 +929,16 @@ def unanimous_revision_delta(
 
 def contextual_model(
     units: list[Document], history: sqlite3.Connection, archive: Path,
+    *, army_path: Path = ARMY,
 ) -> dict[str, int]:
     """Attach current card contexts and promote fully covered shared changes."""
-    database = Database(ARMY)
+    database = Database(army_path)
     general = database.general_profiles(
         [u["logicalUnitId"] for u in units], frozenset(OPTIONAL_AVAILABILITY_FLAGS),
     )
     require(general is not None, "Current General-profile projection unavailable")
     assert general is not None
-    with closing(read_only(ARMY)) as db:
+    with closing(read_only(army_path)) as db:
         db.row_factory = sqlite3.Row
         config = identity_config_from_connection(db)
         source_armies = defaultdict(set)

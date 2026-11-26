@@ -1,6 +1,6 @@
 """Validate the selected SQLite runtime set without loose JSON fallbacks.
 
-Current serving requires Army v34, Rules v23, and the independently
+Current serving requires Army v34/v35, Rules v23, and the independently
 published ITS Season 17 and 18 databases. Earlier two-file embedded schemas remain
 inspectable for explicit development/research fixtures; v10/v11 layouts
 requiring JSON publications are unsupported.
@@ -25,6 +25,7 @@ from .rules_database import REFERENCE_PAGE_SCHEMA_VERSION as COMPLETE_RULES_SCHE
 from .rules_database import RulesDatabase
 from .search_index_storage import PublishedSearchIndex, search_scope
 from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
+from .unit_history_storage import ARMY_SCHEMA_VERSION as HISTORY_ARMY_SCHEMA_VERSION
 from .unit_input_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .variant_usage_reference import load_runtime_variant_usage
 
@@ -132,7 +133,9 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
         )
     with closing(sqlite3.connect(army_path.as_uri() + "?mode=ro", uri=True)) as connection:
         army_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if require_complete and army_version != COMPLETE_ARMY_SCHEMA_VERSION:
+    if require_complete and army_version not in {
+        COMPLETE_ARMY_SCHEMA_VERSION, HISTORY_ARMY_SCHEMA_VERSION,
+    }:
         raise ValueError(
             f"Complete embedded sets require Army schema v{COMPLETE_ARMY_SCHEMA_VERSION}"
         )
@@ -160,6 +163,10 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     rules = RulesDatabase(rules_path)
     rules.validate()
     provenance = validate_set_provenance(army_path, rules_path)
+    if provenance["status"] == "matched" and (
+        ("history" in provenance) != (army_version == HISTORY_ARMY_SCHEMA_VERSION)
+    ):
+        raise ValueError("Army history schema differs from recorded build provenance")
     if require_complete and provenance["status"] != "matched":
         raise ValueError("Complete embedded sets require recorded matched build provenance")
     for path in (army_path, rules_path, *registered_seasons.values()):

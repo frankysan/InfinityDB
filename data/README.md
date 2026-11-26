@@ -69,7 +69,12 @@ the retired source roots.
   It preserves source observations, same-day alternatives, unresolved faction
   identities and contextual metadata references. It does not establish
   upstream publication order or canonical Unit identity. Never route this
-  input through live snapshot discovery, normal builds or public assets.
+  input through live snapshot discovery or public assets. The explicit
+  `build --with-unit-history` option selects only the accepted archive and
+  generated research database under this history root, verifies both pins,
+  and materializes player-facing history in Army v35 before Rules publication.
+  The selected current Army snapshot must be a direct endpoint in that corpus.
+  Neither the archive nor the research database is a runtime dependency.
   The offline `python -m tools.research.characterize_army_history` command
   (also available as `infinity_db.army_history_characterization`) accepts the
   same archive/receipt pins plus an explicit `--output` JSON path under

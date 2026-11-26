@@ -778,7 +778,7 @@ def relationship_payload(
     }, "changedRelationship"
 
 
-def build(preview: Document, archive: Path) -> Document:
+def build(preview: Document, archive: Path, *, history_path: Path = HISTORY) -> Document:
     require(preview["publicationStatus"] == "privatePreviewOnly"
             and preview["archiveSha256"] == ARCHIVE_PIN and preview["edition"] == "n5",
             "Unexpected private preview")
@@ -805,7 +805,7 @@ def build(preview: Document, archive: Path) -> Document:
     availability_rows = []
     declaration_rows = []
     relationship_rows = []
-    with closing(read_only(HISTORY)) as db:
+    with closing(read_only(history_path)) as db:
         for pos, raw in db.execute(
             "SELECT position,body FROM history_record WHERE stream='loadoutMatch' "
             "ORDER BY position"

@@ -27,7 +27,7 @@ def file_sha256(path: Path) -> str:
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def build_input_fingerprints(root: Path) -> dict[str, str]:
+def build_input_fingerprints(root: Path, *, unit_history: bool = False) -> dict[str, str]:
     """Hash the maintained input envelope without requiring upstream archives."""
     paths = [
         path for directory in (
@@ -47,6 +47,11 @@ def build_input_fingerprints(root: Path) -> dict[str, str]:
         root / "pyproject.toml", root / "data/manifests/symbol-publication.json",
         root / "src/infinity_db/web/static/restrictions-reference.json",
     ])
+    if unit_history:
+        paths.extend(root / "tools/research" / name for name in (
+            "build_army_history_database.py", "project_army_history.py",
+            "summarize_army_history.py", "render_player_army_history.py", "render_army_history.py",
+        ))
     result = {}
     for path in paths:
         name = path.relative_to(root).as_posix()
@@ -64,8 +69,8 @@ def _is_digest(value: Any) -> bool:
 def _validate_manifest(manifest: Any) -> None:
     if (
         not isinstance(manifest, dict)
-        or set(manifest) != {"format", "formatVersion", "families", "builderRevision",
-                             "source", "inputs"}
+        or set(manifest) - {"history"} != {"format", "formatVersion", "families",
+                                          "builderRevision", "source", "inputs"}
         or manifest["format"] != MANIFEST_FORMAT
         or type(manifest["formatVersion"]) is not int or manifest["formatVersion"] != 1
         or manifest["families"] != list(FAMILIES)
@@ -81,6 +86,11 @@ def _validate_manifest(manifest: Any) -> None:
             or not _is_digest(digest)
         ):
             raise ValueError("Invalid database-set input identity or digest")
+    if "history" in manifest:
+        history = manifest["history"]
+        if (not isinstance(history, dict) or set(history) != {"archiveSha256", "databaseSha256"}
+                or not all(_is_digest(value) for value in history.values())):
+            raise ValueError("Invalid historical Army source identity")
     source = manifest["source"]
     if (
         not isinstance(source, dict)
@@ -172,6 +182,8 @@ def validate_set_provenance(army: Path, rules: Path) -> dict[str, Any]:
         "status": "matched", "buildSetId": army_record["buildSetId"],
         "builderRevision": army_record["manifest"]["builderRevision"],
         "armyExportPairSha256": generation,
+        **({"history": army_record["manifest"]["history"]}
+           if "history" in army_record["manifest"] else {}),
     }
 
 
@@ -189,7 +201,7 @@ def validate_build_input_freshness(army: Path, root: Path) -> None:
     record = validate_build_record(_metadata(army).get(BUILD_PROVENANCE_KEY), "army")
     root = root.resolve()
     expected = record["manifest"]["inputs"]
-    actual = build_input_fingerprints(root)
+    actual = build_input_fingerprints(root, unit_history="history" in record["manifest"])
     changed = sorted(name for name in expected.keys() | actual.keys()
                      if expected.get(name) != actual.get(name))
     if changed:

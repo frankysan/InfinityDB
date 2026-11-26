@@ -42,6 +42,7 @@ from .skill_classification_storage import publish_skill_classifications
 from .symbol_path_storage import publish_symbol_paths
 from .trait_wiki_references import load_trait_wiki_references
 from .unit_filter_storage import publish_unit_filter_semantics
+from .unit_history_storage import history_input_identity, history_inputs, publish_unit_history
 from .unit_input_storage import publish_filter_contexts
 from .variant_usage import build_variant_usage_from_normalized
 from .variant_usage_reference import publication_from_candidate
@@ -55,7 +56,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def collect_build_manifest(
     root: Path, source: Path, metadata: Path | None, *,
-    snapshot_manifest: Path | None = None,
+    snapshot_manifest: Path | None = None, history_root: Path | None = None,
 ) -> dict[str, Any]:
     """Declare a conservative maintained-input envelope, never absolute host paths."""
     if not source.is_file() or not zipfile.is_zipfile(source):
@@ -68,7 +69,7 @@ def collect_build_manifest(
         verify_pinned_army_build_source(source, snapshot_manifest)
     envelope = discover_metadata(source, metadata, required=True)
     assert envelope is not None
-    inputs = build_input_fingerprints(root)
+    inputs = build_input_fingerprints(root, unit_history=history_root is not None)
     code_digests = {name: digest for name, digest in inputs.items()
                     if name.startswith("src/") and name.endswith(".py")}
     manifest = {
@@ -81,6 +82,8 @@ def collect_build_manifest(
         },
         "inputs": inputs,
     }
+    if history_root is not None:
+        manifest["history"] = history_input_identity(history_root)
     build_set_id(manifest)
     return manifest
 
@@ -191,8 +194,11 @@ def build_database_set(
             )
     selected_manifest = selected_manifest.resolve() if selected_manifest is not None else None
     target = args.db_dir.resolve()
+    history_root = (root / "local/data/history" if getattr(args, "with_unit_history", False)
+                    else None)
     manifest = collect_build_manifest(
         root, source, args.metadata, snapshot_manifest=selected_manifest,
+        history_root=history_root,
     )
     selected_manifest_sha256 = (
         file_sha256(selected_manifest) if selected_manifest is not None else None
@@ -204,6 +210,8 @@ def build_database_set(
         protected.add(args.metadata.resolve())
     if selected_manifest is not None:
         protected.add(selected_manifest)
+    if history_root is not None:
+        protected.update(path.resolve() for path in history_inputs(history_root))
     for name in COMPLETE_RUNTIME_FILES:
         output = target / name
         if output.resolve() in protected or (output.exists() and not output.is_file()):
@@ -249,6 +257,8 @@ def build_database_set(
         )
         _build_general_profiles(stage, root)
         publish_filter_contexts(stage / "army.db")
+        if history_root is not None:
+            publish_unit_history(stage / "army.db", history_root)
         _build_rules_and_publications(stage, root, manifest)
         from .rules_database import RulesDatabase
 
@@ -264,6 +274,7 @@ def build_database_set(
         if (
             collect_build_manifest(
                 root, source, args.metadata, snapshot_manifest=selected_manifest,
+                history_root=history_root,
             ) != manifest
             or (
                 selected_manifest is not None

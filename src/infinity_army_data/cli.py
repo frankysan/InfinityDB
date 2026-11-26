@@ -331,6 +331,10 @@ def add_data_commands(
             help="Build the complete runtime set from a local Army ZIP (default: data/generated)",
         )
         p_build.add_argument(
+            "--with-unit-history", action="store_true",
+            help="Embed history from the accepted local/data/history corpus",
+        )
+        p_build.add_argument(
             "--snapshot-manifest", type=Path,
             help=(
                 "Require an explicitly selected Army ZIP and matching version-3 "
