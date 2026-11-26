@@ -12,6 +12,8 @@ are not retroactively relabeled.
 
 ### Player summary
 
+- Faster global search through a compact prebuilt search index.
+
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
 ### Added
@@ -26,6 +28,10 @@ are not retroactively relabeled.
 - **Data processing + Web backend:** Materialized composed current N5 Rules
   records during database generation for faster reference and catalog lookups,
   preserving scoped contributions, reverse relations and citations.
+
+- **Data processing + Web backend:** Materialize global search identities and
+  normalized search terms across Army, Rules and ITS; preserve matching,
+  ranking and public routes.
 
 ### Fixed
 

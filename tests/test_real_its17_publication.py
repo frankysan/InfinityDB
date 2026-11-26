@@ -33,7 +33,7 @@ def get_json(app, url: str) -> dict:
 
 def test_both_seasons_are_required_and_registered(published_app) -> None:
     report = validate_database_set(GENERATED, require_complete=True)
-    assert report["layout"] == "v18-four-file"
+    assert report["layout"] == "v19-four-file"
     assert set(report["sha256"]) == COMPLETE_RUNTIME_FILES == {
         "army.db", "rules_n5.db", "its_17.db", "its_18.db",
     }

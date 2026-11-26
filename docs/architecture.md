@@ -173,7 +173,7 @@ See `data/README.md` and `data/curated/README.md` for the concrete file contract
 
 ## Design direction: build-time materialization
 
-**Accepted direction for v1.3.0; General profiles implemented for both Unit surfaces.**
+**Accepted direction for v1.3.0; General profiles, composed Rules and global search implemented.**
 
 The immutable runtime database set is the publication boundary. Move suitable
 deterministic composition, enrichment and indexing from request handling into
@@ -206,10 +206,13 @@ both surfaces agree for equivalent selections.
 Rules v18 additionally publishes composed current Rules records with
 their contributions, citations, reverse relations and Army links, indexed
 by identity, kind and applicable N5 scenario context. The canonical
-composer remains the build implementation and legacy reader. Potential
-subsequent candidates include maintained-text tokens, catalog summaries,
-search identities, Glossary entries and Scenario map SVGs. Respect
-publication/season scope and materialize only snapshot-dependent portions.
+composer remains the build implementation and legacy reader. Rules v19 adds a
+compact global search projection from canonical catalog entries after the Army
+and ITS publications are finalized. Search matching and ranking remain dynamic;
+complete serving requires matching Army and ordered season fingerprints.
+Potential subsequent candidates include maintained-text tokens, catalog summaries,
+Glossary entries and Scenario map SVGs. Respect publication/season scope and
+materialize only snapshot-dependent portions.
 Arbitrary filter combinations, prospective counts, pagination and user
 preferences remain runtime selection/query work; precompute reusable
 associations or indexes rather than enumerating unbounded query results.
@@ -459,7 +462,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v33, Rules v18 and ITS v2,
+The complete serving contract requires Army v33, Rules v19 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

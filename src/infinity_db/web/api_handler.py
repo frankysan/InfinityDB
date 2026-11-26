@@ -46,6 +46,7 @@ from infinity_db.scenario_catalog import ScenarioCatalog
 from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 from infinity_db.search_catalog import SearchCatalog
+from infinity_db.search_index_storage import PublishedSearchIndex
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.state_catalog import StateCatalog
@@ -529,6 +530,7 @@ class ApiHandler:
         variant_usage_revision: str | None = None,
         weapon_profile_citations: ProfileCitations | None = None,
         publication_registry: PublicationRegistry | None = None,
+        search_index: PublishedSearchIndex | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
@@ -577,6 +579,7 @@ class ApiHandler:
             self.general_rules_catalog,
             self.glossary_catalog,
             self.legacy_armies,
+            published_search=search_index.search if search_index is not None else None,
         )
         self.catalog_rules = CatalogRules(rules_database, database=database)
         self.symbol_catalog = symbol_catalog

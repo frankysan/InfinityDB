@@ -37,6 +37,7 @@ from .deployed_object_builder import build_deployed_objects
 from .equipment_presentation_storage import publish_equipment_encodings
 from .its_season_database import build_its_database
 from .rules_database import export_rules_database
+from .search_index_storage import publish_search_index
 from .skill_classification_storage import publish_skill_classifications
 from .symbol_path_storage import publish_symbol_paths
 from .trait_wiki_references import load_trait_wiki_references
@@ -251,6 +252,10 @@ def build_database_set(
 
         core_revision = RulesDatabase(stage / "rules_n5.db").current_core_scenario_revision()
         _build_registered_seasons(stage, root, core_revision)
+        publish_search_index(
+            stage / "army.db", stage / "rules_n5.db",
+            {season: stage / filename for season, (filename, _) in SEASON_DATABASE_SOURCES.items()},
+        )
         result = validate_database_set(stage, require_complete=True)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):
             raise ValueError("Built runtime set does not match the selected build inputs")

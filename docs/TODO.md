@@ -451,9 +451,6 @@ make v1.3.0 depend on them.
   - [ ] Evaluate materializing reusable maintained-text reference tokens
     on top of the Rules v18 composed-record projection, preserving
     consumer-local routes, scenario scope and publication ownership.
-  - [ ] Pilot a compact global search index from canonical public identities,
-    normalized aliases, Unit search terms and scoped route metadata across
-    Army, Rules and ITS. Preserve existing substring matching and ranking.
   - [ ] Evaluate catalog summaries and usage associations for Skills,
     Equipment and Weapons, reusable by detail pages and filter choices;
     avoid duplicating full usage payloads across records.

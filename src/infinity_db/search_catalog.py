@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterator
 from typing import Any
 from urllib.parse import quote
 
@@ -16,6 +17,23 @@ from infinity_db.reference_catalog import LabelCatalog, RulesRecordCatalog
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.trait_catalog import TraitCatalog
+
+SearchEntry = tuple[dict[str, Any], tuple[str, ...]]
+
+
+def normalized_terms(*labels: object) -> tuple[str, ...]:
+    return tuple(sorted({key for label in labels if (key := accent_insensitive_key(label))}))
+
+
+def rank_results(results: list[dict[str, Any]], needle: str) -> list[dict[str, Any]]:
+    return sorted(
+        results,
+        key=lambda item: (
+            0 if accent_insensitive_key(item["name"]).startswith(needle) else 1,
+            item["name"].casefold(),
+            item["domain"],
+        ),
+    )
 
 
 class SearchCatalog:
@@ -34,6 +52,8 @@ class SearchCatalog:
         general_rules_catalog: RulesRecordCatalog,
         glossary_catalog: GlossaryCatalog,
         legacy_armies: tuple[LegacyArmy, ...] = (),
+        *,
+        published_search: Callable[[str], list[dict[str, Any]]] | None = None,
     ) -> None:
         self.database = database
         self.skill_catalog = skill_catalog
@@ -46,6 +66,7 @@ class SearchCatalog:
         self.general_rules_catalog = general_rules_catalog
         self.glossary_catalog = glossary_catalog
         self.legacy_armies = legacy_armies
+        self.published_search = published_search
 
     @staticmethod
     def _result(domain: str, item: dict[str, Any], href: str) -> dict[str, Any]:
@@ -67,43 +88,49 @@ class SearchCatalog:
         }
 
     def search(self, query: str) -> list[dict[str, Any]]:
-        """Return name/curated-alias matches across player-facing database domains.
+        """Return name/curated-alias matches across player-facing database domains."""
+        if self.published_search is not None:
+            return self.published_search(query)
+        return self.search_composed(query)
 
-        Search deliberately reuses the application read models instead of flattening
-        source identifiers into a separate index. This keeps public slugs, rules-only
-        identities, and the Army/Fireteam relationship boundary consistent with their
-        detail surfaces.
-        """
-
+    def search_composed(self, query: str) -> list[dict[str, Any]]:
         needle = accent_insensitive_key(query)
         if not needle:
             return []
+        return rank_results([result for result, _terms in self.entries(query)], needle)
 
-        results: list[dict[str, Any]] = []
+    def entries(self, query: str | None = None) -> Iterator[SearchEntry]:
+        """Enumerate canonical search identities and normalized terms.
+
+        A query keeps the legacy Unit listing selective. Without one, the
+        complete public projection is suitable for offline publication.
+        """
+        needle = accent_insensitive_key(query)
+
+        def matches(terms: tuple[str, ...]) -> bool:
+            return not needle or any(needle in term for term in terms)
+
         for army in self.database.list_armies():
-            if needle not in accent_insensitive_key(army["name"]):
+            terms = normalized_terms(army["name"])
+            if not matches(terms):
                 continue
             slug = public_slug_for_reference(self.database, "armies", army["id"])
             if slug is not None:
-                results.append(
-                    self._scoped_result(
-                        "Army", army, "/units", "units", {"army_id": slug}
-                    )
-                )
+                yield self._scoped_result(
+                    "Army", army, "/units", "units", {"army_id": slug}
+                ), terms
 
         for army in self.legacy_armies:
-            if needle not in accent_insensitive_key(army.name):
-                continue
-            results.append(
-                self._result(
+            terms = normalized_terms(army.name)
+            if matches(terms):
+                yield self._result(
                     "Army",
                     {"name": army.name},
                     f"/armies#army-{quote(army.slug, safe='')}",
-                )
-            )
+                ), terms
 
         units = self.database.list_units(
-            search=query,
+            search=query or "",
             limit=10_000,
             mercs=True,
             specops=True,
@@ -111,10 +138,14 @@ class SearchCatalog:
             reinforcement=True,
             _unbounded=True,
         )
+        unit_terms = self.database.unit_search_terms()
         for unit in units["items"]:
             slug = public_slug_for_reference(self.database, "units", unit["id"])
             if slug is not None:
-                results.append(self._result("Unit", unit, f"/units/{quote(slug, safe='')}"))
+                yield (
+                    self._result("Unit", unit, f"/units/{quote(slug, safe='')}"),
+                    normalized_terms(*unit_terms[unit["id"]]),
+                )
 
         catalog_sources = (
             ("Skill", "skills", self.skill_catalog.list_skills(filter_only=True)),
@@ -142,7 +173,8 @@ class SearchCatalog:
         for domain, route, items in catalog_sources:
             for item in items:
                 labels = [item["name"], *item.get("aliases", []), *item.get("alternate_names", [])]
-                if not any(needle in accent_insensitive_key(label) for label in labels):
+                terms = normalized_terms(*labels)
+                if not matches(terms):
                     continue
                 identifier = item.get("slug")
                 if identifier is None and route in {"skills", "equipment", "weapons"}:
@@ -154,40 +186,27 @@ class SearchCatalog:
                     {**item, "name": f"{item['name']} ({item['scenario']['name']})"}
                     if route == "skills" and item.get("scenario") else item
                 )
-                results.append(
-                    self._result(
-                        domain, display_item, f"/{route}/{quote(str(identifier), safe='')}"
-                    )
-                )
+                yield self._result(
+                    domain, display_item, f"/{route}/{quote(str(identifier), safe='')}"
+                ), terms
 
         for item in self.glossary_catalog.embedded_entries():
             labels = [item["name"], *item.get("aliases", [])]
-            if not any(needle in accent_insensitive_key(label) for label in labels):
+            terms = normalized_terms(*labels)
+            if not matches(terms):
                 continue
-            results.append(
-                {
-                    "domain": item["domain"],
-                    "name": item["name"],
-                    "href": item["href"],
-                }
-            )
+            yield {
+                "domain": item["domain"],
+                "name": item["name"],
+                "href": item["href"],
+            }, terms
 
         for army in self.database.list_fireteam_armies():
-            if needle not in accent_insensitive_key(army["name"]):
+            terms = normalized_terms(army["name"])
+            if not matches(terms):
                 continue
             slug = public_slug_for_reference(self.database, "armies", army["id"])
             if slug is not None:
-                results.append(
-                    self._scoped_result(
-                        "Fireteam chart", army, "/fireteams", "fireteams", {"army": slug}
-                    )
-                )
-
-        return sorted(
-            results,
-            key=lambda item: (
-                0 if accent_insensitive_key(item["name"]).startswith(needle) else 1,
-                item["name"].casefold(),
-                item["domain"],
-            ),
-        )
+                yield self._scoped_result(
+                    "Fireteam chart", army, "/fireteams", "fireteams", {"army": slug}
+                ), terms

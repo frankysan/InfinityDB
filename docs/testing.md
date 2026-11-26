@@ -278,6 +278,24 @@ composition from 718 to 446 ms. Skills API profiling fell from 668 to
 434 ms, and Unit detail from 318 to 209 ms. These are diagnostic comparisons,
 not controlled repeated measurements; browser wall times varied independently.
 
+### Global search materialization
+
+Rules v19 publishes 1,357 ordered public results and 3,258 normalized term
+associations. The recorded-source build took 127.78 s versus 108.9 s in the
+previous build; Rules grew from 8,077,312 to 8,298,496 bytes and Army remained
+11,911,168 bytes. The standalone projection pilot occupied 233,472 bytes.
+Actual published rows matched fresh canonical enumeration; systematic term and
+substring queries, representative composer comparisons, damaged projections
+and explicit partial-season fallback passed.
+
+Run `python -m tools.performance.benchmark_search_index --iterations 3`.
+Windows server-side medians (composed vs published, cold/repeat, ms):
+Mimetism 317.17/17.66 vs 2.27/1.62; Activate Console 326.21/18.99 vs
+2.16/1.84; Dragões 317.45/16.40 vs 1.72/1.62; broad query "a"
+368.97/40.55 vs 9.88/10.41; no match 274.88/15.16 vs 1.76/1.48.
+Fresh application construction medians were 2.82–3.15 s; these are not
+browser timings or controlled startup comparisons.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

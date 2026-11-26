@@ -1526,6 +1526,13 @@ class Database:
             "groups_by_source": groups_by_source,
         }
 
+    def unit_search_terms(self) -> dict[int, tuple[str, ...]]:
+        """Expose the same logical Unit search terms used by the Explorer."""
+        return {
+            group["id"]: tuple(str(term) for term in group["search_terms"] if term)
+            for group in self._unit_graph()["groups"]
+        }
+
     @instance_lru_cache(maxsize=16)
     def _visible_unit_items_by_source(
         self, selected_flags: frozenset[str]

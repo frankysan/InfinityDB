@@ -15,6 +15,7 @@ from infinity_db import __display_version__, __version__
 from infinity_db.database import Database
 from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.search_index_storage import PublishedSearchIndex, search_scope
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
@@ -122,6 +123,17 @@ class Application:
         self.snapshot_revision = database_set_snapshot_revision(
             runtime_fingerprints if runtime_fingerprints is not None else fingerprints
         )
+        search_index = (
+            PublishedSearchIndex.select(
+                self.rules_database.path,
+                search_scope(
+                    fingerprints[self.database.path.name],
+                    self.publication_registry.season_manifest()
+                    if self.publication_registry is not None else {},
+                ),
+            )
+            if self.rules_database is not None else None
+        )
         symbols = SymbolCatalog(publication=self.database.symbol_publication())
         static_revision = static_asset_revision(symbols)
         self.presentation = PresentationHandler(
@@ -141,6 +153,7 @@ class Application:
             variant_usage_revision=self.variant_usage_revision,
             weapon_profile_citations=self.weapon_profile_citations,
             publication_registry=self.publication_registry,
+            search_index=search_index,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.

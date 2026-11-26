@@ -242,6 +242,14 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
         exportPairSha256=generation,
     )
     with closing(sqlite3.connect(rules)) as connection, connection:
+        connection.execute("DROP TABLE IF EXISTS search_index_terms")
+        connection.execute("DROP TABLE IF EXISTS search_index")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='searchIndex'")
+        connection.execute("PRAGMA user_version=18")
+        connection.execute("UPDATE __rules_metadata SET value='18' WHERE key='formatVersion'")
+        connection.execute(
+            "UPDATE __rules_metadata SET value='20' WHERE key='databaseCompatibilityVersion'"
+        )
         connection.execute(
             "UPDATE deployed_object_metadata SET value=? WHERE key='armyDatabaseSha256'",
             (json.dumps(file_sha256(army)),),
@@ -346,7 +354,7 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v18-four-file"
+    assert first["layout"] == "v19-four-file"
     assert first["seasons"]["its-17"]["revision"] == "0.2"
     assert first["seasons"]["its-18"]["revision"] == "2026.09.11"
     assert first["restrictionChartRows"] == 6
@@ -390,7 +398,7 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
         ("army", "require Army schema v33"),
-        ("rules", "require Rules schema v18"),
+        ("rules", "require Rules schema v19"),
         ("provenance", "require recorded matched build provenance"),
     ):
         if case == "provenance":

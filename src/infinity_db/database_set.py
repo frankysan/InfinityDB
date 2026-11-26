@@ -1,6 +1,6 @@
 """Validate the selected SQLite runtime set without loose JSON fallbacks.
 
-Current serving requires Army v33, Rules v18, and the independently
+Current serving requires Army v33, Rules v19, and the independently
 published ITS Season 17 and 18 databases. Earlier two-file embedded schemas remain
 inspectable for explicit development/research fixtures; v10/v11 layouts
 requiring JSON publications are unsupported.
@@ -22,8 +22,9 @@ from .build_provenance import validate_set_provenance
 from .database.repository import Database
 from .general_profile_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .publication_registry import PublicationRegistry
-from .rules_database import COMPOSED_SCHEMA_VERSION as COMPLETE_RULES_SCHEMA_VERSION
+from .rules_database import SEARCH_INDEX_SCHEMA_VERSION as COMPLETE_RULES_SCHEMA_VERSION
 from .rules_database import RulesDatabase
+from .search_index_storage import PublishedSearchIndex, search_scope
 from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
 from .variant_usage_reference import load_runtime_variant_usage
 
@@ -123,7 +124,7 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     rules_path = directory / RULES_DATABASE_FILENAME
     with closing(sqlite3.connect(rules_path.as_uri() + "?mode=ro", uri=True)) as connection:
         schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if schema_version not in {12, 13, 14, 15, 16, 17, COMPLETE_RULES_SCHEMA_VERSION}:
+    if schema_version not in {12, 13, 14, 15, 16, 17, 18, COMPLETE_RULES_SCHEMA_VERSION}:
         raise ValueError("Unsupported Rules schema for selected database set")
     if require_complete and schema_version != COMPLETE_RULES_SCHEMA_VERSION:
         raise ValueError(
@@ -238,15 +239,15 @@ def validate_database_set(directory: Path, *, require_complete: bool = False) ->
     for name in sorted(names):
         with (directory / name).open("rb") as stream:
             fingerprints[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+    if require_complete and PublishedSearchIndex.select(
+        rules_path, search_scope(fingerprints[ARMY_DATABASE_FILENAME], season_manifest),
+    ) is None:
+        raise ValueError("Global search publication does not match selected database set")
     return {
         "layout": (
-            "v18-four-file" if require_complete and len(registered_seasons) == 2
-            else "v18-three-file" if require_complete and registered_seasons
-            else {
-                12: "v12-two-file", 13: "v13-two-file",
-                14: "v14-two-file", 15: "v15-two-file",
-                16: "v16-two-file", 17: "v17-two-file", 18: "v18-two-file",
-            }[schema_version]
+            f"v{schema_version}-four-file" if require_complete and len(registered_seasons) == 2
+            else f"v{schema_version}-three-file" if require_complete and registered_seasons
+            else f"v{schema_version}-two-file"
         ),
         "integrityCheck": "full",
         "buildProvenance": provenance,
