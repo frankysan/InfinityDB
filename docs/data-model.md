@@ -212,14 +212,15 @@ projection in `unit_history_payloads`, keyed by logical Unit ID. The payload
 contains date, scope, category and typed display rows, keyed internally by
 General profile identity and Army card ID plus sorted availability flags;
 unmatched historical contexts remain separate. Raw research evidence stays
-offline. The explicit `build --with-unit-history` selection validates the
+offline. The default `infinity-db build` validates the
 accepted archive and historical research database hashes and recomputes the
 projection against the staged v34 Army database before publishing Rules.
 Its build provenance includes the corpus hashes and history builder sources.
 The embedded table is covered by the Army published-content checksum and the
 final database-set fingerprint. Unit details automatically read the selected
 Unit's history; the normal revision-aware API cache applies. Older v34 sets
-remain supported without history. The explicit `serve --unit-history PATH`
+remain supported without history; new history-free development builds require
+`--no-unit-history`. The explicit `serve --unit-history PATH`
 preview override remains available and rejects mismatched database hashes;
 override responses are not cached. General history describes the
 all-optional-categories profile scope, regardless of current browser filters,
@@ -3442,7 +3443,7 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `infinity-db build` creates Army v34 (v35 with `--with-unit-history`)
+Normal `infinity-db build` creates Army v35 (v34 only with `--no-unit-history`)
 and Rules v23 together in the selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded

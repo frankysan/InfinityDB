@@ -61,6 +61,11 @@ def project(
         "tools/data/build_weapon_profile_publication.py",
         "tools/data/audit_enrichment_coverage.py",
         "tools/research/audit_weapon_definition_gaps.py",
+        "tools/research/build_army_history_database.py",
+        "tools/research/project_army_history.py",
+        "tools/research/summarize_army_history.py",
+        "tools/research/render_player_army_history.py",
+        "tools/research/render_army_history.py",
     ):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -108,7 +113,9 @@ def project(
         target = root / "src/infinity_db/web/static" / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(RELEASE.parent.parent / "src/infinity_db/web/static" / relative, target)
-    args = build_parser().parse_args(["build", str(source), "--db-dir", str(root / "output")])
+    args = build_parser().parse_args([
+        "build", str(source), "--db-dir", str(root / "output"), "--no-unit-history",
+    ])
     # This synthetic builder fixture deliberately writes "build-only" instead
     # of a real normalized document. Keep its existing raw-pair overlay path;
     # real normalized-source acceptance is covered by the pinned ZIP rebuild.
@@ -399,6 +406,31 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert second == first
 
 
+@pytest.mark.parametrize("mismatched", [False, True])
+def test_default_build_rejects_missing_or_mismatched_history_before_publication(
+    project, mismatched: bool,
+) -> None:
+    root, args = project
+    args = build_parser().parse_args(["build", str(args.source), "--db-dir", str(args.db_dir)])
+    args.db_dir.mkdir()
+    for name in COMPLETE_RUNTIME_FILES:
+        (args.db_dir / name).write_bytes(name.encode())
+    original = _digests(args.db_dir)
+    if mismatched:
+        archive, history = builder.history_inputs(root / "local/data/history")
+        for path in (archive, history):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"wrong history input")
+
+    def unexpected_build(*_args: Any) -> int:
+        pytest.fail("History validation must precede the Army build")
+
+    message = "history inputs differ" if mismatched else "history input is missing"
+    with pytest.raises(ValueError, match=message):
+        builder.build_database_set(args, unexpected_build, root=root)
+    assert _digests(args.db_dir) == original
+
+
 def test_history_build_embeds_payload_and_serves_without_sidecar(
     project, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -406,13 +438,10 @@ def test_history_build_embeds_payload_and_serves_without_sidecar(
     from infinity_db.unit_history_storage import write_unit_history
 
     root, args = project
-    args.with_unit_history = True
+    args = build_parser().parse_args(["build", str(args.source), "--db-dir", str(args.db_dir)])
+    assert args.with_unit_history
     pins = {"archiveSha256": "a" * 64, "databaseSha256": "b" * 64}
     monkeypatch.setattr(builder, "history_input_identity", lambda _: pins)
-    for name in ("build_army_history_database.py", "project_army_history.py",
-                 "summarize_army_history.py", "render_player_army_history.py",
-                 "render_army_history.py"):
-        (root / "tools/research" / name).write_text("# fixture", encoding="utf-8")
     change = {"date": "2025-10-15", "scope": "", "category": "Skills",
               "actions": [{"action": "Gained", "text": "Dodge"}]}
     selected: dict[str, Any] = {}
@@ -650,6 +679,7 @@ def test_pinned_army_build_selection_preserves_legacy_cli_contract() -> None:
     app = build_parser().parse_args(["build"])
     assert app.source is None and app.snapshot_manifest is None
     assert app.db_dir == Path("data/generated")
+    assert app.with_unit_history
     pinned = build_parser().parse_args([
         "build", "local/data/raw/army/source.zip",
         "--snapshot-manifest", "local/data/manifests/snapshots/source.json",
@@ -660,6 +690,13 @@ def test_pinned_army_build_selection_preserves_legacy_cli_contract() -> None:
         "local/data/manifests/snapshots/source.json"
     )
     assert pinned.db_dir == Path("local/work/test-databases")
+    assert pinned.with_unit_history
+    assert build_parser().parse_args(["build", "--with-unit-history"]).with_unit_history
+    assert not build_parser().parse_args(["build", "--no-unit-history"]).with_unit_history
+    with pytest.raises(SystemExit):
+        build_parser().parse_args(["build", "--with-unit-history", "--no-unit-history"])
+    with pytest.raises(SystemExit):
+        army_parser().parse_args(["build", "--no-unit-history"])
     with pytest.raises(SystemExit):
         army_parser().parse_args(["build", "--snapshot-manifest", "a.json"])
 

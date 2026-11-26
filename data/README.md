@@ -69,8 +69,8 @@ the retired source roots.
   It preserves source observations, same-day alternatives, unresolved faction
   identities and contextual metadata references. It does not establish
   upstream publication order or canonical Unit identity. Never route this
-  input through live snapshot discovery or public assets. The explicit
-  `build --with-unit-history` option selects only the accepted archive and
+  input through live snapshot discovery or public assets. The default
+  `infinity-db build` selects only the accepted archive and
   generated research database under this history root, verifies both pins,
   and materializes player-facing history in Army v35 before Rules publication.
   The selected current Army snapshot must be a direct endpoint in that corpus.
@@ -352,10 +352,12 @@ build inputs (such as a version bump), run
 `python -m tools.data.rebuild_runtime_set --use-recorded-source`.
 This selects the exact Army ZIP/manifest pair recorded by the current
 `data/generated/army.db`, verifies the archive hash, and refuses missing
-sources instead of silently selecting a newer snapshot. The recorded-source
-wrapper also preserves the history-enabled build selection. For an explicit
-source build intended for publication, include `--with-unit-history`;
-a history-free development build remains available without that flag.
+sources instead of silently selecting a newer snapshot. Both build entry points
+include Unit history by default. Missing or mismatched history inputs, or an
+Army snapshot not represented by the accepted corpus, block publication rather
+than falling back to a history-free set. Use `--no-unit-history` explicitly
+for development-only builds (prefer a separate `--db-dir`); the previous
+`--with-unit-history` flag remains accepted.
 
 For an R1 source-pinned build, supply **both** the exact ZIP and its
 version-3 provenance manifest, optionally choosing a separate complete

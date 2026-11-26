@@ -60,6 +60,8 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Data processing:** Include Unit history in normal runtime builds and require
+  an explicit opt-out for history-free development builds.
 - **Project infrastructure:** Corrected identical-tree CI reuse when GitHub's newer API omits PR merge identity.
 
 ## [1.2.2] - 2026-11-26

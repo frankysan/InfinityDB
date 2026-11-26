@@ -32,9 +32,14 @@ def history_inputs(root: Path) -> tuple[Path, Path]:
 
 def history_input_identity(root: Path) -> dict[str, str]:
     archive, database = history_inputs(root)
-    if (file_sha256(archive) != HISTORY_ARCHIVE_SHA256
-            or file_sha256(database) != HISTORY_DATABASE_SHA256):
-        raise ValueError("Selected Army history inputs differ from the accepted corpus")
+    for path, expected in ((archive, HISTORY_ARCHIVE_SHA256),
+                           (database, HISTORY_DATABASE_SHA256)):
+        if not path.is_file():
+            raise ValueError(f"Required Army history input is missing: {path}")
+        if file_sha256(path) != expected:
+            raise ValueError(
+                f"Selected Army history inputs differ from the accepted corpus: {path}"
+            )
     return {"archiveSha256": HISTORY_ARCHIVE_SHA256, "databaseSha256": HISTORY_DATABASE_SHA256}
 
 

@@ -194,7 +194,7 @@ def build_database_set(
             )
     selected_manifest = selected_manifest.resolve() if selected_manifest is not None else None
     target = args.db_dir.resolve()
-    history_root = (root / "local/data/history" if getattr(args, "with_unit_history", False)
+    history_root = (root / "local/data/history" if getattr(args, "with_unit_history", True)
                     else None)
     manifest = collect_build_manifest(
         root, source, args.metadata, snapshot_manifest=selected_manifest,

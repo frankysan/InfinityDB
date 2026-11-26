@@ -330,9 +330,14 @@ def add_data_commands(
             "--db-dir", type=Path, default=Path("data/generated"),
             help="Build the complete runtime set from a local Army ZIP (default: data/generated)",
         )
-        p_build.add_argument(
-            "--with-unit-history", action="store_true",
-            help="Embed history from the accepted local/data/history corpus",
+        history = p_build.add_mutually_exclusive_group()
+        history.add_argument(
+            "--with-unit-history", action="store_true", default=True,
+            help="Embed history from the accepted local/data/history corpus (default)",
+        )
+        history.add_argument(
+            "--no-unit-history", dest="with_unit_history", action="store_false",
+            help="Explicit development-only build without Unit history",
         )
         p_build.add_argument(
             "--snapshot-manifest", type=Path,

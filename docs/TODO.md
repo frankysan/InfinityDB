@@ -323,7 +323,7 @@ make v1.3.0 depend on them.
     permits; review remaining Army-context and unresolved entries before
     public integration.
   - [ ] Include the embedded v35 Unit history projection in the v1.3.0 release
-    build (`--with-unit-history`), review the actual browser presentation and
+    build (history is enabled by default), review the actual browser presentation and
     validate normal deployment. The tracked build now includes v35 history,
     matches all 738 preview payloads and passes deployment artifact checks.
     Native browser review covers General, Army and unmatched histories,

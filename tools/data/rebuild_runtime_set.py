@@ -46,18 +46,17 @@ def main(argv: list[str] | None = None) -> int:
         "--db-dir", type=Path, default=Path("data/generated"),
         help="Complete runtime set destination (default: data/generated)",
     )
-    parser.add_argument("--with-unit-history", action="store_true",
-                        help="Embed the accepted local Army history corpus")
+    history = parser.add_mutually_exclusive_group()
+    history.add_argument("--with-unit-history", action="store_true", default=True,
+                         help="Embed the accepted local Army history corpus (default)")
+    history.add_argument("--no-unit-history", dest="with_unit_history", action="store_false",
+                         help="Explicit development-only build without Unit history")
     args = parser.parse_args(argv)
     if args.use_recorded_source:
         if args.manifest is not None:
             parser.error("--manifest cannot be combined with --use-recorded-source")
         try:
             source, manifest = recorded_source_paths(args.db_dir)
-            record = validate_build_record(
-                _metadata(args.db_dir / "army.db")[BUILD_PROVENANCE_KEY], "army",
-            )
-            args.with_unit_history = args.with_unit_history or "history" in record["manifest"]
         except (KeyError, ValueError) as exc:
             parser.error(str(exc))
     else:
@@ -69,7 +68,7 @@ def main(argv: list[str] | None = None) -> int:
         "--snapshot-manifest", str(manifest),
         "--db-dir", str(args.db_dir),
         "--compact",
-        *(["--with-unit-history"] if args.with_unit_history else []),
+        *([] if args.with_unit_history else ["--no-unit-history"]),
     ])
 
 
