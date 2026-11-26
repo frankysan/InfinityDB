@@ -30,46 +30,28 @@ Use these links to jump directly to a workstream:
 
 **Release focus:** Historical reference, performance and personalization.
 
-This is the accepted development scope, not a statement of implemented
-behavior. The linked workstreams below own detailed tasks and acceptance;
-retire this milestone summary when the release closes.
+This is the accepted scope and remaining development work. Detailed tasks live
+in the linked workstreams; retire this milestone summary when the release closes.
 
-### Committed scope and implementation order
+### Committed scope and remaining work
 
-1. **Project infrastructure:** CI efficiency and release tooling (implemented)
-   ([release and deployment robustness](#release-and-deployment-robustness)).
-   Corrected identical-tree reuse with authoritative PR metadata; live replay
-   verified PR #35 and all three candidate workflows. Added the direct Caddy
-   Host-header probe. Hosted merge behavior and live production probing remain
-   subject to normal release verification.
-2. **Data processing + Web backend:** Performance and build-time
-   materialization ([performance and build tooling](#performance-storage-and-build-tooling)).
-   Benchmark the existing application and build pipeline; pilot persisted
-   General profiles for all 16 availability combinations. Extend to Unit
-   details, Rules records and other projections where measured benefits
-   justify it. Reduce redundant build/export validation and serialization
-   where safe. Preserve API compatibility and deterministic outputs.
-3. **Data processing + Web backend:** Integrate
-   [historical Army data](#per-reference-change-history) into generated
-   SQLite data, initially targeting N5. Resolve identities, semantic
-   changes, Army scope and observation windows using accepted research.
-   Preserve uncertainty and review publication rights before exposure.
-4. **Web frontend + Web backend + Data processing:** Introduce
-   [Army-derived themes and the visual rules-content hierarchy](#reference-presentation-and-feedback)
-   together. Keep Theme separate from Auto/Light/Dark mode; retain the
-   default InfinityDB theme, accessible contrast and theme-aware maps.
-   Initial faction palette implementation is complete; representative visual
-   review and the rules-content hierarchy remain.
-5. **Data processing + Web backend + Web frontend:** Publish player-facing
-   Unit version histories and initial
-   [per-reference change indicators](#per-reference-change-history)
-   for Army-derived content. Show reviewed before/after changes to
-   attributes, profiles, Skills, Equipment, Weapons and Army availability
-   with dated evidence and explicit uncertainty. Reuse the mechanism for
-   future reference history without requiring comprehensive Rules or FAQ
-   history now. Include
-   [direct links to official Infinity Army](#reference-presentation-and-feedback)
-   where a supported deep-link contract is verified.
+- **Project infrastructure:** Identical-tree CI reuse, authoritative PR metadata
+  and direct Caddy Host-header probing are implemented. Retain normal
+  [release verification](releasing.md) and the remaining
+  [release-tooling follow-up](#release-and-deployment-robustness).
+- **Data processing + Web backend:** General profiles, composed Rules, search,
+  catalog usage, scoped filter inputs and reference projections are implemented.
+  Finish the remaining [performance and build work](#performance-storage-and-build-tooling).
+- **Data processing + Web backend + Web frontend:** Initial N5 Unit history is
+  embedded in the normal build. Extend the accepted corpus to newer direct
+  snapshots and retain explicit coverage limits. Initial history disclosures
+  are implemented; see [history follow-up](#per-reference-change-history).
+- **Web frontend + Web backend:** Faction palettes and the initial rules-content
+  hierarchy are implemented. Complete remaining representative visual review and
+  verify [official Army deep links](#reference-presentation-and-feedback).
+
+Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
+candidate acceptance remains in the release checklist.
 
 Complete the selected development work before the existing
 [release checklist](releasing.md); no new release gates are introduced.
@@ -187,150 +169,25 @@ make v1.3.0 depend on them.
 
 ### Per-reference change history
 
-- [ ] **Data processing + Web backend + Web frontend:** Historical Army and Unit
-  version history (target: v1.3.0; offline N5 research integrated from
-  `agent/win/mcp/army-history` at `37a70d8`).
-  Offline source intake is accepted: exact producer receipt parity for all
-  1,406 objects and 2,841 observations; 29 focused tests passed, with clean
-  Ruff and Pyright results. See [source intake](../data/README.md).
-  Characterization accepted for all 1,370 faction objects and 36 metadata
-  objects. Every assigned content has contextual metadata; N5 has 505
-  unambiguous adjacent-date comparisons (12 revision-field-only), with 180
-  ambiguous endpoint pairs excluded. Of 37,541 shared Unit key occurrences,
-  six have changed labels. Private report: `local/data/history/reports/characterization-v1.json`.
-  N5 comparison pilot completed: 505 directional comparisons over 622 distinct
-  faction objects; 180 ambiguous endpoint pairs excluded. The pilot distinguishes
-  typed gameplay field candidates, reference changes, presentation and identity
-  review, and equivalent-definition Peripheral rekeys (7,437 of 7,446 differences).
-  Of 1,717 shared reference comparisons missing a metadata ID, 1,648 have
-  the ID in both faction filters. Private evidence:
-  `local/data/history/reports/n5-semantic-pilot-v3.summary.json`.
-  N5 identity/consolidation v2 accepted: 920 consistent ID/slug candidates
-  and five reviewed identities (four distinct Reinforcements IDs and the
-  Zaybak/Zeybek alias). All 1,753 eligible scalar/stat occurrences retained;
-  703 exact-window candidates reduced to 590 via compatible-window grouping.
-  Private evidence: `local/data/history/reports/n5-consolidation-v2.summary.json`
-  and `n5-identity-review-v1.json` in the same directory.
-  N5 consolidation v3 adds Skill, Equipment and Weapon reference changes:
-  3,119 of 3,211 occurrences retained as 1,219 candidates (45 occurrences
-  use filter-only definition evidence; 92 require label review). Combined:
-  4,872 eligible occurrences in 1,809 candidate groups, including the unchanged
-  590 scalar/stat groups. Private evidence:
-  `local/data/history/reports/n5-consolidation-v3.summary.json`.
-  N5 membership/lifecycle v2 accepted: 268 army-list Unit changes (82
-  have positive evidence in other armies), 208 declared membership claim
-  groups (137 corroborated by overlapping list changes), and 11 AVA changes.
-  Of 854 nested record appearances/disappearances, 428 group into 147
-  candidates; 426 have possible replacement keys and are retained for review.
-  No unique exact-record replacements were found in this archive.
-  Private evidence: `local/data/history/reports/n5-membership-v2.summary.json`.
-  Loadout reconciliation v2 reviewed all 844 loadout occurrences: three
-  unique same-composition pairs (six occurrences), 47 possible modification
-  pairs in 12 review groups, 399 one-sided changes and 345 other unpaired
-  occurrences. Of the original 426 replacement-review occurrences, 420
-  remain unpaired (including the modification hints).
-  Private evidence: `local/data/history/reports/n5-loadouts-v2.summary.json`.
-  N5 catalog analysis v1: 479 definition differences across 505 comparisons,
-  grouped into 144 definition transition groups with 2,368 affected reference
-  locations (counted per comparison and origin). Eleven Weapon mechanics
-  candidates, 57 definition identity/type review groups, 75 link/presentation
-  groups and one other Weapon definition review; no changed Peripheral
-  definitions among nine persistent-reference comparisons. Contextual metadata
-  evidence remains distinct from army-local definitions and Unit composition.
-  Private evidence: `local/data/history/reports/n5-catalogs-v1.summary.json`.
-  The first private SQLite evidence index is generated from the seven pinned
-  full reports; it retains all 505 comparisons, 180 ambiguous endpoint gaps,
-  17,685 raw changes, 1,809 composition candidates and the separate membership,
-  loadout and catalog streams. See the
-  [private history data model](data-model.md#private-army-history-research-database).
-  Private Unit-history projection implemented: all 921 current source IDs
-  matched directly to 738 logical Units; four historical-only IDs retained.
-  1,806 composition candidates group into 1,282 observed-window groups
-  across 330 logical Units; 265 Army observations remain separate.
-  The offline HTML review renders all 738 logical Units (389 with timeline
-  entries), 1,806 composition field candidates and all 265 Army observations.
-  It retains reference multiplicity, historical target labels, evidence
-  drilldown and separate review/catalog links. Private review remains required
-  before promotion. The effective-loadout pilot processes 3,001 source
-  Group-field comparisons: 1,660 complete changed, 222 complete unchanged,
-  661 partial changed, 31 partial unchanged and 427 wholly unresolved.
-  Partial continuity compares surviving or uniquely reconciled pairs
-  independently of unresolved siblings. It consolidates 2,692 Army-scoped
-  summaries into 1,182, of which 381 cover all loadouts in their Group and
-  465 combine multiple Armies. All 148 multi-profile comparisons now have
-  at least partial coverage. Direct-owner scope retains 462 pair-field
-  comparisons with stable Include edges and 291 with stable Peripheral
-  attachments (overlapping counts); no inherited capabilities are inferred.
-  Four accepted rekey collections are available; 131 composition candidates
-  remain outside the pilot scope.
-  Lifecycle accounting covers all 844 structural loadout occurrences:
-  ten reconciled rekey occurrences, 280 one-sided addition/removal candidates
-  (249 additions and 31 removals) and 554 review outcomes. The 280 candidates
-  consolidate into 118 summaries, including 35 spanning multiple Armies.
-  Contextual availability covers 279 observations: 11 AVA changes, 254
-  list-presence candidates and 14 review outcomes. These consolidate into
-  118 summaries, 57 spanning multiple Armies. Preserve 208 declaration
-  claims separately, including 137 corroborated by observed list evidence.
-
-  Attachment history accounts for 7,545 raw relationship observations:
-  7,437 equivalent Peripheral changes, 29 supported Include/Peripheral
-  changes (13 consolidated summaries, eight spanning multiple Armies),
-  and 79 possible attachment replacements. Preserve the latter as review
-  outcomes without inferring new target identities.
-  Resolve remaining relationship changes and lifecycle cases, including
-  possible replacements and unsupported complex lifecycle composition,
-  before selecting the public semantic projection.
-
-  The normalized continuity pass resolves two additional rekey pairs (four
-  structural occurrences), bringing effective composition to 1,182 summaries
-  from 3,001 Group-field comparisons. All 79 attachment replacement cases
-  remain unresolved. Preserve the remaining replacement hints for review;
-  prioritize the streamlined private player-facing preview rather than
-  progressively weakening automatic continuity criteria.
-  A separate private player-history renderer now combines the semantic
-  summary streams and 127 supported profile characteristic candidates.
-  It resolves historical labels, consolidates equivalent Group-wide changes,
-  and provides searchable Unit navigation with optional technical evidence.
-  The responsive timeline uses shared Army and scope headings, compact historical
-  loadout labels and standard MOV inch notation. Private browser checks cover
-  navigation, evidence disclosure and desktop/mobile layout.
-  Review the generated preview before promoting any historical content.
-  - [ ] Review and promote the player-facing history projection, including
-    unresolved records and human-readable changes, using the private preview.
-    Keep unresolved loadout replacements, modification groups, changed labels,
-    missing definitions, unresolved reference shapes and same-day alternatives
-    as explicit review or coverage states. Preserve army scope, edition-scoped
-    provisional identities, observation windows and all source provenance;
-    do not treat catalog transition groups as Unit composition changes or
-    infer publication dates from contextual metadata. Extend to N4/CodeOne
-    only with edition-specific validation.
-  - [ ] Implement the context-specific history projection and private Unit-detail
-    preview according to the [historical data contract](data-model.md#private-army-history-research-database)
-    and [Unit history presentation](web-design-guidelines.md#unit-history-presentation).
-    Validate historical General-profile changes against the shared composition
-    contract, keep Army-only changes in their owning cards, and review dense
-    histories such as Minutemen before public integration. The private contextual
-    preview now renders current profile and Army cards, with typed collapsed
-    histories and separate unmatched contexts. The shared-revision pilot now
-    includes 31 shared characteristic and 130 shared-item entries, retaining
-    Army-level residual changes. It supports stable direct attachments,
-    reviewed source-classified Equipment without a native counterpart,
-    explicitly scoped profile-owned changes in stable multi-profile Groups,
-    and different earlier revision dates with a common later revision date
-    and independently supported transitions. Extend coverage for other
-    classified items, multi-target and group-owned loadout changes, and
-    incomplete observations or differing later revision dates where evidence
-    permits; review remaining Army-context and unresolved entries before
-    public integration.
-  - [ ] Include the embedded v35 Unit history projection in the v1.3.0 release
-    build (history is enabled by default), review the actual browser presentation and
-    validate normal deployment. The tracked build now includes v35 history,
-    matches all 738 preview payloads and passes deployment artifact checks.
-    Native browser review covers General, Army and unmatched histories,
-    change counts, keyboard expansion and desktop/mobile layout. Isolated
-    Docker and final release acceptance remain under the release checklist.
-    Extend the accepted corpus for newer direct Army snapshots before
-    publishing their history.
+- [ ] **Data processing + Web backend + Web frontend:** Extend the published N5
+  Unit history beyond the initial accepted corpus.
+  The v35 projection, enabled by default, is documented in the
+  [history data model](data-model.md#private-army-history-research-database)
+  and [presentation contract](web-design-guidelines.md#unit-history-presentation).
+  - [ ] Extend the accepted corpus to newer direct Army snapshots before
+    publishing their history; validate identity, source revision dates,
+    comparison scope, provenance and contextual General/Army attribution.
+  - [ ] Improve coverage where independently supported: unresolved loadout
+    replacement/modification groups, changed labels, missing definitions,
+    unresolved reference shapes, ambiguous same-day alternatives, complex
+    lifecycle/attachment changes, multi-target and group-owned loadout changes,
+    other classified items and asynchronous or incomplete observations.
+    Keep ambiguous cases as review/coverage evidence; never weaken continuity
+    criteria merely to increase the displayed count.
+  - [ ] Later: extend to N4/CodeOne only with edition-specific validation,
+    provisional identities and independently supported source provenance.
+  Final Docker and release acceptance of the initial N5 publication belongs
+  to the [release checklist](releasing.md).
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
   **historical FAQ edition replay and source-date/season selection**,
@@ -346,41 +203,32 @@ make v1.3.0 depend on them.
   model exists; ambiguous dates must remain visibly qualified.
   See the [current FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
 
-- [ ] **Data processing + Web backend + Web frontend:** Show a change-history
-  marker/notice on each updated Rule, Skill, Weapon, Unit/profile, and other
-  applicable reference entity, linking to a player-readable explanation of
-  **when** it changed, **what** changed (before/after), and **why** where an
-  authoritative source documents the reason. Resolve changes by stable entity
-  identity and publication/version; include an effective date only when known.
-  - [ ] Derive reviewed change events by comparing versioned N5 Army snapshots,
-    rules/FAQ PDFs, exact Wiki revisions, and official Corvus Belli update posts.
-    Keep precise source citations and distinguish changed gameplay semantics from
-    editorial wording, source-format changes, and unresolved source conflicts.
-  - [ ] Present concise change badges on affected detail pages, with accessible
-    explanations and links to evidence/history; do not mark unchanged records or
-    claim an inferred motivation as an official reason. Explicitly indicate when
-    the reason or effective date is unknown.
-  Preserve multiple successive changes and supersession without overwriting
-  earlier events or conflating history with current canonical facts.
+- [ ] **Data processing + Web backend + Web frontend:** Extend per-reference
+  change indicators beyond the initial Unit histories to applicable Rules,
+  Skills, Weapons and other entities. Show when and what changed, and why only
+  when documented by an authoritative source.
+  - [ ] Derive reviewed events from versioned N5 Army snapshots, rules/FAQ PDFs,
+    exact Wiki revisions and official Corvus Belli update posts. Distinguish
+    gameplay changes, editorial wording, source-format changes and unresolved
+    conflicts; preserve stable identities, citations and successive revisions.
+  - [ ] Add concise accessible detail-page indicators and links to evidence;
+    do not mark unchanged records or invent reasons or effective dates.
+    Keep unknown reasons/dates explicit and historical facts separate from
+    the current reference.
 
 ### Reference presentation and feedback
 
-- [ ] **Web frontend + Web backend:** Add optional Army-derived themes using
-  Army colors, published emblems and miniature paint schemes. Eleven faction
-  palettes now use distinct accent, surface and chrome seeds; review them
-  on representative desktop and mobile pages. Theme identity
-  and mode are independent, with first-paint resolution, compatible preference
-  persistence, shared scenario SVG colors and automated contrast coverage.
-  Consider independent sectorial palettes only with representative sectorial
-  visual references; do not infer them solely from their parent faction.
-- [ ] **Web frontend + Data processing:** Establish and implement a shared
-  visual hierarchy for rules provenance. Initial text, border, evidence-label
-  and warning treatments are implemented, with automated desktop/mobile
-  coverage across all palettes. Review representative cards visually and refine
-  typography and spacing as needed. Add explicit correction and recent-change
-  treatments only for verified upstream changes, through the
-  [per-reference change history](#per-reference-change-history) work. The
-  presentation policy is in [web design guidelines](web-design-guidelines.md).
+- [ ] **Web frontend + Web backend:** Complete representative desktop/mobile
+  visual review of the implemented faction palettes and shared rules-content
+  hierarchy. The eleven faction palettes, independent theme/mode preferences,
+  scenario SVG theming, contrast checks and initial evidence treatments are
+  documented in the [web design guidelines](web-design-guidelines.md).
+  Refine typography, spacing or colors only where review identifies a problem.
+  Add correction and recent-change treatments only for verified upstream
+  changes via [history follow-up](#per-reference-change-history).
+- [ ] **Web frontend + Web backend:** Consider independent sectorial palettes
+  only with representative sectorial visual references; do not infer them
+  solely from their parent faction.
 - [ ] **Web frontend + Web backend + Deployment:** Add a shared, minimal
   bug/error reporting form with lightweight spam/bot protection. Include
   the current page and relevant entity context by default, let the reporter
@@ -468,70 +316,28 @@ make v1.3.0 depend on them.
 
 **Project domain:** Project infrastructure
 
-- [ ] **Prevent recurrence of v1.1.0 release-process failures** without adding
-  another release-management system or routine full-suite gates. The 2026-11-16
-  release passed application/data/CI validation, but exposed late checklist
-  corrections, release-evidence/CI drift, noncritical image-pruning failure
-  and an incorrect production `1.1.0+dev` footer.
-  - [ ] **Make production version identity deterministic.** For a verified
-    release-tag checkout, derive and bake the version from the tag/package
-    identity rather than server worktree status; retain `+dev` for real
-    development builds. [PR #31](https://github.com/frankysan/InfinityDB/pull/31)
-    proposes changing source-checkout Git status handling, but that module
-    participates in the tracked runtime-database input fingerprint. Do not
-    merge that source-level change alone: it needs a matching database rebuild
-    during release preparation. The production build instead now pins display
-    identity to the exact tag/package version in `scripts/deploy.sh`.
-    Assert that the built image/footer and deployed public footer agree with
-    the release tag and `/api/version`, alongside snapshot/static revisions.
-  - [ ] **Make image retention cleanup non-fatal.** The v1.1.0 deploy tried
-    to remove an old `app-test-*` metrics-history image still referenced by
-    a test container. Skip and report tags used by *any* container (including
-    stopped or isolated-test containers); do not force-remove them, disturb
-    production/test stacks or fail an otherwise healthy deployment because
-    pruning could not complete. Keep the supported test-stack stop command
-    in the release procedure.
-  - [ ] **Prevent CI/evidence contract drift.** The release-evidence collector
-    rejected the green Source run because its expected matrix omitted both
-    pinned-determinism jobs; the immediate fix was [PR #30](https://github.com/frankysan/InfinityDB/pull/30).
-    Add a focused contract test against the maintained workflow job definitions,
-    including required successful build/reuse steps. Exercise candidate release
-    evidence after its hosted checks pass but *before* merge; still recollect
-    evidence on the exact final `main` SHA before tagging.
-  - [ ] **Consolidate isolated Docker acceptance probes.** Earlier
-    `releasing.md` commands used the wrong Caddy host and health port;
-    corrected to `localhost:8080/api/version` and the loopback metrics
-    listener `127.0.0.1:8081/health`. Reuse one small executable smoke
-    check for version, health, metrics and representative routes instead of
-    copying commands between documents.
-  - [ ] **Freeze release-facing content before costly acceptance.** Complete
-    changelog/README, version metadata, deployment instructions and release
-    tooling, then run cheap metadata/docs/tooling checks before the mandatory
-    full local suite and isolated Docker test. Preserve exact-SHA post-merge
-    CI and any selected cross-browser jobs; the additional browser dispatch
-    on the merge SHA is expected, not a failure. Avoid redundant reruns unless
-    the changed content invalidates the relevant evidence.
-  - [ ] Validate these focused improvements with release-evidence, version
-    and deployment-script regression tests, Ruff and appropriate hosted CI.
-    The implementation on `dev/v1.2.0` includes tag-derived display identity,
-    nonfatal/reference-aware pruning, pre-merge evidence checking, a shared
-    deployment HTTP probe, and updated release instructions. Focused Windows
-    tests and static checks passed; Linux pruning behavior, the tagged Docker
-    image path and hosted CI remain to be verified before closeout.
-    Keep detailed acceptance procedures in `docs/releasing.md` and
-    `docs/deployment.md`, not duplicated in this backlog.
+- [ ] Confirm remaining release-tooling regression coverage for the
+  [CI/evidence contract](ci.md) and [deployment procedure](deployment.md):
+  verify that the collector's expected matrix is tested against the maintained
+  workflow job definitions, including required build/reuse steps; add coverage
+  if missing. Verify Linux reference-aware image pruning behavior if not
+  already covered by recorded acceptance.
+  Tag-derived display identity, nonfatal pruning, shared deployment probes and
+  pre-merge evidence/freeze procedures are implemented. Normal tagged-image,
+  hosted and production acceptance stays in the [release checklist](releasing.md).
 
 ### Performance, storage, and build tooling
 
-- [ ] **Data processing + Web backend (v1.3.0):** Begin the transition to
-  [build-time materialized application projections](architecture.md#design-direction-build-time-materialization).
-  Army v33 materializes all 16 General-profile combinations and serves both
-  Extended Explorer and Unit details from the same projection, with a
-  contextual fallback when a requested Army adds excluded occurrences.
-  All 16 availability masks passed Unit-detail and Extended Explorer parity.
-  See [measured baseline](testing.md#general-profile-materialization-pilot).
-  - [ ] Evaluate worker memory and cross-platform performance at release
-    validation; retire redundant runtime caches only when justified.
+- [ ] **Data processing + Web backend (v1.3.0):** Complete the remaining
+  [build-time materialization](architecture.md#design-direction-build-time-materialization)
+  follow-up. General profiles, Rules, search, catalog summaries/usage, scoped
+  Unit filter inputs, Specialist candidates, reference targets, Glossary and
+  declarations are materialized; published catalog details bypass redundant
+  LRU caches. The [cross-platform baseline](testing.md#cross-platform-materialization-baseline--2026-11-26)
+  records Windows/Linux measurements and focused parity.
+  - [ ] Measure aggregate worker memory and deployed concurrent request
+    performance on the representative runtime configuration at release validation.
+    Retire additional caches only where measured benefit justifies it.
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.
@@ -556,17 +362,11 @@ make v1.3.0 depend on them.
   - [ ] Consider a pinned Playwright test container only after verifying a
     suitable Linux test container engine, separate from production Compose.
 
-- [ ] Benchmark cold and warm requests per worker for unit lists, unit details,
-  skills, equipment, and weapons. Record median and p95 timings against a
-  representative snapshot before and after each performance change.
-  - [ ] Unit Explorer follow-up: benchmark the optimized path under the
-    deployed worker configuration and representative concurrent traffic.
-    Profile remaining Extended first-visit costs or cold scoped-index
-    construction only if measured latency warrants it.
-  - [ ] Detail/catalog follow-up: profile cold Skills/Weapons catalog generation
-    and large Skill/Equipment/Weapon detail payloads, especially exact-variant
-    usage and repeated rendering. Measure final asynchronous updates as well
-    as first visible content. Preserve canonical source references.
+- [ ] Extend the existing [performance baseline](testing.md#cross-platform-materialization-baseline--2026-11-26)
+  with deployed-worker cold/warm median and p95 measurements under representative
+  concurrent traffic for Unit Explorer, Unit details, Skills, Equipment and
+  Weapons. Investigate remaining first-visit, exact-variant and asynchronous
+  rendering costs only where measured latency warrants further work.
 
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.
@@ -579,10 +379,9 @@ make v1.3.0 depend on them.
   performance and deployment portability/multi-platform suitability before
   deciding whether a storage/query abstraction is justified.
 
-- [ ] Establish a reproducible build/export performance baseline on CI or a
-  fixed development host. Record the exact source snapshot, toolchain, generated artifact
-  sizes, and timing methodology with each result instead of carrying provisional benchmark
-  numbers in the backlog.
+- [ ] Extend recorded-source build/export benchmarks to isolate the remaining
+  validation and serialization costs on a fixed host before changing the
+  combined build/export path.
 
 - [ ] Remove redundant whole-document work in the combined build/export path.
   Export validation serializes the complete normalized object to reject invalid
@@ -631,317 +430,30 @@ Season 16 Part II remains later scope.
   Labels remain readable in the v1.2.2 standalone visual acceptance; this is
   deferred visual polish.
 
-- [x] **Data processing: consolidate source-family curation.** ITS 18 now
-  uses one curated `data/curated/its/n5-its-season-18.json` with reviewed
-  per-fact revision tags and historical field-level overrides. Its explicit
-  current 2026.09.11 projection produces the registered `its_18.db` alongside
-  the independently reviewed ITS 17 V0.2 publication.
-  Older explicit-revision links fail closed; the player-facing selector
-  chooses only a season. The original 2026.09.01 provenance and historical
-  Battleground/policy facts remain in the curated file for possible future
-  history browsing. Source-family projection, current-archive build and
-  revision isolation have focused regression coverage.
-
-- [ ] Build a versioned ITS reference library from material under
-  `local/data/pdf/its/` and `local/data/pdf/legacy/`, keeping the current season distinct
-  from archived seasons.
-  - [ ] Keep season content isolated by season and effective date. A user choosing
-    a prior event must see its matching scenario, objectives, extras, and FAQ
-    rulings rather than a mixture of seasons. Retain a curated, human-reviewed
-    change log/diff rather than relying on raw PDF text diffing.
-  - [ ] Reconcile the official September 24 ITS 18 hotfix in the pinned
-    English/Spanish 2026.09.11 PDFs against English 2026.09.01: verify all
-    changes to The Dig, Double Bind and Crossing Lines (including objective
-    selection, token ownership, 150-point spacing and Engineer/GizmoKit);
-    select effective-date/version identities, migrate affected citations and
-    audit the published Battleground pilot without silently rewriting historical
-    2026.09.01 play. The initial [bilingual PDF delta
-    intake](n5-source-history.md#pdf-revision-difference-intake-2026-11-06)
-    is evidence triage, not semantic acceptance.
-  The official Army app/site remains authoritative for list legality;
-  InfinityDB labels its snapshot/date and does not claim tournament validation.
-  - [ ] Publish ITS-only FAQ clarifications after verifying each exact
-    season/scenario identity, version and bilingual source citation. Model
-    seasonal action identities such as `Activate Communication Antenna`,
-    `Oppose Activation`, and `Emit Akial Interference` only in their reviewed
-    mission context. Confirm none leak into core or other seasons; avoid
-    universalizing tournament-specific outcomes.
-
-- [ ] Extend the existing core-scenario foundation with remaining ITS scenario
-  list/detail coverage backed by versioned seasonal data; retain the already
-  published Season 18 Battleground pilot.
-  - [x] Curate the remaining Season 18 mission identities and complete
-    source-backed definitions under the reviewed selected 2026.09.11 hotfix
-    identity once its source promotion is accepted; retain
-    `its-18@2026.09.01` for historically scoped results. Extend typed
-    geometry, scoring and card/classified choices only where each mission
-    needs them. Unpublished missions must fail closed.
-    All twenty reviewed hotfix missions now have definitions and six-size maps.
-    Unresolved bilingual discrepancies remain explicit source issues;
-    visual browser acceptance is tracked separately.
-  - [ ] **Before ITS 17: finish cross-season scenario/Skill reuse.** The
-    optional pinned library resolves scenarios, components and shared Skill
-    definitions in synthetic independent ITS 17/18 builds, preserving source
-    review/citations and legacy Skill routes. Shared Skills now group by exact
-    identity in catalog/Search with fail-closed fact/version comparison. The
-    current ITS 18 curated facts and public semantics are unchanged; tracked
-    runtime databases were rebuilt for fingerprinted builder changes.
-    - [x] Integrate opt-in library-backed seasons with the complete-set build.
-      Explicit per-season library registration, matched input provenance and
-      deployment freshness checks fail closed. Synthetic ITS 17 confirms
-      pinning and standalone output. ITS 18 remains unchanged; exact source-family
-      tags and archived projections of imported scenarios retain regression tests.
-    - [ ] Add reviewed narrow overrides for scenario components and Skill
-      Requirements/Effects/Restrictions where suitable, rejecting conflicts.
-      - [x] Skill prose-array replacements are now scoped to exact scenario
-        actions. Intentional variants stay separate in catalog/Search.
-      - [x] Canonical scenario setup, geometry, objective and end-condition
-        components can now be referenced across multiple scenarios in a
-        pinned shared library, with per-scenario publication citations.
-        Synthetic tests cover one definition, two scenarios, isolated
-        source pages, and incompatible same-ID facts.
-      - [ ] Other scenario components still need reviewed, typed overrides
-        with a narrow field allowlist.
-    - [x] Curate and publish four globally defined ITS 18 Skills separately
-      from scenario-specific actions: CivEvac (pp. 22–23), Casevac (p. 25),
-      Team-Ops (p. 30), and Request a Tacball (pp. 30–31). Preserve exact
-      2026.09.11/2026.09.01 citations and season/Extra applicability. Team-Ops
-      is a distinct optional tournament Extra (p. 29) as well as a Special Skill.
-    - [x] Extend shared Skill authorship/publication to **season-level Skill
-      bindings** independent of scenario references. `sharedSeasonSkillBindings`
-      resolves a pinned shared-library Skill with season-specific citations,
-      review, revision, and optional Extra context; identical definitions
-      consolidate in the catalog/Search without inventing scenario IDs.
-    - [x] Curate Casevac State as its own season-scoped, source-cited State
-      with bidirectional links to the Casevac Skill. Preserve all activation,
-      movement, ARO, and automatic/voluntary cancellation rules plus
-      exact current/historical source citations.
-    - [ ] Review genuine repeated ITS 17/18 scenario semantics and CivEvac in
-      the published Evacuation/Outbreak contexts before moving real definitions.
-      Also review interaction with other season-wide Skills such as Casevac,
-      and preserve optional Team-Ops applicability. The three repeated ITS 18
-      action names have different Skill facts and must not be merged on name alone.
-      - [x] Initial official ITS 17 v0.2/v1.0.2 comparison: CivEvac and Casevac
-        have different declared Skill types from ITS 18; Outbreak changes
-        Alpha scoring and objective membership. ITS-only historical
-        `short-movement-skill` type support and synthetic cross-season
-        non-consolidation tests now preserve source semantics. An ITS 18
-        regression protects Outbreak's one-Infected CivEvac exception
-        separately from the global two-Civilian maximum. Source review
-        findings are recorded in docs/its-season-database.md.
-      - [x] Permit reviewed, differently versioned season-wide Skills from
-        one pinned library to publish separate routes, prioritizing the
-        newest season for the unqualified slug. Preserve source-specific
-        types and citations; same-version fact drift still fails closed.
-      - [x] Acquire and SHA-pin the official ITS 17 V0.2 English source
-        (105-page v1.0.2 download). Cross-check its 16 recurring
-        scenario names against all 20 ITS 18 missions; compare the
-        Evacuation maps/objectives and the distinct-version Battleground,
-        Superiority, Cutthroat and Outbreak scoring. Add source-reviewed
-        regression for Evacuation geometry and Battleground scoring.
-      - [x] Verify the canonical ignored ITS 17 English/Spanish V0.0,
-        V0.1 and V0.2 PDF set (six originals) and update the source
-        tools to the `local/data/pdf/legacy/its_17/` layout. Record V0.1
-        Casevac type changes in both languages and V0.2 Outbreak
-        introduction as revision-scoped source facts.
-      - [x] Curate a real ITS 17 V0.2 Evacuation membership against
-        reviewed English pp. 55–58 and Spanish pp. 50–53 in a
-        standalone source-pinned shared library. Preserve historical
-        citation pages, language ambiguities and original mission
-        action/scoring. The standalone three-map database builds
-        deterministically; do not register it for serving yet.
-      - [x] Source-review ITS 17 V0.2 Hardlock (EN pp. 59–62,
-        ES pp. 54–57), verifying scoring, all three maps, Pick Up
-        Beacon/Activate Console, Specialist Troops and endings against
-        ITS 18. Preserve the historical Console diameter wording and
-        bilingual ambiguities in a second independently pinned
-        definition. The ITS 17 V0.2 database is now independently registered.
-      - [x] Source-review ITS 17 V0.2 Uplink Center (EN pp. 93–96,
-        ES pp. 99–102) against ITS 18: four scoring objectives,
-        all three geometries, Antenna activation, Tech-Coffin control,
-        Operational Learning and end conditions. Retain historical
-        scenery diameter wording and the ES omission of 350 points
-        from the Antenna placement sentence; the source maps group it
-        with 300/400. Include a third pinned definition and standalone
-        tests without changing ITS 18.
-      - [x] Curate ITS 17 V0.2 Battleground (EN pp. 83–85,
-        ES pp. 88–90) as a separate historical definition with
-        1/3/4 OP Sector scoring and exclusive Key Ops 2/1 OP
-        alternatives. Reuse reviewed Sector geometry while updating
-        the map scoring labels; preserve Key Ops designation/Skills,
-        bilingual VH and Shasvastii discrepancies, and exact source
-        citations. No ITS 18 publication changes.
-      - [x] Source-review ITS 17 V0.2 Annihilation (EN pp. 81–82,
-        ES pp. 85–87): pin the six-size scoring table and
-        original maps, preserve English 1/3/4 OP survival bands
-        versus Spanish 3/4/4, both 350-point 275-point threshold
-        gaps and the 150-point English mixed-unit deployment
-        typo. Publish the fifth definition only in the isolated
-        historical authoring library, not ITS 18.
-      - [x] Materialize the reviewed ITS 17 historical authoring
-        source and pinned shared library into a dedicated
-        `local/work/its/its_17.db` SQLite file (initial five scenarios),
-        independent of `its_18.db` and `rules_n5.db`. Keep runtime
-        registration and `data/generated/its_17.db` publication deferred
-        until the season is ready to ship.
-      - [x] Review ITS 17 Cutthroat V0.2 (EN pp. 86–88,
-        ES pp. 91–93): preserve the two historical Key Ops objectives,
-        selection/Skills and English/Spanish Lieutenant and VH differences,
-        reuse only matching deployment geometry, and rebuild the separate
-        six-scenario `its_17.db` without changing ITS 18.
-      - [x] Review ITS 17 Superiority V0.2 (EN pp. 89–92,
-        ES pp. 94–98): preserve the historic 3-OP Console cap,
-        Dominant Key Ops bonus, selection requirements and language
-        discrepancies, while reusing matching Consoles/Quadrants and
-        Hack Consoles semantics. Rebuild `its_17.db` with seven
-        independent historical scenario records.
-      - [x] Source-review ITS 17 V0.2 Provisioning (EN pp. 72–76,
-        ES pp. 70–74): preserve 4-box scoring and all three diagrams,
-        restore historical equal-diameter Tech-Coffins, same-language
-        Player Token marking, enemy-Safe-Area pickup limits and
-        wholly-inside deposit requirements. Record EN base contact
-        versus ES Silhouette contact. Build the standalone
-        eight-scenario `its_17.db`, without publishing ITS 17.
-      - [x] Source-review ITS 17 V0.2 Area of Interest (EN pp. 77–80,
-        ES pp. 80–84): reuse the matching 3 + 3 + 3 + 1 OP
-        scoring and corner-table geometry. Preserve historical
-        Antenna diameter wording and five bilingual source issues:
-        Reinforcements suitability (EN YES / ES NO), Hacker ARO,
-        Shasvastii States, INTELCOM timing and Spanish
-        Connected/Activated wording. Rebuild the isolated
-        nine-scenario `its_17.db`; do not change ITS 18.
-      - [x] Source-review ITS 17 V0.2 Last Launch (EN pp. 63–67,
-        ES pp. 75–80): verify matching scoring and three diagrams,
-        including 4/8-inch ID Scanner offsets, three ID Skills, Tower
-        Domination, Peripherals and extraction. Preserve relative Token
-        diameters and four independently cited bilingual source issues.
-        Rebuild isolated ten-scenario `its_17.db`; keep ITS 18 unchanged.
-      - [x] Source-review ITS 17 V0.2 B-Pong (EN pp. 36–39,
-        ES pp. 38–41): verify matching 2 + 3 + 3 + 2 OP scoring, three
-        diagrams and both mission Skills. Both historical languages
-        measure relocation from the Beacon, require free Beacon contact
-        for Console Activation and limit successful activation per round.
-        Preserve relative scenery diameters and bilingual Magnetize /
-        Connected wording issues; rebuild isolated eleven-scenario
-        `its_17.db`, without changing ITS 18.
-      - [x] Source-review ITS 17 V0.2 Crossing Lines (EN pp. 51–54,
-        ES pp. 42–45): retain matching 3 + 3 + 2 + 2 OP scoring,
-        three split-deployment maps, central-strip limit, Antenna
-        action and end conditions. Preserve EN/ES central-strip
-        dimension discrepancy, Token type and Shasvastii wording,
-        and the unresolved HVT deployment implication. Rebuild
-        separate twelve-scenario `its_17.db` without ITS 18 changes.
-      - [x] Source-review ITS 17 V0.2 Corporate Appropriation (EN
-        pp. 40–44, ES pp. 32–37): retain source-confirmed Prototype,
-        Panoply and ADS scoring, three geometries and two typed scenario
-        Skills. Preserve token-relative sizes; track bilingual
-        Reinforcements, Capture and Baggage discrepancies. Rebuild
-        separate thirteen-scenario `its_17.db`; leave ITS 18 intact.
-      - [x] Source-review ITS 17 V0.2 Critical Intervention (EN
-        pp. 45–50, ES pp. 63–69): retain asymmetric printed scoring,
-        kill thresholds, three maps, turret profile and two typed
-        scenario Skills. Preserve historically token-relative scenery,
-        enemy-Model turret reactions, six source-local issues, and
-        the unnormalized Defender maximum. Rebuild isolated
-        fourteen-scenario `its_17.db`; leave ITS 18 unchanged.
-      - [x] Source-review ITS 17 V0.2 Outbreak (EN pp. 68–71,
-        ES pp. 46–49): retain the historical 1 OP Stabilize Alpha
-        objective and 1 OP CivEvac Alpha award separately from ITS 18's
-        2 OP CivEvac Alpha award and omitted Stabilize Alpha objective.
-        Pin bilingual placement measurements and independently rebuild
-        the fifteen-scenario `its_17.db`, without ITS 18 changes.
-      - [x] Source-review ITS 17 V0.2 Akial Interference (EN
-        pp. 31–35, ES pp. 58–62): retain the 10 OP distribution,
-        Common/Private Classified rules, four HVTs per player and
-        three deployment maps. Preserve Secure HVT and Secure
-        Treasure exclusion, token-relative Antenna sizing, two
-        independently cited Short Skills and the unresolved
-        one-Emission-versus-failed-retries source issue. Rebuild
-        isolated sixteen-scenario `its_17.db`; leave ITS 18 unchanged.
-      - [x] Compare ITS 17 V0.2's scenario inventory against all existing
-        memberships: the TOC contains exactly sixteen standard scenarios
-        and all sixteen are reviewed. Resilience Operations is a separate
-        tournament Extra, not another scenario membership.
-      - [x] Review and curate ITS 17 V0.2 CivEvac, Casevac and Casevac State
-        (EN pp. 17–21, ES pp. 18–22) as season-local standalone records.
-        Preserve the English Short Movement Skill declarations, the
-        distinct Spanish Basic Short Skill labels, the independent State
-        cancelation rules, bilingual citations and ITS 18 isolation.
-      - [x] Reconcile the original ITS 17 V0.2 global token diameter chart
-        (EN p. 13 / ES p. 14) against twelve reviewed scenario definitions.
-        Pin the chart pages in each affected season membership and shared
-        definition; resolve the erroneous unspecified-diameter claims while
-        preserving genuine EN/ES token-name differences. Test isolated
-        SQLite and keep ITS 18 unchanged.
-      - [x] Source-review Resilience Operations as an optional ITS 17
-        tournament Extra (EN pp. 96–104 / ES pp. 103–111), not a
-        seventeenth scenario. Curate typed deck choices, scoring,
-        deployment, Tactical Elements and glossary in its own
-        season-scoped Rule record and isolated SQLite projection.
-        Retain bilingual source inconsistencies and exclude unsupported
-        physical-card contents; leave ITS 18 unmodified.
-      - [x] Audit all four adjacent ITS 17 PDF revision pairs offline
-        (V0.0→V0.1 and V0.1→V0.2, EN/ES), using the six original SHA pins.
-        Source-review the Casevac declaration, Critical Intervention
-        Reinforcements, Spanish Corporate scoring, Crossing Lines
-        restriction and Resilience Operations reveal-timing chronology.
-        Record the introduced Outbreak mission and V0.2 page reflow,
-        without assuming the remaining historical facts are identical.
-      - [x] Preserve reviewed ITS 17 V0.0/V0.1 differences as
-        revision- and language-tagged `historicalEvidence` inside the
-        existing season source file: 11 facts, 44 original-page observations,
-        four pinned older editions. Include Critical Intervention's
-        Attacker-only Inhibitor and Armed Turret clarifications and Area of
-        Interest's Hacker opposition procedure. Validate fail-closed,
-        keep earlier editions unprojected and ITS 18 publication untouched.
-      - [x] Review and tag seven additional V0.0/V0.1 observations
-        (both languages): tournament bye scoring, 350-point tier SWC,
-        Akial shared objective timing, Corporate Prototype protection
-        and ownership terminology, Crossing Lines central-strip timing,
-        and Provisioning Supply Box pickup phrasing. Expand the same
-        review-only evidence to 18 aspects / 72 source observations and
-        support season-scoped facts without inventing scenario ownership.
-      - [x] Compare the V0.1→V0.2 Uplink Center 150-point
-        written Communication Antenna placement (4→6 in / 10→15 cm) and
-        Corporate Prototype collateral-Attack restriction against
-        all six pinned EN/ES originals. Tag V0.2 observations against
-        existing current source descriptors without duplicating pins;
-        explicitly verify the Outbreak V0.2 introduction. Historical
-        inventory was then 21 reviewed aspects / 92 observations;
-        preserve the V0.2-only SQLite projection.
-      - [x] Visually inspect the Uplink Center 150-point maps in all six
-        original PDFs. V0.0/V0.1 diagrams already say 6 in / 15 cm,
-        despite their 4 in / 10 cm prose; V0.2 corrects the prose
-        without changing graphical placement. Retain separate,
-        source-pinned written and graphical observations.
-      - [x] Visually compare Crossing Lines 150-/200–250-point maps
-        and deployment tables in six publisher-original EN/ES PDFs.
-        Record the persistent EN overlong 4 × 32 / 4 × 48 in
-        table entries separately from its correct 4 × 24 / 4 × 32 in
-        diagrams and the consistent ES text/maps. Historical inventory
-        now 23 reviewed aspects / 104 observations; no projection changes.
-      - [ ] Pin and review the complete ITS 17 source locally, including
-        the remaining V0.0/V0.1 revision changes, V0.2 English/Spanish
-        discrepancies, optional Extras (including Resilience Operations)
-        and reusable geometry/components. All six original PDFs are pinned;
-        do not infer cross-revision or cross-season equivalence.
-    - [x] Publish the sixteen reviewed ITS 17 V0.2 missions in a separate,
-      source- and library-pinned `its_17.db`, registered alongside ITS 18.
-      Preserve season-specific Skill/State identities and current revision selection;
-      continue presentation review independently for both seasons.
-  - [ ] **Later seasons:** Add ITS Season 16 Part II (the N5-compatible
-    revision); ITS Season 17 V0.2 is now registered with 16 missions.
-    Keep original
-    Season 16 N4-era content distinct from Part II; preserve exact season,
-    revision and source provenance. Consider season-specific rules and FAQ
-    coverage after the scenario baseline, without delaying Season 18.
-  - [ ] Capture structured, cited scenario facts: objectives and scoring, game
-    rounds/end conditions, force/point/SWC/table/deployment configuration,
-    deployment map or geometry, exclusion zones, token types/diameters,
-    classified-objective setup, reinforcement suitability, tactical-support
-    options, and scenario-specific rules/elements.
-  - [ ] Scenario pages should expose the selected season prominently and link
-    season-specific terms to the relevant rules/state references.
+- [ ] Extend the versioned ITS reference library to remaining archived seasons
+  and historical revision browsing as appropriate. ITS 17 V0.2 and ITS 18
+  2026.09.11 are already published with independent selected revisions and
+  source-family evidence. Preserve season/date isolation, curated differences,
+  historical facts and the official Army app's authority for list legality.
+  - [ ] Publish additional ITS-only FAQ clarifications after verifying exact
+    season/scenario identity, version and bilingual citation; keep seasonal
+    actions and rulings scoped to their reviewed context.
+- [ ] **Data processing + Web backend:** Extend the shared scenario/Skill
+  authoring model only where real reuse requires reviewed typed overrides.
+  ITS 17/18 scenario coverage and canonical Skill consolidation are published;
+  see [ITS database documentation](its-season-database.md).
+  - [ ] Add narrow typed field overrides for remaining scenario components
+    when needed, rejecting incompatible facts and preserving citations.
+  - [ ] Review remaining ITS 17 V0.0/V0.1 historical differences, V0.2
+    bilingual discrepancies, optional Extras and reusable components as
+    justified by further publication or historical replay. All six original
+    PDFs are pinned; do not infer cross-revision or cross-season equivalence.
+  - [ ] Add ITS Season 16 Part II (N5-compatible revision), keeping original
+    N4-era Season 16 distinct. Curate cited scoring, objectives, setup,
+    geometry, token sizes, classified and tactical support options, scenario
+    rules and applicable season references. Reuse the existing component
+    and renderer contracts; consider season-wide rules and FAQ coverage
+    after the scenario baseline.
 
 - [ ] **Web frontend + Web backend:** Add a collapsed-by-default Season Rules
   section to ITS scenario pages, using the selected season's canonical
@@ -951,17 +463,10 @@ Season 16 Part II remains later scope.
   any missing common rule coverage rather than duplicating rules per mission
   or mixing seasons/revisions.
 
-- [ ] **Data processing + Web frontend:** Extend the existing core-scenario SVG renderer for ITS
-  geometry after the seasonal scenario data is curated. Reuse the same versioned geometry model and
-  rendering engine rather than creating an ITS-only map format.
-  - [ ] Add ITS-required geometry only when supported by curated scenario evidence, including
-    repeated/mirrored placements, circular/radius regions, Exclusion/Hazard/Scoring areas,
-    asymmetric roles, access/opening lines, scenario-specific markers/icons, and genuine
-    per-table-size overrides rather than blind scaling.
-  - [ ] Preserve season/scenario source provenance and add compatibility fixtures from current and
-    archived ITS material before promoting new geometry features into the schema contract.
-  A future geometry editor/preview must reuse the scenario creator below and
-  the shared schema/renderer, not introduce an ITS-only browser format.
+- [ ] **Data processing + Web frontend:** Extend the shared scenario geometry
+  model and SVG renderer only when later seasonal content or the scenario
+  editor requires unsupported, source-backed geometry. Preserve source
+  provenance and compatibility fixtures; do not introduce an ITS-only format.
 
 - [ ] **Data processing + Web frontend:** Build a **scenario creator/editor**
   using the canonical scenario component model and map renderer, with no server-side
@@ -1062,7 +567,7 @@ remains authoritative for list legality.
   hidden information; coordinate with the ITS guidance above.
 - [ ] Add Developer-mode data-review screens for normalization warnings,
   unresolved placeholders and raw-archive record provenance.
-- [ ] Optionally browse archived imported versions when snapshot history
-  becomes player-useful; existing ZIPs already provide recovery.
+- [ ] Extend archived snapshot browsing beyond the initial N5 Unit history
+  where it becomes player-useful; existing ZIPs provide recovery.
 - [ ] Add a two-snapshot JSON comparison screen for added, removed and
-  updated records, with optional changes highlighted elsewhere in the UI.
+  updated records, reusing structured snapshot diff tooling where possible.
