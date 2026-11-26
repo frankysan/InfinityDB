@@ -100,6 +100,21 @@ labels are explicitly marked as such. Evidence references and raw values
 remain expandable; unresolved and catalog evidence are separate from the
 main timeline, with coverage gaps visible at report level.
 
+The intended public history is a concise semantic summary, not the layout of
+this private review. The effective-loadout pilot compares single-profile
+Groups with complete stable or uniquely reconciled Loadout identities, using
+endpoint-resolved references from both profile and loadout owners. Normalize
+default quantity and empty extras, preserve occurrence multiplicity, and
+leave overlaps across owners unresolved. Definition-only changes are not
+composition changes. Identical cost deltas and effective reference changes
+are grouped across loadouts, then across exact matching Army windows and
+payloads. All-loadout scope means all loadouts in the compared Group, not
+all loadouts in the logical Unit or all Armies. Preserve original comparison
+and candidate links. Complex profiles, unresolved rekeys, disabled options,
+Includes, Peripherals and non-pilot fields retain separate review evidence.
+Use observation ranges until independently established update dates exist.
+Technical evidence belongs in developer review, not normal player copy.
+
 ### Accepted authoring direction: one source family, version-tagged facts
 
 For maintained curation, **prefer one file per logical source family** rather

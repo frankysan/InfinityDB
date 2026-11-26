@@ -249,7 +249,14 @@ make v1.3.0 depend on them.
   entries), 1,806 composition field candidates and all 265 Army observations.
   It retains reference multiplicity, historical target labels, evidence
   drilldown and separate review/catalog links. Private review remains required
-  before promotion.
+  before promotion. The effective-loadout pilot processes 2,999 source
+  Group-field comparisons: 1,463 changed, 206 unchanged and 1,330 review
+  outcomes. It consolidates 1,626 Army-scoped summaries into 661, of which
+  317 cover all loadouts in their Group and 275 combine multiple Armies.
+  Three accepted rekey collections are available; 131 composition candidates
+  remain outside the pilot scope. Extend coverage to partial loadout
+  continuity, lifecycle events, complex profiles and contextual availability
+  before selecting the public semantic projection.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,

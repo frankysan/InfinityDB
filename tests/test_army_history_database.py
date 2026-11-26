@@ -258,3 +258,99 @@ def test_render_army_observations_distinguish_list_presence_from_availability():
     assert "current label" in html
     assert "Observed between 2025-01-01 and 2025-02-01" in html
     assert "Added to Army" not in html
+
+
+def semantic_group(profile_skills, options):
+    return {
+        "units": [{"id": 42, "name": "Test Unit", "profileGroups": [{
+            "id": 1, "profiles": [{"id": 1, "name": "Test Profile",
+                                  "skills": profile_skills}],
+            "options": options,
+        }]}],
+        "filters": {"skills": [{"id": 1, "name": "Mimetism"},
+                               {"id": 2, "name": "Engineer"}]},
+    }
+
+
+def semantic_option(identity, skills=None, points=20):
+    return {"id": identity, "name": "Test", "skills": skills or [],
+            "points": points, "swc": 0}
+
+
+def semantic_summary(old, new, field, paths, rekeys=None):
+    from tools.research.summarize_army_history import summarize_group
+
+    return summarize_group(old, new, 42, 1, field, [{}], [{}], set(paths), rekeys)
+
+
+def test_effective_history_suppresses_relocation_and_counts_real_gain():
+    skill = {"id": 1}
+    old = semantic_group([], [semantic_option(1, [skill]), semantic_option(2)])
+    new = semantic_group([skill], [semantic_option(1), semantic_option(2)])
+    paths = [
+        ("units", 42, "profileGroups", 1, "profiles", 1, "skills"),
+        ("units", 42, "profileGroups", 1, "options", 1, "skills"),
+    ]
+    result, status = semantic_summary(old, new, "skills", paths)
+    assert status == "comparable"
+    assert result is not None and len(result) == 1
+    assert result[0]["summary"] == "Gained Mimetism"
+    assert [row["optionId"] for row in result[0]["loadouts"]] == [2]
+    assert result[0]["allGroupLoadouts"] is False
+    unchanged = semantic_group([skill], [semantic_option(1)])
+    previous = semantic_group([], [semantic_option(1, [skill])])
+    assert semantic_summary(previous, unchanged, "skills", paths) == ([], "comparable")
+    assert semantic_summary(old, new, "skills", paths[:1]) == (
+        None, "unacceptedReferenceChange",
+    )
+
+
+def test_effective_history_consolidates_cost_delta():
+    old = semantic_group([], [semantic_option(1, points=20), semantic_option(2, points=30)])
+    new = semantic_group([], [semantic_option(1, points=18), semantic_option(2, points=28)])
+    paths = [("units", 42, "profileGroups", 1, "options", i, "points") for i in (1, 2)]
+    result, status = semantic_summary(old, new, "points", paths)
+    assert status == "comparable"
+    assert result is not None and len(result) == 1
+    assert result[0]["summary"] == "-2 Points"
+    assert result[0]["allGroupLoadouts"]
+    assert [(r["before"], r["after"]) for r in result[0]["loadouts"]] == [(20, 18), (30, 28)]
+    assert semantic_summary(old, new, "points", paths[:1]) == (None, "unacceptedCostChange")
+
+
+def test_effective_history_accepts_only_complete_reconciled_rekeys():
+    skill = {"id": 1}
+    old = semantic_group([], [semantic_option(1, [skill])])
+    new = semantic_group([], [semantic_option(2, [skill], points=18)])
+    assert semantic_summary(old, new, "points", []) == (None, "changedLoadoutKeys")
+    result, status = semantic_summary(old, new, "points", [], {1: 2})
+    assert status == "comparable"
+    assert result is not None and result[0]["summary"] == "-2 Points"
+    assert result[0]["loadouts"][0]["laterOptionId"] == 2
+    conflict = semantic_group([], [semantic_option(2, [{"id": 2}])])
+    assert semantic_summary(old, conflict, "points", [], {1: 2}) == (
+        None, "rekeyCompositionConflict",
+    )
+
+
+def test_effective_history_rejects_overlapping_layers_and_peripherals():
+    skill = {"id": 1}
+    old = semantic_group([skill], [semantic_option(1, [skill])])
+    new = semantic_group([skill], [semantic_option(1)])
+    assert semantic_summary(old, new, "skills", []) == (None, "overlappingOwners")
+    new["units"][0]["profileGroups"][0]["options"][0]["peripheral"] = [{"id": 1}]
+    assert semantic_summary(old, new, "skills", []) == (None, "includesOrPeripheral")
+
+
+def test_effective_reference_comparison_ignores_definition_only_and_default_quantity():
+    from tools.research.summarize_army_history import effective_delta, reference_summary
+
+    old = {"filter": {"id": 1, "name": "Mimetism"}, "occurrence": {},
+           "metadataFingerprints": ["a"]}
+    new = {"filter": {"id": 1, "name": "Mimetism renamed"}, "occurrence": {"q": 1},
+           "metadataFingerprints": ["b"]}
+    assert effective_delta([old], [new]) == {"lost": [], "gained": []}
+    changed = {**old, "occurrence": {"extra": [{"id": 2, "name": "-3"}]}}
+    assert reference_summary(effective_delta([old], [changed])) == (
+        "Changed Mimetism → Mimetism (-3)"
+    )

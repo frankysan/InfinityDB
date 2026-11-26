@@ -202,6 +202,13 @@ the retired source roots.
   exact preview SHA-256; the renderer also verifies both linked database
   hashes. The standalone searchable HTML requires no web server or network.
   It is an ignored private review artifact, not a player-facing publication.
+  The private effective-loadout pilot is generated with
+  `python -m tools.research.summarize_army_history --preview
+  local/data/history/generated/unit_history_preview.json --preview-sha256 HASH
+  --output local/data/history/generated/effective_history_pilot.json`.
+  The tool pins the preview and linked databases, reads accepted evidence
+  and archive endpoints, and records both summaries and excluded/review
+  outcomes. No runtime publication is created.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not
