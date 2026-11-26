@@ -26,6 +26,78 @@ Use these links to jump directly to a workstream:
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
+## v1.3.0 release plan
+
+**Release focus:** Historical reference, performance and personalization.
+
+This is the accepted development scope, not a statement of implemented
+behavior. The linked workstreams below own detailed tasks and acceptance;
+retire this milestone summary when the release closes.
+
+### Committed scope and implementation order
+
+1. **Project infrastructure:** CI efficiency and release tooling
+   ([release and deployment robustness](#release-and-deployment-robustness)).
+   Eliminate redundant CI runs for identical trees without weakening
+   required validation or exact-SHA evidence. Complete the authoritative
+   PR metadata fix and explicit Host-header deployment probe.
+2. **Data processing + Web backend:** Performance and build-time
+   materialization ([performance and build tooling](#performance-storage-and-build-tooling)).
+   Benchmark the existing application and build pipeline; pilot persisted
+   General profiles for all 16 availability combinations. Extend to Unit
+   details, Rules records and other projections where measured benefits
+   justify it. Reduce redundant build/export validation and serialization
+   where safe. Preserve API compatibility and deterministic outputs.
+3. **Data processing + Web backend:** Integrate
+   [historical Army data](#per-reference-change-history) into generated
+   SQLite data, initially targeting N5. Resolve identities, semantic
+   changes, Army scope and observation windows using accepted research.
+   Preserve uncertainty and review publication rights before exposure.
+4. **Web frontend + Web backend + Data processing:** Introduce
+   [Army-derived themes and the visual rules-content hierarchy](#reference-presentation-and-feedback)
+   together. Keep Theme separate from Auto/Light/Dark mode; retain the
+   default InfinityDB theme, accessible contrast and theme-aware maps.
+5. **Data processing + Web backend + Web frontend:** Publish player-facing
+   Unit version histories and initial
+   [per-reference change indicators](#per-reference-change-history)
+   for Army-derived content. Show reviewed before/after changes to
+   attributes, profiles, Skills, Equipment, Weapons and Army availability
+   with dated evidence and explicit uncertainty. Reuse the mechanism for
+   future reference history without requiring comprehensive Rules or FAQ
+   history now. Include
+   [direct links to official Infinity Army](#reference-presentation-and-feedback)
+   where a supported deep-link contract is verified.
+
+Complete the selected development work before the existing
+[release checklist](releasing.md); no new release gates are introduced.
+
+### Optional additions (not release-blocking)
+
+- **Web frontend + Web backend:** [ITS season-wide rules](#its-scenarios-and-game-tools)
+  and [Unit comparison](#user-owned-tools-and-portable-data), both high
+  priority when capacity permits. Reuse materialized profiles and historical
+  comparison components where appropriate.
+- **Web frontend + Web backend + Deployment:** Shared
+  [bug/error reporting form](#reference-presentation-and-feedback).
+- **Data processing:** [Structured snapshot diff reports](#army-snapshot-maintenance),
+  preferably as a natural output of historical Army processing.
+- **Web backend + Data processing:** Opportunistic
+  [scenario ruler label polish](#its-scenarios-and-game-tools) and
+  [retirement of superseded build helpers](#performance-storage-and-build-tooling).
+
+### Deferred beyond the committed scope
+
+Historical FAQ replay and comprehensive Rules history; ITS 16 Part II;
+scenario creator/editor; interactive Fireteam builder; stateless v2 sharing;
+native applications; portable Army lists and collection management;
+comprehensive multi-agent coordination; alternative JSON runtime storage.
+These remain in their owning backlog sections.
+
+Miniature image integration and printable model identification sheets remain
+dependency-bound to sufficient curated miniature and image coverage.
+Reconsider inclusion only if those inputs mature during development; do not
+make v1.3.0 depend on them.
+
 ## Active development
 
 ### External source clarifications
