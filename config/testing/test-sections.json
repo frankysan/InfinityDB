@@ -190,6 +190,7 @@
         "test_flamethrower_reference",
         "test_marksman_rifle_reference",
         "test_non_skill_army_presentation",
+        "test_official_army_links",
         "test_unit_source_options_notes",
         "test_unit_source_api_parity",
         "test_unit_general_profile_extras",

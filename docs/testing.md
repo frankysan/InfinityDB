@@ -502,6 +502,27 @@ The history-enabled complete runtime build passed in 230.73 s;
 deployment database/reference verification also passed (SVG validation
 skipped). Both ITS databases remained byte-identical.
 
+### Official Army deep-link acceptance
+
+Verified on 2026-11-26 against the official Army v7.3.0 web application
+(Chromium 159.0.8154.6). A read-only inspection of the captured public
+`main.377157b165184e17120b.js` (SHA-256
+`6ddb6eb590ff453bb0225a7fb96834cb3bbc91b263dfe4bdd3897a9a4d7400fd`)
+confirmed the game/Army/Unit route and selection from source resume slugs.
+The application-generated Zeros route uses `zeros`, not `zero`. Fresh
+isolated browser sessions selected the expected Unit in each of:
+
+- <https://infinityuniverse.com/army/infinity/nomads/zeros>
+- <https://infinityuniverse.com/army/infinity/bakunin/zeros>
+- <https://infinityuniverse.com/army/infinity/bakunin/reinf-prowlers>
+
+The third route automatically selected the reinforcement menu. Focused
+`tests/test_official_army_links.py` passed four tests covering exact source
+memberships, ambiguity and unsafe-slug rejection, shared reinforcement
+parents, actual snapshot routes, and the selected Army card at 1280 and
+390 CSS px. This is representative route acceptance, not an exhaustive
+live audit of every Unit or future Army application revision.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

@@ -47,8 +47,8 @@ in the linked workstreams; retire this milestone summary when the release closes
   snapshots and retain explicit coverage limits. Initial history disclosures
   are implemented; see [history follow-up](#per-reference-change-history).
 - **Web frontend + Web backend:** Faction palettes and the initial rules-content
-  hierarchy are implemented. Complete remaining representative visual review and
-  verify [official Army deep links](#reference-presentation-and-feedback).
+  hierarchy and official Army deep links are implemented. Complete remaining
+  [representative visual review](#reference-presentation-and-feedback).
 
 Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
 candidate acceptance remains in the release checklist.
@@ -237,12 +237,6 @@ make v1.3.0 depend on them.
   report-delivery mechanism and retention policy before implementation;
   avoid a separate issue-management system or personal-content store.
   Keep the component consistent wherever displayed.
-- [ ] **Web backend + Web frontend:** Link Unit detail pages to their
-  corresponding entries in official Infinity Army. Verify the supported
-  deep-link format before generating links from imported source identifiers;
-  resolve the selected Army context and multiple memberships correctly.
-  Omit unsupported targets, including out-of-catalog entries without a
-  verified destination.
 
 ### List and session configuration
 

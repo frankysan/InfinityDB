@@ -20,6 +20,7 @@ are not retroactively relabeled.
 - Correct Equipment filter counts on repeated matching queries.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
+- Open matching Unit entries directly in official Infinity Army from their Army profile cards.
 - Choose InfinityDB or one of eleven Army-inspired themes, independently of
   Auto, Light or Dark mode. Saved scenario maps retain the selected appearance.
 - Clearer distinctions between rules, explanations, source examples, reviewed
@@ -38,6 +39,9 @@ are not retroactively relabeled.
   using Army colors, emblems and miniature paint schemes, with compatible
   first-paint preference resolution, shared standalone SVG colors and contrast
   regression coverage in both modes.
+- **Web backend + Web frontend:** Added source-native official Army destinations
+  to Unit detail cards, including multiple memberships and reinforcement parents.
+  Unsupported or ambiguous destinations are omitted.
 
 ### Changed
 

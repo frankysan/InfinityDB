@@ -242,6 +242,16 @@ incomplete history and the revision-date convention in every disclosure. The
 [historical data contract](data-model.md#private-army-history-research-database)
 owns attribution, observation windows and unresolved evidence.
 
+### Official Army links
+
+Place **Open in Infinity Army** at the top of the relevant expanded Army
+profile card, outside its disclosure summary. Open the external destination
+in a separate tab and label distinct parent Army or source Unit destinations
+when necessary. Omit the link row for unsupported targets and never attach a
+current destination to a former historical context. Use the
+[data-model contract](data-model.md#official-army-unit-destinations) rather
+than deriving external paths from display names.
+
 ### Explain rules interactions, not just outcomes
 
 **Target design direction:** When showing a reviewed interaction, give the

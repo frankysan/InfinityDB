@@ -58,6 +58,7 @@ from .fireteam_relationships import (
 )
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
+from .official_army_links import official_army_links
 from .peripheral_relationships import validate_peripheral_relationships
 from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
 from .relation_constraints import validate_relation_constraints
@@ -727,6 +728,11 @@ class Database:
                 continue
             result[source["id"]] = dict(source)
         return result
+
+    @instance_lru_cache(maxsize=1)
+    def _official_army_unit_links(self) -> dict[tuple[int, int], list[dict[str, str]]]:
+        with self._connect() as connection:
+            return official_army_links(connection, self._army_metadata_factions())
 
     @instance_lru_cache(maxsize=1)
     def _application_army_graph(self) -> dict[str, Any]:
@@ -4693,6 +4699,7 @@ class Database:
                 row["id"]: row["canonical_faction_id"] for row in graph["rows"]
             }
             placeholders = ", ".join("?" for _ in source_ids)
+            official_links = self._official_army_unit_links()
             armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
             by_source_army: dict[tuple[int, int], dict[str, Any]] = {}
             for occurrence in group["army_occurrences"]:
@@ -4730,11 +4737,16 @@ class Database:
                             if section_id in application_armies["identities"]
                         ],
                         "availability_flags": list(flags),
+                        "official_army_links": [],
                         "profiles": [],
                         "loadouts": [],
                         "_occurrence_key": occurrence_key,
                     },
                 )
+                source_key = (occurrence["source_army_id"], source_id)
+                for link in official_links.get(source_key, []):
+                    if link not in army["official_army_links"]:
+                        army["official_army_links"].append(dict(link))
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             note_rows = connection.execute(

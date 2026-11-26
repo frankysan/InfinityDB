@@ -2135,6 +2135,14 @@ h1>span {
   border-bottom: 1px solid var(--color-border-profile-divider);
 }
 
+.unit-detail .official-army-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 10px 18px;
+  font-size: var(--font-size-sm);
+}
+
 .unit-detail .army-profile-title::-webkit-details-marker {
   display: none;
 }

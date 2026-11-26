@@ -1040,6 +1040,21 @@ or provenance. Army v33 stores the complete General-profile projection for
 both Extended Explorer and Unit details. Explicit requested-Army selections
 that change the effective set of occurrences retain contextual composition.
 
+### Official Army Unit destinations
+
+The Unit-detail API adds `official_army_links` to each Army occurrence group.
+Each target contains `army_name`, `unit_name` and `href`. These are external
+source destinations, not InfinityDB domain identities. The resolver uses the
+selected snapshot's metadata faction slug and the exact source Unit ID's
+`army_lists.resume` slug, joined to `army_units`. Logical aliases do not
+replace either path segment. Reinforcement Units use each source parent
+Army's slug and the reinforcement resume's Unit slug. Missing, malformed,
+nonmember and ambiguous destinations are omitted, including slugs shared by
+the main and reinforcement resumes. This read-only lookup is cached per
+database instance; no new schema or live upstream dependency is required.
+The links open the current official application, which may have newer data
+than InfinityDB's pinned snapshot. They do not prove list legality.
+
 ### Unit and General-profile symbols
 
 Every published logical Unit has exactly one effective graphical symbol. A General profile inherits

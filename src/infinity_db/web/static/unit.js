@@ -1445,6 +1445,30 @@ function renderArmyProfile(army, generalByIdentity, expanded) {
   }
   armyHeading.append(availabilityBadges(army.availability_badges));
   section.append(armyHeading);
+  if (army.official_army_links?.length) {
+    const links = document.createElement("div");
+    links.className = "official-army-links";
+    for (const target of army.official_army_links) {
+      const link = document.createElement("a");
+      link.href = target.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      const contextual = army.official_army_links.length > 1
+        || army.name !== target.army_name;
+      const sameArmy = army.official_army_links.filter(
+        (other) => other.army_name === target.army_name,
+      ).length > 1;
+      const destination = sameArmy
+        ? `${target.army_name} · ${target.unit_name}`
+        : target.army_name;
+      link.textContent = contextual
+        ? `Open in Infinity Army · ${destination}`
+        : "Open in Infinity Army";
+      link.setAttribute("aria-label", `Open in Infinity Army · ${destination} (new tab)`);
+      links.append(link);
+    }
+    section.append(links);
+  }
   if ((army.composite_options || []).length) {
     section.append(subheading("Composite options"));
     section.append(compositeOptionTable(army.composite_options, anchorScope));
