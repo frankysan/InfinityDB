@@ -7,8 +7,13 @@ not stored as a permanent Unit attribute.
 
 from __future__ import annotations
 
+import hashlib
+import json
+import sqlite3
+
+from infinity_db.build_provenance import canonical_bytes
 from infinity_db.database import Database
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.rules_database import RULES_METADATA_TABLE, RulesDatabase
 
 SPECIALIST_RULE_ID = "rule:specialist-troops:standard"
 SPECIALIST_CONTEXTS = frozenset({"standard", "domination", "supplies", "firefight"})
@@ -62,3 +67,50 @@ def candidate_unit_ids(
                 continue
             unit_ids.update(int(unit["id"]) for unit in variant["units"])
     return frozenset(unit_ids)
+
+def _specialist_projection_sha256(db: sqlite3.Connection) -> str:
+    row = db.execute(
+        f"SELECT value FROM {RULES_METADATA_TABLE} WHERE key='searchIndex'"
+    ).fetchone()
+    if row is None:
+        raise ValueError("Specialist candidate projection requires a matching publication scope")
+    rows = [tuple(row) for row in db.execute(
+        "SELECT context,body FROM specialist_candidates ORDER BY context"
+    )]
+    return hashlib.sha256(canonical_bytes([json.loads(row[0])["scope"], rows])).hexdigest()
+
+
+def stage_specialist_projection(
+    db: sqlite3.Connection, candidates: dict[str, frozenset[int]],
+) -> None:
+    db.execute(
+        "CREATE TABLE specialist_candidates (context TEXT PRIMARY KEY, body TEXT NOT NULL) "
+        "WITHOUT ROWID"
+    )
+    db.executemany(
+        "INSERT INTO specialist_candidates VALUES (?,?)",
+        [(context, canonical_bytes(sorted(ids)).decode("utf-8"))
+         for context, ids in sorted(candidates.items())],
+    )
+    db.execute(
+        f"INSERT INTO {RULES_METADATA_TABLE} VALUES (?,?)",
+        ("specialistProjectionSha256", json.dumps(_specialist_projection_sha256(db))),
+    )
+    validate_specialist_projection(db)
+
+
+def validate_specialist_projection(db: sqlite3.Connection) -> None:
+    row = db.execute(
+        f"SELECT value FROM {RULES_METADATA_TABLE} WHERE key='specialistProjectionSha256'"
+    ).fetchone()
+    if row is None or json.loads(row[0]) != _specialist_projection_sha256(db):
+        raise ValueError("Invalid Specialist candidate projection fingerprint")
+    contexts = set()
+    for context, raw in db.execute("SELECT context,body FROM specialist_candidates"):
+        contexts.add(context)
+        ids = json.loads(raw)
+        if (not isinstance(ids, list) or any(type(i) is not int or i < 0 for i in ids)
+                or ids != sorted(set(ids))):
+            raise ValueError("Invalid Specialist candidate projection identities")
+    if contexts != SPECIALIST_CONTEXTS:
+        raise ValueError("Incomplete Specialist candidate projection contexts")

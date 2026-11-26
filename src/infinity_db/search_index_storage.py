@@ -24,16 +24,17 @@ from .hacking_program_catalog import HackingProgramCatalog
 from .publication_registry import PublicationRegistry
 from .reference_catalog import LabelCatalog, RulesRecordCatalog
 from .rules_database import (
-    CATALOG_COMPATIBILITY_VERSION,
-    CATALOG_SCHEMA_VERSION,
     COMPOSED_SCHEMA_VERSION,
     RULES_METADATA_TABLE,
     SEARCH_INDEX_SCHEMA_VERSION,
+    SPECIALIST_COMPATIBILITY_VERSION,
+    SPECIALIST_SCHEMA_VERSION,
     RulesDatabase,
 )
 from .scenario_catalog import ScenarioCatalog
 from .search_catalog import SearchCatalog, SearchEntry, rank_results
 from .skill_catalog import SkillCatalog
+from .specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids, stage_specialist_projection
 from .sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
 from .state_catalog import StateCatalog
 from .trait_catalog import TraitCatalog
@@ -158,6 +159,10 @@ def publish_search_index(
     )
     entries = list(catalog.entries())
     catalog_rows = collect_catalog_projection(database, rules, registry)
+    candidates = {
+        context: candidate_unit_ids(database, rules, context)
+        for context in sorted(SPECIALIST_CONTEXTS)
+    }
     scope = search_scope(file_sha256(army_path), registry.season_manifest())
     with closing(sqlite3.connect(rules_path)) as db:
         with db:
@@ -171,10 +176,11 @@ def publish_search_index(
             )
             stage_catalog_projection(db, catalog_rows)
             record_catalog_projection(db)
-            db.execute(f"PRAGMA user_version={CATALOG_SCHEMA_VERSION}")
+            stage_specialist_projection(db, candidates)
+            db.execute(f"PRAGMA user_version={SPECIALIST_SCHEMA_VERSION}")
             for key, value in (
-                ("formatVersion", CATALOG_SCHEMA_VERSION),
-                ("databaseCompatibilityVersion", CATALOG_COMPATIBILITY_VERSION),
+                ("formatVersion", SPECIALIST_SCHEMA_VERSION),
+                ("databaseCompatibilityVersion", SPECIALIST_COMPATIBILITY_VERSION),
             ):
                 db.execute(
                     f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?", (str(value), key),

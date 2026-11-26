@@ -330,6 +330,26 @@ matched for each of the three scopes. Corrupt projections fail closed.
 Timings are standalone component measurements, not full request or browser
 latency; traced peak allocations are not worker RSS.
 
+### Specialist candidates and Unit-detail input pilot
+
+Run `python -m tools.performance.benchmark_unit_detail_inputs --samples 100`.
+Windows 100-Unit sample: median raw retrieval 5.10 ms, invariant enrichment
+2.16 ms, JSON read 0.33 ms, compressed read 0.34 ms. The enriched sample
+occupied 4,470,067 bytes uncompressed and 239,429 bytes compressed.
+Retain runtime detail composition rather than duplicate full occurrence
+payloads for this modest warm-service median saving.
+
+Rules v21 publishes four context-specific sets, each currently containing
+496 candidate logical Units (2,204 JSON bytes per context). Repeat canonical
+candidate calculation medians were 1.69 ms for standard, 7.59 ms for
+domination, 8.92 ms for supplies and 7.69 ms for firefight. Same-connection
+pilot reads took 0.07–0.08 ms. A subsequent published-path benchmark,
+including opening the Rules database, measured 1.34 ms for standard,
+1.28 ms for domination and supplies, and 1.42 ms for firefight.
+Recorded-source rebuild: 115.89 s;
+Rules grew from 9,973,760 to 9,994,240 bytes; Army and ITS sizes unchanged.
+These are component timings, not end-to-end request latency.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

@@ -451,9 +451,6 @@ make v1.3.0 depend on them.
   - [ ] Evaluate materializing reusable maintained-text reference tokens
     on top of the Rules v18 composed-record projection, preserving
     consumer-local routes, scenario scope and publication ownership.
-  - [ ] Evaluate invariant Unit detail enrichment and bounded Specialist
-    qualification candidates. Army v34 publishes scoped filter inputs; retain
-    the relational Unit graph and dynamic selection/counting.
   - [ ] Evaluate composed Glossary/help, Orders/AROs, and Scenario SVG
     projections where measured gains justify their cost.
 

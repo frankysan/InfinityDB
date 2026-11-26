@@ -14,6 +14,7 @@ from infinity_db.catalog_projection import CATALOGS, CatalogProjection
 from infinity_db.database.repository import Database
 from infinity_db.database_set import SEASON_DATABASE_SOURCES
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.web.app import create_app, create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 
@@ -106,3 +107,42 @@ def test_partial_scope_retains_canonical_catalogs() -> None:
     assert app.database.list_catalog_items("skills") == Database(
         RELEASE / "army.db"
     ).list_catalog_items("skills")
+
+
+def test_specialist_projection_parity_and_api_selection(monkeypatch: pytest.MonkeyPatch) -> None:
+    app = create_app_from_database_set(RELEASE)
+    assert app.rules_database is not None
+    projection = app.database.catalog_projection
+    assert projection is not None
+    canonical = Database(RELEASE / "army.db")
+    for context in sorted(SPECIALIST_CONTEXTS):
+        assert projection.specialist_candidates(context) == candidate_unit_ids(
+            canonical, app.rules_database, context,
+        )
+    for context in sorted(SPECIALIST_CONTEXTS):
+        url = ("http://localhost/api/units?matching_scope=loadout&counts=prospective"
+               f"&specialist={context}&skill_id=berserk&limit=5")
+        status, _, body = wsgi_response(app, url)
+        with monkeypatch.context() as patch:
+            patch.setattr(CatalogProjection, "specialist_candidates", lambda self, context: None)
+            expected_status, _, expected_body = wsgi_response(app, url)
+        assert status == expected_status == 200
+        assert json.loads(body) == json.loads(expected_body)
+    def fail(*args, **kwargs):
+        raise AssertionError("Canonical Specialist composer should not run")
+    monkeypatch.setattr("infinity_db.web.api_handler.candidate_unit_ids", fail)
+    assert wsgi_response(app, "http://localhost/api/units?specialist=standard")[0] == 200
+
+
+@pytest.mark.parametrize("mutation", [
+    "DELETE FROM specialist_candidates WHERE context='standard'",
+    "UPDATE specialist_candidates SET body='[]'",
+    "DROP TABLE specialist_candidates",
+])
+def test_specialist_projection_damage_fails_closed(tmp_path: Path, mutation: str) -> None:
+    path = tmp_path / "rules_n5.db"
+    shutil.copyfile(RELEASE / "rules_n5.db", path)
+    with closing(sqlite3.connect(path)) as db, db:
+        db.execute(mutation)
+    with pytest.raises(ValueError, match="Specialist candidate projection"):
+        RulesDatabase(path).validate()

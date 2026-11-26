@@ -1613,9 +1613,15 @@ class ApiHandler:
                     if specialist:
                         if self.rules_database is None:
                             raise ValueError("Specialist filter requires published rules data")
-                        qualifying = candidate_unit_ids(
-                            self.database, self.rules_database, specialist,
+                        projection = self.database.catalog_projection
+                        qualifying = (
+                            projection.specialist_candidates(specialist)
+                            if projection is not None else None
                         )
+                        if qualifying is None:
+                            qualifying = candidate_unit_ids(
+                                self.database, self.rules_database, specialist,
+                            )
                         logical_unit_ids = (
                             qualifying if logical_unit_ids is None
                             else logical_unit_ids & qualifying
@@ -1659,9 +1665,13 @@ class ApiHandler:
                             )},
                         )
                         if "prospective_counts" in payload:
-                            payload["prospective_counts"] = public_prospective(
-                                payload["prospective_counts"]
-                            )
+                            # Repository results are cached; never replace their raw counts.
+                            payload = {
+                                **payload,
+                                "prospective_counts": public_prospective(
+                                    payload["prospective_counts"]
+                                ),
+                            }
                         payload = {
                             **payload,
                             **(

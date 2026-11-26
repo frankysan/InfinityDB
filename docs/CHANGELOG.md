@@ -14,7 +14,8 @@ are not retroactively relabeled.
 
 - Faster global search through a compact prebuilt search index.
 - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
-- Faster initial Unit Explorer filter-context initialization.
+- Faster initial Unit Explorer filter-context initialization and Specialist Troops filtering.
+- Correct Equipment filter counts on repeated matching queries.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 

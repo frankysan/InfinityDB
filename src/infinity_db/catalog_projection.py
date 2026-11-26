@@ -14,7 +14,12 @@ from .build_provenance import canonical_bytes
 from .database.repository import Database
 from .equipment_catalog import EquipmentCatalog
 from .publication_registry import PublicationRegistry
-from .rules_database import CATALOG_SCHEMA_VERSION, RULES_METADATA_TABLE, RulesDatabase
+from .rules_database import (
+    CATALOG_SCHEMA_VERSION,
+    RULES_METADATA_TABLE,
+    SPECIALIST_SCHEMA_VERSION,
+    RulesDatabase,
+)
 from .scenario_catalog import ScenarioCatalog
 from .skill_catalog import SkillCatalog
 
@@ -175,6 +180,17 @@ class CatalogProjection:
             if db.execute("PRAGMA user_version").fetchone()[0] < CATALOG_SCHEMA_VERSION:
                 return None
         return cls(path)
+
+    def specialist_candidates(self, context: str) -> frozenset[int] | None:
+        with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+            if db.execute("PRAGMA user_version").fetchone()[0] < SPECIALIST_SCHEMA_VERSION:
+                return None
+            row = db.execute(
+                "SELECT body FROM specialist_candidates WHERE context=?", (context,),
+            ).fetchone()
+        if row is None:
+            raise ValueError(f"Missing Specialist candidate projection: {context}")
+        return frozenset(json.loads(row[0]))
 
     def summary(self, catalog: str, view: str) -> list[dict[str, Any]]:
         with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:

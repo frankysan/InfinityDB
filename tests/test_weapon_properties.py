@@ -33,6 +33,10 @@ def _copy_mutable_rules_fixture(path: Path) -> None:
     shutil.copyfile(RULES_PATH, path)
     with sqlite3.connect(path) as connection:
         if connection.execute("PRAGMA user_version").fetchone()[0] >= 18:
+            connection.execute("DROP TABLE IF EXISTS specialist_candidates")
+            connection.execute(
+                "DELETE FROM __rules_metadata WHERE key='specialistProjectionSha256'"
+            )
             connection.execute("DROP TABLE IF EXISTS catalog_details")
             connection.execute("DROP TABLE IF EXISTS catalog_usage_units")
             connection.execute("DROP TABLE IF EXISTS catalog_summaries")
