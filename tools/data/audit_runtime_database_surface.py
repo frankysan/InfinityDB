@@ -149,6 +149,11 @@ _register(
     reason="Build-time General-profile payloads selected by logical Unit and availability mask.",
 )
 _register(
+    ["unit_history_payloads"],
+    CONTEXTUAL,
+    reason="Snapshot-bound contextual history keyed by current logical Unit.",
+)
+_register(
     ["legacy_army_identities"],
     CONTEXTUAL,
     reason=(
@@ -406,6 +411,7 @@ TABLE_POLICY["units"] = _policy(
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
     "general_profiles",
+    "unit_history",
     "symbol_publication",
     "army_reference_data",
     "application_catalog_id",
@@ -559,6 +565,7 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("army-reference-data", lambda db: db.army_reference_data()),
         ("symbol-publication", lambda db: db.symbol_publication()),
         ("general-profiles", lambda db: db.general_profiles([unit_id], frozenset())),
+        ("unit-history", lambda db: db.unit_history(unit_id)),
         ("skill-source-classifications", lambda db: db.skill_source_classifications()),
         ("unit-filter-semantics", lambda db: db.unit_filter_semantics()),
         ("fireteam-armies", lambda db: db.list_fireteam_armies()),

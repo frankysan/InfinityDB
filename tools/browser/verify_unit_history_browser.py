@@ -17,7 +17,10 @@ def main() -> int:
     parser.add_argument("--db-dir", type=Path, required=True)
     parser.add_argument("--compare-projection", type=Path)
     parser.add_argument("--unit", type=int, action="append", default=[])
+    parser.add_argument("--screenshots", type=Path)
     args = parser.parse_args()
+    if args.screenshots is not None:
+        args.screenshots.mkdir(parents=True, exist_ok=True)
 
     app = create_app_from_database_set(args.db_dir)
     with app.database._connect() as db:
@@ -52,7 +55,10 @@ def main() -> int:
 
     from playwright.sync_api import sync_playwright
 
-    units = args.unit or [232, 1903, 1940, 24]
+    other_context = next(
+        int(key) for key, row in rows.items() if row["unmatched"] and row["general"]
+    )
+    units = args.unit or list(dict.fromkeys([232, 1903, 1940, 24, other_context]))
     with sync_playwright() as driver:
         browser = driver.chromium.launch()
         try:
@@ -70,23 +76,45 @@ def main() -> int:
                     page.on("pageerror", lambda error, errors=errors: errors.append(str(error)))
                     try:
                         route_browser_page(page, app, ORIGIN)
+                        page.add_init_script(
+                            "sessionStorage.setItem('infinitydb-accuracy-notice-collapsed', 'true')"
+                        )
                         page.goto(f"{ORIGIN}/units/{slug}", wait_until="domcontentloaded")
                         page.locator(".general-profile .unit-history").first.wait_for()
                         page.evaluate(
                             "(theme) => document.documentElement.dataset.theme = theme", theme,
                         )
                         assert page.locator(".unit-history[open]").count() == 0
-                        history = page.locator(".unit-history:has(.unit-history-date)").first
-                        history.evaluate("""element => {
-                            for (let parent = element.parentElement; parent;
-                                 parent = parent.parentElement)
-                                if (parent.tagName === 'DETAILS') parent.open = true;
-                        }""")
-                        history.locator(":scope > summary").click()
-                        assert history.locator(".unit-history-change").first.is_visible()
-                        assert page.evaluate(
-                            "document.documentElement.scrollWidth <= innerWidth + 1"
-                        )
+                        inspected = 0
+                        for context, selector in (
+                            ("general", ".general-profile .unit-history"),
+                            ("army", ".army-profile .unit-history"),
+                            ("other", ".unit-history > section > .unit-history"),
+                        ):
+                            histories = page.locator(f"{selector}:has(.unit-history-date)")
+                            if not histories.count():
+                                continue
+                            history = histories.first
+                            history.evaluate("""element => {
+                                for (let parent = element.parentElement; parent;
+                                     parent = parent.parentElement)
+                                    if (parent.tagName === 'DETAILS') parent.open = true;
+                            }""")
+                            summary = history.locator(":scope > summary")
+                            summary.focus()
+                            summary.press("Enter")
+                            assert history.locator(".unit-history-change").first.is_visible()
+                            assert history.locator(".unit-history-note").last.is_visible()
+                            assert page.evaluate(
+                                "document.documentElement.scrollWidth <= innerWidth + 1"
+                            )
+                            if args.screenshots is not None:
+                                path = args.screenshots / f"{slug}-{context}-{width}-{theme}.png"
+                                history.screenshot(path=path)
+                            summary.press("Enter")
+                            assert history.get_attribute("open") is None
+                            inspected += 1
+                        assert inspected
                         assert not errors, errors
                         print(f"{slug}: {width}px {theme} PASS", flush=True)
                     finally:

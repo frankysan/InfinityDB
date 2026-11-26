@@ -331,10 +331,10 @@ the retired source roots.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — four tracked runtime databases: `army.db`
-  (Army v34/compatibility 43), `rules_n5.db` (Rules v23/compatibility 25),
+  (Army v35/compatibility 44), `rules_n5.db` (Rules v23/compatibility 25),
   `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
   Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
-  symbol mappings and General profiles remain embedded in Army/Rules. The ITS databases
+  symbol mappings, General profiles and Unit history remain embedded in Army/Rules. The ITS databases
   publish season-specific missions and applicable tournament/Extra policies.
   Superseded ITS 18 Battleground facts and source identity remain in
   `curated/its/n5-its-season-18.json`, not a selectable older revision.
@@ -352,7 +352,10 @@ build inputs (such as a version bump), run
 `python -m tools.data.rebuild_runtime_set --use-recorded-source`.
 This selects the exact Army ZIP/manifest pair recorded by the current
 `data/generated/army.db`, verifies the archive hash, and refuses missing
-sources instead of silently selecting a newer snapshot.
+sources instead of silently selecting a newer snapshot. The recorded-source
+wrapper also preserves the history-enabled build selection. For an explicit
+source build intended for publication, include `--with-unit-history`;
+a history-free development build remains available without that flag.
 
 For an R1 source-pinned build, supply **both** the exact ZIP and its
 version-3 provenance manifest, optionally choosing a separate complete
@@ -431,7 +434,7 @@ exist for independent development commands; they are not serving dependencies.
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
 `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
-Army v34 / Rules v23 / ITS v2, with matched provenance
+Army v34/v35 / Rules v23 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -476,9 +479,9 @@ transitional fixtures when explicitly requested by development code.
 the selected four-database set, without selecting environment paths or discovering
 another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current four-file runtime layout embeds Army v34 Equipment presentation
+The current four-file runtime layout embeds Army Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
-Army overview text, legacy identities, symbol mappings/hashes and General profiles,
+Army overview text, legacy identities, symbol mappings/hashes, General profiles and Unit history,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
 and Ammunition publications. P2.4 materialization is complete for the normal runtime.
 Older v10–v16 Rules layouts

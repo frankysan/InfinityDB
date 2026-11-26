@@ -8,10 +8,11 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The complete serving runtime uses Army v34 in `army.db`, Rules v23 in
+The complete serving runtime uses Army v34 or history-enabled v35 in `army.db`, Rules v23 in
 `rules_n5.db` and ITS schema v2 in `its_17.db` and `its_18.db`.
 Structured references, source/citation identity, symbol mappings and
-shared General-profile projections are embedded. Serving requires all four,
+shared General-profile projections are embedded. The tracked v35 publication also
+embeds Unit history. Serving requires all four,
 validates matched build/source provenance and does not read build JSON.
 The [data lifecycle](../data/README.md) owns current build/serve paths.
 Earlier schema/publication migration descriptions below are historical where
@@ -3190,7 +3191,7 @@ Explicitly selected older or partial sets retain the canonical composers.
 
 The editable `config/catalogs/equipment-presentation-encodings.json`
 retains two reviewed Cube/Cube 2.0 characteristic mappings.
-The current Army v34 runtime retains the presentation tables first
+The current Army runtime retains the presentation tables first
 introduced in Army v27/compatibility 36, without altering
 the narrow Army importer.
 `equipment_presentation_encodings` stores the exact canonical
@@ -3441,8 +3442,8 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `infinity-db build` creates Army v34 and Rules v23 together in the
-selected complete directory. Rules embeds object identities, attributes and
+Normal `infinity-db build` creates Army v34 (v35 with `--with-unit-history`)
+and Rules v23 together in the selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded
 projections and shared build provenance are validated before replacement.
@@ -4834,7 +4835,7 @@ and adds the reviewed embedded projections through v9–v23 as build-time
 stages. These stages are used to produce the current v23 publication, not
 an invitation to serve a historical database in place of a complete set.
 Normal checkout/Docker serving requires the validated current Rules v23
-publication together with matched Army v34 and both ITS v2 seasons; separately
+publication together with matched Army v34/v35 and both ITS v2 seasons; separately
 selected non-complete databases are only for explicit inspection or
 targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)
 owns operational selection.

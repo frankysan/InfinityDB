@@ -111,7 +111,8 @@ def test_database_separation_audit_is_deterministic_and_read_only(tmp_path: Path
 
 @pytest.mark.parametrize(
     ("version", "extra_count"),
-    [(26, 0), (27, 2), (28, 4), (29, 8), (30, 11), (31, 14), (32, 16), (33, 16), (34, 17)],
+    [(26, 0), (27, 2), (28, 4), (29, 8), (30, 11), (31, 14),
+     (32, 16), (33, 16), (34, 17), (35, 18)],
 )
 def test_database_separation_audit_classifies_versioned_publication_tables(
     version: int, extra_count: int,
@@ -142,7 +143,8 @@ def test_database_separation_audit_accepts_current_tracked_army_database(
         published, project_root=ROOT, raw_path=tmp_path / "not-available.raw.db"
     )
 
-    assert report["database"]["tableCount"] == 101
+    assert report["database"]["tableCount"] == 102
+    assert _item(report, "unit_history_payloads")["classification"] == CONTEXTUAL
     assert report["rawArchive"]["status"] == "not_available"
     assert report["summary"]["runtimeSourceOnlyViolationCount"] == 0
     assert report["summary"]["foreignKeyBlockerCount"] == 0

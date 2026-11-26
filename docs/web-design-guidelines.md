@@ -201,7 +201,7 @@ desktop/mobile layouts and non-color text cues.
 
 ### Unit history presentation
 
-**Accepted design direction (web integration pilot implemented).** Put a collapsed
+Put a collapsed
 **History** disclosure immediately beneath the current content of each
 General profile and within each applicable Army profile card. History
 belongs to the particular profile or Army context it describes; do not
@@ -226,7 +226,9 @@ the shared General-profile scope and direct readers to the Army histories for
 individual changes. An empty or incomplete history is not evidence that a
 profile has never changed. Direct-owner capability scope excludes attached
 entities; explain that distinction without repeating it in loadout headings
-or splitting otherwise identical display scopes. The
+or splitting otherwise identical display scopes. Show a count of displayed change
+rows when a disclosure contains changes, and identify the incomplete history and
+revision-date convention in every disclosure. The
 [historical data contract](data-model.md#private-army-history-research-database)
 owns attribution, observation windows and unresolved evidence.
 

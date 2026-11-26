@@ -54,6 +54,10 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("--manifest cannot be combined with --use-recorded-source")
         try:
             source, manifest = recorded_source_paths(args.db_dir)
+            record = validate_build_record(
+                _metadata(args.db_dir / "army.db")[BUILD_PROVENANCE_KEY], "army",
+            )
+            args.with_unit_history = args.with_unit_history or "history" in record["manifest"]
         except (KeyError, ValueError) as exc:
             parser.error(str(exc))
     else:

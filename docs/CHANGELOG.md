@@ -18,12 +18,18 @@ are not retroactively relabeled.
 - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
 - Faster initial Unit Explorer filter-context initialization and Specialist Troops filtering.
 - Correct Equipment filter counts on repeated matching queries.
+- Unit details now include N5 profile and Army history, grouped by revision date
+  and change type. Historical coverage is incomplete.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
 ### Added
 
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.
+- **Data processing + Web backend + Web frontend:** Embedded the reviewed N5
+  Unit history projection in Army schema v35. Collapsed histories distinguish
+  shared General-profile changes, Army-specific changes and former Army
+  contexts without needing a runtime JSON sidecar.
 
 ### Changed
 

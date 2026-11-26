@@ -322,10 +322,13 @@ make v1.3.0 depend on them.
     public integration.
   - [ ] Include the embedded v35 Unit history projection in the v1.3.0 release
     build (`--with-unit-history`), review the actual browser presentation and
-    validate normal deployment. The builder and runtime reader support the
-    accepted local historical corpus without a runtime sidecar. Extend the
-    accepted corpus for newer direct Army snapshots before publishing their
-    history.
+    validate normal deployment. The tracked build now includes v35 history,
+    matches all 738 preview payloads and passes deployment artifact checks.
+    Native browser review covers General, Army and unmatched histories,
+    change counts, keyboard expansion and desktop/mobile layout. Isolated
+    Docker and final release acceptance remain under the release checklist.
+    Extend the accepted corpus for newer direct Army snapshots before
+    publishing their history.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
   **historical FAQ edition replay and source-date/season selection**,

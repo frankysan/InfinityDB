@@ -1900,6 +1900,12 @@ h1>span {
   font-weight: 600;
 }
 
+.unit-history-count {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+}
+
 .unit-history-body {
   padding-top: 10px;
   overflow-wrap: anywhere;
@@ -1908,6 +1914,7 @@ h1>span {
 .unit-history-note {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+  margin: 0 0 6px;
 }
 
 .unit-history-date {
@@ -1942,12 +1949,14 @@ h1>span {
 }
 
 .unit-history-change[data-action="gained"],
-.unit-history-change[data-action="added"] {
+.unit-history-change[data-action="added"],
+.unit-history-change[data-action="appeared"] {
   border-left-color: #31956b;
 }
 
 .unit-history-change[data-action="lost"],
-.unit-history-change[data-action="removed"] {
+.unit-history-change[data-action="removed"],
+.unit-history-change[data-action="disappeared"] {
   border-left-color: #c95b60;
 }
 

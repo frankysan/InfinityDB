@@ -19,7 +19,7 @@ def test_published_contexts_match_every_source_occurrence() -> None:
     database = Database(ARMY)
     expected = database._compose_scoped_unit_filter_contexts()
     with closing(sqlite3.connect(ARMY)) as db:
-        assert db.execute("PRAGMA user_version").fetchone()[0] == 34
+        assert db.execute("PRAGMA user_version").fetchone()[0] >= 34
         assert read_filter_contexts(db) == expected
         assert db.execute("SELECT body FROM unit_filter_contexts").fetchone()[0] == (
             encode_contexts(expected)

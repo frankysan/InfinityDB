@@ -1327,15 +1327,26 @@ function historyDisclosure(changes, general = false) {
   disclosure.className = "unit-history";
   const summary = document.createElement("summary");
   summary.textContent = "History";
+  if (changes.length) {
+    const count = changes.reduce((total, change) => total + change.actions.length, 0);
+    const countLabel = document.createElement("span");
+    countLabel.className = "unit-history-count";
+    countLabel.textContent = ` · ${count} ${count === 1 ? "change" : "changes"}`;
+    summary.append(countLabel);
+  }
   disclosure.append(summary);
   const body = document.createElement("div");
   body.className = "unit-history-body";
   const note = document.createElement("p");
   note.className = "unit-history-note";
   note.textContent = general
-    ? "Shared across all Army profiles and loadouts, including optional categories. Individual changes appear in Army histories."
-    : "Dates are Army data revisions. History may be incomplete.";
+    ? "Changes shared across all Army profiles and loadouts for this General profile, including optional categories. Individual changes appear in Army histories."
+    : "Changes to this Army's profiles and loadouts. Skills, Equipment and Weapons refer to the owning profile or loadout, not its attached entities.";
   body.append(note);
+  const coverage = document.createElement("p");
+  coverage.className = "unit-history-note";
+  coverage.textContent = "Dates are Army data revision dates. Available history is incomplete.";
+  body.append(coverage);
   if (!changes.length) {
     const empty = document.createElement("p");
     empty.textContent = general
@@ -1371,7 +1382,9 @@ function historyDisclosure(changes, general = false) {
         title.textContent = scope;
         group.append(title);
       }
-      for (const category of categoryOrder) {
+      for (const category of [...categoryOrder, ...[...categories.keys()].filter(
+        (category) => !categoryOrder.includes(category),
+      )]) {
         if (!categories.has(category)) continue;
         const label = document.createElement("h5");
         label.className = "data-label";
@@ -1384,7 +1397,7 @@ function historyDisclosure(changes, general = false) {
           const action = document.createElement("span");
           action.className = "unit-history-action";
           action.textContent = change.action;
-          item.append(action, document.createTextNode(change.text));
+          item.append(action, document.createTextNode(" " + change.text));
           list.append(item);
         }
         group.append(label, list);

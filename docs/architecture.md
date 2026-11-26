@@ -487,7 +487,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v34, Rules v23 and ITS v2,
+The complete serving contract requires Army v34/v35, Rules v23 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)
