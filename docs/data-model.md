@@ -830,6 +830,11 @@ applicable loadout, or present with different quantities, is not promoted.
 Existing identical-extra shared variants retain their own identity. Source
 profile/loadout payloads, relationship semantics and filtering remain unchanged.
 
+The accepted [build-time materialization direction](architecture.md#design-direction-build-time-materialization)
+will change when General profiles are composed, not their identity, semantics
+or provenance. The v1.3.0 pilot is tracked in the performance backlog;
+current publication still uses runtime composition.
+
 ### Unit and General-profile symbols
 
 Every published logical Unit has exactly one effective graphical symbol. A General profile inherits

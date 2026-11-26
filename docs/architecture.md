@@ -55,6 +55,10 @@ Unless a section is explicitly marked **Design direction**, it describes current
    architectural boundaries as well as planning labels.
 10. **Determinism and portability are artifact contracts.** Given the same inputs and declared
     toolchain, persistent generated artifacts must be byte-identical across supported platforms.
+11. **Prefer build-time computation.** When all inputs to a deterministic transformation are
+    known at database-build time, prefer storing its result in the runtime database set over
+    repeating it per request or worker, when storage, build and maintenance costs justify it.
+    See the [accepted design direction](#design-direction-build-time-materialization).
 
 ## Accepted workspace conventions (prospective, not a path migration)
 
@@ -166,6 +170,58 @@ already-built database. Build-time configuration may be packaged for installed b
 opening a runtime database remains independent of repository-relative build policy.
 
 See `data/README.md` and `data/curated/README.md` for the concrete file contracts.
+
+## Design direction: build-time materialization
+
+**Accepted direction for v1.3.0; not yet implemented.**
+
+The immutable runtime database set is the publication boundary. Move suitable
+deterministic composition, enrichment and indexing from request handling into
+the existing database build pipeline. The backend should primarily retrieve,
+select, filter and present application-shaped data, rather than reconstruct it
+on cold requests or maintain redundant per-worker caches.
+
+Materialized projections are generated derivatives, never separately maintained
+knowledge or replacements for authoritative normalized occurrences, curated
+facts or their provenance. Build them from the complete pinned input set,
+including applicable Rules/FAQ/ITS publications, configuration and symbols
+when consumed. Keep composition semantics in one reusable implementation;
+do not introduce independent build-time and runtime definitions. Rebuild
+projections with their dependencies, validate their coverage and compatibility
+with the selected database set, and preserve deterministic cross-platform
+output. Use existing generated databases and build machinery unless a
+measured need justifies additional infrastructure.
+
+The first candidate is the General profile. Its four optional availability
+flags (Mercenaries, Spec-Ops, Team Operations and Reinforcements) give
+16 combinations per logical Unit. Generate the applicable representations
+and deduplicate identical derived payloads where beneficial, preserving
+the selection mapping, profile identity, shared items, symbols and availability.
+A Unit-detail request may also explicitly include a requested Army; preserve
+that context-specific behavior rather than assuming the 16 flag combinations
+cover every request. The existing [General profile contract](data-model.md#general-profile)
+remains authoritative. Extended Explorer rows must continue to agree with
+Unit details for equivalent selections.
+
+Potential subsequent candidates include canonical Unit details, composed
+Rules records and relations, Skill/Equipment/Weapon enrichment, search
+identity indexes, Glossary entries, catalog usage associations and Scenario
+map SVGs for bounded presentation variants. Respect publication/season scope,
+requested Army context and presentation parameters; materialize only the
+snapshot-dependent portion when a result also depends on a request.
+Arbitrary filter combinations, prospective counts, pagination and user
+preferences remain runtime selection/query work; precompute reusable
+associations or indexes rather than enumerating unbounded query results.
+
+Choose materialization granularity and storage representation using measured
+tradeoffs: cold and repeated request latency, build duration, generated
+database size, application startup and per-worker memory. Preserve public
+API behavior and source provenance, and retire superseded runtime work/caches
+when parity and compatibility are established. The objective is less total
+work and simpler serving, not maximum precomputation at any cost.
+
+Implementation priorities and remaining tasks belong to the
+[performance backlog](TODO.md#performance-storage-and-build-tooling).
 
 ## Application domains
 

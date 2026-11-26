@@ -284,6 +284,29 @@ Use these links to jump directly to a workstream:
 
 ### Performance, storage, and build tooling
 
+- [ ] **Data processing + Web backend (v1.3.0):** Begin the transition to
+  [build-time materialized application projections](architecture.md#design-direction-build-time-materialization).
+  Keep this separate from v1.2.2 release preparation.
+  - [ ] Pilot materialized General profiles in the existing runtime database
+    build. Cover all 16 optional availability combinations per logical Unit,
+    deduplicate identical projections where useful, and preserve explicit
+    requested-Army behavior on Unit details. Retain the canonical composition
+    logic and source occurrence provenance; select the persisted representation
+    at runtime instead of rebuilding full Unit details for Extended Explorer.
+  - [ ] Compare generated projections with the current runtime reference across
+    the snapshot and all availability combinations, including contextual symbols,
+    AVA, shared items, distinct identities and requested-Army exceptions.
+    Verify deterministic complete-set builds and public API compatibility.
+    Measure build duration, database size, startup, worker memory, and cold
+    and repeated request latency against the existing browser/API baseline.
+    Remove redundant runtime composition/caching only after successful cutover.
+  - [ ] If the pilot demonstrates worthwhile benefits, extend incrementally to
+    canonical Unit details and composed Rules records/relations. Evaluate
+    catalog enrichment, search identities, Glossary, usage associations and
+    bounded Scenario SVG variants next, using measurements to select scope.
+    Leave arbitrary request filtering and prospective counts dynamic; consider
+    reusable materialized associations/indexes for them.
+
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.
   The current set includes 17 normalized deployed objects (one unresolved
