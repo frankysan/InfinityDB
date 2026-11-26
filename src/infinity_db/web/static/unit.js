@@ -1322,19 +1322,31 @@ function compositeOptionTable(options, anchorScope) {
   );
 }
 
+function appendHistorySummary(disclosure, title, contexts) {
+  const summary = document.createElement("summary");
+  summary.textContent = title;
+  // Each context renders one post per revision date, even when several
+  // categories or scopes changed on that date.
+  const updates = contexts.reduce(
+    (total, changes) => total + new Set(changes.map((change) => change.date)).size, 0,
+  );
+  const count = contexts.reduce((total, changes) => total + changes.reduce(
+    (sum, change) => sum + change.actions.length, 0,
+  ), 0);
+  const countLabel = document.createElement("span");
+  countLabel.className = "unit-history-count";
+  countLabel.textContent = updates
+    ? ` · ${updates} ${updates === 1 ? "update" : "updates"} · ${count} ${count === 1 ? "change" : "changes"}`
+    : " · No confirmed updates";
+  disclosure.classList.toggle("unit-history--empty", !updates);
+  summary.append(countLabel);
+  disclosure.append(summary);
+}
+
 function historyDisclosure(changes, general = false) {
   const disclosure = document.createElement("details");
   disclosure.className = "unit-history";
-  const summary = document.createElement("summary");
-  summary.textContent = "History";
-  if (changes.length) {
-    const count = changes.reduce((total, change) => total + change.actions.length, 0);
-    const countLabel = document.createElement("span");
-    countLabel.className = "unit-history-count";
-    countLabel.textContent = ` · ${count} ${count === 1 ? "change" : "changes"}`;
-    summary.append(countLabel);
-  }
-  disclosure.append(summary);
+  appendHistorySummary(disclosure, "History", [changes]);
   const body = document.createElement("div");
   body.className = "unit-history-body";
   const note = document.createElement("p");
@@ -1585,9 +1597,9 @@ function render(unit, helpItems = [], attributeItems = []) {
   if (unit.historical_contexts?.length) {
     const historical = document.createElement("details");
     historical.className = "surface content-frame unit-history";
-    const summary = document.createElement("summary");
-    summary.textContent = "Other historical contexts";
-    historical.append(summary);
+    appendHistorySummary(
+      historical, "Other historical contexts", unit.historical_contexts.map((context) => context.changes),
+    );
     for (const context of unit.historical_contexts) {
       const section = document.createElement("section");
       section.className = "unit-history-body";

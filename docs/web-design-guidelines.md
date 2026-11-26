@@ -233,9 +233,12 @@ the shared General-profile scope and direct readers to the Army histories for
 individual changes. An empty or incomplete history is not evidence that a
 profile has never changed. Direct-owner capability scope excludes attached
 entities; explain that distinction without repeating it in loadout headings
-or splitting otherwise identical display scopes. Show a count of displayed change
-rows when a disclosure contains changes, and identify the incomplete history and
-revision-date convention in every disclosure. The
+or splitting otherwise identical display scopes. Show the number of dated
+update posts and displayed change rows in each collapsed heading, counting
+each revision date once per context. Aggregate the displayed posts and rows
+across Other historical contexts. Keep empty disclosures muted but readable
+and expandable, with an explicit "No confirmed updates" label. Identify
+incomplete history and the revision-date convention in every disclosure. The
 [historical data contract](data-model.md#private-army-history-research-database)
 owns attribution, observation windows and unresolved evidence.
 

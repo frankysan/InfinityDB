@@ -1926,15 +1926,26 @@ def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_
         "date": "2025-10-15", "scope": "", "category": "Characteristics",
         "actions": [{"action": "Changed", "text": "BS: 11 → 12"}],
     }
+    same_date = {
+        **change, "category": "Skills",
+        "actions": [
+            {"action": "Gained", "text": "Dodge"},
+            {"action": "Lost", "text": "Berserk"},
+        ],
+    }
+    later = {**change, "date": "2025-11-15"}
     projection = tmp_path / "history.json"
     projection.write_text(json.dumps({
         "formatVersion": 1,
         "armyDatabaseSha256": sha256(app_database_template.read_bytes()).hexdigest(),
         "units": {"1": {
-            "general": {"profile ranger": [change]},
+            "general": {"profile ranger": [change, same_date, later]},
             "armies": {"101": [], "201": [{**change, "scope": "Loadout A",
                                          "category": "Costs"}]},
-            "unmatched": [{"name": "Former Army", "changes": [change]}],
+            "unmatched": [
+                {"name": "Former Army", "changes": [change, same_date]},
+                {"name": "Another Former Army", "changes": [change]},
+            ],
         }},
     }), encoding="utf-8")
     app = create_app(app_database_template, history_path=projection)
@@ -1956,8 +1967,46 @@ def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_
                 assert page.locator(".army-profile .unit-history").count() == 2
                 assert page.locator(".unit-history[open]").count() == 0
                 page.evaluate("(theme) => document.documentElement.dataset.theme = theme", theme)
+                assert general.locator(":scope > summary").inner_text() == (
+                    "History · 2 updates · 4 changes"
+                )
+                empty = page.locator(".army-profile .unit-history--empty")
+                empty.locator("xpath=..").evaluate("(army) => army.open = true")
+                empty_summary = empty.locator(":scope > summary")
+                assert empty_summary.inner_text() == "History · No confirmed updates"
+                assert empty_summary.evaluate("""element => {
+                    const style = getComputedStyle(element);
+                    const label = element.querySelector(".unit-history-count");
+                    return style.color === getComputedStyle(label).color
+                        && style.fontWeight === "400";
+                }""")
+                empty_summary.focus()
+                empty_summary.press("Enter")
+                assert empty.get_by_text(
+                    "No changes have been confirmed in the available history for this Army."
+                ).is_visible()
+                empty_summary.press("Enter")
+                assert empty.get_attribute("open") is None
+
+                army_history = page.locator(".army-profile .unit-history:not(.unit-history--empty)")
+                army_history.locator("xpath=..").evaluate("(army) => army.open = true")
+                assert army_history.locator(":scope > summary").inner_text() == (
+                    "History · 1 update · 1 change"
+                )
+                other = page.locator(".unit-history").filter(
+                    has=page.locator(":scope > summary", has_text="Other historical contexts"),
+                )
+                assert other.locator(":scope > summary").inner_text() == (
+                    "Other historical contexts · 2 updates · 4 changes"
+                )
+                other.locator(":scope > summary").click()
+                assert other.locator("section > .unit-history > summary").all_inner_texts() == [
+                    "History · 1 update · 3 changes", "History · 1 update · 1 change",
+                ]
                 general.locator(":scope > summary").click()
-                assert general.get_by_text("BS: 11 → 12").is_visible()
+                assert general.locator(".unit-history-date").count() == 2
+                assert general.locator(".unit-history-change").count() == 4
+                assert general.get_by_text("BS: 11 → 12").first.is_visible()
                 assert general.get_by_text("2025-10-15").is_visible()
                 assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
                 page.close()

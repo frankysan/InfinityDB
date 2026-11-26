@@ -1960,6 +1960,15 @@ h1>span {
 .unit-history-count {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.unit-history--empty > summary {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.unit-history--empty > summary > .unit-history-count {
   font-weight: 400;
 }
 
