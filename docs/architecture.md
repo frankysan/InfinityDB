@@ -223,8 +223,10 @@ derived from reviewed qualifying Skills and exact Army variants. Candidate
 membership is not permanent Specialist status or a filtered result.
 Full invariant Unit-detail materialization is not selected: its measured
 gain did not justify duplicating the enriched occurrence payloads.
-Potential subsequent candidates include maintained-text tokens, Glossary entries
-and Scenario map SVGs. Respect publication/season scope and
+Rules v22 publishes compact maintained-text target descriptors, including
+parsed preview tokens and canonical routes. Resolve local anchors, scenario
+selection, display forms and season-owned fallback targets in the consumer.
+Potential subsequent candidates include Glossary entries and Scenario map SVGs. Respect publication/season scope and
 materialize only snapshot-dependent portions.
 Arbitrary filter combinations, prospective counts, pagination and user
 preferences remain runtime selection/query work; precompute reusable
@@ -475,7 +477,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v34, Rules v21 and ITS v2,
+The complete serving contract requires Army v34, Rules v22 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

@@ -2,17 +2,21 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import sqlite3
 from collections.abc import Iterable
 from copy import deepcopy
 from typing import Any
 
+from infinity_db.build_provenance import canonical_bytes
 from infinity_db.database.repository import Database
 from infinity_db.domain_references import (
     local_rule_public_reference,
     rule_record_public_reference,
 )
-from infinity_db.maintained_text import parse_maintained_text
-from infinity_db.rules_database import RulesDatabase
+from infinity_db.maintained_text import MAINTAINED_REFERENCE_KINDS, parse_maintained_text
+from infinity_db.rules_database import RULES_METADATA_TABLE, RulesDatabase
 from infinity_db.weapon_properties import WeaponProperties
 
 
@@ -29,6 +33,86 @@ def _pluralize(value: str) -> str:
     return f"{value}s"
 
 
+def collect_reference_targets(
+    database: Database, rules_database: RulesDatabase,
+) -> dict[str, Any]:
+    """Prepare small context-neutral target descriptors from composed Rules rows."""
+    records: dict[str, dict[str, Any]] = {}
+    with rules_database._connect() as db:
+        for record_id, scenario_id, body in db.execute(
+            "SELECT record_id,scenario_id,body FROM composed_rule_records "
+            "ORDER BY record_id,scenario_id"
+        ):
+            record = json.loads(body)
+            if record_id.partition(":")[0] not in MAINTAINED_REFERENCE_KINDS:
+                continue
+            records.setdefault(record_id, {})[scenario_id] = {
+                "name": record["name"],
+                "contextual": bool((record.get("scope") or {}).get("scenarios")),
+                "public_reference": rule_record_public_reference(database, record),
+                "summary_tokens": parse_maintained_text(record["summary"]),
+            }
+    properties = {
+        entry["id"]: {
+            "name": entry["name"], "public_reference": entry["public_reference"],
+            "summary": entry["summary"],
+        }
+        for entry in WeaponProperties(rules_database, database=database).entries()
+    }
+    return {"records": records, "properties": properties}
+
+
+def _target_fingerprint(db: sqlite3.Connection, body: str) -> str:
+    row = db.execute(
+        f"SELECT value FROM {RULES_METADATA_TABLE} WHERE key='searchIndex'"
+    ).fetchone()
+    if row is None:
+        raise ValueError("Maintained reference targets require publication scope")
+    return hashlib.sha256(canonical_bytes([json.loads(row[0])["scope"], body])).hexdigest()
+
+
+def stage_reference_targets(db: sqlite3.Connection, targets: dict[str, Any]) -> None:
+    body = canonical_bytes(targets).decode("utf-8")
+    db.execute(
+        "CREATE TABLE maintained_reference_targets (id INTEGER PRIMARY KEY CHECK(id=1), "
+        "body TEXT NOT NULL)"
+    )
+    db.execute("INSERT INTO maintained_reference_targets VALUES (1,?)", (body,))
+    db.execute(
+        f"INSERT INTO {RULES_METADATA_TABLE} VALUES (?,?)",
+        ("referenceTargetsSha256", json.dumps(_target_fingerprint(db, body))),
+    )
+    validate_reference_targets(db)
+
+
+def read_reference_targets(db: sqlite3.Connection) -> dict[str, Any]:
+    row = db.execute("SELECT body FROM maintained_reference_targets WHERE id=1").fetchone()
+    if row is None:
+        raise ValueError("Missing maintained reference targets")
+    return json.loads(row[0])
+
+
+def validate_reference_targets(db: sqlite3.Connection) -> None:
+    body = db.execute("SELECT body FROM maintained_reference_targets WHERE id=1").fetchone()
+    digest = db.execute(
+        f"SELECT value FROM {RULES_METADATA_TABLE} WHERE key='referenceTargetsSha256'"
+    ).fetchone()
+    if body is None or digest is None or json.loads(digest[0]) != _target_fingerprint(db, body[0]):
+        raise ValueError("Invalid maintained reference targets fingerprint")
+    targets = json.loads(body[0])
+    expected = {
+        (record_id, context) for record_id, context in db.execute(
+            "SELECT record_id,scenario_id FROM composed_rule_records"
+        ) if record_id.partition(":")[0] in MAINTAINED_REFERENCE_KINDS
+    }
+    actual = {
+        (record_id, context) for record_id, variants in targets["records"].items()
+        for context in variants
+    }
+    if actual != expected:
+        raise ValueError("Incomplete maintained reference target coverage")
+
+
 class _Resolver:
     def __init__(
         self,
@@ -38,6 +122,7 @@ class _Resolver:
         *,
         local_rule_ids: frozenset[str] = frozenset(),
         additional_records: dict[str, dict[str, Any]] | None = None,
+        reference_targets: dict[str, Any] | None = None,
     ) -> None:
         self.additional_records = additional_records or {}
         self.database = database
@@ -45,7 +130,14 @@ class _Resolver:
         self.scenario_id = scenario_id
         self.local_rule_ids = local_rule_ids
         self.records: dict[str, dict[str, Any] | None] = {}
-        self._properties: dict[str, dict[str, Any]] | None = None
+        projection = database.catalog_projection
+        if (reference_targets is None and projection is not None
+                and projection.path == rules_database.path):
+            reference_targets = projection.reference_targets
+        self.reference_targets = reference_targets
+        self._properties: dict[str, dict[str, Any]] | None = (
+            reference_targets["properties"] if reference_targets is not None else None
+        )
 
     def record(self, record_id: str) -> dict[str, Any]:
         if record_id not in self.records:
@@ -58,10 +150,15 @@ class _Resolver:
         return record
 
     def tokens(self, value: str, *, include_preview: bool = True) -> list[dict[str, Any]]:
+        return self._resolve_tokens(parse_maintained_text(value), include_preview=include_preview)
+
+    def _resolve_tokens(
+        self, tokens: list[dict[str, Any]], *, include_preview: bool,
+    ) -> list[dict[str, Any]]:
         resolved = []
-        for token in parse_maintained_text(value):
+        for token in tokens:
             if token["type"] != "reference":
-                resolved.append(token)
+                resolved.append(dict(token))
                 continue
             if token["target"].startswith("weapon-property:"):
                 if self._properties is None:
@@ -81,7 +178,7 @@ class _Resolver:
                     "type": "reference",
                     "target": token["target"],
                     "label": label,
-                    "public_reference": property_entry["public_reference"],
+                    "public_reference": deepcopy(property_entry["public_reference"]),
                 }
                 if include_preview:
                     item["preview_tokens"] = [
@@ -89,15 +186,30 @@ class _Resolver:
                     ]
                 resolved.append(item)
                 continue
-            record = self.record(token["target"])
-            label = token.get("display_text") or record["name"]
+            target = token["target"]
+            prepared = None
+            if self.reference_targets is not None:
+                variants = self.reference_targets["records"].get(target, {})
+                prepared = variants.get(self.scenario_id or "") or variants.get("")
+            if prepared is not None:
+                name = prepared["name"]
+                contextual = prepared["contextual"]
+                reference = prepared["public_reference"]
+            else:
+                record = self.record(target)
+                name = record["name"]
+                contextual = bool((record.get("scope") or {}).get("scenarios"))
+                reference = None if contextual else (
+                    local_rule_public_reference(record["id"], self.local_rule_ids)
+                    or rule_record_public_reference(self.database, record)
+                )
+            label = token.get("display_text") or name
             if token.get("display_form") == "plural" and not token.get("display_text"):
                 label = _pluralize(label)
-            contextual = bool((record.get("scope") or {}).get("scenarios"))
-            reference = None if contextual else (
-                local_rule_public_reference(record["id"], self.local_rule_ids)
-                or rule_record_public_reference(self.database, record)
-            )
+            if prepared is not None:
+                reference = None if contextual else (
+                    local_rule_public_reference(target, self.local_rule_ids) or reference
+                )
             if reference is None and not contextual:
                 raise ValueError(
                     f"Maintained-text reference {token['target']!r} has no public route"
@@ -106,10 +218,14 @@ class _Resolver:
                 "type": "reference",
                 "target": token["target"],
                 "label": label,
-                "public_reference": reference,
+                "public_reference": deepcopy(reference),
             }
             if include_preview:
-                item["preview_tokens"] = self.tokens(record["summary"], include_preview=False)
+                preview = (
+                    prepared["summary_tokens"] if prepared is not None
+                    else parse_maintained_text(record["summary"])
+                )
+                item["preview_tokens"] = self._resolve_tokens(preview, include_preview=False)
             resolved.append(item)
         return resolved
 

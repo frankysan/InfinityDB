@@ -7,6 +7,7 @@ import json
 import sqlite3
 from contextlib import closing
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ from .equipment_catalog import EquipmentCatalog
 from .publication_registry import PublicationRegistry
 from .rules_database import (
     CATALOG_SCHEMA_VERSION,
+    REFERENCE_TARGET_SCHEMA_VERSION,
     RULES_METADATA_TABLE,
     SPECIALIST_SCHEMA_VERSION,
     RulesDatabase,
@@ -180,6 +182,16 @@ class CatalogProjection:
             if db.execute("PRAGMA user_version").fetchone()[0] < CATALOG_SCHEMA_VERSION:
                 return None
         return cls(path)
+
+    @cached_property
+    def reference_targets(self) -> dict[str, Any] | None:
+        """Load once per selected immutable application, not once per text value."""
+        from .maintained_text_references import read_reference_targets
+
+        with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+            if db.execute("PRAGMA user_version").fetchone()[0] < REFERENCE_TARGET_SCHEMA_VERSION:
+                return None
+            return read_reference_targets(db)
 
     def specialist_candidates(self, context: str) -> frozenset[int] | None:
         with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:

@@ -13,6 +13,7 @@ are not retroactively relabeled.
 ### Player summary
 
 - Faster global search through a compact prebuilt search index.
+- Faster resolution of inline rules references and their previews.
 - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
 - Faster initial Unit Explorer filter-context initialization and Specialist Troops filtering.
 - Correct Equipment filter counts on repeated matching queries.

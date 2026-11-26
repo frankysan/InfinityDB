@@ -350,6 +350,19 @@ Recorded-source rebuild: 115.89 s;
 Rules grew from 9,973,760 to 9,994,240 bytes; Army and ITS sizes unchanged.
 These are component timings, not end-to-end request latency.
 
+### Maintained-text reference target pilot
+
+Run `python -m tools.performance.benchmark_reference_targets`. On the current
+snapshot, 400 target identities, 401 composed selections and 12 Weapon
+Properties occupy 254,491 JSON bytes (262,144-byte pilot SQLite file).
+Construction took 0.185 s; reading and decoding took 5.91 ms.
+All 499 composed records matched canonical enrichment, with the correct
+scenario scope and local anchors. Median per-record resolution was
+6.04 ms canonical versus 0.14 ms prepared; aggregate times were 7.287 s
+and 0.111 s respectively. The complete rebuild took 113.51 s;
+Rules grew from 9,994,240 to 10,252,288 bytes, with Army/ITS sizes unchanged.
+These are component timings, not end-to-end browser measurements.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db
