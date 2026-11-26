@@ -697,6 +697,81 @@ actual JSON bytes, and the commit's date. **Do not** infer a publication date fr
 the version string, a Git commit timestamp, or the mutable `<faction>.json` alias
 alone. Do not assume the archive captures every intervening Army state.
 
+### Pinned historical Army research baseline
+
+The v1.3.0 research baseline was produced by the separate
+`InfinityDB-army-acquisition` repository. Its archive build revision is
+`8f14ca64c2bcd2ecee5e61a06f155792b5d873d4`; the producer handoff contract
+(`docs/HISTORY_HANDOFF.md`) was reviewed at
+`ae841c1dbf5c28df29c377de35fac9df4f1caaa0`.
+The consumer research implementation was integrated into InfinityDB at
+`32868779074d5af2b4241c2438c5f0562aa81de0`.
+
+The selected English-language archive combines the community backup ZIP
+(unverified commit/coherence), the backup's first-parent Army path history at
+`0b402cf1bb8aaabe594c67da93bb4e59b049cfbc` on `refs/heads/main`, and the
+direct N5 API snapshot `JSON 20261125-162328.zip`, acquired
+2026-11-25T16:23:28+01:00. The producer receipt pins those inputs and the
+embedded evidence reports. It is producer-side acceptance; the independent
+consumer reader separately verified receipt parity and archive integrity.
+
+Private input files under `local/data/history/archive/`:
+
+| File | SHA-256 |
+| --- | --- |
+| `army-history-v1.zip` | `08978b9bbf3fffa3184f6153fa4dd05a1931482742f08ee5de7a6df4f4a3c5c5` |
+| `army-history-v1.acceptance.json` | `da15fe82f910228ebd43b12eb74c47a365346fb9c4070b9768e0ed1cb59089d3` |
+
+Both have format version 1. The archive contains 1,406 unique objects
+(1,370 faction and 36 metadata objects), 2,841 observations, 119 assigned
+edition/faction sequences and 15 unresolved edition/content combinations.
+Coverage is incomplete or unknown. Source characterization spans N4, N5
+and CodeOne; the semantic comparison and subsequent reconciliation are
+**N5-only**, using 505 unambiguous adjacent-date pairs and explicitly
+excluding 180 ambiguous endpoint pairs. No cross-edition Unit continuity
+or upstream publication chronology is established.
+
+The selected full reports under `local/data/history/reports/` are:
+
+| Report | Format version | SHA-256 |
+| --- | --- | --- |
+| `characterization-v1.json` | 1 | `4477dac7daa81f8b4580f8db3a9fedb9cb1bb27a7d9ced9c04296fa017ce5bfc` |
+| `n5-identity-review-v1.json` | Not versioned | `953d39efc8a1804803932f6845b4c0912e4a5f13ebeb31da15a583ef680d350b` |
+| `n5-semantic-pilot-v3.json` | 1 | `168c4a06243b04a7097861464823150257344a6dafffd0eebbe377cd838cb8a3` |
+| `n5-consolidation-v3.json` | 3 | `2694ab280e386558347cbf580ff553b426a750723efed0345a96f7010b4c0b74` |
+| `n5-membership-v2.json` | 2 | `e740eec0460fd50747a18a467f46ab9efc88c8f607852769ebf05b829187ad10` |
+| `n5-loadouts-v2.json` | 2 | `998ef8c5f82157d545cbf9446d6a316f8b0a7cbec1cb0f6e0f71cc40beb2f926` |
+| `n5-catalogs-v1.json` | 1 | `d8ab56be3db436afaa7f40d344617c7c745b62828fe92d481e2fbac9ca875fb1` |
+
+Filename suffixes identify report runs, not necessarily format versions.
+The corresponding condensed reports are pinned for inspection, not as
+substitutes for full evidence:
+
+| Summary | SHA-256 |
+| --- | --- |
+| `n5-semantic-pilot-v3.summary.json` | `076ca7aec7236ebb2f011cb9d3d87eee8198ef2a8b9a53312b39ca26fd202838` |
+| `n5-consolidation-v3.summary.json` | `760c2c3187f156338f95d728217052eedd0c5c63cd6632d1612072ea5b84d948` |
+| `n5-membership-v2.summary.json` | `ce904fb526d9d93899016310db4198bdf9ead3d610a76d23e74383ea4dd48ea9` |
+| `n5-loadouts-v2.summary.json` | `165f11b25f918142d6b4d5630d03cb5d87addb835160e2936314b4bbd4526e72` |
+| `n5-catalogs-v1.summary.json` | `dfef659fb24e89286a09e754c7ee62677f2f3e147db2a9aed8b206bb115b4829` |
+
+To reproduce the baseline, use the pinned consumer implementation and the
+offline commands documented in [data paths and behavior](../data/README.md#current-paths-and-behavior).
+All commands require the selected archive and receipt pins. Characterization,
+identity review (Unit IDs 1635, 1691, 1718, 1800 and 1852) and semantic pilot
+read the archive independently. Consolidation, membership and catalog
+comparison additionally require the full semantic pilot and its hash;
+loadout reconciliation requires the full membership report and its hash.
+Use new output paths; never overwrite the accepted evidence.
+
+The 14 pinned files were hash-verified in both the original research
+worktree and the primary development checkout after transfer. They remain
+private research inputs, not runtime dependencies or public artifacts.
+For the remaining database and player-facing work, see the
+[history backlog](TODO.md#per-reference-change-history). Any new acquisition
+or regeneration requires explicit selection and validation; do not silently
+replace this baseline.
+
 ## Cross-source reconciliation procedure
 
 For each suspected discrepancy or missing rule:
