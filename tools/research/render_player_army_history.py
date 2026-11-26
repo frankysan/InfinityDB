@@ -759,8 +759,12 @@ def action_rows(row: Document) -> list[tuple[str, str]]:
 
 def context_history(rows: list[Document], names: dict[int, str], *, general: bool = False) -> str:
     if not rows:
-        note = ("No confirmed shared changes in this pilot." if general
-                else "No supported changes found in the available history.")
+        note = (
+            "No changes to this General profile, shared across its Army profiles and loadouts, "
+            "have been confirmed in the available history. Individual changes belong to the "
+            "respective Army histories."
+            if general else "No supported changes found in the available history for this Army."
+        )
         return ('<details class="history"><summary>History</summary>'
                 f'<p class="notice">{note}</p></details>')
     dates: dict[str, list[Document]] = defaultdict(list)
@@ -770,7 +774,9 @@ def context_history(rows: list[Document], names: dict[int, str], *, general: boo
     for date in sorted(dates, reverse=True):
         scopes: dict[str, list[Document]] = defaultdict(list)
         for row in dates[date]:
-            scopes["" if general else row["scope"]].append(row)
+            # Direct-owner scope qualifies the evidence, not the visible loadout heading.
+            scope = row["scope"].removesuffix(" · Own capabilities only")
+            scopes["" if general else scope].append(row)
         groups = []
         for scope, changes in scopes.items():
             categories: dict[str, list[Document]] = defaultdict(list)
@@ -791,7 +797,9 @@ def context_history(rows: list[Document], names: dict[int, str], *, general: boo
                     evidence = (
                         f"<p>{esc(armies)}</p><p>Observation window: "
                         f"{esc(row['earlierObservedDate'])} – {esc(row['laterObservedDate'])}</p>"
-                        f"<pre>{raw(row['evidence'])}</pre>"
+                        + ("<p>Scope: Own capabilities only (excluding attached entities).</p>"
+                           if row["scope"].endswith(" · Own capabilities only") else "")
+                        + f"<pre>{raw(row['evidence'])}</pre>"
                     )
                     review = details("Evidence", evidence)
                     items.append(
@@ -996,6 +1004,7 @@ def render(units: list[Document], names: dict[int, str], coverage: Document,
         "Army names use current labels. MOV is displayed in inches. "
         + ("Current cards show all optional Unit categories. General history is a conservative "
            "scalar-only attribution pilot; other changes remain in their observed Army contexts. "
+           "Capability changes describe the listed profiles and loadouts, not attached entities. "
            if contextual else "")
         + "</p>"
         '<label><input type="checkbox" id="technical"> Show technical evidence</label>'

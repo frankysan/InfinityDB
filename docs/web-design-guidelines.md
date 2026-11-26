@@ -221,8 +221,12 @@ before/after rows, explicit action labels, and clear spacing between
 scopes and categories; color is supplementary. Consolidate identical
 effects only where the underlying history model supports the scope.
 Keep normal-mode text readable on narrow screens and technical evidence
-available separately. An empty or incomplete history is not evidence
-that a profile has never changed. The
+available separately. An empty General-profile history must explicitly identify
+the shared General-profile scope and direct readers to the Army histories for
+individual changes. An empty or incomplete history is not evidence that a
+profile has never changed. Direct-owner capability scope excludes attached
+entities; explain that distinction without repeating it in loadout headings
+or splitting otherwise identical display scopes. The
 [historical data contract](data-model.md#private-army-history-research-database)
 owns attribution, observation windows and unresolved evidence.
 

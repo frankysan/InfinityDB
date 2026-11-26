@@ -298,6 +298,28 @@ def test_contextual_history_uses_collapsed_disclosures_and_typed_categories():
     assert "Observation window:" in html
 
 
+def test_contextual_empty_general_history_explains_shared_scope():
+    html = player.context_history([], {}, general=True)
+    assert "this General profile, shared across its Army profiles and loadouts" in html
+    assert "respective Army histories" in html
+    assert "confirmed in the available history" in html
+
+
+def test_contextual_direct_owner_scope_shares_heading_but_keeps_evidence():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    row = next(r for r in units[0]["entries"] if r["kind"] == "summaries")
+    rows = [
+        row,
+        {**row, "scope": "Group · Own capabilities only"},
+    ]
+    html = player.context_history(rows, {101: "Army A", 102: "Army B"})
+    assert html.count('<h4 class="scope">Group</h4>') == 1
+    assert html.count('Points: 32 → 30') == 2
+    assert "Group · Own capabilities only" not in html
+    assert "Scope: Own capabilities only (excluding attached entities)." in html
+
+
 def test_contextual_action_rows_keep_reference_changes_distinct():
     def ref(item_id, label, extra=None):
         occurrence = {"extra": [{"name": extra}]} if extra else {}
