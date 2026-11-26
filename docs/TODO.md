@@ -245,6 +245,11 @@ make v1.3.0 depend on them.
   matched directly to 738 logical Units; four historical-only IDs retained.
   1,806 composition candidates group into 1,282 observed-window groups
   across 330 logical Units; 265 Army observations remain separate.
+  The offline HTML review renders all 738 logical Units (389 with timeline
+  entries), 1,806 composition field candidates and all 265 Army observations.
+  It retains reference multiplicity, historical target labels, evidence
+  drilldown and separate review/catalog links. Private review remains required
+  before promotion.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,

@@ -189,3 +189,72 @@ def test_preview_groups_only_identical_target_window_and_scope():
     assert combined["historicalLabels"][0][0]["name"] == "Historical name"
     assert combined["comparisonIndices"] == [0]
     assert combined["status"] == "observedCandidate"
+
+
+def history_reference(identity, *, name="Weapon", metadata="a", quantity=1):
+    return {
+        "filter": {"id": identity, "name": name},
+        "metadataFingerprints": [metadata] if metadata else None,
+        "occurrence": {"quantity": quantity},
+    }
+
+
+def test_render_reference_multisets_preserve_duplicates_and_distinct_ids():
+    from tools.research.render_army_history import reference_changes
+
+    first = history_reference(1)
+    other = history_reference(2)
+    changes = reference_changes([first, first], [first, other])
+    assert changes == [
+        {"kind": "removed", "before": [first], "after": []},
+        {"kind": "added", "before": [], "after": [other]},
+    ]
+
+
+def test_render_reference_definition_changes_not_occurrence_changes():
+    from tools.research.render_army_history import reference_changes
+
+    first = history_reference(1)
+    changed = history_reference(1, metadata="b")
+    assert reference_changes([first], [changed]) == [
+        {"kind": "definitionChanged", "before": [first], "after": [changed]},
+    ]
+    modified = history_reference(1, quantity=2)
+    assert reference_changes([first], [modified])[0]["kind"] == "changed"
+    assert reference_changes([first, modified], [modified, first]) == []
+
+
+def test_history_render_preserves_source_values_and_escapes_names():
+    from tools.research.render_army_history import render_change, value_text
+
+    row = history_reference(1, name="<script>alert(1)</script>", metadata=None)
+    change = {
+        "field": "skills", "before": {"present": True, "value": []},
+        "after": {"present": True, "value": [row]},
+        "evidenceRecord": {"stream": "compositionCandidate", "position": 0,
+                           "sourceUnitId": 42},
+    }
+    html, counts = render_change(change)
+    assert counts == {"skills:added": 1}
+    assert "Added occurrence" in html and "filter-only evidence" in html
+    assert "&lt;script&gt;" in html and "<script>" not in html
+    assert value_text("ava", {"present": False}) == "Not present in source"
+    assert value_text("ava", {"present": True, "value": None}) == "Null (source value)"
+    assert value_text("move", {"present": True, "value": [4, 4]}) == "4-4"
+
+
+def test_render_army_observations_distinguish_list_presence_from_availability():
+    from tools.research.render_army_history import render_army
+
+    row = {
+        "kind": "unitListMembership", "direction": "appeared", "armyId": 101,
+        "earlierObservedDate": "2025-01-01", "laterObservedDate": "2025-02-01",
+        "sourcePath": ["units", 42],
+        "evidenceRecord": {"stream": "structuralOccurrence", "position": 0,
+                           "sourceUnitId": 42},
+    }
+    html = render_army(row, {101: "Army A"})
+    assert "Appeared in source list" in html
+    assert "current label" in html
+    assert "Observed between 2025-01-01 and 2025-02-01" in html
+    assert "Added to Army" not in html

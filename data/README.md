@@ -195,6 +195,13 @@ the retired source roots.
   history read model. It uses the tracked Army database and the pinned source
   archive, records both database hashes, and refuses a different current
   source snapshot. The output remains private and requires no runtime change.
+  Render the preview for local browser review with
+  `python -m tools.research.render_army_history --preview
+  local/data/history/generated/unit_history_preview.json --preview-sha256 HASH
+  --output local/data/history/generated/unit_history_review.html`. Use the
+  exact preview SHA-256; the renderer also verifies both linked database
+  hashes. The standalone searchable HTML requires no web server or network.
+  It is an ignored private review artifact, not a player-facing publication.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not

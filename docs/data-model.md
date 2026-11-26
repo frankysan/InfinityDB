@@ -90,6 +90,15 @@ are separate from composition. Unresolved structural, membership and loadout
 records and catalog evidence remain separate drilldown references; raw
 comparison categories and ambiguous Army windows retain coverage context.
 The preview is not a published history API or a verified event log.
+The offline HTML review renders attributes and costs as source before/after
+values, and compares resolved Skill, Equipment and Weapon multisets by exact
+signatures. Retain duplicates and modifiers; distinguish changed definitions
+with unchanged occurrence multisets from changed occurrences. Do not pair
+unrelated IDs by name. Army list appearances and disappearances describe
+observed list presence, not necessarily playable availability. Current Army
+labels are explicitly marked as such. Evidence references and raw values
+remain expandable; unresolved and catalog evidence are separate from the
+main timeline, with coverage gaps visible at report level.
 
 ### Accepted authoring direction: one source family, version-tagged facts
 
