@@ -426,6 +426,11 @@ The Windows implementation diagnostic retained 123.3 MiB versus 162.9 MiB
 with detail caching restored, with identical response digests. These runs
 overlapped development checks, so their timings are not a controlled latency
 comparison. The complete catalog-projection suite passed (22 tests).
+Linux-dev on `c9b3239f` retained 129.1 MiB versus 167.4 MiB with detail
+caching restored, with the same response digest; 22 catalog-projection tests
+passed in 102.08 s. Rebuilt the runtime databases after the repository input
+change; the deployment provenance check (`--skip-svg`) passed. Aggregate
+Gunicorn memory remains a release/deployment measurement, not a pilot result.
 
 ### Detail and catalog browser performance — 2026-11-25
 
