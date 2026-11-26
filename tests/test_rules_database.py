@@ -29,6 +29,34 @@ def export_rules_database(*args, **kwargs) -> None:
     export_release_rules_database(*args, **kwargs)
 
 
+def test_immutable_composed_kind_cache_preserves_public_records(monkeypatch) -> None:
+    path = Path("data/generated/rules_n5.db")
+    offline = RulesDatabase(path)
+    cached = RulesDatabase(path, immutable_snapshot=True)
+    for kind in ("skill", "equipment", "rule", "trait", "state", "weapon", "attribute",
+                 "term", "hacking-program", "ammunition", "scenario"):
+        for links in (True, False):
+            expected = offline.composed_records_by_kind(kind, include_army_links=links)
+            items = cached.composed_records_by_kind(kind, include_army_links=links)
+            assert items == expected
+            if items:
+                items[0]["facts"] = {"mutated": True}
+                items[0]["citations"].clear()
+                items[0]["relations"].clear()
+                items[0]["army_links"] = [{"entity": "mutated"}]
+            assert cached.composed_records_by_kind(kind, include_army_links=links) == expected
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("Cached kind must not recompose its records")
+
+    monkeypatch.setattr(cached, "_read_composed_kind", unexpected)
+    assert cached.composed_records_by_kind("skill") == offline.composed_records_by_kind("skill")
+    assert cached.composed_records_by_kind(
+        "skill", include_army_links=True,
+    ) == offline.composed_records_by_kind("skill", include_army_links=True)
+    assert offline._composed_kind_cache is None
+
+
 def test_rules_export_creates_schema_inside_transaction(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

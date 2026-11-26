@@ -209,6 +209,29 @@ were 73 and 64 ms. Further optimization should focus on broad Rules record
 composition and uncached Extended Unit Explorer pages only if justified by
 additional profiling.
 
+### Rules composition reuse — 2026-11-26
+
+Windows Chrome, baseline `a46a7a1`, both ITS seasons registered, three
+independent cold samples and repeat navigations per page. The serving
+application binds a Rules database instance to its immutable publication
+and caches kind compositions, returning detached copies and retaining
+the opt-in Army links contract. Offline readers remain uncached.
+Reverse relations and their endpoint Army links use bounded batch queries
+instead of per-record queries.
+
+Median first DOM update, before / after (ms):
+
+- Mimetism search: cold 766 / 523; repeat 64 / 33.
+- Skills catalog: cold 480 / 486; repeat 57 / 48.
+- Mimetism detail: cold 451 / 421; repeat 106 / 106.
+- MediKit detail: cold 474 / 445; repeat 114 / 101.
+
+Decoded response sizes were unchanged. Application startup median was
+2484 / 2397 ms. The search improvement is substantial; other changes are
+modest or within sample variability. A concurrent-test benchmark was
+discarded due to CPU contention. These final measurements were isolated
+from the regression suite.
+
 ### Full-season Skill initialization — 2026-11-26
 
 The browser benchmark's optional `--with-seasons` flag registers both ITS
