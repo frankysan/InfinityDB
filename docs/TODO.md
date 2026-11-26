@@ -302,6 +302,12 @@ make v1.3.0 depend on them.
     do not treat catalog transition groups as Unit composition changes or
     infer publication dates from contextual metadata. Extend to N4/CodeOne
     only with edition-specific validation.
+  - [ ] Implement the context-specific history projection and private Unit-detail
+    preview according to the [historical data contract](data-model.md#private-army-history-research-database)
+    and [Unit history presentation](web-design-guidelines.md#unit-history-presentation).
+    Validate historical General-profile changes against the shared composition
+    contract, keep Army-only changes in their owning cards, and review dense
+    histories such as Minutemen before public integration.
   - [ ] Review publication rights before exposing derived historical data.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional

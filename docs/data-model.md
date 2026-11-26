@@ -148,6 +148,27 @@ source-list membership as observed presence, not playable availability. The offl
 and provenance through optional technical controls; it is not a public API
 or publication approval.
 
+**Accepted direction for Unit details (not yet implemented).** Project
+historical changes onto the same application-facing General-profile and
+Army-specific profile/loadout boundaries used by current Unit details. A
+General-profile event must describe an observed change to that profile's
+shared presentation, not merely a source-level profile change or a change
+repeated in several Armies. Compare the shared facts at the relevant
+historical endpoints using the canonical General-profile composition and
+compatible profile identities, including the applicable occurrence selection.
+Do not apply today's common-item intersection retrospectively. Incomplete
+coverage, ambiguous continuity and asynchronous observations must not be
+treated as proof of a change shared by all applicable loadouts or Armies.
+A confirmed shared change appears once in the relevant General profile;
+retain any additional Army-specific effects in the relevant Army cards.
+Points, SWC, contextual AVA, Army-list presence and loadout lifecycle belong
+to the Army context. Preserve unmatched historical identities and removed
+Army contexts separately rather than assigning them to an unrelated current
+profile or losing their history. Source-only classification changes do not
+become changes to the General profile unless its projected facts changed.
+The [Unit history presentation](web-design-guidelines.md#unit-history-presentation)
+owns disclosure and layout.
+
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets
 within the endpoint Army and Unit, and resolve Peripheral references through

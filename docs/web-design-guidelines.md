@@ -199,6 +199,33 @@ discrepancy, or possible historical update. Maintain the source-model
 boundaries in [data-model.md](data-model.md) and test both light/dark,
 desktop/mobile layouts and non-color text cues.
 
+### Unit history presentation
+
+**Accepted design direction (not yet implemented).** Put a collapsed
+**History** disclosure immediately beneath the current content of each
+General profile and within each applicable Army profile card. History
+belongs to the particular profile or Army context it describes; do not
+repeat a shared General-profile event in every Army card. For Units with
+multiple General profiles (including distinct forms and Peripherals), keep
+their histories separate. An Army history stays within its parent card
+and remains independently collapsed by default. Retain readable historical
+contexts without a corresponding current card in a separate collapsed
+historical section rather than inventing a current profile or Army.
+
+Within each disclosure, group changes by first-observed date (newest
+first), then by meaningful profile/loadout scope and change category:
+characteristics, Skills, Equipment, Weapons, costs, availability and
+lifecycle/relationships as applicable. Classification changes must be
+distinguished from gains, losses and changed values. Use concise
+before/after rows, explicit action labels, and clear spacing between
+scopes and categories; color is supplementary. Consolidate identical
+effects only where the underlying history model supports the scope.
+Keep normal-mode text readable on narrow screens and technical evidence
+available separately. An empty or incomplete history is not evidence
+that a profile has never changed. The
+[historical data contract](data-model.md#private-army-history-research-database)
+owns attribution, observation windows and unresolved evidence.
+
 ### Explain rules interactions, not just outcomes
 
 **Target design direction:** When showing a reviewed interaction, give the
