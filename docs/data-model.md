@@ -139,8 +139,12 @@ observed date (the later endpoint), not an inferred publication date. Preserve
 each complete observation window in technical evidence. Within a date, display
 equivalent effects once across disjoint Army scopes even if their earlier
 observation dates differ. Retain distinct cost pairs, partial scopes, source
-identities, overlapping Army observations and underlying evidence. Display source-list membership as observed presence,
-not playable availability. The offline preview exposes unresolved outcomes
+identities, overlapping Army observations and underlying evidence. Pair one-sided
+cross-catalog reference changes as an observed classification transition only when
+exact target names, rule links, occurrence modifiers, scope, loadout coverage and
+comparison evidence agree uniquely. Retain both source observations; do not infer
+mechanical equivalence or a gameplay change from classification alone. Display
+source-list membership as observed presence, not playable availability. The offline preview exposes unresolved outcomes
 and provenance through optional technical controls; it is not a public API
 or publication approval.
 

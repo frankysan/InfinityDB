@@ -331,6 +331,64 @@ def historical_scopes(db: sqlite3.Connection, archive: Path) -> ScopeResolver:
     return resolve
 
 
+def classification_rows(rows: list[Document]) -> list[Document]:
+    """Describe exact same-scope cross-catalog transitions without inferring mechanics."""
+    candidates: dict[str, list[tuple[int, str, Document]]] = defaultdict(list)
+    for index, row in enumerate(rows):
+        if row["kind"] != "summaries":
+            continue
+        identity = row["identity"]
+        if identity["field"] not in {"skills", "equip", "weapons"}:
+            continue
+        lost, gained = identity.get("lost", []), identity.get("gained", [])
+        if len(lost) + len(gained) != 1:
+            continue
+        direction = "lost" if lost else "gained"
+        reference = (lost or gained)[0]
+        target = reference["filter"]
+        if not target.get("name") or not target.get("wiki"):
+            continue
+        context = {
+            k: v for k, v in identity.items() if k not in {"field", "lost", "gained", "summary"}
+        }
+        # Candidate positions differ by field; all comparison and pair coverage must agree.
+        evidence = sorted(
+            encode({k: v for k, v in item.items() if k != "candidatePositions"})
+            for item in row["evidence"]["evidence"]
+        )
+        key = encode({
+            "context": context, "scope": row["scope"], "armyIds": row["armyIds"],
+            "evidence": evidence, "name": target["name"], "wiki": target["wiki"],
+            "occurrence": reference["occurrence"],
+        })
+        candidates[key].append((index, direction, reference))
+
+    replacements: dict[int, Document] = {}
+    consumed: set[int] = set()
+    for matches in candidates.values():
+        if len(matches) != 2 or {m[1] for m in matches} != {"lost", "gained"}:
+            continue
+        (a, _, before), (b, _, after) = sorted(matches, key=lambda m: m[1], reverse=True)
+        left, right = rows[a], rows[b]
+        old, new = left["identity"]["field"], right["identity"]["field"]
+        if old == new:
+            continue
+        identity = {
+            k: v for k, v in left["identity"].items()
+            if k not in {"field", "lost", "gained", "summary"}
+        }
+        replacements[min(a, b)] = {
+            **left, "kind": "classification",
+            "text": f"{compact_reference(before)}: {FIELDS[old]} → {FIELDS[new]} (classification)",
+            "identity": {**identity, "beforeField": old, "afterField": new,
+                         "beforeReference": before, "afterReference": after},
+            "evidence": {"from": left["evidence"], "to": right["evidence"]},
+        }
+        consumed.update((a, b))
+    return [replacements[i] if i in replacements else row
+            for i, row in enumerate(rows) if i in replacements or i not in consumed]
+
+
 def effect_identity(row: Document) -> Document | list:
     identity = row["identity"]
     if row["kind"] == "summaries" and identity["allGroupLoadouts"]:
@@ -386,7 +444,7 @@ def model(
         # Merge only identical semantic targets and windows; display text alone
         # is not an identity. Preserve all original evidence.
         merged: dict[str, Document] = {}
-        for row in unit["entries"]:
+        for row in classification_rows(unit["entries"]):
             identity = effect_identity(row)
             key = encode({
                 **{k: v for k, v in row.items() if k not in {"armyIds", "evidence", "identity"}},

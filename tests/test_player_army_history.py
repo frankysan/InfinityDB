@@ -201,6 +201,42 @@ def test_presentation_keeps_distinct_targets_and_overlapping_army_observations()
     assert len(player.presentation_rows(rows)) == 2
 
 
+def test_exact_cross_catalog_transition_keeps_both_source_observations():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    base = {k: v for k, v in row.items() if k not in {"field", "summary", "loadouts"}}
+    base["loadouts"] = [{"optionId": 1, "label": "HMG"}]
+    before = {"filter": {"id": 266, "name": "Bangbomb", "wiki": "wiki"},
+              "occurrence": {"extra": [{"id": 310, "name": "+4", "type": "TEXT"}], "q": 1}}
+    after = {**before, "filter": {**before["filter"], "id": 246, "type": "WEAPON"}}
+    lost = {**base, "field": "skills", "summary": "Lost Bangbomb (+4)",
+            "lost": [before], "gained": []}
+    gained = {**base, "field": "equip", "summary": "Gained Bangbomb (+4)",
+              "lost": [], "gained": [after]}
+    semantic["summaries"] = [lost, gained]
+    units, counts = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    assert counts["summaries"] == 2
+    changes = [r for r in units[0]["entries"] if r["kind"] != "characteristic"]
+    assert len(changes) == 1
+    change = changes[0]
+    assert change["kind"] == "classification"
+    assert change["text"] == (
+        f"Bangbomb (+4): {player.FIELDS['skills']} → {player.FIELDS['equip']} (classification)"
+    )
+    assert change["evidence"][0]["from"]["lost"] == [before]
+    assert change["evidence"][0]["to"]["gained"] == [after]
+    # Same display label is insufficient when coverage, modifiers or targets differ.
+    for variant in (
+        {**gained, "evidence": [{"armyId": 103}]},
+        {**gained, "loadouts": [{"optionId": 2, "label": "HMG"}]},
+        {**gained, "gained": [{**after, "occurrence": {"q": 2}}]},
+        {**gained, "gained": [{**after, "filter": {**after["filter"], "wiki": "other"}}]},
+    ):
+        semantic["summaries"] = [lost, variant]
+        units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+        assert len([r for r in units[0]["entries"] if r["kind"] == "summaries"]) == 2
+
+
 def test_group_wide_same_delta_different_cost_pairs_stay_separate():
     preview, semantic = fixture()
     row = semantic["summaries"][0]
