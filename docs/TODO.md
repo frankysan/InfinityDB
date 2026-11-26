@@ -250,13 +250,17 @@ make v1.3.0 depend on them.
   It retains reference multiplicity, historical target labels, evidence
   drilldown and separate review/catalog links. Private review remains required
   before promotion. The effective-loadout pilot processes 2,999 source
-  Group-field comparisons: 1,463 complete changed, 206 complete unchanged,
-  523 partial changed, 32 partial unchanged and 775 wholly unresolved.
+  Group-field comparisons: 1,658 complete changed, 222 complete unchanged,
+  661 partial changed, 31 partial unchanged and 427 wholly unresolved.
   Partial continuity compares surviving or uniquely reconciled pairs
-  independently of unresolved siblings. It consolidates 2,317 Army-scoped
-  summaries into 1,024, of which 317 cover all loadouts in their Group and
-  410 combine multiple Armies. Three accepted rekey collections are
-  available; 131 composition candidates remain outside the pilot scope.
+  independently of unresolved siblings. It consolidates 2,689 Army-scoped
+  summaries into 1,179, of which 380 cover all loadouts in their Group and
+  465 combine multiple Armies. All 148 multi-profile comparisons now have
+  at least partial coverage. Direct-owner scope retains 462 pair-field
+  comparisons with stable Include edges and 291 with stable Peripheral
+  attachments (overlapping counts); no inherited capabilities are inferred.
+  Three accepted rekey collections are available; 131 composition candidates
+  remain outside the pilot scope.
   Lifecycle accounting covers all 844 structural loadout occurrences:
   six reconciled rekey occurrences, 280 one-sided addition/removal candidates
   (249 additions and 31 removals) and 558 review outcomes. The 280 candidates
@@ -265,8 +269,9 @@ make v1.3.0 depend on them.
   list-presence candidates and 14 review outcomes. These consolidate into
   118 summaries, 57 spanning multiple Armies. Preserve 208 declaration
   claims separately, including 137 corroborated by observed list evidence.
-  Extend coverage to complex profiles and unresolved lifecycle cases before
-  selecting the public semantic projection.
+  Resolve remaining relationship changes and lifecycle cases, including
+  possible replacements and unsupported complex lifecycle composition,
+  before selecting the public semantic projection.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,

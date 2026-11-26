@@ -13,7 +13,12 @@ from typing import Any
 
 from infinity_db.army_history_consolidation import record_at
 from infinity_db.army_history_loadouts import composition
-from infinity_db.army_history_pilot import catalog_index, indexed
+from infinity_db.army_history_pilot import (
+    catalog_index,
+    indexed,
+    peripheral_definitions,
+    peripheral_signature,
+)
 from infinity_db.army_history_references import CATALOGS, resolve_references
 from infinity_db.army_history_source import Document, digest, file_digest, read_history, require
 from tools.research.build_army_history_database import ARCHIVE_PIN, encode
@@ -39,8 +44,76 @@ def get_group(data: Document, unit_id: int, group_id: int) -> tuple[Document, Do
     return unit, groups[group_id]
 
 
+def include_signature(owner: Document, data: Document, unit: int) -> str | None:
+    """Resolve direct Include edges in the endpoint Army and Unit namespace.
+
+    Retain target identities and multiplicity, not a flattened target profile.
+    """
+    includes = owner.get("includes")
+    if includes is None:
+        return encode([])
+    if not isinstance(includes, list):
+        return None
+    result = []
+    for edge in includes:
+        if not isinstance(edge, dict) or set(edge) - {"group", "option", "q"}:
+            return None
+        group, option = edge.get("group"), edge.get("option")
+        if type(group) is not int or type(option) is not int:
+            return None
+        quantity = edge.get("q")
+        if quantity is None:
+            quantity = 1
+        if type(quantity) is not int or quantity < 1:
+            return None
+        found = get_group(data, unit, group)
+        if found is None:
+            return None
+        target_group = found[1]
+        options = indexed(target_group.get("options"))
+        profiles = indexed(target_group.get("profiles"))
+        if options is None or option not in options or not profiles:
+            return None
+        target = options[option]
+        result.append({
+            "group": group, "option": option, "quantity": quantity,
+            "groupLabels": {k: target_group.get(k) for k in LABELS},
+            "optionLabels": {k: target.get(k) for k in LABELS},
+            "disabled": target.get("disabled"),
+            "profiles": [{"id": identity, **{k: profiles[identity].get(k) for k in LABELS}}
+                         for identity in sorted(profiles)],
+        })
+    return encode(sorted(result, key=encode))
+
+
+def comparable_relationships(
+    a: Document, b: Document, old: Document, new: Document, unit: int,
+    allow_relationships: bool,
+) -> bool:
+    """Compare direct owners only; never flatten attached entities into a profile."""
+    if a.get("includes") not in (None, []) or b.get("includes") not in (None, []):
+        if not allow_relationships:
+            return False
+        first, second = include_signature(a, old, unit), include_signature(b, new, unit)
+        if first is None or first != second:
+            return False
+    left, right = a.get("peripheral"), b.get("peripheral")
+    left = [] if left is None else left
+    right = [] if right is None else right
+    if not isinstance(left, list) or not isinstance(right, list):
+        return False
+    if not left and not right:
+        return True
+    if not allow_relationships:
+        return False
+    left_signature = peripheral_signature(left, peripheral_definitions(old))
+    right_signature = peripheral_signature(right, peripheral_definitions(new))
+    return left_signature is not None and left_signature == right_signature
+
+
 def stable_context(
     old: Document, new: Document, unit: int, group: int, *, allow_empty: bool = False,
+    profile_id: int | None = None, allow_stable_relationships: bool = False,
 ) -> tuple[tuple[Document, dict[int, Document], Document, dict[int, Document]] | None, str]:
     a, b = get_group(old, unit, group), get_group(new, unit, group)
     if a is None or b is None:
@@ -48,17 +121,21 @@ def stable_context(
     if not same_labels(a[0], b[0]) or not same_labels(a[1], b[1]):
         return None, "changedLabels"
     profiles_a, profiles_b = indexed(a[1].get("profiles")), indexed(b[1].get("profiles"))
-    if (profiles_a is None or profiles_b is None or len(profiles_a) != 1
-            or profiles_a.keys() != profiles_b.keys()):
+    if profiles_a is None or profiles_b is None:
         return None, "multiProfileOrChangedProfile"
-    pa, pb = next(iter(profiles_a.values())), next(iter(profiles_b.values()))
+    if profile_id is None:
+        if len(profiles_a) != 1 or profiles_a.keys() != profiles_b.keys():
+            return None, "multiProfileOrChangedProfile"
+        profile_id = next(iter(profiles_a))
+    if profile_id not in profiles_a or profile_id not in profiles_b:
+        return None, "multiProfileOrChangedProfile"
+    pa, pb = profiles_a[profile_id], profiles_b[profile_id]
     if not same_labels(pa, pb):
         return None, "changedLabels"
     oa, ob = indexed(a[1].get("options")), indexed(b[1].get("options"))
     if oa is None or ob is None or (not allow_empty and (not oa or not ob)):
         return None, "changedLoadoutKeys"
-    if any(row.get(key) not in (None, []) for row in (pa, pb)
-           for key in ("includes", "peripheral")):
+    if not comparable_relationships(pa, pb, old, new, unit, allow_stable_relationships):
         return None, "includesOrPeripheral"
     return (pa, oa, pb, ob), "comparable"
 
@@ -188,8 +265,7 @@ def pair_delta(
         return None, "changedLoadoutLabels"
     if oa.get("disabled") or ob.get("disabled"):
         return None, "disabledLoadout"
-    if any(row.get(key) not in (None, []) for row in (oa, ob)
-           for key in ("includes", "peripheral")):
+    if not comparable_relationships(oa, ob, old, new, unit, True):
         return None, "includesOrPeripheral"
     if i != j:
         left, _ = composition(oa, old, contexts_a)
@@ -236,14 +312,16 @@ def pair_delta(
     return ({"delta": change} if Decimal(change) else {}), "comparable"
 
 
-def summarize_group(
+def summarize_profile_group(
     old: Document, new: Document, unit: int, group: int, field: str,
     contexts_a: list[dict[str, dict[int, tuple[str, ...]]]],
     contexts_b: list[dict[str, dict[int, tuple[str, ...]]]],
     approved_paths: set[tuple[Any, ...]],
-    rekeys: dict[int, int] | None = None,
+    rekeys: dict[int, int] | None = None, *, profile_id: int | None = None,
 ) -> tuple[list[Document] | None, str, Document]:
-    context, status = stable_context(old, new, unit, group)
+    context, status = stable_context(
+        old, new, unit, group, profile_id=profile_id, allow_stable_relationships=True,
+    )
     if context is None:
         return None, status, {"groupReview": status}
     pa, oa, pb, ob = context
@@ -262,16 +340,26 @@ def summarize_group(
             pa, pb, oa[i], ob[j], old, new, unit, group, field,
             contexts_a, contexts_b, approved_paths,
         )
-        pair = {"beforeOptionId": i, "afterOptionId": j}
+        pair: Document = {"beforeOptionId": i, "afterOptionId": j}
         if delta is None:
             coverage["reviewPairs"].append({**pair, "reason": reason})
             continue
+        relationship_fields = [
+            field_name for field_name in ("includes", "peripheral")
+            if any(owner.get(field_name) for owner in (pa, pb, oa[i], ob[j]))
+        ]
+        if relationship_fields:
+            pair["relationshipScope"] = "directOwners"
+            pair["relationshipFields"] = relationship_fields
         coverage["comparedPairs"].append({**pair, "changed": bool(delta)})
         if not delta:
             continue
         key = encode(delta)
         bucket = buckets.setdefault(key, {"field": field, **delta, "loadouts": []})
         target = {"optionId": i, "label": describe_option(oa[i], old, contexts_a)}
+        if field in CATALOGS and relationship_fields:
+            target["relationshipScope"] = "directOwners"
+            target["relationshipFields"] = relationship_fields
         if i != j:
             target["laterOptionId"] = j
         if field not in CATALOGS:
@@ -294,6 +382,78 @@ def summarize_group(
         else:
             sign = "+" if Decimal(row["delta"]) > 0 else ""
             row["summary"] = f"{sign}{row['delta']} {FIELDS[field]}"
+        result.append(row)
+    return result, "comparable" if complete else "partial", coverage
+
+
+def summarize_group(
+    old: Document, new: Document, unit: int, group: int, field: str,
+    contexts_a: list[dict[str, dict[int, tuple[str, ...]]]],
+    contexts_b: list[dict[str, dict[int, tuple[str, ...]]]],
+    approved_paths: set[tuple[Any, ...]],
+    rekeys: dict[int, int] | None = None,
+) -> tuple[list[Document] | None, str, Document]:
+    a, b = get_group(old, unit, group), get_group(new, unit, group)
+    if a is None or b is None:
+        return None, "missingGroup", {"groupReview": "missingGroup"}
+    pa, pb = indexed(a[1].get("profiles")), indexed(b[1].get("profiles"))
+    if not pa or not pb or (len(pa) == len(pb) == 1 and pa.keys() == pb.keys()):
+        return summarize_profile_group(
+            old, new, unit, group, field, contexts_a, contexts_b, approved_paths, rekeys,
+        )
+    coverage: Document = {
+        "beforeProfileIds": sorted(pa), "afterProfileIds": sorted(pb),
+        "unpairedBeforeProfiles": sorted(pa.keys() - pb.keys()),
+        "unpairedAfterProfiles": sorted(pb.keys() - pa.keys()),
+        "profileComparisons": [],
+    }
+    buckets: dict[str, Document] = {}
+    costs: dict[str, Document] = {}
+    successful = 0
+    complete = pa.keys() == pb.keys()
+    for identity in sorted(pa.keys() & pb.keys()):
+        rows, status, detail = summarize_profile_group(
+            old, new, unit, group, field, contexts_a, contexts_b, approved_paths, rekeys,
+            profile_id=identity,
+        )
+        coverage["profileComparisons"].append({
+            "profileId": identity, "outcome": status, "coverage": detail,
+        })
+        complete &= status == "comparable"
+        if rows is None:
+            continue
+        successful += 1
+        for row in rows:
+            # Costs belong to the shared loadout, not each individual profile.
+            if field not in CATALOGS:
+                cost = costs.setdefault(row["delta"], {
+                    **row, "loadouts": [], "allGroupLoadouts": False,
+                })
+                for target in row["loadouts"]:
+                    if target not in cost["loadouts"]:
+                        cost["loadouts"].append(target)
+                continue
+            # For references, explicitly retain each affected profile.
+            all_profile_loadouts = row.pop("allGroupLoadouts")
+            row["allGroupLoadouts"] = False
+            key = encode(row)
+            summary = buckets.setdefault(key, {**row, "profiles": []})
+            summary["profiles"].append({
+                "profileId": identity, "name": pa[identity].get("name"),
+                "allProfileLoadouts": all_profile_loadouts,
+            })
+    if not successful:
+        return None, "noComparableProfiles", coverage
+    result = list(buckets.values())
+    for row in result:
+        # Do not claim group-wide scope if any profile or loadout was not compared.
+        row["allGroupLoadouts"] = (
+            complete and len(row["profiles"]) == len(pa)
+            and all(p["allProfileLoadouts"] for p in row["profiles"])
+        )
+    for row in costs.values():
+        row["loadouts"].sort(key=lambda target: target["optionId"])
+        row["allGroupLoadouts"] = complete and len(row["loadouts"]) == len(a[1]["options"])
         result.append(row)
     return result, "comparable" if complete else "partial", coverage
 
@@ -572,10 +732,23 @@ def build(preview: Document, archive: Path) -> Document:
                 event["evidence"].append(evidence)
                 counts["armyScopedSummaries"] += 1
         outcomes.append({**identity, **evidence, "outcome": outcome})
-        for pair in coverage.get("reviewPairs", []):
-            counts[f"pairReview:{pair['reason']}"] += 1
-        counts["unpairedBefore"] += len(coverage.get("unpairedBefore", []))
-        counts["unpairedAfter"] += len(coverage.get("unpairedAfter", []))
+        profile_comparisons = coverage.get("profileComparisons")
+        if profile_comparisons is not None:
+            counts["multiProfileGroupFieldComparisons"] += 1
+            counts["multiProfile:" + outcome] += 1
+        details = [p["coverage"] for p in profile_comparisons] if (
+            profile_comparisons is not None
+        ) else [coverage]
+        for detail in details:
+            for pair in detail.get("reviewPairs", []):
+                counts[f"pairReview:{pair['reason']}"] += 1
+            counts["unpairedBefore"] += len(detail.get("unpairedBefore", []))
+            counts["unpairedAfter"] += len(detail.get("unpairedAfter", []))
+            for relationship, label in (("peripheral", "Peripheral"), ("includes", "Include")):
+                counts[f"stable{label}PairComparisons"] += sum(
+                    relationship in pair.get("relationshipFields", [])
+                    for pair in detail.get("comparedPairs", [])
+                )
     lifecycle: dict[str, Document] = {}
     lifecycle_outcomes = []
     for pos, row in lifecycle_rows:
@@ -680,7 +853,7 @@ def build(preview: Document, archive: Path) -> Document:
     counts["allGroupLoadoutSummaries"] = sum(e["allGroupLoadouts"] for e in events.values())
     counts["multiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in events.values())
     return {
-        "formatVersion": 4, "publicationStatus": "privateResearchOnly", "edition": "n5",
+        "formatVersion": 5, "publicationStatus": "privateResearchOnly", "edition": "n5",
         "archiveSha256": ARCHIVE_PIN, "armyDatabaseSha256": preview["armyDatabaseSha256"],
         "historyDatabaseSha256": preview["historyDatabaseSha256"],
         "counts": dict(counts), "summaries": list(events.values()), "outcomes": outcomes,

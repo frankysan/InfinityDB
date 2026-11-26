@@ -101,7 +101,7 @@ remain expandable; unresolved and catalog evidence are separate from the
 main timeline, with coverage gaps visible at report level.
 
 The intended public history is a concise semantic summary, not the layout of
-this private review. The effective-loadout pilot compares single-profile
+this private review. The effective-loadout pilot compares individual profiles in
 Groups using surviving Loadout keys and uniquely reconciled rekeys. A
 profile-owned Skill applies to every associated loadout; a relocation is
 unchanged only for a particular loadout whose effective occurrences remain
@@ -114,9 +114,18 @@ siblings are unresolved, disabled, newly observed or no longer observed.
 Record the paired, unpaired and excluded keys and per-pair dispositions.
 All-loadout scope requires complete comparison of both endpoints; it means
 all loadouts in the compared Group, not all loadouts in the logical Unit or
-all Armies. Preserve original comparison and candidate links. Complex
-profiles, unresolved rekeys, disabled options, Includes, Peripherals and
-non-pilot fields retain separate review evidence. Use observation ranges
+all Armies. Multi-profile comparisons retain affected profile identities and
+scope; shared loadout costs are counted once. All-group scope additionally
+requires complete coverage of the profiles.
+
+Direct-owner comparisons may proceed when Include edges resolve to the same
+Army-local Unit/Group/Loadout targets with stable labels, profile identities
+and multiplicity, and Peripheral attachments have equivalent unique local
+definitions. Mark this limited scope explicitly; never attribute attached
+entities' capabilities to a Controller or flatten the Include graph. Changed
+or unresolved relationships and lifecycle composition remain review evidence,
+as do unresolved rekeys, disabled options and non-pilot fields. Preserve
+original comparison and candidate links. Use observation ranges
 until independently established update dates exist. Technical evidence
 belongs in developer review, not normal player copy.
 

@@ -582,3 +582,95 @@ def test_availability_disabled_state_not_inferred_from_missing_value():
     del old["units"][0]["profileGroups"][0]["options"][0]["disabled"]
     row["before"] = {"present": False}
     assert availability_payload(old, new, row) == (None, "unresolvedDisabledState")
+
+
+def test_mult_profile_relocation_preserves_individual_profile_scope():
+    old = semantic_group([], [semantic_option(1, [{"id": 1}]), semantic_option(2)])
+    new = semantic_group([{"id": 1}], [semantic_option(1), semantic_option(2)])
+    for data in (old, new):
+        data["units"][0]["profileGroups"][0]["profiles"].append(
+            {"id": 2, "name": "Second Profile", "skills": []},
+        )
+    paths = [
+        ("units", 42, "profileGroups", 1, "profiles", 1, "skills"),
+        ("units", 42, "profileGroups", 1, "options", 1, "skills"),
+    ]
+    result, status, coverage = semantic_summary(
+        old, new, "skills", paths, with_coverage=True,
+    )
+    assert status == "comparable"
+    assert result is not None and len(result) == 2
+    gained = next(r for r in result if r["gained"])
+    lost = next(r for r in result if r["lost"])
+    assert gained["profiles"] == [
+        {"profileId": 1, "name": "Test Profile", "allProfileLoadouts": False},
+    ]
+    assert lost["profiles"] == [
+        {"profileId": 2, "name": "Second Profile", "allProfileLoadouts": False},
+    ]
+    assert [r["optionId"] for r in gained["loadouts"]] == [2]
+    assert [r["optionId"] for r in lost["loadouts"]] == [1]
+    assert not any(r["allGroupLoadouts"] for r in result)
+    assert len(coverage["profileComparisons"]) == 2
+
+
+def test_multi_profile_cost_is_not_duplicated():
+    old = semantic_group([], [semantic_option(1, points=20)])
+    new = semantic_group([], [semantic_option(1, points=18)])
+    for data in (old, new):
+        data["units"][0]["profileGroups"][0]["profiles"].append(
+            {"id": 2, "name": "Second Profile", "skills": []},
+        )
+    result, status = semantic_summary(
+        old, new, "points", [("units", 42, "profileGroups", 1, "options", 1, "points")],
+    )
+    assert status == "comparable"
+    assert result is not None and len(result) == 1
+    assert result[0]["allGroupLoadouts"]
+    assert len(result[0]["loadouts"]) == 1
+    assert "profiles" not in result[0]
+
+
+def test_stable_peripheral_rekey_allows_direct_owner_comparison():
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([{"id": 1}], [semantic_option(1)])
+    for data, identity in ((old, 7), (new, 9)):
+        data["filters"]["peripheral"] = [{"id": identity, "name": "Attached Model"}]
+        data["units"][0]["profileGroups"][0]["options"][0]["peripheral"] = [{"id": identity}]
+    paths = [("units", 42, "profileGroups", 1, "profiles", 1, "skills")]
+    result, status, coverage = semantic_summary(
+        old, new, "skills", paths, with_coverage=True,
+    )
+    assert status == "comparable"
+    assert result is not None and result[0]["summary"] == "Gained Mimetism"
+    assert result[0]["loadouts"][0]["relationshipScope"] == "directOwners"
+    assert coverage["comparedPairs"][0]["relationshipScope"] == "directOwners"
+    new["filters"]["peripheral"][0]["name"] = "Different Model"
+    assert semantic_summary(old, new, "skills", paths) == (None, "includesOrPeripheral")
+
+
+def test_stable_include_edges_allow_direct_owner_changes_but_not_inheritance():
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([{"id": 1}], [semantic_option(1)])
+    for data in (old, new):
+        groups = data["units"][0]["profileGroups"]
+        groups[0]["options"][0]["includes"] = [{"group": 2, "option": 7}]
+        groups.append({
+            "id": 2, "name": "Included", "profiles": [
+                {"id": 2, "name": "Included Profile", "skills": [{"id": 2}]},
+            ], "options": [semantic_option(7)],
+        })
+    paths = [("units", 42, "profileGroups", 1, "profiles", 1, "skills")]
+    result, status, coverage = semantic_summary(
+        old, new, "skills", paths, with_coverage=True,
+    )
+    assert status == "comparable"
+    assert result is not None and result[0]["summary"] == "Gained Mimetism"
+    assert result[0]["loadouts"][0]["relationshipFields"] == ["includes"]
+    assert coverage["comparedPairs"][0]["relationshipScope"] == "directOwners"
+    assert not result[0]["lost"]
+    new["units"][0]["profileGroups"][0]["options"][0]["includes"][0]["q"] = 2
+    assert semantic_summary(old, new, "skills", paths) == (None, "includesOrPeripheral")
+    new["units"][0]["profileGroups"][0]["options"][0]["includes"][0]["q"] = 1
+    new["units"][0]["profileGroups"][1]["options"] = []
+    assert semantic_summary(old, new, "skills", paths) == (None, "includesOrPeripheral")
