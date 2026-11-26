@@ -17,9 +17,21 @@ entries.
 4. Mention new unresolved items during handoff. Never reuse an assigned ID:
    increment the next-ID marker when creating a new entry.
 
-**Next ID:** `AI-0023`
+**Next ID:** `AI-0024`
 
 ## Open improvements
+
+### AI-0023 — Separate presentation-only sources from database build freshness
+
+- **Date:** 2026-11-26
+- **Area:** Runtime build provenance and theme iteration.
+- **Issue:** Palette and scenario SVG rendering changes outside the web package
+  invalidate the conservative Python input envelope. A palette-only change
+  required a complete history-enabled rebuild (289 seconds on Windows).
+- **Proposed:** Audit actual build dependencies and move or explicitly exclude
+  presentation-only sources from the build envelope while retaining static
+  asset revision coverage and tests for genuine data-input changes.
+- **Disposition:** proposed.
 
 ### AI-0015 — Publish ITS 18 Use Panoply as a typed scenario Skill
 

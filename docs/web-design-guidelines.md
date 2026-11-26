@@ -530,10 +530,24 @@ branding.
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
 
 Theme identity and theme mode are independent preferences. InfinityDB remains
-the default palette; eleven optional faction palettes derive appearance colors
-from established Army color pairs, ordered by numerical Army ID. Auto, Light
-and Dark apply to every palette. Semantic game colors remain independent of the
-selected palette, and the same contrast contract applies to every combination.
+the default palette; eleven optional faction palettes are ordered by numerical
+Army ID. Auto, Light and Dark apply to every palette. Semantic game colors
+remain independent of the selected palette, and the same contrast contract
+applies to every combination.
+
+Faction themes are authored interpretations, not official paint recipes.
+Use Army colors, the published faction SVG emblems under `static/armies/`,
+and miniature paint schemes as inspiration. Corvus Belli's
+[painting article](https://infinityuniverse.com/en/news/alternative-color-scheme-for-infinity-troops)
+describes the studio blue, orange, green, earth, red and cool-gray schemes.
+Give each palette distinguishable chrome, page surfaces and action accents;
+do not simply tint all roles with a single weak color. The authored directions
+are cyan/blue (PanOceania), orange (Yu Jing), military olive (Ariadna),
+sand and olive (Haqqislam), red and charcoal (Nomads), alien plum
+(Combined Army), cool lavender (ALEPH), amber and graphite (Tohaa),
+jade (Non-Aligned Armies), navy and gold (O-12), and crimson and teal (JSA).
+Keep default InfinityDB unchanged and preserve the established Army identity
+colors even where the appearance seeds differ.
 
 ### Maintain measurable contrast and non-color meaning
 

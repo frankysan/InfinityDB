@@ -117,8 +117,9 @@ its application metrics.
   selected.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
-- Supports System, Light, and Dark themes from Settings; System follows the operating-system
-  preference, while an explicit choice can be remembered with the other browser settings.
+- Supports InfinityDB and eleven faction-inspired themes from Settings, with independent
+  Auto, Light, and Dark modes. Auto follows the operating-system preference;
+  both selections can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, parenthetical
   chart terms, original chart notes, and N5 rules/bonus context. Parentheses alone do not imply

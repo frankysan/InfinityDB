@@ -623,9 +623,10 @@ accessibility are owned by `docs/web-design-guidelines.md`.
 
 The browser CSS separates theme-neutral geometry/typography from an explicit semantic theme
 contract. Component and layout rules consume semantic color/shadow roles rather than concrete
-palette literals. Light and Dark provide the base InfinityDB palettes. Army palettes tint appearance roles
-while preserving relative luminance. Domain identity, rules-category, status, range and deployment
-colors retain their existing semantic meaning.
+palette literals. Light and Dark provide the base InfinityDB palettes. Faction palettes use
+separate authored accent, surface and chrome seeds, with luminance-controlled tinting and
+contrast-audited surface levels. Domain identity, rules-category, status, range and
+deployment colors retain their existing semantic meaning.
 
 CSS source ownership is explicit without introducing a build pipeline: `static/foundation.css` owns
 font declarations and theme-neutral foundational tokens, the base modes own semantic
@@ -634,8 +635,9 @@ palette files under `static/themes/` (`light.css` and `dark.css`),
 `static/page-overrides.css` owns late page-specific exceptions that intentionally sit after the
 shared rules. `/static/styles.css` remains the stable public stylesheet URL; the presentation layer
 composes those sources with generated Army palette overrides immediately after the base palettes.
-`theme_palette.py` derives eleven faction palettes from established color pairs in
-`themes/light.css`, sharing resolved tokens with the standalone SVG renderer. The generated
+`theme_palette.py` defines eleven faction-inspired palettes separately from the
+unchanged Army identity pairs in `themes/light.css`, sharing resolved tokens
+with the standalone SVG renderer. The generated
 stylesheet is cached and included in static-asset revision hashing.
 
 Theme defaults to **InfinityDB**; Theme mode defaults to **Auto**, following the operating-system
@@ -644,7 +646,8 @@ retains its original preference key and stored `system` value for compatibility.
 the ordered palette registry on the page root. The synchronous `static/theme-startup.js` bootstrap
 resolves both `data-theme` and `data-theme-palette` before first paint, without an API request.
 `static/preferences.js` owns persistence; `static/settings.js` owns both selectors and live
-Auto-mode updates. No separate sectorial palette is inferred without an established color pair.
+Auto-mode updates. Separate sectorial palettes require representative sectorial visual
+references; do not infer them solely from their parent faction.
 
 Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
 least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use

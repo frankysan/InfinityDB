@@ -34,7 +34,8 @@ are not retroactively relabeled.
   Unit history projection in Army schema v35. Collapsed histories distinguish
   shared General-profile changes, Army-specific changes and former Army
   contexts without needing a runtime JSON sidecar.
-- **Web frontend + Web backend:** Added Army-derived palettes with compatible
+- **Web frontend + Web backend:** Added distinct faction-inspired palettes
+  using Army colors, emblems and miniature paint schemes, with compatible
   first-paint preference resolution, shared standalone SVG colors and contrast
   regression coverage in both modes.
 

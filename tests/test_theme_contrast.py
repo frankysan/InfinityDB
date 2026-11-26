@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import itertools
+import math
 import re
 from collections.abc import Iterator
 from pathlib import Path
 
-from infinity_db.theme_palette import ARMY_THEMES, army_palette_stylesheet, theme_tokens
+from infinity_db.theme_palette import (
+    ARMY_THEMES,
+    army_palette_stylesheet,
+    palette_options,
+    theme_tokens,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src" / "infinity_db" / "web" / "static"
@@ -266,6 +273,21 @@ def _audited_palettes() -> Iterator[tuple[str, dict[str, str]]]:
                 )):
                     assert tokens[name] == base[name]
             yield f"{slug}/{mode}", tokens
+
+
+def test_faction_palettes_are_distinct_across_visible_roles() -> None:
+    """Guard against nearly identical navigation, canvas and action colors."""
+    roles = ("color-nav-surface", "color-surface-page", "color-action-primary")
+    for mode in ("light", "dark"):
+        signatures = {}
+        for option in palette_options():
+            tokens = theme_tokens(mode, option["value"])
+            signatures[option["value"]] = tuple(
+                channel for role in roles for channel in _rgb(_resolve_token(tokens, role))
+            )
+        for (first, a), (second, b) in itertools.combinations(signatures.items(), 2):
+            # This is a simple RGB regression guard, not a perceptual contrast metric.
+            assert math.dist(a, b) >= 0.12, (mode, first, second)
 
 
 def test_every_explicit_theme_meets_compact_text_contrast_contract() -> None:

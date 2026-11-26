@@ -1,4 +1,4 @@
-"""Contrast-preserving Army palettes derived from the established faction colors."""
+"""Contrast-aware faction palettes inspired by Army, emblems and studio paint schemes."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ ThemeMode = Literal["light", "dark"]
 DEFAULT_PALETTE = "infinitydb"
 
 # Numerical Army IDs, canonical source slugs and player-facing labels.
-# The established color pairs are owned by themes/light.css. Do not invent
-# separate sectorial palettes where no independent source pair is available.
+# Army identity colors remain owned by themes/light.css. Appearance seeds below
+# are separately curated; they never change the colors of Army identity badges.
 ARMY_THEMES = (
     (101, "panoceania", "PanOceania"),
     (201, "yu-jing", "Yu Jing"),
@@ -29,6 +29,23 @@ ARMY_THEMES = (
     (1101, "jsa", "JSA"),
 )
 PALETTE_IDS = frozenset((DEFAULT_PALETTE, *(slug for _, slug, _ in ARMY_THEMES)))
+
+# (action accent, page/card hue, navigation/chrome hue). These are authored UI
+# colors, not official paint specifications. See the web design guidelines for
+# visual source references and rationale.
+_APPEARANCE_SEEDS = {
+    "panoceania": ("#009fe4", "#137fc4", "#005e9d"),
+    "yu-jing": ("#f1861d", "#e4852b", "#9c4a09"),
+    "ariadna": ("#557b2c", "#6b7d42", "#3a581e"),
+    "haqqislam": ("#afca0b", "#bfa26c", "#8a6535"),
+    "nomads": ("#e30a14", "#76535a", "#39252a"),
+    "combined-army": ("#a044a5", "#8f3c96", "#712578"),
+    "aleph": ("#504f8f", "#9691c5", "#514e8b"),
+    "tohaa": ("#f4960b", "#666666", "#3b3b3b"),
+    "non-aligned-armies": ("#379b79", "#77b8a1", "#287b60"),
+    "o-12": ("#fdc309", "#414c94", "#2e2560"),
+    "jsa": ("#cd1333", "#4ca49e", "#277d78"),
+}
 _THEME_DIRECTORY = Path(__file__).resolve().parent / "web" / "static" / "themes"
 _TOKEN_RE = re.compile(r"--([\w-]+):\s*([^;]+);")
 _HEX_RE = re.compile(r"#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?")
@@ -65,7 +82,24 @@ _PRIMARY_ROLES = (
     "color-profile-accent",
     "color-logo-ribbon-",
     "color-logo-rim-",
+    "color-text-on-inverse-accent",
+    "color-text-rule-heading",
 )
+_CHROME_ROLES = ("color-nav-", "color-switch-", "color-brand-border", "color-surface-inverse")
+
+# Keep light content cards nearly white, but give the larger page surface
+# a visible hue. Dark cards also need separation from the page background.
+_SURFACE_LUMINANCE = {
+    "light": {"color-surface-page": 0.82, "color-surface-data-header": 0.89,
+              "color-surface-toolbar": 0.89},
+    "dark": {
+        "color-surface-page": 0.012, "color-surface-default": 0.026,
+        "color-surface-subtle": 0.033, "color-surface-raised": 0.031,
+        "color-surface-data-header": 0.035, "color-surface-toolbar": 0.035,
+        "color-surface-accent": 0.044, "color-surface-control-hover": 0.042,
+        "color-surface-interactive-hover": 0.039,
+    },
+}
 
 
 def palette_options() -> list[dict[str, str]]:
@@ -136,8 +170,9 @@ def _quantize(rgb: _RGB, luminance: float) -> str:
     return "#" + "".join(f"{channel:02x}" for channel in closest)
 
 
-def _tint(value: str, seed: _RGB, strength: float) -> str:
-    target = _luminance(_rgb(value))
+def _tint(value: str, seed: _RGB, strength: float, *, target: float | None = None) -> str:
+    if target is None:
+        target = _luminance(_rgb(value))
     red, green, blue = _seed_at_luminance(seed, target)
     rgb = (
         target + strength * (red - target),
@@ -157,9 +192,7 @@ def theme_tokens(mode: ThemeMode, palette: str = DEFAULT_PALETTE) -> dict[str, s
     base = _base_tokens(mode)
     if palette == DEFAULT_PALETTE:
         return dict(base)
-    seeds = _base_tokens("light")
-    primary = _rgb(seeds[f"color-faction-{palette}-primary"])
-    secondary = _rgb(seeds[f"color-faction-{palette}-secondary"])
+    accent, surface, chrome = (_rgb(value) for value in _APPEARANCE_SEEDS[palette])
     result = dict(base)
     for name, value in base.items():
         if (
@@ -169,8 +202,33 @@ def theme_tokens(mode: ThemeMode, palette: str = DEFAULT_PALETTE) -> dict[str, s
             or not _HEX_RE.fullmatch(value)
         ):
             continue
-        accent = name.startswith(_PRIMARY_ROLES)
-        result[name] = _tint(value, primary if accent else secondary, 0.85 if accent else 0.5)
+        target = None
+        if name.startswith(_PRIMARY_ROLES):
+            seed, strength = accent, 1.0
+            if mode == "light" and name == "color-accent":
+                target = 0.135  # readable on the stronger page tint
+        elif name.startswith(_CHROME_ROLES):
+            seed, strength = chrome, 1.0
+            if name.startswith("color-nav-surface") or name == "color-nav-control-surface":
+                # A more visible faction-colored frame, including in dark mode.
+                target = _luminance(_rgb(value)) + (0.018 if mode == "light" else 0.012)
+            elif name == "color-nav-choice-muted":
+                target = 0.44 if mode == "light" else 0.36
+        else:
+            seed, strength = surface, 0.35
+            if ("surface" in name or "border" in name) and not name.startswith("color-text-"):
+                strength = 1.0
+            target = _SURFACE_LUMINANCE[mode].get(name)
+        if (mode == "light" and name.startswith("color-text-")
+                and not name.startswith("color-text-on-")
+                and name != "color-text-separator"):
+            # Normal page text, including muted labels, must remain readable
+            # even outside the nearly white content cards.
+            target = min(0.135, _luminance(_rgb(value))) if target is None else target
+        result[name] = _tint(value, seed, strength, target=target)
+    result["color-surface-translucent"] = result["color-surface-default"] + (
+        "9e" if mode == "light" else "d1"
+    )
     return result
 
 

@@ -366,12 +366,13 @@ make v1.3.0 depend on them.
 ### Reference presentation and feedback
 
 - [ ] **Web frontend + Web backend:** Add optional Army-derived themes using
-  the imported Army color pairs. Initial eleven faction palettes are implemented;
-  review them on representative desktop and mobile pages. Theme identity
+  Army colors, published emblems and miniature paint schemes. Eleven faction
+  palettes now use distinct accent, surface and chrome seeds; review them
+  on representative desktop and mobile pages. Theme identity
   and mode are independent, with first-paint resolution, compatible preference
   persistence, shared scenario SVG colors and automated contrast coverage.
-  Add independent sectorial palettes only if established source color pairs
-  become available; do not invent them.
+  Consider independent sectorial palettes only with representative sectorial
+  visual references; do not infer them solely from their parent faction.
 - [ ] **Web frontend + Data processing:** Establish and implement a shared
   visual hierarchy for rules provenance. Initial text, border, evidence-label
   and warning treatments are implemented, with automated desktop/mobile
