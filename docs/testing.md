@@ -159,6 +159,24 @@ is unchanged. Skill detail parity against the original detached enrichment
 pipeline is regression-tested. Profile remaining cold catalog generation
 and detail construction before further optimizing them.
 
+### Catalog initialization follow-up — 2026-11-26
+
+Windows Chrome, baseline `a3783359`, three fresh application/browser-context
+samples and repeat visits per route. Catalog benchmarks now observe direct
+catalog-list DOM replacements, avoiding the polling latency in visible timings.
+Cold median API durations changed from 455 to 332 ms for Skills and from
+352 to 179 ms for Weapons. Cold first DOM medians changed from 589 to 470 ms
+and from 483 to 313 ms respectively. Repeat DOM medians stayed within roughly
+40–46 ms. Response sizes were unchanged (35,342 and 31,486 decoded bytes).
+Application startup and production network latency are excluded.
+
+Catalog usage counts collapse repeated canonical payloads per source Unit
+before joining items and ordered extras; exact detail occurrence queries
+retain their original scope. Unit graph construction computes name-derived
+optional modes once per logical Unit, retaining per-occurrence requirements.
+Complete catalog results on the tracked Army snapshot are regression-tested
+against the uncollapsed query and recomputed availability flags.
+
 ### Unit Explorer initialization — 2026-11-25
 
 Windows checkout based on `885b7757`, same Army and N5 Rules snapshot,

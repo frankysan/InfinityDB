@@ -368,14 +368,18 @@ def benchmark_unit_explorer(
             origin = f"http://127.0.0.1:{server.server_port}"
             if pages:
                 ready = page_cases[selected_route]
-                detail = ready in {"#skill-content", "#item-content"}
-                if detail:
+                observed = ready in {
+                    "#skill-content", "#item-content", "#catalog-table-container",
+                }
+                if observed:
                     page.add_init_script("""(() => {
                         window.detailRenderTimes = [];
                         const observer = new MutationObserver(records => {
                             if (records.some(record =>
                                 record.target.id === 'skill-content'
-                                || record.target.id === 'item-content')) {
+                                || record.target.id === 'item-content'
+                                || (record.target.id === 'catalog-list'
+                                    && record.target.childElementCount > 0))) {
                                 window.detailRenderTimes.push(performance.now());
                             }
                         });
@@ -387,7 +391,7 @@ def benchmark_unit_explorer(
                     page.locator(ready).wait_for(state="visible", timeout=15_000)
                     elapsed = time.perf_counter() - started
                     samples.setdefault(f"{selected_route} {phase}", []).append(elapsed)
-                    if detail:
+                    if observed:
                         # Wait for follow-up requests, but report observed render
                         # timestamps rather than networkidle's fixed quiet interval.
                         page.wait_for_load_state("networkidle", timeout=15_000)

@@ -336,8 +336,9 @@ def _canonical_usage_select(
     catalog: str,
     *,
     where: str = "",
+    collapse_payloads: bool = False,
 ) -> str:
-    """Return one canonical profile/loadout catalog-usage SELECT fragment."""
+    """Return usage rows, optionally collapsing identical payloads for catalog counts."""
     if payload_kind == "profile":
         occurrence_table = "profile_payload_occurrences"
         occurrence_alias = "ppo"
@@ -357,11 +358,27 @@ def _canonical_usage_select(
     ]
     payload_table = f"{payload_kind}_payload_{catalog}"
     extras_table = f"{payload_kind}_payload_{extra_stem}_extras"
+    if collapse_payloads:
+        if where:
+            raise ValueError("Collapsed payload usage does not support occurrence filters")
+        # Catalog counts deduplicate by visible logical Unit and ordered extras.
+        # Repeated uses of the same payload by one source Unit cannot add a count.
+        occurrence_table = (
+            f"(SELECT DISTINCT unit_id, {payload_id} FROM {occurrence_table})"
+        )
+        occurrence_key = (
+            f"printf('%d:%d:%d', {occurrence_alias}.unit_id, "
+            f"{occurrence_alias}.{payload_id}, o.position)"
+        )
+    else:
+        occurrence_key = (
+            f"printf('%d:%d:%d:%d:%d', {occurrence_alias}.army_id, "
+            f"{occurrence_alias}.unit_id, {occurrence_alias}.group_id, "
+            f"{occurrence_alias}.{parent_id}, o.position)"
+        )
     return (
         f"SELECT '{source_label}' AS source, o.item_id, {occurrence_alias}.unit_id, "
-        f"printf('%d:%d:%d:%d:%d', {occurrence_alias}.army_id, "
-        f"{occurrence_alias}.unit_id, {occurrence_alias}.group_id, "
-        f"{occurrence_alias}.{parent_id}, o.position) AS occurrence_key, "
+        f"{occurrence_key} AS occurrence_key, "
         "e.position AS extra_position, e.extra_id "
         f"FROM {occurrence_table} AS {occurrence_alias} "
         f"JOIN {payload_table} AS o "
@@ -498,9 +515,11 @@ def army_required_flags(
     group: Mapping[str, Any],
     canonical_faction_id: int | None = None,
     declared_faction_ids: Collection[int] | None = None,
+    *,
+    optional_modes: Collection[str] | None = None,
 ) -> set[str]:
     """Return the optional availability categories required by an occurrence."""
-    required = unit_optional_modes(group)
+    required = unit_optional_modes(group) if optional_modes is None else set(optional_modes)
     availability_kind = army.get("availability_kind")
     if availability_kind == MERCENARY_AVAILABILITY:
         required.add("mercs")
@@ -1425,6 +1444,7 @@ class Database:
                 "armies": {},
                 "army_occurrences": [],
             }
+            optional_modes = unit_optional_modes(group)
             for source_id in source_ids:
                 for army in memberships[source_id]:
                     source_army_id = army["source_army_id"]
@@ -1441,6 +1461,7 @@ class Database:
                             "_required_flags": frozenset(army_required_flags(
                                 army, group, canonical_factions[source_id],
                                 declared_faction_ids_by_unit[source_id],
+                                optional_modes=optional_modes,
                             )),
                         }
                     )
@@ -2117,8 +2138,8 @@ class Database:
             raise ValueError(f"Unknown catalog: {catalog}")
         graph = self._application_catalog_graph(catalog)
         suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
-        profile_usage = _canonical_usage_select("profile", catalog)
-        loadout_usage = _canonical_usage_select("loadout", catalog)
+        profile_usage = _canonical_usage_select("profile", catalog, collapse_payloads=True)
+        loadout_usage = _canonical_usage_select("loadout", catalog, collapse_payloads=True)
         with self._connect() as connection:
             usage_rows = connection.execute(
                 "WITH uses AS ("

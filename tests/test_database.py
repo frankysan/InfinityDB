@@ -12,6 +12,7 @@ from typing import Any
 import pytest
 
 import infinity_db.database.importer as database_importer
+import infinity_db.database.repository as database_repository
 from infinity_army_data.normalize import main_army_id, normalize_master, validate_normalized
 from infinity_army_data.weapon_categories import WEAPON_CATEGORIES, weapon_category
 from infinity_army_data.weapon_config import (
@@ -1481,6 +1482,31 @@ def test_catalog_use_count_matches_detail_variant_unit_totals(
     expected_count = sum(len(variant["units"]) for variant in detail["variants"])
     item = next(item for item in database.list_catalog_items(catalog) if item["id"] == 1)
     assert item["use_count"] == expected_count
+
+
+def test_tracked_catalog_counts_match_uncollapsed_usage(monkeypatch: pytest.MonkeyPatch) -> None:
+    path = Path("data/generated/army.db")
+    database = Database(path)
+    catalogs = ("skills", "equipment", "weapons")
+    optimized = {catalog: database.list_catalog_items(catalog) for catalog in catalogs}
+    exact_select = database_repository._canonical_usage_select
+
+    def uncollapsed(payload_kind: str, catalog: str, **kwargs: Any) -> str:
+        kwargs["collapse_payloads"] = False
+        return exact_select(payload_kind, catalog, **kwargs)
+
+    monkeypatch.setattr(database_repository, "_canonical_usage_select", uncollapsed)
+    baseline_required_flags = database_repository.army_required_flags
+
+    def recomputed_flags(*args: Any, **kwargs: Any) -> set[str]:
+        kwargs.pop("optional_modes", None)
+        return baseline_required_flags(*args, **kwargs)
+
+    monkeypatch.setattr(database_repository, "army_required_flags", recomputed_flags)
+    baseline = Database(path)
+    assert optimized == {
+        catalog: baseline.list_catalog_items(catalog) for catalog in catalogs
+    }
 
 
 @pytest.mark.parametrize("catalog", ["skills", "equipment", "weapons"])
