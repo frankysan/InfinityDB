@@ -270,7 +270,7 @@ def benchmark_database(
 
 def benchmark_unit_explorer(
     path: Path, iterations: int, *, profile: bool = False,
-    pages: bool = False, page_names: Sequence[str] = (),
+    pages: bool = False, page_names: Sequence[str] = (), with_seasons: bool = False,
 ) -> None:
     """Measure loopback HTTP and completed DOM updates on a fresh app per sample."""
     import cProfile
@@ -281,7 +281,13 @@ def benchmark_unit_explorer(
 
     from playwright.sync_api import sync_playwright  # pyright: ignore[reportMissingImports]
 
+    from infinity_db.database_set import SEASON_DATABASE_SOURCES
     from infinity_db.web import create_app
+
+    season_databases = {
+        season: path.with_name(filename)
+        for season, (filename, _) in SEASON_DATABASE_SOURCES.items()
+    } if with_seasons else None
 
     class Server(ThreadingMixIn, WSGIServer):
         daemon_threads = True
@@ -295,6 +301,7 @@ def benchmark_unit_explorer(
         "/units/minutemen": "#unit-content",
         "/units/dragoes": "#unit-content",
         "/skills/mimetism": "#skill-content",
+        "/skills/hack-consoles": "#skill-content",
         "/equipment/medikit": "#item-content",
         "/weapons/combi-rifle": "#item-content",
         "/skills": "#catalog-table-container",
@@ -311,7 +318,10 @@ def benchmark_unit_explorer(
         page_cases = {route: page_cases[route] for route in page_names}
 
     def run_sample(browser: Any, selected_route: str = "") -> None:
-        app = create_app(path, rules_database_path=path.with_name("rules_n5.db"))
+        app = create_app(
+            path, rules_database_path=path.with_name("rules_n5.db"),
+            season_databases=season_databases,
+        )
         def serve(environ, start_response):
             if (
                 profile and (
@@ -474,6 +484,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", action="store_true", help="Profile each selected case.")
     parser.add_argument("--browser", action="store_true", help="Benchmark Unit Explorer in Chrome.")
     parser.add_argument("--pages", action="store_true", help="Benchmark detail and catalog pages.")
+    parser.add_argument(
+        "--with-seasons", action="store_true",
+        help="Register both ITS databases beside the Army snapshot for browser benchmarks.",
+    )
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -483,12 +497,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
     try:
+        if args.with_seasons and not (args.browser or args.pages):
+            raise ValueError("--with-seasons requires --browser or --pages")
         if args.browser or args.pages:
             if args.json or (args.browser and (args.case or args.pages)):
                 raise ValueError("--browser cannot be combined with --case, --pages or --json")
             benchmark_unit_explorer(
                 args.database, args.cold_iterations, profile=args.profile,
-                pages=args.pages, page_names=args.case,
+                pages=args.pages, page_names=args.case, with_seasons=args.with_seasons,
             )
             return 0
         if args.profile:

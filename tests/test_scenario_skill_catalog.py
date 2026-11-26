@@ -500,6 +500,21 @@ def test_multiple_exact_action_pages_are_preserved(app):
     ]
 
 
+def test_scenario_skill_lookup_preserves_detached_catalog_and_aliases(app):
+    catalog = ScenarioCatalog(app.rules_database, app.publication_registry)
+    for slug in ("scenario-activate-console", "its-18-hardlock-activate-console"):
+        expected = catalog.get_scenario_skill(slug)
+        assert expected is not None
+        selected = catalog.get_scenario_skill(slug)
+        assert selected == expected
+        assert selected is not None
+        selected["rules"].clear()
+        assert catalog.get_scenario_skill(slug) == expected
+    items = catalog.scenario_skill_items()
+    items[0]["rules"].clear()
+    assert catalog.scenario_skill_items()[0]["rules"]
+
+
 def test_scenario_skills_search_uses_canonical_route(app):
     status, payload = _get(app, "/api/search?q=activate%20console")
     assert status == 200

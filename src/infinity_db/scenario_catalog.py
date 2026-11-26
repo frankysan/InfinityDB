@@ -252,8 +252,8 @@ class ScenarioCatalog:
             )
         ]
 
-    def scenario_skill_items(self) -> list[dict[str, Any]]:
-        """Project explicitly typed ITS actions as normal, scenario-scoped Skills."""
+    def _scenario_skill_records(self) -> list[dict[str, Any]]:
+        """Build and retain the internal scenario Skill projection."""
         if self._scenario_skills_cache is None:
             items: list[dict[str, Any]] = []
             known_labels = {
@@ -629,13 +629,18 @@ class ScenarioCatalog:
                             self._scenario_skill_aliases[route] = alias
                     published.append(canonical)
             self._scenario_skills_cache = published
-        return deepcopy(self._scenario_skills_cache)
+        return self._scenario_skills_cache
+
+    def scenario_skill_items(self) -> list[dict[str, Any]]:
+        """Return detached scenario-scoped Skill records for the public catalog."""
+        return deepcopy(self._scenario_skill_records())
 
     def get_scenario_skill(self, slug: str) -> dict[str, Any] | None:
-        items = self.scenario_skill_items()
+        items = self._scenario_skill_records()
         if slug in self._scenario_skill_aliases:
             return deepcopy(self._scenario_skill_aliases[slug])
-        return next((item for item in items if item["slug"] == slug), None)
+        item = next((item for item in items if item["slug"] == slug), None)
+        return deepcopy(item) if item is not None else None
 
     def list_collections(self) -> list[dict[str, Any]]:
         """Return only current scenario sets with readable published missions."""

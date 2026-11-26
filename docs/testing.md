@@ -159,6 +159,34 @@ is unchanged. Skill detail parity against the original detached enrichment
 pipeline is regression-tested. Profile remaining cold catalog generation
 and detail construction before further optimizing them.
 
+### Full-season Skill initialization — 2026-11-26
+
+The browser benchmark's optional `--with-seasons` flag registers both ITS
+databases beside the Army and Rules snapshots. Earlier page measurements
+were Core-only; use the full-season mode for production-representative
+Scenario Skill and catalog comparisons. Example:
+`python -m tools.performance.benchmark_runtime data/generated/army.db --pages --with-seasons --case skills --case skills/hack-consoles --cold-iterations 3`.
+
+Windows Chrome, baseline `26442b06`, three fresh application/browser-context
+samples before and after, with both seasons registered. A cold profile
+identified 36 complete ITS database inspections during catalog initialization
+(2.35 s cumulative under instrumentation). Registration already validates
+each season, so exact scenario selections are read once and retained by the
+immutable publication registry. Public selectors outside that registry
+still inspect the database independently. Registry and Scenario Skill
+lookups return detached records; detail lookup no longer copies every Skill.
+
+Cold median first/final DOM update (ms):
+
+- Skills catalog: 1933/1933 to 589/589.
+- Hack Consoles (scoped alias): 1534/1636 to 250/367.
+- Mimetism: 497/524 to 484/511 (effectively unchanged).
+
+Decoded detail and catalog response sizes were unchanged. Timings exclude
+application startup, network latency and browser paint. Ordinary Skill detail
+still pays for Unit usage and broad Skill rule composition; the remaining
+cost is smaller than the removed redundant season validation.
+
 ### Catalog initialization follow-up — 2026-11-26
 
 Windows Chrome, baseline `a3783359`, three fresh application/browser-context
