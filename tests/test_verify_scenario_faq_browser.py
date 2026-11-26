@@ -585,12 +585,8 @@ def test_tinbot_reference_only_variants_normal_browser(
         )
         section.wait_for(state="visible", timeout=30000)
         page.wait_for_load_state("networkidle")
-        if item["variant_usage_published"]:
-            assert any("tinbot-firewall" in url for url in usage_requests)
-        assert all(
-            "tinbot-albedo" not in url and "tinbot-neurocinetics" not in url
-            for url in usage_requests
-        )
+        assert not usage_requests
+        assert page.locator(".exact-variant-usage").count() == 0
         assert page.locator("html").get_attribute("data-theme") == theme
         assert section.locator(":scope > .detail-copy").inner_text() == (
             "These variants are not listed for this Equipment in the current Army data. "

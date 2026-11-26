@@ -708,11 +708,18 @@ def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() 
         (item["catalog"], item["sourceId"], item["occurrenceId"])
         for item in projection["unresolvedSourceRows"]
     }
-    assert {("skills", 47, number) for number in
-            (44546, 74177, 61511, 65105, 67248)} <= raw_unresolved
-    assert {("skills", 53, number) for number in
-            (33478, 34014, 34181, 35960)} <= raw_unresolved
-    assert projection["diagnosticCounts"]["unreviewed-signature"] >= 9
+    from tools.data.audit_source_variant_inputs import source_extra_owner_context
+
+    raw = ROOT / "local/work/build/army/army.raw.db"
+    for source_id, extra_id, count in ((47, 277, 5), (53, 253, 15)):
+        owners = source_extra_owner_context(
+            raw, catalog="skills", source_id=source_id, extra_id=extra_id,
+        )
+        assert len(owners) == count
+        assert {
+            ("skills", source_id, owner["occurrence_id"]) for owner in owners
+        } <= raw_unresolved
+    assert projection["diagnosticCounts"]["unreviewed-signature"] >= 20
     # No include or controller relationship can fabricate a direct owner.
     for group in projection["variants"]:
         for owner in group["sourceRows"]:

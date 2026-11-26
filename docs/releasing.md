@@ -362,7 +362,12 @@ the stable candidate. Re-run affected gates if the candidate changes.
   browser coverage that is available on the selected test host. Save the
   transcript, test counts, host, SHA and skip reasons. Required cohorts cannot
   be silently skipped; review platform-specific and opt-in skips rather than
-  treating them as successful tests.
+  treating them as successful tests. For source-backed tests requiring the
+  legacy raw SQLite archive, run `python -m tools.testing.prepare_source_audit`
+  from the checkout root before the suite. It uses the pinned Army ZIP and
+  complete runtime build provenance, verifies the published export generation,
+  and writes only ignored local audit artifacts. An ordinary standalone
+  normalization/export is not a matched release pair.
 
   Windows PowerShell (from the repository root):
 

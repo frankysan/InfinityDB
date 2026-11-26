@@ -72,6 +72,25 @@ raw Army SQLite export), and no failures. Asset preflight verified 809/809
 published SVGs. Manual acceptance does not replace the outstanding
 source-backed cohort or final pinned full-suite release gate.
 
+The first frozen candidate `273b00dcdd2b6395fca8bed408244bff4fb4ecbf`
+passed all three hosted workflows, the pre-merge CI evidence collector and
+the isolated Linux Docker smoke/browser checks (21/21). The Windows
+full suite failed (6797 passed, 52 skipped, 70 failed, 79 setup errors,
+1451.84 s): a standalone raw export lacked release-matched identity and build
+provenance, Chromium slot admission timed out with auto workers/loadgroup,
+and six TinBot tests expected eager variant requests in normal mode.
+The corrected TinBot cohort passed 6/6. The source-audit preparation command
+reproduced the pinned release pair and verified the complete metadata before
+replacing the ignored local outputs. The subsequent 409-case focused run
+had 367 passes and 42 failures, with no setup errors or skips; the
+source-ownership and weapon browser cohorts ran successfully. Reconciled
+the November 25 source inventory and exact occurrence pins without
+changing reviewed semantics or runtime artifacts. The complete source
+audit module then passed 109/109 (37.37 s), and the five corrected
+pair/ownership checks passed (10.38 s). The failed full run is not
+release acceptance; use grouped browser lanes for the final rerun to
+avoid the observed Chromium slot admission timeouts.
+
 ## Unit Explorer filter performance — 2026-11-25
 
 Windows development checkout based on `caae1c2c`, using the November 25
