@@ -120,6 +120,15 @@ non-pilot fields retain separate review evidence. Use observation ranges
 until independently established update dates exist. Technical evidence
 belongs in developer review, not normal player copy.
 
+Loadout lifecycle summaries use the structural occurrence and reconciliation
+evidence separately from effective changes on surviving loadouts. A supported
+one-sided key appearance or disappearance with no replacement evidence becomes
+an observed addition or removal candidate scoped to that Army and Group.
+Resolve its endpoint profile-owned and loadout-owned references and costs.
+Known composition-equivalent rekeys are not additions or removals; ambiguous
+modifications and unsupported composition remain review outcomes. Consolidate
+only identical payloads and observation windows across Armies.
+
 ### Accepted authoring direction: one source family, version-tagged facts
 
 For maintained curation, **prefer one file per logical source family** rather

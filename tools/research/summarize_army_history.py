@@ -39,7 +39,7 @@ def get_group(data: Document, unit_id: int, group_id: int) -> tuple[Document, Do
 
 
 def stable_context(
-    old: Document, new: Document, unit: int, group: int,
+    old: Document, new: Document, unit: int, group: int, *, allow_empty: bool = False,
 ) -> tuple[tuple[Document, dict[int, Document], Document, dict[int, Document]] | None, str]:
     a, b = get_group(old, unit, group), get_group(new, unit, group)
     if a is None or b is None:
@@ -54,7 +54,7 @@ def stable_context(
     if not same_labels(pa, pb):
         return None, "changedLabels"
     oa, ob = indexed(a[1].get("options")), indexed(b[1].get("options"))
-    if not oa or not ob:
+    if oa is None or ob is None or (not allow_empty and (not oa or not ob)):
         return None, "changedLoadoutKeys"
     if any(row.get(key) not in (None, []) for row in (pa, pb)
            for key in ("includes", "peripheral")):
@@ -297,6 +297,63 @@ def summarize_group(
     return result, "comparable" if complete else "partial", coverage
 
 
+def lifecycle_payload(
+    old: Document, new: Document, event: Document, reason: str,
+    contexts_a: list[dict[str, dict[int, tuple[str, ...]]]],
+    contexts_b: list[dict[str, dict[int, tuple[str, ...]]]],
+) -> tuple[Document | None, str]:
+    """Summarize a one-sided occurrence in its observed Army and Group only."""
+    path = event["path"]
+    require(len(path) == 6 and path[::2] == ["units", "profileGroups", "options"],
+            "Unexpected loadout path")
+    unit, group, identity = path[1::2]
+    direction = event["direction"]
+    require(direction in {"appeared", "disappeared"}, "Unexpected lifecycle direction")
+    if reason != "noOppositeKey" or event["possibleReplacementIds"]:
+        return None, "possibleReplacement" if event["possibleReplacementIds"] else reason
+    context, status = stable_context(old, new, unit, group, allow_empty=True)
+    if context is None:
+        return None, status
+    pa, oa, pb, ob = context
+    appeared = direction == "appeared"
+    present, absent = (ob, oa) if appeared else (oa, ob)
+    require(identity in present and identity not in absent, "Lifecycle presence differs")
+    if absent.keys() - present.keys():
+        return None, "opposingKeyChanges"
+    option = present[identity]
+    side = "after" if appeared else "before"
+    require(event[side]["present"] and encode(event[side]["value"]) == encode(option),
+            "Lifecycle source record differs")
+    require(not event["before" if appeared else "after"]["present"], "Lifecycle absence differs")
+    if option.get("disabled"):
+        return None, "disabledLoadout"
+    if any(option.get(key) not in (None, []) for key in ("includes", "peripheral")):
+        return None, "includesOrPeripheral"
+    profile, data, contexts = (pb, new, contexts_b) if appeared else (pa, old, contexts_a)
+    resolved = {}
+    for field in CATALOGS:
+        values, status = effective(profile, option, field, data, contexts)
+        if values is None:
+            return None, status
+        resolved[field] = sorted(values, key=encode)
+    if any(cost_delta(option.get(field), option.get(field)) is None for field in ("points", "swc")):
+        return None, "invalidCost"
+    # Preserve full option-owned data for review and conservative Army grouping.
+    # A one-sided source appearance is not proof of an official release or of
+    # absence from another Group or Army.
+    action = "Added" if appeared else "Removed"
+    label = describe_option(option, data, contexts)
+    return {
+        "kind": "loadoutAdded" if appeared else "loadoutRemoved",
+        "summary": f"{action} loadout: {label}",
+        "label": label, "optionId": identity,
+        "profileId": profile["id"], "profileName": profile.get("name"),
+        "points": option["points"], "swc": option["swc"],
+        "effectiveReferences": resolved, "sourceOption": option,
+        "status": "observedCandidate",
+    }, "oneSided"
+
+
 def build(preview: Document, archive: Path) -> Document:
     require(preview["publicationStatus"] == "privatePreviewOnly"
             and preview["archiveSha256"] == ARCHIVE_PIN and preview["edition"] == "n5",
@@ -319,6 +376,8 @@ def build(preview: Document, archive: Path) -> Document:
     }
     rekeys: dict[tuple[int, int, int], dict[int, int]] = {}
     rekey_positions: dict[tuple[int, int, int], list[int]] = {}
+    lifecycle_rows = []
+    lifecycle_rekeys = []
     with closing(read_only(HISTORY)) as db:
         for pos, raw in db.execute(
             "SELECT position,body FROM history_record WHERE stream='loadoutMatch' "
@@ -337,11 +396,28 @@ def build(preview: Document, archive: Path) -> Document:
             require(row["beforeId"] not in mapping, "Duplicate accepted rekey")
             mapping[row["beforeId"]] = row["afterId"]
             rekey_positions.setdefault(key, []).append(pos)
+            lifecycle_rekeys.append({"loadoutMatchPosition": pos, "comparisonIndex": ci,
+                                     "sourceUnitId": unit, "groupId": group,
+                                     "beforeOptionId": row["beforeId"],
+                                     "afterOptionId": row["afterId"]})
             for field in ("points", "swc"):
                 if field in row["changedNonCompositionFields"]:
                     work.setdefault((ci, unit, group, field), {
                         "evidence": ev, "paths": [], "positions": [],
                     })
+        lifecycle_rows = [
+            (pos, json.loads(raw)) for pos, raw in db.execute(
+                "SELECT position,body FROM history_record WHERE stream='loadoutUnpaired' "
+                "ORDER BY position"
+            )
+        ]
+        structural_count = sum(
+            json.loads(raw)["kind"] == "loadout" for (raw,) in db.execute(
+                "SELECT body FROM history_record WHERE stream='structuralOccurrence'"
+            )
+        )
+        require(len(lifecycle_rows) + 2 * len(lifecycle_rekeys) == structural_count,
+                "Incomplete lifecycle evidence accounting")
         for pos, raw in db.execute(
             "SELECT position,body FROM history_record WHERE stream='compositionCandidate' "
             "ORDER BY position"
@@ -404,6 +480,46 @@ def build(preview: Document, archive: Path) -> Document:
             counts[f"pairReview:{pair['reason']}"] += 1
         counts["unpairedBefore"] += len(coverage.get("unpairedBefore", []))
         counts["unpairedAfter"] += len(coverage.get("unpairedAfter", []))
+    lifecycle: dict[str, Document] = {}
+    lifecycle_outcomes = []
+    for pos, row in lifecycle_rows:
+        occurrence = row["occurrence"]
+        path = occurrence["path"]
+        ev = occurrence["evidence"]
+        a, b = ev["earlier"], ev["later"]
+        unit, group = path[1], path[3]
+        identity = {
+            "logicalUnitId": current.get(unit), "sourceUnitId": unit, "groupId": group,
+            "earlierObservedDate": a["encodedRevisionDate"],
+            "laterObservedDate": b["encodedRevisionDate"],
+        }
+        evidence = {
+            "comparisonIndex": ev["comparisonIndex"], "armyId": ev["factionId"],
+            "loadoutUnpairedPosition": pos,
+        }
+        if unit not in current:
+            payload, status = None, "unresolvedUnitIdentity"
+        else:
+            payload, status = lifecycle_payload(
+                data(a["sha256"]), data(b["sha256"]), occurrence, row["reason"],
+                [metadata(sha) for sha in a["metadataSha256"]],
+                [metadata(sha) for sha in b["metadataSha256"]],
+            )
+        outcome = "review:" + status if payload is None else payload["kind"]
+        counts[f"lifecycle:{outcome}"] += 1
+        lifecycle_outcomes.append({
+            **identity, **evidence, "optionId": path[-1],
+            "direction": occurrence["direction"], "outcome": outcome,
+            "reconciliationReason": row["reason"],
+        })
+        if payload is not None:
+            key = encode({**identity, **payload})
+            summary = lifecycle.setdefault(key, {**identity, **payload, "evidence": []})
+            summary["evidence"].append(evidence)
+    counts["lifecycleUnpairedOccurrences"] = len(lifecycle_rows)
+    counts["lifecycleRekeyOccurrences"] = 2 * len(lifecycle_rekeys)
+    counts["lifecycleConsolidatedSummaries"] = len(lifecycle)
+    counts["lifecycleMultiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in lifecycle.values())
     counts["acceptedRekeyCollections"] = len(rekeys)
     counts["outsidePilotScopeCandidates"] = len(outside_scope)
     counts["sourceGroupFieldComparisons"] = len(work)
@@ -411,11 +527,13 @@ def build(preview: Document, archive: Path) -> Document:
     counts["allGroupLoadoutSummaries"] = sum(e["allGroupLoadouts"] for e in events.values())
     counts["multiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in events.values())
     return {
-        "formatVersion": 2, "publicationStatus": "privateResearchOnly", "edition": "n5",
+        "formatVersion": 3, "publicationStatus": "privateResearchOnly", "edition": "n5",
         "archiveSha256": ARCHIVE_PIN, "armyDatabaseSha256": preview["armyDatabaseSha256"],
         "historyDatabaseSha256": preview["historyDatabaseSha256"],
         "counts": dict(counts), "summaries": list(events.values()), "outcomes": outcomes,
         "outsidePilotScope": outside_scope,
+        "lifecycleSummaries": list(lifecycle.values()), "lifecycleOutcomes": lifecycle_outcomes,
+        "lifecycleRekeys": lifecycle_rekeys,
     }
 
 

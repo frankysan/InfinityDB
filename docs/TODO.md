@@ -257,8 +257,12 @@ make v1.3.0 depend on them.
   summaries into 1,024, of which 317 cover all loadouts in their Group and
   410 combine multiple Armies. Three accepted rekey collections are
   available; 131 composition candidates remain outside the pilot scope.
-  Extend coverage to lifecycle events, complex profiles and contextual
-  availability before selecting the public semantic projection.
+  Lifecycle accounting covers all 844 structural loadout occurrences:
+  six reconciled rekey occurrences, 280 one-sided addition/removal candidates
+  (249 additions and 31 removals) and 558 review outcomes. The 280 candidates
+  consolidate into 118 summaries, including 35 spanning multiple Armies.
+  Extend coverage to complex profiles, contextual availability and unresolved
+  lifecycle cases before selecting the public semantic projection.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,

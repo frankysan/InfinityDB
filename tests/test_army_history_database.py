@@ -431,3 +431,84 @@ def test_effective_history_partial_rekey_preserves_unpaired_keys():
     assert result is not None and result[0]["loadouts"][0]["laterOptionId"] == 2
     assert result[0]["allGroupLoadouts"] is False
     assert coverage["unpairedBefore"] == [3] and coverage["unpairedAfter"] == [4]
+
+
+def lifecycle_event(option, direction="appeared", possible=None):
+    present, absent = {"present": True, "value": option}, {"present": False}
+    return {
+        "path": ["units", 42, "profileGroups", 1, "options", option["id"]],
+        "direction": direction, "possibleReplacementIds": possible or [],
+        "before": absent if direction == "appeared" else present,
+        "after": present if direction == "appeared" else absent,
+    }
+
+
+@pytest.mark.parametrize("direction", ["appeared", "disappeared"])
+def test_lifecycle_one_sided_effective_loadout(direction):
+    from tools.research.summarize_army_history import lifecycle_payload
+
+    option = semantic_option(2, [{"id": 2}], points=23)
+    one = semantic_group([{"id": 1}], [semantic_option(1)])
+    two = semantic_group([{"id": 1}], [semantic_option(1), option])
+    old, new = (one, two) if direction == "appeared" else (two, one)
+    result, status = lifecycle_payload(
+        old, new, lifecycle_event(option, direction), "noOppositeKey", [{}], [{}],
+    )
+    assert status == "oneSided"
+    assert result is not None
+    assert result["kind"] == ("loadoutAdded" if direction == "appeared" else "loadoutRemoved")
+    assert result["points"] == 23
+    assert {r["filter"]["name"] for r in result["effectiveReferences"]["skills"]} == {
+        "Mimetism", "Engineer",
+    }
+    assert result["status"] == "observedCandidate"
+    assert "Engineer" in result["summary"]
+
+
+def test_lifecycle_does_not_infer_replacement_or_add_remove_from_two_sided_keys():
+    from tools.research.summarize_army_history import lifecycle_payload
+
+    option = semantic_option(2, [{"id": 2}])
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [option])
+    for reason in ("modificationReview", "ambiguousModification", "noUniqueCompositionMatch"):
+        assert lifecycle_payload(old, new, lifecycle_event(option), reason, [{}], [{}]) == (
+            None, reason,
+        )
+    assert lifecycle_payload(
+        old, new, lifecycle_event(option, possible=[1]), "noOppositeKey", [{}], [{}],
+    ) == (None, "possibleReplacement")
+    assert lifecycle_payload(
+        old, new, lifecycle_event(option), "noOppositeKey", [{}], [{}],
+    ) == (None, "opposingKeyChanges")
+
+
+@pytest.mark.parametrize(("extra", "expected"), [
+    ({"disabled": True}, "disabledLoadout"),
+    ({"includes": [7]}, "includesOrPeripheral"),
+    ({"peripheral": [{"id": 1}]}, "includesOrPeripheral"),
+    ({"skills": [{"id": 999}]}, "missingFactionDefinition"),
+    ({"points": None}, "invalidCost"),
+])
+def test_lifecycle_retains_unsupported_options_as_review(extra, expected):
+    from tools.research.summarize_army_history import lifecycle_payload
+
+    option = {**semantic_option(2), **extra}
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1), option])
+    assert lifecycle_payload(
+        old, new, lifecycle_event(option), "noOppositeKey", [{}], [{}],
+    ) == (None, expected)
+
+
+def test_lifecycle_supports_first_or_last_loadout_without_inventing_continuity():
+    from tools.research.summarize_army_history import lifecycle_payload
+
+    option = semantic_option(1)
+    empty = semantic_group([], [])
+    populated = semantic_group([], [option])
+    result, status = lifecycle_payload(
+        empty, populated, lifecycle_event(option), "noOppositeKey", [{}], [{}],
+    )
+    assert result is not None and status == "oneSided"
+    assert result["kind"] == "loadoutAdded"
