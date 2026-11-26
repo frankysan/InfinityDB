@@ -19,6 +19,7 @@ from infinity_db.maintained_text_references import (
     _Resolver,
     collect_reference_targets,
 )
+from infinity_db.reference_page_storage import collect_reference_pages
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.web.app import create_app, create_app_from_database_set
@@ -239,4 +240,44 @@ def test_reference_target_projection_damage_fails_closed(tmp_path: Path, mutatio
     with closing(sqlite3.connect(path)) as db, db:
         db.execute(mutation)
     with pytest.raises(ValueError, match="maintained reference targets"):
+        RulesDatabase(path).validate()
+
+
+
+def test_reference_pages_match_canonical_composition() -> None:
+    app = create_app_from_database_set(RELEASE)
+    rules = app.rules_database
+    projection = app.database.catalog_projection
+    assert rules is not None and projection is not None
+    canonical = Database(RELEASE / "army.db")
+    pages = collect_reference_pages(canonical, rules)
+    for key, expected in pages.items():
+        assert projection.reference_page(key) == expected
+    assert app.api.glossary_catalog.entries() == pages["glossary"]
+    for key in pages:
+        if not key.startswith("orders-aros:"):
+            continue
+        slug = key.partition(":")[2]
+        status, _, body = wsgi_response(
+            app, f"http://localhost/api/orders-aros?scenario={slug}"
+        )
+        assert status == 200
+        assert json.loads(body) == {**pages["orders-aros"], "scenario": pages[key]}
+    assert json.loads(wsgi_response(
+        app, "http://localhost/api/orders-aros"
+    )[2]) == pages["orders-aros"]
+    assert wsgi_response(app, "http://localhost/api/orders-aros?scenario=hardlock")[0] == 400
+
+
+@pytest.mark.parametrize("mutation", [
+    "DELETE FROM reference_pages WHERE page='glossary'",
+    "UPDATE reference_pages SET body='{}'",
+    "DROP TABLE reference_pages",
+])
+def test_reference_page_projection_damage_fails_closed(tmp_path: Path, mutation: str) -> None:
+    path = tmp_path / "rules_n5.db"
+    shutil.copyfile(RELEASE / "rules_n5.db", path)
+    with closing(sqlite3.connect(path)) as db, db:
+        db.execute(mutation)
+    with pytest.raises(ValueError, match="reference page projection"):
         RulesDatabase(path).validate()

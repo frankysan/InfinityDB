@@ -243,6 +243,8 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
         exportPairSha256=generation,
     )
     with closing(sqlite3.connect(rules)) as connection, connection:
+        connection.execute("DROP TABLE IF EXISTS reference_pages")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='referencePagesSha256'")
         connection.execute("DROP TABLE IF EXISTS maintained_reference_targets")
         connection.execute("DELETE FROM __rules_metadata WHERE key='referenceTargetsSha256'")
         connection.execute("DROP TABLE IF EXISTS specialist_candidates")
@@ -363,7 +365,7 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v22-four-file"
+    assert first["layout"] == "v23-four-file"
     assert first["seasons"]["its-17"]["revision"] == "0.2"
     assert first["seasons"]["its-18"]["revision"] == "2026.09.11"
     assert first["restrictionChartRows"] == 6
@@ -407,7 +409,7 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
         ("army", "require Army schema v34"),
-        ("rules", "require Rules schema v22"),
+        ("rules", "require Rules schema v23"),
         ("provenance", "require recorded matched build provenance"),
     ):
         if case == "provenance":

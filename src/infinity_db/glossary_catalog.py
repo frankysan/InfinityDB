@@ -196,6 +196,12 @@ class GlossaryCatalog:
     def entries(self) -> list[dict[str, Any]]:
         """Return current canonical Glossary entries in stable display order."""
 
+        projection = self.database.catalog_projection
+        if (projection is not None and self.rules_database is not None
+                and projection.path == self.rules_database.path):
+            published = projection.reference_page("glossary")
+            if published is not None:
+                return published
         if self._entries_cache is None:
             self._entries_cache = sorted(
                 [

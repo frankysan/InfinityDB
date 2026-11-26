@@ -226,8 +226,11 @@ gain did not justify duplicating the enriched occurrence payloads.
 Rules v22 publishes compact maintained-text target descriptors, including
 parsed preview tokens and canonical routes. Resolve local anchors, scenario
 selection, display forms and season-owned fallback targets in the consumer.
-Potential subsequent candidates include Glossary entries and Scenario map SVGs. Respect publication/season scope and
-materialize only snapshot-dependent portions.
+Rules v23 publishes canonical raw Glossary entries and the core Orders/AROs
+matrix with separate core scenario declaration extensions. The Glossary reuses
+the reference target projection instead of storing fully enriched previews.
+Unit-profile help retains its small runtime cache; Scenario SVGs retain
+runtime rendering because the measured savings do not justify duplication.
 Arbitrary filter combinations, prospective counts, pagination and user
 preferences remain runtime selection/query work; precompute reusable
 associations or indexes rather than enumerating unbounded query results.
@@ -477,7 +480,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v34, Rules v22 and ITS v2,
+The complete serving contract requires Army v34, Rules v23 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

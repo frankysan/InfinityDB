@@ -24,10 +24,11 @@ from .hacking_program_catalog import HackingProgramCatalog
 from .maintained_text_references import collect_reference_targets, stage_reference_targets
 from .publication_registry import PublicationRegistry
 from .reference_catalog import LabelCatalog, RulesRecordCatalog
+from .reference_page_storage import collect_reference_pages, stage_reference_pages
 from .rules_database import (
     COMPOSED_SCHEMA_VERSION,
-    REFERENCE_TARGET_COMPATIBILITY_VERSION,
-    REFERENCE_TARGET_SCHEMA_VERSION,
+    REFERENCE_PAGE_COMPATIBILITY_VERSION,
+    REFERENCE_PAGE_SCHEMA_VERSION,
     RULES_METADATA_TABLE,
     SEARCH_INDEX_SCHEMA_VERSION,
     RulesDatabase,
@@ -165,6 +166,7 @@ def publish_search_index(
         for context in sorted(SPECIALIST_CONTEXTS)
     }
     reference_targets = collect_reference_targets(database, rules)
+    reference_pages = collect_reference_pages(database, rules)
     scope = search_scope(file_sha256(army_path), registry.season_manifest())
     with closing(sqlite3.connect(rules_path)) as db:
         with db:
@@ -180,10 +182,11 @@ def publish_search_index(
             record_catalog_projection(db)
             stage_specialist_projection(db, candidates)
             stage_reference_targets(db, reference_targets)
-            db.execute(f"PRAGMA user_version={REFERENCE_TARGET_SCHEMA_VERSION}")
+            stage_reference_pages(db, reference_pages)
+            db.execute(f"PRAGMA user_version={REFERENCE_PAGE_SCHEMA_VERSION}")
             for key, value in (
-                ("formatVersion", REFERENCE_TARGET_SCHEMA_VERSION),
-                ("databaseCompatibilityVersion", REFERENCE_TARGET_COMPATIBILITY_VERSION),
+                ("formatVersion", REFERENCE_PAGE_SCHEMA_VERSION),
+                ("databaseCompatibilityVersion", REFERENCE_PAGE_COMPATIBILITY_VERSION),
             ):
                 db.execute(
                     f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?", (str(value), key),

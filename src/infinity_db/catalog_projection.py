@@ -17,6 +17,7 @@ from .equipment_catalog import EquipmentCatalog
 from .publication_registry import PublicationRegistry
 from .rules_database import (
     CATALOG_SCHEMA_VERSION,
+    REFERENCE_PAGE_SCHEMA_VERSION,
     REFERENCE_TARGET_SCHEMA_VERSION,
     RULES_METADATA_TABLE,
     SPECIALIST_SCHEMA_VERSION,
@@ -182,6 +183,15 @@ class CatalogProjection:
             if db.execute("PRAGMA user_version").fetchone()[0] < CATALOG_SCHEMA_VERSION:
                 return None
         return cls(path)
+
+    def reference_page(self, page: str) -> Any:
+        with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+            if db.execute("PRAGMA user_version").fetchone()[0] < REFERENCE_PAGE_SCHEMA_VERSION:
+                return None
+            row = db.execute("SELECT body FROM reference_pages WHERE page=?", (page,)).fetchone()
+        if row is None:
+            raise ValueError(f"Missing reference page projection: {page}")
+        return json.loads(row[0])
 
     @cached_property
     def reference_targets(self) -> dict[str, Any] | None:

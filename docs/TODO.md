@@ -448,8 +448,6 @@ make v1.3.0 depend on them.
   - [ ] Extend full Unit-detail parity coverage to remaining availability
     combinations; evaluate worker memory and cross-platform performance at
     release validation; retire redundant runtime caches only when justified.
-  - [ ] Evaluate composed Glossary/help, Orders/AROs, and Scenario SVG
-    projections where measured gains justify their cost.
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.

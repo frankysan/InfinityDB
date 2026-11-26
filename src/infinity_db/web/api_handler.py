@@ -704,10 +704,19 @@ class ApiHandler:
             try:
                 if self.rules_database is None:
                     raise ValueError("Core rules reference unavailable")
-                payload = core_declaration_matrix(self.database, self.rules_database)
+                projection = self.database.catalog_projection
+                payload = projection.reference_page("orders-aros") if projection else None
+                if payload is None:
+                    payload = core_declaration_matrix(self.database, self.rules_database)
                 if scenario_slug is not None:
-                    payload["scenario"] = core_scenario_declaration_extension(
-                        self.rules_database, scenario_slug,
+                    extension = (
+                        projection.reference_page(f"orders-aros:{scenario_slug}")
+                        if projection else None
+                    )
+                    payload["scenario"] = (
+                        extension if extension is not None else core_scenario_declaration_extension(
+                            self.rules_database, scenario_slug,
+                        )
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not project scoped Orders/AROs")

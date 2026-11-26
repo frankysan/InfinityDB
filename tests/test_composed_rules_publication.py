@@ -21,6 +21,8 @@ def legacy(tmp_path_factory: pytest.TempPathFactory) -> RulesDatabase:
     path = tmp_path_factory.mktemp("rules-v17") / "rules_n5.db"
     shutil.copyfile(RELEASE, path)
     with closing(sqlite3.connect(path)) as db, db:
+        db.execute("DROP TABLE IF EXISTS reference_pages")
+        db.execute("DELETE FROM __rules_metadata WHERE key='referencePagesSha256'")
         db.execute("DROP TABLE IF EXISTS maintained_reference_targets")
         db.execute("DELETE FROM __rules_metadata WHERE key='referenceTargetsSha256'")
         db.execute("DROP TABLE IF EXISTS specialist_candidates")

@@ -363,6 +363,28 @@ and 0.111 s respectively. The complete rebuild took 113.51 s;
 Rules grew from 9,994,240 to 10,252,288 bytes, with Army/ITS sizes unchanged.
 These are component timings, not end-to-end browser measurements.
 
+### Reference pages and Scenario SVG pilot
+
+Run `python -m tools.performance.benchmark_reference_pages`. Windows
+measurements on Rules v22: initial Glossary request 203.27 ms, repeat
+median 15.16 ms; separate raw entry composition 135.85 ms,
+219,834 serialized bytes, and decode plus reference resolution 38.14 ms.
+The fully enriched response was 1,161,071 bytes; publish only raw entries.
+Orders/AROs repeated requests took 19.15 ms (base) and 25.41–31.73 ms
+(core scenario extensions); pilot SQLite reads and JSON decode took
+0.08–0.14 ms without opening the connection.
+Unit-profile help already took 0.26 ms on repeat requests, so retain its cache.
+Across 78 distinct Scenario geometries and 312 SVG presentations, rendering
+took 0.28 ms median and complete warm map requests 1.31 ms median.
+The SVGs would add 1,571,454 raw bytes or 439,557 compressed bytes; retain
+runtime rendering. Rules v23 publishes Glossary and declarations, adding
+233,472 bytes to Rules; Army and ITS sizes remain unchanged. The recorded
+source rebuild took 129.41 s. A subsequent Rules v23 run measured raw
+Glossary lookup at 4.11 ms, initial Glossary at 56.17 ms and repeat at
+15.20 ms; repeat Orders/AROs took 1.88 ms for the base matrix and
+5.00–5.39 ms with scenario selection. These are local component/request
+timings, not complete browser or startup timings.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db
