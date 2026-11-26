@@ -1874,6 +1874,97 @@ def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     assert {item["id"] for item in json.loads(body)["items"]} == {6}
 
 
+def test_unit_history_is_optional_and_snapshot_bound(
+    app_database_template: Path, tmp_path: Path,
+) -> None:
+    from hashlib import sha256
+
+    database = app_database_template
+    projection = tmp_path / "history.json"
+    change = {
+        "date": "2025-10-15", "scope": "", "category": "Characteristics",
+        "actions": [{"action": "Changed", "text": "BS: 11 → 12"}],
+    }
+    document = {
+        "formatVersion": 1,
+        "armyDatabaseSha256": sha256(database.read_bytes()).hexdigest(),
+        "units": {"1": {
+            "general": {"profile ranger": [change]},
+            "armies": {"101": [], "201": [change]},
+            "unmatched": [{"name": "Former Army", "changes": [change]}],
+        }},
+    }
+    projection.write_text(json.dumps(document), encoding="utf-8")
+    ordinary = create_app(database)
+    status, _, body = request(ordinary, "/api/units/1")
+    assert status == 200
+    assert "historical_contexts" not in json.loads(body)
+    selected = create_app(database, history_path=projection)
+    status, headers, body = request(selected, "/api/units/1")
+    assert status == 200
+    assert headers["cache-control"] == "no-store"
+    assert "etag" not in headers
+    unit = json.loads(body)
+    assert unit["general_profiles"][0]["history"] == [change]
+    assert {army["id"]: army["history"] for army in unit["armies"]} == {
+        101: [], 201: [change],
+    }
+    assert unit["historical_contexts"] == document["units"]["1"]["unmatched"]
+    document["armyDatabaseSha256"] = "wrong"
+    projection.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        create_app(database, history_path=projection)
+
+
+def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_path: Path) -> None:
+    from hashlib import sha256
+
+    from tools.browser_wsgi_transport import route_browser_page
+
+    api = pytest.importorskip("playwright.sync_api")
+    change = {
+        "date": "2025-10-15", "scope": "", "category": "Characteristics",
+        "actions": [{"action": "Changed", "text": "BS: 11 → 12"}],
+    }
+    projection = tmp_path / "history.json"
+    projection.write_text(json.dumps({
+        "formatVersion": 1,
+        "armyDatabaseSha256": sha256(app_database_template.read_bytes()).hexdigest(),
+        "units": {"1": {
+            "general": {"profile ranger": [change]},
+            "armies": {"101": [], "201": [{**change, "scope": "Loadout A",
+                                         "category": "Costs"}]},
+            "unmatched": [{"name": "Former Army", "changes": [change]}],
+        }},
+    }), encoding="utf-8")
+    app = create_app(app_database_template, history_path=projection)
+    with api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch()
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc):
+                pytest.skip(f"Chromium unavailable: {exc}")
+            raise
+        try:
+            for width, theme in ((1280, "light"), (390, "dark")):
+                page = browser.new_page(viewport={"width": width, "height": 900})
+                route_browser_page(page, app, "http://infinitydb-browser.test")
+                page.goto("http://infinitydb-browser.test/units/ranger-prototype")
+                general = page.locator(".general-profile .unit-history").first
+                general.wait_for()
+                assert general.get_attribute("open") is None
+                assert page.locator(".army-profile .unit-history").count() == 2
+                assert page.locator(".unit-history[open]").count() == 0
+                page.evaluate("(theme) => document.documentElement.dataset.theme = theme", theme)
+                general.locator(":scope > summary").click()
+                assert general.get_by_text("BS: 11 → 12").is_visible()
+                assert general.get_by_text("2025-10-15").is_visible()
+                assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+                page.close()
+        finally:
+            browser.close()
+
+
 def test_unit_details_are_available_by_id(app: Callable) -> None:
     status, _, body = request(app, "/api/units/1")
     assert status == 200

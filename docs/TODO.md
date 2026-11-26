@@ -320,7 +320,12 @@ make v1.3.0 depend on them.
     incomplete observations or differing later revision dates where evidence
     permits; review remaining Army-context and unresolved entries before
     public integration.
-  - [ ] Review publication rights before exposing derived historical data.
+  - [ ] Integrate the snapshot-bound player history projection into the normal
+    database build and release selection. The Unit details page can already
+    render it when explicitly selected at local server startup; validate the
+    release-matched projection and normal deployment before enabling by default.
+    The maintainer confirmed the existing Army data permission covers this
+    historical use (2026-11-26).
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
   **historical FAQ edition replay and source-date/season selection**,

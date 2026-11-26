@@ -201,7 +201,7 @@ desktop/mobile layouts and non-color text cues.
 
 ### Unit history presentation
 
-**Accepted design direction (private pilot implemented).** Put a collapsed
+**Accepted design direction (web integration pilot implemented).** Put a collapsed
 **History** disclosure immediately beneath the current content of each
 General profile and within each applicable Army profile card. History
 belongs to the particular profile or Army context it describes; do not
@@ -212,7 +212,7 @@ and remains independently collapsed by default. Retain readable historical
 contexts without a corresponding current card in a separate collapsed
 historical section rather than inventing a current profile or Army.
 
-Within each disclosure, group changes by first-observed date (newest
+Within each disclosure, group changes by encoded Army revision date (newest
 first), then by meaningful profile/loadout scope and change category:
 characteristics, Skills, Equipment, Weapons, costs, availability and
 lifecycle/relationships as applicable. Classification changes must be

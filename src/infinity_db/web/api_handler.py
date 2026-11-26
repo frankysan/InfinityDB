@@ -54,6 +54,7 @@ from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
 from infinity_db.unit_composition import present_unit
+from infinity_db.unit_history import attach_unit_history
 from infinity_db.unit_presentation import (
     OPTIONAL_AVAILABILITY_FLAGS,
     enrich_unit_filter_presentation,
@@ -533,8 +534,10 @@ class ApiHandler:
         publication_registry: PublicationRegistry | None = None,
         search_index: PublishedSearchIndex | None = None,
         catalog_projection: CatalogProjection | None = None,
+        unit_histories: dict[str, Any] | None = None,
     ) -> None:
         self.database = database
+        self.unit_histories = unit_histories
         self.rules_database = rules_database
         self.static_revision = static_revision
         self.snapshot_revision = snapshot_revision
@@ -1725,7 +1728,7 @@ class ApiHandler:
                     status = HTTPStatus.SERVICE_UNAVAILABLE
                     payload = {"error": "Unit information is unavailable. Please try again."}
         elif match := UNIT_API_PATH.fullmatch(path):
-            cache_control = API_CACHE_CONTROL
+            cache_control = API_CACHE_CONTROL if self.unit_histories is None else "no-store"
             try:
                 optional_filters, requested_army = _unit_detail_presentation_query(
                     query_string
@@ -1750,6 +1753,8 @@ class ApiHandler:
                             profiles[payload["id"]] if profiles is not None else None
                         ),
                     )
+                if payload is not None and self.unit_histories is not None:
+                    attach_unit_history(payload, self.unit_histories)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

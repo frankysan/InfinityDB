@@ -219,7 +219,7 @@ def cmd_database_health(args: argparse.Namespace) -> int:
 def cmd_serve(args: argparse.Namespace) -> int:
     from .web.server import serve
 
-    serve(args.db_dir, host=args.host, port=args.port)
+    serve(args.db_dir, host=args.host, port=args.port, history_path=args.unit_history)
     return 0
 
 
@@ -442,6 +442,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Interface to bind (defaults to all interfaces, including the local network)",
     )
     p_serve.add_argument("--port", type=_port, default=8000)
+    p_serve.add_argument("--unit-history", type=Path,
+                         help="Explicit snapshot-matched player history projection JSON")
     p_serve.set_defaults(func=cmd_serve)
 
     p_curated = sub.add_parser(

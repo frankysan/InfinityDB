@@ -203,8 +203,20 @@ labels remain stable, and the exact occurrence is owned by the target profile
 rather than a loadout. Do not promote overlapping multi-target summaries or
 group-owned loadout changes to one profile. Changed or unresolved attachments
 and disabled loadouts remain excluded. Ambiguous or removed Army cards retain
-a separate historical context. This remains a private, conservative projection,
-not a public serving API.
+a separate historical context. This remains a conservative projection. The maintainer confirmed that the
+existing Army data permission covers historical use on 2026-11-26.
+
+The contextual renderer can additionally export a compact versioned player
+history JSON projection with the Army database SHA-256. It contains date,
+scope, category and typed display rows, keyed by logical Unit ID, General
+profile identity and Army card ID plus sorted availability flags; unmatched
+historical contexts remain separate. Raw research evidence stays offline.
+The local web server accepts an explicitly selected projection through
+`serve --unit-history PATH` and rejects a mismatched Army database hash.
+Unit detail responses with this projection are not cached. General history
+describes the all-optional-categories profile scope, regardless of current
+browser filters, which is stated in the disclosure. Normal database-set
+publication integration remains pending.
 
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets

@@ -1322,6 +1322,81 @@ function compositeOptionTable(options, anchorScope) {
   );
 }
 
+function historyDisclosure(changes, general = false) {
+  const disclosure = document.createElement("details");
+  disclosure.className = "unit-history";
+  const summary = document.createElement("summary");
+  summary.textContent = "History";
+  disclosure.append(summary);
+  const body = document.createElement("div");
+  body.className = "unit-history-body";
+  const note = document.createElement("p");
+  note.className = "unit-history-note";
+  note.textContent = general
+    ? "Shared across all Army profiles and loadouts, including optional categories. Individual changes appear in Army histories."
+    : "Dates are Army data revisions. History may be incomplete.";
+  body.append(note);
+  if (!changes.length) {
+    const empty = document.createElement("p");
+    empty.textContent = general
+      ? "No changes to the shared General profile have been confirmed in the available history."
+      : "No changes have been confirmed in the available history for this Army.";
+    body.append(empty);
+  }
+  const dates = new Map();
+  for (const change of changes) {
+    if (!dates.has(change.date)) dates.set(change.date, new Map());
+    const scopes = dates.get(change.date);
+    if (!scopes.has(change.scope)) scopes.set(change.scope, new Map());
+    const categories = scopes.get(change.scope);
+    if (!categories.has(change.category)) categories.set(change.category, []);
+    categories.get(change.category).push(...change.actions);
+  }
+  const categoryOrder = ["Characteristics", "Skills", "Equipment", "Weapons", "Costs",
+    "Availability", "Loadout lifecycle", "Relationships", "Classification", "Other changes"];
+  for (const date of [...dates.keys()].sort().reverse()) {
+    const article = document.createElement("article");
+    article.className = "unit-history-date";
+    const heading = document.createElement("h3");
+    const time = document.createElement("time");
+    time.dateTime = date;
+    time.textContent = date;
+    heading.append(time);
+    article.append(heading);
+    for (const [scope, categories] of dates.get(date)) {
+      const group = document.createElement("section");
+      group.className = "unit-history-scope";
+      if (scope) {
+        const title = document.createElement("h4");
+        title.textContent = scope;
+        group.append(title);
+      }
+      for (const category of categoryOrder) {
+        if (!categories.has(category)) continue;
+        const label = document.createElement("h5");
+        label.className = "data-label";
+        label.textContent = category;
+        const list = document.createElement("ul");
+        for (const change of categories.get(category)) {
+          const item = document.createElement("li");
+          item.className = "unit-history-change";
+          item.dataset.action = change.action.toLowerCase();
+          const action = document.createElement("span");
+          action.className = "unit-history-action";
+          action.textContent = change.action;
+          item.append(action, document.createTextNode(change.text));
+          list.append(item);
+        }
+        group.append(label, list);
+      }
+      article.append(group);
+    }
+    body.append(article);
+  }
+  disclosure.append(body);
+  return disclosure;
+}
+
 function renderArmyProfile(army, generalByIdentity, expanded) {
   const section = document.createElement("details");
   const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
@@ -1377,6 +1452,7 @@ function renderArmyProfile(army, generalByIdentity, expanded) {
       ));
     }
   }
+  if (Array.isArray(army.history)) section.append(historyDisclosure(army.history));
   return section;
 }
 
@@ -1455,6 +1531,7 @@ function render(unit, helpItems = [], attributeItems = []) {
       "statline",
       `${profile.display_name || "Unit"} general profile`,
     ));
+    if (Array.isArray(profile.history)) generalProfile.append(historyDisclosure(profile.history, true));
     generalProfilesSection.append(generalProfile);
   }
   const profileHelp = renderProfileNotationHelp(helpItems);
@@ -1491,6 +1568,20 @@ function render(unit, helpItems = [], attributeItems = []) {
     }
     section.append(profiles);
     content.append(section);
+  }
+  if (unit.historical_contexts?.length) {
+    const historical = document.createElement("details");
+    historical.className = "surface content-frame unit-history";
+    const summary = document.createElement("summary");
+    summary.textContent = "Other historical contexts";
+    historical.append(summary);
+    for (const context of unit.historical_contexts) {
+      const section = document.createElement("section");
+      section.className = "unit-history-body";
+      section.append(subheading(context.name), historyDisclosure(context.changes));
+      historical.append(section);
+    }
+    content.append(historical);
   }
   content.hidden = false;
   requestAnimationFrame(revealProfileGroupHash);

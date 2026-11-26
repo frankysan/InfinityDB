@@ -32,10 +32,12 @@ def _ensure_port_is_available(host: str, port: int) -> None:
 
 def serve(
     db_dir: Path | None = None, *, host: str = "0.0.0.0", port: int = 8000,
+    history_path: Path | None = None,
 ) -> None:
     _ensure_port_is_available(host, port)
     selected = select_database_directory(db_dir)
-    app = create_app_from_database_set(selected)
+    app = (create_app_from_database_set(selected, history_path=history_path)
+           if history_path is not None else create_app_from_database_set(selected))
     with make_server(host, port, app, server_class=ThreadingWSGIServer) as server:
         print(f"InfinityDB database directory: {selected}", flush=True)
         print(f"Snapshot revision: {app.snapshot_revision}", flush=True)

@@ -1889,6 +1889,79 @@ h1>span {
   box-shadow: var(--shadow-profile);
 }
 
+.unit-history {
+  border-top: 1px solid var(--color-border-default);
+  padding: 10px 14px;
+  min-width: 0;
+}
+
+.unit-history > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.unit-history-body {
+  padding-top: 10px;
+  overflow-wrap: anywhere;
+}
+
+.unit-history-note {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.unit-history-date {
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 10px 0;
+}
+
+.unit-history-date h3,
+.unit-history-scope h4,
+.unit-history-scope h5 {
+  margin: 0 0 6px;
+}
+
+.unit-history-scope + .unit-history-scope {
+  border-top: 1px solid var(--color-border-default);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.unit-history-scope ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.unit-history-change {
+  border-left: 3px solid var(--color-action-primary);
+  padding: 4px 8px;
+  margin: 3px 0;
+}
+
+.unit-history-change[data-action="gained"],
+.unit-history-change[data-action="added"] {
+  border-left-color: #31956b;
+}
+
+.unit-history-change[data-action="lost"],
+.unit-history-change[data-action="removed"] {
+  border-left-color: #c95b60;
+}
+
+.unit-history-change[data-action="classification"] {
+  border-left-style: dashed;
+}
+
+.unit-history-action {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  margin-right: 8px;
+}
+
 .general-profile-symbols {
   display: flex;
   flex: 0 0 auto;

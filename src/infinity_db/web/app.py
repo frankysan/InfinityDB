@@ -19,6 +19,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.search_index_storage import PublishedSearchIndex, search_scope
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
+from infinity_db.unit_history import load_unit_history
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.api_handler import ApiHandler
@@ -64,6 +65,7 @@ class Application:
         self, database_path: Path, rules_database_path: Path | None = None,
         *, runtime_fingerprints: dict[str, str] | None = None,
         season_databases: Mapping[str, Path] | None = None,
+        history_path: Path | None = None,
     ) -> None:
         self.database = Database(database_path)
         self.database.validate()
@@ -147,6 +149,10 @@ class Application:
             snapshot_revision=self.snapshot_revision,
             static_revision=static_revision,
         )
+        unit_histories = (
+            load_unit_history(history_path, fingerprints[self.database.path.name])
+            if history_path is not None else None
+        )
         self.api = ApiHandler(
             self.database,
             self.rules_database,
@@ -160,6 +166,7 @@ class Application:
             publication_registry=self.publication_registry,
             search_index=search_index,
             catalog_projection=catalog_projection,
+            unit_histories=unit_histories,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.
@@ -291,7 +298,8 @@ class Application:
 
         etag = (
             self._snapshot_etag(path, query)
-            if path.startswith("/api/") and response.status == HTTPStatus.OK
+            if (path.startswith("/api/") and response.status == HTTPStatus.OK
+                and response.cache_control != "no-store")
             else None
         )
         if etag and path == "/api/variant-usage" and self.api.variant_usage_revision:
@@ -325,15 +333,19 @@ class Application:
 def create_app(
     database_path: Path, rules_database_path: Path | None = None,
     *, season_databases: Mapping[str, Path] | None = None,
+    history_path: Path | None = None,
 ) -> Application:
     """Create the app with optionally registered, explicitly selected ITS files."""
 
     return Application(
         database_path, rules_database_path, season_databases=season_databases,
+        history_path=history_path,
     )
 
 
-def create_app_from_database_set(directory: Path) -> Application:
+def create_app_from_database_set(
+    directory: Path, *, history_path: Path | None = None,
+) -> Application:
     """Open exactly one complete embedded set after shared, read-only validation."""
     from infinity_db.database_set import (
         ARMY_DATABASE_FILENAME,
@@ -347,6 +359,7 @@ def create_app_from_database_set(directory: Path) -> Application:
     return Application(
         selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME,
         runtime_fingerprints=report["sha256"],
+        history_path=history_path,
         season_databases={
             season: selected / filename
             for season, (filename, _source) in SEASON_DATABASE_SOURCES.items()

@@ -19,6 +19,7 @@ from infinity_db.army_history_source import Document, digest, file_digest, read_
 from infinity_db.database.repository import Database, identity_config_from_connection
 from infinity_db.identities import normalized_profile_identity
 from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
+from infinity_db.unit_history import army_history_key
 from infinity_db.unit_presentation import (
     OPTIONAL_AVAILABILITY_FLAGS,
     _classify_skill_source_presentations,
@@ -1243,6 +1244,40 @@ def action_rows(row: Document) -> list[tuple[str, str]]:
     return result or [action_text(row)]
 
 
+def history_projection(units: list[Document], names: dict[int, str], sha: str) -> Document:
+    """Export compact player-facing changes, not the private research evidence."""
+    def changes(rows: list[Document], *, general: bool = False) -> list[Document]:
+        return [{
+            "date": row["laterObservedDate"],
+            "scope": "" if general else row["scope"].removesuffix(" · Own capabilities only"),
+            "category": category(row),
+            "actions": [{"action": action, "text": body} for action, body in action_rows(row)],
+        } for row in rows]
+
+    result = {}
+    for unit in units:
+        armies = unit["currentArmies"]
+        keys = [army_history_key(army) for army in armies]
+        require(len(keys) == len(set(keys)), "Ambiguous current Army history card")
+        result[str(unit["logicalUnitId"])] = {
+            "general": {
+                profile["profile_identity"]: changes(
+                    unit["generalHistory"].get(profile["profile_identity"], []), general=True,
+                )
+                for profile in unit["currentGeneral"]
+            },
+            "armies": {
+                key: changes(unit["armyHistory"].get(index, []))
+                for index, key in enumerate(keys)
+            },
+            "unmatched": [
+                {"name": names.get(army, f"Army #{army}"), "changes": changes(rows)}
+                for army, rows in sorted(unit["unmatchedHistory"].items())
+            ],
+        }
+    return {"formatVersion": 1, "armyDatabaseSha256": sha, "units": result}
+
+
 def context_history(rows: list[Document], names: dict[int, str], *, general: bool = False) -> str:
     if not rows:
         note = (
@@ -1612,6 +1647,8 @@ def main() -> int:
                         help="Include one Unit with confirmed General-profile history.")
     parser.add_argument("--inspect-multi-profile", action="store_true",
                         help="Include Units with promoted multi-profile Group changes.")
+    parser.add_argument("--web-projection", type=Path,
+                        help="Export snapshot-bound contextual player history JSON.")
     parser.add_argument("--contextual", action="store_true",
                         help="Render current profile cards with scoped historical disclosures.")
     parser.add_argument("--browser-review", action="store_true",
@@ -1621,6 +1658,12 @@ def main() -> int:
     for path in (args.preview, args.semantic, args.output):
         require(path.resolve().is_relative_to(private), "Use private history directory")
     require(not args.output.exists(), "Preview output already exists")
+    if args.web_projection:
+        require(args.contextual, "Web projection requires contextual mode")
+        require(
+            args.web_projection.resolve().is_relative_to(private), "Use private history directory",
+        )
+        require(not args.web_projection.exists(), "Web projection already exists")
     preview_bytes, semantic_bytes = args.preview.read_bytes(), args.semantic.read_bytes()
     require(digest(preview_bytes) == args.preview_sha256, "Preview SHA-256 differs")
     require(digest(semantic_bytes) == args.semantic_sha256, "Semantic SHA-256 differs")
@@ -1680,6 +1723,11 @@ def main() -> int:
     require(file_digest(HISTORY) == preview["historyDatabaseSha256"], "History database changed")
     with args.output.open("x", encoding="utf-8", newline="\n") as handle:
         handle.write(html)
+    if args.web_projection:
+        projection = history_projection(units, names, preview["armyDatabaseSha256"])
+        with args.web_projection.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(encode(projection))
+        print(f"Web history projection: {args.web_projection}")
     print(json.dumps(counts, indent=2, sort_keys=True))
     for unit in units:
         if unit["logicalUnitId"] in args.inspect_unit:
