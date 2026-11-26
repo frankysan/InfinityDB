@@ -658,7 +658,7 @@ def test_variant_usage_mismatched_raw_snapshot_fails_closed(
     with pytest.raises(ValueError, match="raw archive does not match"):
         build_variant_usage_projection(
             ROOT / "data/generated/army.db",
-            ROOT / "data/work/build/army.raw.db",
+            ROOT / "local/work/build/army/army.raw.db",
             ROOT / "data/generated/rules_n5.db",
         )
 
@@ -667,7 +667,7 @@ def test_variant_usage_mismatched_raw_snapshot_fails_closed(
 def test_variant_usage_pinned_pair_has_source_ownership_not_inferred_includes() -> None:
     projection = build_variant_usage_projection(
         ROOT / "data/generated/army.db",
-        ROOT / "data/work/build/army.raw.db",
+        ROOT / "local/work/build/army/army.raw.db",
         ROOT / "data/generated/rules_n5.db",
     )
     assert projection["scope"] == "read-only-candidate-not-published"

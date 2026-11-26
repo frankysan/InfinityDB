@@ -39,7 +39,7 @@ def _get_json(app: Any, path: str) -> dict[str, Any]:
 def published_pair(requires_pinned_raw_army_archive: None) -> dict[str, Any]:
     """Full pinned source parity: never silently rebuild a stale publication."""
     army = DATA / "army.db"
-    raw = ROOT / "data/work/build/army.raw.db"
+    raw = ROOT / "local/work/build/army/army.raw.db"
     rules = DATA / "rules_n5.db"
     candidate = build_variant_usage_projection(army, raw, rules)
     expected = publication_from_candidate(candidate)

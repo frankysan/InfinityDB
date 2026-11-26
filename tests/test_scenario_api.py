@@ -120,7 +120,7 @@ def test_pinned_chain_of_command_non_specialist_owners_do_not_qualify_alone(
 
     root = Path(__file__).parents[1]
     owners = source_extra_owner_context(
-        root / "data/work/build/army.raw.db",
+        root / "local/work/build/army/army.raw.db",
         catalog="skills", source_id=26, extra_id=375,
     )
     assert len(owners) == 11

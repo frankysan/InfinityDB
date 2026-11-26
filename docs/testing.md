@@ -62,6 +62,16 @@ Reproduce with `python -m tools.research.render_its_map_previews --standalone
 --theme dark --distance-unit cm --width-px 360`. Previews are retained under
 `local/work/its/map-previews/`.
 
+## v1.2.2 player-facing acceptance — 2026-11-26
+
+The maintainer accepted both standalone SVG visual checks and the browser
+review. On Windows at `6ebe078941b024a687389dcb3a4fd61a04b5909c`, the
+Unit Explorer multi-selection, Army overview and exact-variant publication
+browser test batch returned 28 passed, 9 skipped (missing optional paired
+raw Army SQLite export), and no failures. Asset preflight verified 809/809
+published SVGs. Manual acceptance does not replace the outstanding
+source-backed cohort or final pinned full-suite release gate.
+
 ## Unit Explorer filter performance — 2026-11-25
 
 Windows development checkout based on `caae1c2c`, using the November 25
