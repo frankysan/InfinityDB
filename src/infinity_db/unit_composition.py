@@ -22,6 +22,8 @@ def present_unit(
     source_skill_classifications: tuple[SkillSourceClassification, ...] | None,
     optional_filters: dict[str, bool], requested_army: str | None = None,
     general_only: bool = False,
+    classify_general: bool = True,
+    materialized_general_profiles: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Use identical composition semantics during publication and serving."""
     if general_only:
@@ -69,5 +71,6 @@ def present_unit(
     return enrich_unit_presentation(
         unit, optional_filters=optional_filters, requested_army=requested_army,
         source_skill_classifications=source_skill_classifications,
-        general_only=general_only,
+        general_only=general_only, classify_general=classify_general,
+        materialized_general_profiles=materialized_general_profiles,
     )

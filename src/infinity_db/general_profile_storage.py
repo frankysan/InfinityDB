@@ -1,4 +1,4 @@
-"""Deterministic Army v32 General-profile projection publication and lookup."""
+"""Deterministic Army General-profile projection publication and lookup."""
 
 from __future__ import annotations
 
@@ -15,8 +15,10 @@ from .sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sq
 from .symbol_path_storage import ARMY_SCHEMA_VERSION as PREVIOUS_SCHEMA_VERSION
 from .symbol_path_storage import ARMY_V31_PUBLISHED_TABLES
 
-ARMY_SCHEMA_VERSION = 32
-ARMY_COMPATIBILITY_VERSION = 41
+EXPLORER_SCHEMA_VERSION = 32
+EXPLORER_COMPATIBILITY_VERSION = 41
+ARMY_SCHEMA_VERSION = 33
+ARMY_COMPATIBILITY_VERSION = 42
 # This order is a persisted contract, not a UI ordering preference.
 AVAILABILITY_MASK_FLAGS = ("mercs", "specops", "teamops", "reinforcement")
 MASK_COUNT = 1 << len(AVAILABILITY_MASK_FLAGS)
@@ -25,6 +27,8 @@ GENERAL_PROFILE_TABLES = {
     "general_profile_selections": Table(("unit_id", "mask"), ("payload_id",)),
 }
 ARMY_V32_PUBLISHED_TABLES = {**ARMY_V31_PUBLISHED_TABLES, **GENERAL_PROFILE_TABLES}
+# v33 retains the relational layout but stores complete, pre-classification rows.
+ARMY_V33_PUBLISHED_TABLES = ARMY_V32_PUBLISHED_TABLES
 
 
 def availability_mask(flags: frozenset[str]) -> int:
@@ -113,7 +117,7 @@ def write_general_profiles(
                     db.execute("INSERT INTO general_profile_selections VALUES (?,?,?)",
                                (unit_id, mask, payload_id))
             validate_general_profiles(db)
-            checksum = published_content_sha256(db, definitions=ARMY_V32_PUBLISHED_TABLES)
+            checksum = published_content_sha256(db, definitions=ARMY_V33_PUBLISHED_TABLES)
             db.executemany(
                 f"UPDATE {METADATA_TABLE} SET value=? WHERE key=?",
                 [(json.dumps(checksum), PUBLISHED_CONTENT_SHA256_KEY),
@@ -161,8 +165,8 @@ def publish_general_profiles(army: Path, rules: Path) -> None:
                 unit, database=database, skill_catalog=skill_catalog,
                 equipment_catalog=equipment_catalog, symbol_catalog=symbol_catalog,
                 source_skill_classifications=classifications, optional_filters=flags,
-                general_only=True,
-            ))
+                general_only=True, classify_general=False,
+            ), include_hidden=True)
     write_general_profiles(army, lambda unit_id, flags: projections[
         unit_id, availability_mask(frozenset(flag for flag, enabled in flags.items() if enabled))
     ])

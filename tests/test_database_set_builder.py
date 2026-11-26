@@ -389,7 +389,7 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
     original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
-        ("army", "require Army schema v32"),
+        ("army", "require Army schema v33"),
         ("rules", "require Rules schema v17"),
         ("provenance", "require recorded matched build provenance"),
     ):

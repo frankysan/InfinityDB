@@ -1,6 +1,6 @@
 """Validate the selected SQLite runtime set without loose JSON fallbacks.
 
-Current serving requires Army v32, Rules v17, and the independently
+Current serving requires Army v33, Rules v17, and the independently
 published ITS Season 17 and 18 databases. Earlier two-file embedded schemas remain
 inspectable for explicit development/research fixtures; v10/v11 layouts
 requiring JSON publications are unsupported.

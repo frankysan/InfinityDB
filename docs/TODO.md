@@ -441,24 +441,27 @@ make v1.3.0 depend on them.
 
 - [ ] **Data processing + Web backend (v1.3.0):** Begin the transition to
   [build-time materialized application projections](architecture.md#design-direction-build-time-materialization).
-  Army v32 now materializes all 16 General-profile combinations in the
-  complete build and serves Extended Explorer via a batched SQLite lookup.
-  All 11,808 published selections match the final Rules runtime composer.
+  Army v33 materializes all 16 General-profile combinations and serves both
+  Extended Explorer and Unit details from the same projection, with a
+  contextual fallback when a requested Army adds excluded occurrences.
   See [measured baseline](testing.md#general-profile-materialization-pilot).
-  Unit details retain their contextual composer.
-  - [ ] Compare generated projections with the current runtime reference across
-    the snapshot and all availability combinations, including contextual symbols,
-    AVA, shared items, distinct identities and requested-Army exceptions.
-    Verify deterministic complete-set builds and public API compatibility.
-    Measure build duration, database size, startup, worker memory, and cold
-    and repeated request latency against the existing browser/API baseline.
-    Remove redundant runtime composition/caching only after successful cutover.
-  - [ ] If the pilot demonstrates worthwhile benefits, extend incrementally to
-    canonical Unit details and composed Rules records/relations. Evaluate
-    catalog enrichment, search identities, Glossary, usage associations and
-    bounded Scenario SVG variants next, using measurements to select scope.
-    Leave arbitrary request filtering and prospective counts dynamic; consider
-    reusable materialized associations/indexes for them.
+  - [ ] Extend full Unit-detail parity coverage to remaining availability
+    combinations; evaluate worker memory and cross-platform performance at
+    release validation; retire redundant runtime caches only when justified.
+  - [ ] Evaluate materializing composed current Rules records, Army links,
+    reverse relations and reusable maintained-text reference tokens; preserve
+    source contributions, scenario scope and publication ownership.
+  - [ ] Pilot a compact global search index from canonical public identities,
+    normalized aliases, Unit search terms and scoped route metadata across
+    Army, Rules and ITS. Preserve existing substring matching and ranking.
+  - [ ] Evaluate catalog summaries and usage associations for Skills,
+    Equipment and Weapons, reusable by detail pages and filter choices;
+    avoid duplicating full usage payloads across records.
+  - [ ] Evaluate invariant Unit detail enrichment, Unit graph and contextual
+    filter-index inputs. Keep arbitrary selections, prospective counts and
+    pagination dynamic. Include bounded Specialist qualification candidates.
+  - [ ] Evaluate composed Glossary/help, Orders/AROs, and Scenario SVG
+    projections where measured gains justify their cost.
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.

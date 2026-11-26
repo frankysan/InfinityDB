@@ -155,3 +155,44 @@ def test_harbingers_breaker_pistol_variant_is_presented_in_general_profile() -> 
                     weapon["name"] == "Breaker Pistol" and not weapon["extras"]
                     for weapon in loadout["specific_items"]["weapons"]
                 )
+
+
+def test_materialized_general_profiles_preserve_requested_army_context(monkeypatch) -> None:
+    from infinity_db import unit_presentation
+
+    unit = fixture_loadouts({"weapons": [item(33)]})
+    alternative = deepcopy(unit["armies"][0])
+    alternative["id"] = 102
+    alternative["availability_flags"] = ["reinforcement"]
+    alternative["loadouts"][0]["weapons"] = [item(55)]
+    unit["armies"].append(alternative)
+    flags = {"reinforcement": False}
+    stored = extended_general_profiles(enrich_unit_presentation(
+        deepcopy(unit), optional_filters=flags, source_skill_classifications=(),
+        general_only=True, classify_general=False,
+    ), include_hidden=True)
+    expected = {
+        army: enrich_unit_presentation(
+            deepcopy(unit), optional_filters=flags, requested_army=army,
+            source_skill_classifications=(),
+        )
+        for army in ("101", "102")
+    }
+    original_stats = unit_presentation._general_stats
+    calls = []
+
+    def stats(profiles):
+        calls.append(profiles)
+        return original_stats(profiles)
+
+    monkeypatch.setattr(unit_presentation, "_general_stats", stats)
+    for army in ("101", "102"):
+        actual = enrich_unit_presentation(
+            deepcopy(unit), optional_filters=flags, requested_army=army,
+            source_skill_classifications=(), materialized_general_profiles=stored,
+        )
+        assert actual == expected[army]
+        if army == "101":
+            assert not calls
+        else:
+            assert calls

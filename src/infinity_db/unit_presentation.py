@@ -536,11 +536,13 @@ def enrich_unit_list_presentation(items: list[dict[str, Any]]) -> list[dict[str,
     return items
 
 
-def extended_general_profiles(unit: dict[str, Any]) -> list[dict[str, Any]]:
-    """Project the detail page's visible General profiles with Army availability."""
+def extended_general_profiles(
+    unit: dict[str, Any], *, include_hidden: bool = False,
+) -> list[dict[str, Any]]:
+    """Project General profiles with Army availability; publication retains hidden rows."""
     result = []
     for general in unit.get("general_profiles", ()):
-        if general.get("presentation_visible") is False:
+        if not include_hidden and general.get("presentation_visible") is False:
             continue
         availability: dict[int, list[str]] = {}
         for army in unit.get("armies", ()):
@@ -632,6 +634,20 @@ def _classify_skill_source_presentations(
         items["source_markers"] = source_markers
 
 
+def classify_published_general_profiles(
+    profiles: list[dict[str, Any]],
+    classifications: tuple[SkillSourceClassification, ...],
+) -> list[dict[str, Any]]:
+    """Project raw published rows into the existing Extended Explorer response."""
+    source_classifications = {
+        str(item.skill_ref): item.classification for item in classifications
+    }
+    visible = [row for row in profiles if row.get("presentation_visible") is not False]
+    for row in visible:
+        _classify_skill_source_presentations(row["shared_items"], source_classifications)
+    return visible
+
+
 def enrich_unit_presentation(
     unit: dict[str, Any],
     *,
@@ -639,6 +655,8 @@ def enrich_unit_presentation(
     requested_army: str | None = None,
     source_skill_classifications: tuple[SkillSourceClassification, ...] | None = None,
     general_only: bool = False,
+    classify_general: bool = True,
+    materialized_general_profiles: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Compose General-profile and Unit-detail presentation semantics in the backend.
 
@@ -693,88 +711,100 @@ def enrich_unit_presentation(
             _army_enabled(army, optional_filters) or army["presentation_requested"]
         )
     selected_armies = [army for army in armies if army["presentation_visible"]]
-    profiles_by_identity: dict[str, dict[str, Any]] = {}
-    profile_order: list[str] = []
-    for army in selected_armies:
-        for profile in army.get("profiles", ()):
-            identity = str(profile.get("profile_identity") or "")
-            if identity not in profiles_by_identity:
-                profiles_by_identity[identity] = {
-                    "display_name": str(
-                        profile.get("display_name") or profile.get("name") or ""
-                    ).strip(),
-                    "profiles": [],
-                    "contexts": [],
-                    "reinforcement_flags": [],
-                }
-                profile_order.append(identity)
-            profiles_by_identity[identity]["profiles"].append(profile)
-            profiles_by_identity[identity]["contexts"].append(
-                (army.get("id"), profile.get("group_id"))
-            )
-            profiles_by_identity[identity]["reinforcement_flags"].append(
-                "reinforcement" in army.get("availability_flags", ())
-            )
-
+    # An explicitly requested, normally excluded Army changes the selection.
+    # The ordinary mask cannot represent that context.
+    if any(not _army_enabled(army, optional_filters) for army in selected_armies):
+        materialized_general_profiles = None
     general_profiles: list[dict[str, Any]] = []
-    general_by_identity: dict[str, dict[str, Any]] = {}
-    for identity in profile_order:
-        group = profiles_by_identity[identity]
-        matching_profiles = group["profiles"]
-        context_keys = set(group["contexts"])
-        matching_loadouts = [
-            loadout
-            for army in selected_armies
-            for loadout in army.get("loadouts", ())
-            if (army.get("id"), loadout.get("group_id")) in context_keys
+    if materialized_general_profiles is not None:
+        # Retain hidden identities and raw shared buckets for the specific-item
+        # calculation. Availability belongs to the Explorer projection only.
+        general_profiles = [
+            {key: value for key, value in row.items() if key != "availability"}
+            for row in deepcopy(materialized_general_profiles)
         ]
-        stats = _general_stats(matching_profiles)
-        order_type = _general_order_type(matching_profiles, matching_loadouts)
-        shared_items = {
-            "skills": _general_profile_skills(matching_profiles, matching_loadouts),
-            "equipment": _unique_items([
-                *_common_items(matching_profiles, "equipment"),
-                *_common_bases_with_varying_extras(matching_loadouts, "equipment"),
-            ]),
-            "weapons": _unique_items([
-                *_common_items(matching_loadouts, "weapons"),
-                *_common_bases_with_varying_extras(matching_loadouts, "weapons"),
-            ]),
-        }
-        general = {
-            "profile_identity": identity,
-            "display_name": group["display_name"],
-            "stats": stats,
-            "order_type": order_type,
-            "type": _most_common(matching_profiles, "type"),
-            "classification": _most_common(matching_profiles, "classification"),
-            "occurrence_count": len(matching_profiles),
-            "reinforcement_only": all(group["reinforcement_flags"]),
-            "symbol_path": next(
-                (
-                    profile.get("symbol_path")
-                    for profile in matching_profiles
-                    if profile.get("symbol_path")
-                ),
-                None,
-            ),
-            "shared_items": shared_items,
-            "different_stat_labels": _stat_difference_labels(matching_profiles, stats),
-            "symbol_descriptors": _symbol_descriptors(
-                matching_profiles, matching_loadouts, order_type
-            ),
-        }
-        general["type_label"] = troop_type_label(general["type"])
-        general_profiles.append(general)
-        general_by_identity[identity] = general
+    else:
+        profiles_by_identity: dict[str, dict[str, Any]] = {}
+        profile_order: list[str] = []
+        for army in selected_armies:
+            for profile in army.get("profiles", ()):
+                identity = str(profile.get("profile_identity") or "")
+                if identity not in profiles_by_identity:
+                    profiles_by_identity[identity] = {
+                        "display_name": str(
+                            profile.get("display_name") or profile.get("name") or ""
+                        ).strip(),
+                        "profiles": [],
+                        "contexts": [],
+                        "reinforcement_flags": [],
+                    }
+                    profile_order.append(identity)
+                profiles_by_identity[identity]["profiles"].append(profile)
+                profiles_by_identity[identity]["contexts"].append(
+                    (army.get("id"), profile.get("group_id"))
+                )
+                profiles_by_identity[identity]["reinforcement_flags"].append(
+                    "reinforcement" in army.get("availability_flags", ())
+                )
 
-    _annotate_general_profile_visibility(general_profiles)
+        for identity in profile_order:
+            group = profiles_by_identity[identity]
+            matching_profiles = group["profiles"]
+            context_keys = set(group["contexts"])
+            matching_loadouts = [
+                loadout
+                for army in selected_armies
+                for loadout in army.get("loadouts", ())
+                if (army.get("id"), loadout.get("group_id")) in context_keys
+            ]
+            stats = _general_stats(matching_profiles)
+            order_type = _general_order_type(matching_profiles, matching_loadouts)
+            shared_items = {
+                "skills": _general_profile_skills(matching_profiles, matching_loadouts),
+                "equipment": _unique_items([
+                    *_common_items(matching_profiles, "equipment"),
+                    *_common_bases_with_varying_extras(matching_loadouts, "equipment"),
+                ]),
+                "weapons": _unique_items([
+                    *_common_items(matching_loadouts, "weapons"),
+                    *_common_bases_with_varying_extras(matching_loadouts, "weapons"),
+                ]),
+            }
+            general = {
+                "profile_identity": identity,
+                "display_name": group["display_name"],
+                "stats": stats,
+                "order_type": order_type,
+                "type": _most_common(matching_profiles, "type"),
+                "classification": _most_common(matching_profiles, "classification"),
+                "occurrence_count": len(matching_profiles),
+                "reinforcement_only": all(group["reinforcement_flags"]),
+                "symbol_path": next(
+                    (
+                        profile.get("symbol_path")
+                        for profile in matching_profiles
+                        if profile.get("symbol_path")
+                    ),
+                    None,
+                ),
+                "shared_items": shared_items,
+                "different_stat_labels": _stat_difference_labels(matching_profiles, stats),
+                "symbol_descriptors": _symbol_descriptors(
+                    matching_profiles, matching_loadouts, order_type
+                ),
+            }
+            general["type_label"] = troop_type_label(general["type"])
+            general_profiles.append(general)
+        _annotate_general_profile_visibility(general_profiles)
+    general_by_identity = {row["profile_identity"]: row for row in general_profiles}
     unit["general_profiles"] = general_profiles
 
     if general_only:
-        # Extended Explorer rows consume only the General profiles and visibility.
-        for general in general_profiles:
-            _classify_skill_source_presentations(general["shared_items"], source_classifications)
+        if classify_general:
+            for general in general_profiles:
+                _classify_skill_source_presentations(
+                    general["shared_items"], source_classifications,
+                )
         return unit
 
     for army in selected_armies:

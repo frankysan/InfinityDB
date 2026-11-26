@@ -251,6 +251,23 @@ median/p95 Extended 272.9/305.7 ms (API 77.3/82.1 ms), Extended next
 browser baseline, not a controlled same-run comparison.
 Worker-memory measurements remain outstanding.
 
+Army v33 shares complete General-profile rows between Explorer and Unit
+details. Recorded-source rebuild: 110.0 s, Army database unchanged in size
+(11,911,168 bytes). All 11,808 published Explorer selections matched the
+runtime composer; full Unit-detail payload parity passed across the visible
+snapshot with all optional flags enabled and disabled. Single diagnostic
+50-Unit sample: 4.69 ms published batch versus 743.0 ms cold composition.
+These are not end-to-end timing comparisons.
+
+Fresh profiled Windows Chrome samples (both seasons) identified remaining
+cold costs: `SearchCatalog.search` 718 ms, Skills catalog 614 ms,
+`Database.get_unit` 118 ms including `_unit_graph` 104 ms. Search invokes
+composed Rules kinds (302 ms), Skill catalog (305 ms), and Unit listing
+(159 ms); the Skills catalog invokes Scenario Skill composition (246 ms)
+and Army catalog usage (216 ms). Cumulative profiler times overlap and
+include instrumentation overhead; these are prioritization evidence, not
+unprofiled latency or projected savings.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

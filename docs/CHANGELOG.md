@@ -21,8 +21,8 @@ are not retroactively relabeled.
 ### Changed
 
 - **Data processing + Web backend:** Materialized deduplicated General-profile
-  selections during database generation; Extended Explorer reads them in one
-  batch while preserving the public profile and availability semantics.
+  selections during database generation; Extended Explorer and Unit details
+  share them while preserving public profile and availability semantics.
 
 ### Fixed
 

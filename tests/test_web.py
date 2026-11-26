@@ -1763,11 +1763,12 @@ def test_materialized_extended_profiles_preserve_detail_and_availability(monkeyp
     )
     original = application.api._present_unit
     calls = []
+    detail_projections = []
 
     def present(*args, **kwargs):
         calls.append(kwargs.get("general_only", False))
+        detail_projections.append(kwargs.get("materialized_general_profiles"))
         return original(*args, **kwargs)
-
     monkeypatch.setattr(application.api, "_present_unit", present)
     for settings in flags:
         query = f"limit=10&extended=1&matching_scope=profile&{settings}"
@@ -1790,6 +1791,7 @@ def test_materialized_extended_profiles_preserve_detail_and_availability(monkeyp
             assert item["general_profiles"] == extended_general_profiles(json.loads(body))
     assert calls.count(True) == 0
     assert calls.count(False) == 20
+    assert all(profiles is not None for profiles in detail_projections)
 
 
 @pytest.mark.parametrize("enabled", [False, True])
@@ -1810,16 +1812,21 @@ def test_extended_general_projection_matches_all_current_units(enabled: bool) ->
         teamops=enabled, reinforcement=enabled,
     )["items"]
     assert units
+    ids = [item["id"] for item in units]
+    selected_flags = frozenset(flag for flag, value in flags.items() if value)
+    published = api.database.general_profiles(ids, selected_flags, for_detail=True)
+    explorer = api.database.general_profiles(ids, selected_flags)
+    assert published is not None and explorer is not None
     for item in units:
         detail = api.database.get_unit(item["id"])
         assert detail is not None
-        expected = extended_general_profiles(api._present_unit(
+        expected = api._present_unit(detail, optional_filters=flags)
+        actual = api._present_unit(
             detail, optional_filters=flags,
-        ))
-        actual = extended_general_profiles(api._present_unit(
-            detail, optional_filters=flags, general_only=True,
-        ))
+            materialized_general_profiles=published[item["id"]],
+        )
         assert actual == expected, item["name"]
+        assert explorer[item["id"]] == extended_general_profiles(expected), item["name"]
 
 
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:

@@ -111,7 +111,7 @@ def test_database_separation_audit_is_deterministic_and_read_only(tmp_path: Path
 
 @pytest.mark.parametrize(
     ("version", "extra_count"),
-    [(26, 0), (27, 2), (28, 4), (29, 8), (30, 11), (31, 14), (32, 16)],
+    [(26, 0), (27, 2), (28, 4), (29, 8), (30, 11), (31, 14), (32, 16), (33, 16)],
 )
 def test_database_separation_audit_classifies_versioned_publication_tables(
     version: int, extra_count: int,

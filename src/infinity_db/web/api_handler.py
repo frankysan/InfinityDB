@@ -590,6 +590,7 @@ class ApiHandler:
         self, unit: dict[str, Any], *,
         optional_filters: dict[str, bool], requested_army: str | None = None,
         general_only: bool = False,
+        materialized_general_profiles: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         return present_unit(
             unit, database=self.database, skill_catalog=self.skill_catalog,
@@ -597,6 +598,7 @@ class ApiHandler:
             source_skill_classifications=self._source_skill_classifications(),
             optional_filters=optional_filters, requested_army=requested_army,
             general_only=general_only,
+            materialized_general_profiles=materialized_general_profiles,
         )
 
     @instance_lru_cache(maxsize=1)
@@ -1710,8 +1712,15 @@ class ApiHandler:
                 unit_ref = int(identifier) if identifier.isdigit() else identifier
                 payload = self.database.get_unit(unit_ref)
                 if payload is not None:
+                    flags = frozenset(flag for flag, enabled in optional_filters.items() if enabled)
+                    profiles = self.database.general_profiles(
+                        [payload["id"]], flags, for_detail=True,
+                    ) if self.variant_usage is not None else None
                     payload = self._present_unit(
                         payload, optional_filters=optional_filters, requested_army=requested_army,
+                        materialized_general_profiles=(
+                            profiles[payload["id"]] if profiles is not None else None
+                        ),
                     )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND

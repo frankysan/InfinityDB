@@ -83,6 +83,10 @@ def database_health_report(
     from infinity_db.general_profile_storage import (
         ARMY_SCHEMA_VERSION as GENERAL_PROFILE_SCHEMA_VERSION,
     )
+    from infinity_db.general_profile_storage import (
+        EXPLORER_COMPATIBILITY_VERSION,
+        EXPLORER_SCHEMA_VERSION,
+    )
     from infinity_db.symbol_path_storage import (
         ARMY_COMPATIBILITY_VERSION as SYMBOL_COMPATIBILITY_VERSION,
     )
@@ -122,6 +126,9 @@ def database_health_report(
         elif schema_revision == SYMBOL_SCHEMA_VERSION:
             application["expectedSchemaRevision"] = SYMBOL_SCHEMA_VERSION
             application["expectedCompatibilityRevision"] = SYMBOL_COMPATIBILITY_VERSION
+        elif schema_revision == EXPLORER_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = EXPLORER_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = EXPLORER_COMPATIBILITY_VERSION
         elif schema_revision == GENERAL_PROFILE_SCHEMA_VERSION:
             application["expectedSchemaRevision"] = GENERAL_PROFILE_SCHEMA_VERSION
             application["expectedCompatibilityRevision"] = GENERAL_PROFILE_COMPATIBILITY_VERSION
