@@ -3,20 +3,24 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sqlite3
 from collections import Counter, defaultdict
 from collections.abc import Callable
 from contextlib import closing
+from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
 
 from infinity_db.army_history_pilot import catalog_index
+from infinity_db.army_history_references import resolve_references
 from infinity_db.army_history_source import Document, digest, file_digest, read_history, require
+from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
 from tools.research.build_army_history_database import ARCHIVE_PIN, encode
 from tools.research.project_army_history import ARMY, HISTORY, ROOT, read_only
 from tools.research.render_army_history import FIELDS, details, esc, raw, value_text
-from tools.research.summarize_army_history import describe_option, get_group, indexed
+from tools.research.summarize_army_history import compact_reference, get_group, indexed
 
 SCALARS = frozenset({"arm", "bs", "bts", "cc", "move", "ph", "s", "str", "w", "wip"})
 STREAMS = ("summaries", "lifecycleSummaries", "availabilitySummaries", "relationshipSummaries")
@@ -24,27 +28,53 @@ ScopeResolver = Callable[[Document, Document, str], str]
 
 STYLE = """
 * {box-sizing:border-box}
-:root {color-scheme:light dark}
-body {max-width:960px;margin:0 auto;padding:24px 18px;font:16px/1.5 system-ui}
-h1,h2,h3 {line-height:1.2;margin:0 0 .6em}
-p {margin:.5em 0}
-header {border-bottom:1px solid GrayText;padding-bottom:1em}
+:root {
+  color-scheme:light dark;--bg:#f5f6f8;--surface:#fff;--ink:#19212d;
+  --muted:#526174;--line:#d2dae2;--accent:#245b8e;
+}
+@media(prefers-color-scheme:dark) {
+  :root {--bg:#151c26;--surface:#202a37;--ink:#eef2f6;
+    --muted:#b4c2d1;--line:#465564;--accent:#a8d1ff}
+}
+body {max-width:1240px;margin:0 auto;padding:24px 20px;font:16px/1.5 system-ui;
+  color:var(--ink);background:var(--bg);overflow-wrap:anywhere}
+h1,h2,h3,h4 {line-height:1.25;margin:0 0 .55em}
+h1 {font-size:1.55rem} h2 {font-size:1.5rem} h3 {font-size:1.05rem}
+h4 {font-size:.9rem;font-weight:600}
+p {margin:.4em 0}
+header {border-bottom:1px solid var(--line);padding-bottom:1em}
+.notice,.armies,.scope,#shown {font-size:.875rem;color:var(--muted)}
 input,select {font:inherit;padding:.5em;max-width:100%;width:100%}
 input[type=checkbox] {width:auto}
-label {display:block;margin-top:.8em}
-nav {margin:1em 0;display:grid;gap:.4em}
-article {margin:1.3em 0;padding-top:1em;border-top:1px solid GrayText}
-h3 {font-size:1rem}
-.armies {font-size:.85em;color:GrayText;margin-top:.7em}
-ul {padding-left:1.4em;margin:.4em 0 1em}
-li {margin:.4em 0}
-.scope {font-size:.9em;color:GrayText}
+label {display:block;margin-top:.6em}
+.layout {display:grid;grid-template-columns:minmax(0,270px) minmax(0,1fr);
+  gap:24px;align-items:start;margin-top:20px}
+nav {position:sticky;top:16px;display:grid;gap:.25em}
+#unit-select {height:clamp(150px,42vh,380px)}
+#unit-select.compact {height:auto}
+main {min-width:0}
+article {margin:0 0 16px;padding:16px 18px;background:var(--surface);
+  border:1px solid var(--line);border-radius:8px}
+article h3 {color:var(--accent)}
+.army-group {border-top:1px solid var(--line);padding-top:.65em;margin-top:.65em}
+.armies {margin:0 0 .6em}
+.change-group + .change-group {margin-top:.8em}
+.scope {margin:0 0 .15em}
+ul {padding-left:1.3em;margin:.15em 0 .3em}
+li {margin:.2em 0}
 details {margin:.3em 0;font-size:.9em}
 summary {cursor:pointer}
 pre {white-space:pre-wrap;overflow-wrap:anywhere}
 [hidden] {display:none!important}
 body:not(.technical) .technical-only {display:none}
 :focus-visible {outline:2px solid Highlight;outline-offset:3px}
+@media(max-width:720px) {
+  body {padding:14px 12px}
+  .layout {display:block;margin-top:12px}
+  nav {position:static;margin-bottom:1.25em}
+  #unit-select {height:8em}
+  article {padding:12px}
+}
 """
 SCRIPT = """
 const search = document.querySelector('#search');
@@ -54,6 +84,7 @@ const only = document.querySelector('#with-history');
 const units = [...document.querySelectorAll('.unit')];
 function show() {
   for (const unit of units) unit.hidden = unit.id !== select.value;
+  document.querySelector('#empty').hidden = Boolean(select.value);
 }
 function filter() {
   const query = search.value.trim().toLowerCase();
@@ -61,8 +92,11 @@ function filter() {
   const matches = options.filter(o => o.dataset.search.includes(query) &&
     (!only.checked || o.dataset.history === 'yes'));
   select.replaceChildren(...matches);
-  if (matches.some(o => o.value === prior)) select.value = prior;
-  document.querySelector('#shown').textContent = matches.length + ' Units found';
+  select.classList.toggle('compact', matches.length <= 4);
+  select.size = Math.max(1, Math.min(6, matches.length));
+  select.value = matches.some(o => o.value === prior) ? prior : (matches[0]?.value ?? '');
+  document.querySelector('#shown').textContent =
+    matches.length + (matches.length === 1 ? ' Unit found' : ' Units found');
   show();
 }
 search.addEventListener('input', filter);
@@ -93,7 +127,11 @@ def scalar_text(field: str, record: Document) -> str:
         if isinstance(value, list) and len(value) == 2 and all(
             type(v) is int and v >= 0 for v in value
         ):
-            return value_text(field, record) + " cm"
+            distances = [
+                format((Decimal(v) / DISTANCE_CENTIMETERS_PER_INCH).normalize(), "f")
+                for v in value
+            ]
+            return "-".join(distances) + '"'
         if value == [-1, -1]:
             return "—"
     if type(value) is int and value == -1:
@@ -130,7 +168,8 @@ def scalar_rows(unit: Document) -> list[Document]:
 
 def summary_text(row: Document, stream: str) -> str:
     if stream == "lifecycleSummaries":
-        return f"{row['summary']} ({row['points']} Points, {row['swc']} SWC)"
+        action = "Added" if row["kind"] == "loadoutAdded" else "Removed"
+        return f"{action} loadout · {row['points']} Points, {row['swc']} SWC"
     if stream == "summaries" and row["field"] in {"points", "swc"}:
         targets = row["loadouts"]
         pairs = {(str(t["before"]), str(t["after"])) for t in targets}
@@ -158,6 +197,58 @@ def effective_scope(row: Document, group: str) -> str:
     return scope
 
 
+def compact_option_labels(
+    options: dict[int, Document], army: Document,
+    contexts: list[dict[str, dict[int, tuple[str, ...]]]],
+) -> dict[int, str]:
+    """Shorten display labels only; never use them as historical identities."""
+    references: dict[int, list[str]] = {}
+    complete = True
+    for identity, option in options.items():
+        parts = []
+        for field in ("weapons", "skills", "equip"):
+            rows, _ = resolve_references(option.get(field, []), field, army, contexts)
+            if rows is None:
+                complete = False
+                parts.append("Unresolved " + FIELDS[field])
+            else:
+                parts.extend(compact_reference(row) for row in rows)
+        references[identity] = parts
+    common: Counter[str] = Counter()
+    if complete and len(references) > 1:
+        common = Counter(next(iter(references.values())))
+        for parts in references.values():
+            common &= Counter(parts)
+
+    labels = {}
+    for identity, option in options.items():
+        remaining = common.copy()
+        distinct = []
+        for part in references[identity]:
+            if remaining[part]:
+                remaining[part] -= 1
+            else:
+                distinct.append(part)
+        label = name(option, "Loadout")
+        shown = distinct or references[identity]
+        if shown:
+            label += " — " + "; ".join(shown)
+        labels[identity] = label
+
+    # Same-name siblings can differ only in shared references or cost.
+    repeated = Counter(labels.values())
+    for identity, label in labels.items():
+        if repeated[label] > 1:
+            option = options[identity]
+            label += f" ({option.get('points', '?')} Points, {option.get('swc', '?')} SWC)"
+            labels[identity] = label
+    repeated = Counter(labels.values())
+    return {
+        identity: label + (" (not uniquely distinguished)" if repeated[label] > 1 else "")
+        for identity, label in labels.items()
+    }
+
+
 def historical_scopes(db: sqlite3.Connection, archive: Path) -> ScopeResolver:
     """Resolve historical group/owner labels at the exact evidence endpoint."""
     source = read_history(archive, ARCHIVE_PIN)
@@ -170,6 +261,19 @@ def historical_scopes(db: sqlite3.Connection, archive: Path) -> ScopeResolver:
     @lru_cache(maxsize=64)
     def metadata(sha: str) -> dict[str, dict[int, tuple[str, ...]]]:
         return catalog_index(data(sha))
+
+    @lru_cache(maxsize=512)
+    def option_labels(
+        sha: str, metadata_shas: tuple[str, ...], source_unit: int, group_id: int,
+    ) -> dict[int, str]:
+        army = data(sha)
+        result = get_group(army, source_unit, group_id)
+        require(result is not None, "Historical summary group no longer resolves")
+        assert result is not None
+        return compact_option_labels(
+            indexed(result[1].get("options")) or {}, army,
+            [metadata(value) for value in metadata_shas],
+        )
 
     def resolve(row: Document, evidence: Document, stream: str) -> str:
         if stream == "availabilitySummaries" and row["kind"].startswith("armyList"):
@@ -184,26 +288,41 @@ def historical_scopes(db: sqlite3.Connection, archive: Path) -> ScopeResolver:
         assert result is not None
         unit, group = result
         group_name = name(group, name(unit, "Profile group"))
+        options = indexed(group.get("options")) or {}
         if stream == "summaries":
             profiles = indexed(group.get("profiles")) or {}
             if len(profiles) == 1:
                 profile = name(next(iter(profiles.values())), "Unnamed profile")
                 if profile.casefold() != group_name.casefold():
                     group_name += " / " + profile
+            if not row["allGroupLoadouts"]:
+                labels = option_labels(
+                    endpoint["sha256"], tuple(endpoint["metadataSha256"]),
+                    row["sourceUnitId"], group_id,
+                )
+                row = {**row, "loadouts": [
+                    {**target, "label": labels[target["optionId"]]}
+                    for target in row["loadouts"]
+                ]}
             return effective_scope(row, group_name)
         if stream == "lifecycleSummaries":
             profile = str(row["profileName"] or "Unnamed profile").strip()
-            return group_name if profile.casefold() == group_name.casefold() else (
+            prefix = group_name if profile.casefold() == group_name.casefold() else (
                 group_name + " / " + profile
             )
+            labels = option_labels(
+                endpoint["sha256"], tuple(endpoint["metadataSha256"]),
+                row["sourceUnitId"], group_id,
+            )
+            return prefix + " · " + labels[row["optionId"]]
         owner = path[4]
         if owner == "options":
-            options = indexed(group.get("options")) or {}
             require(path[5] in options, "Historical loadout no longer resolves")
-            label = describe_option(
-                options[path[5]], army, [metadata(sha) for sha in endpoint["metadataSha256"]],
+            labels = option_labels(
+                endpoint["sha256"], tuple(endpoint["metadataSha256"]),
+                row["sourceUnitId"], group_id,
             )
-            return group_name + " · " + label + " (loadout)"
+            return group_name + " · " + labels[path[5]] + " (loadout)"
         require(owner == "profiles", "Unsupported historical owner")
         profiles = indexed(group.get("profiles")) or {}
         require(path[5] in profiles, "Historical profile no longer resolves")
@@ -301,17 +420,31 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
             blocks = []
             for ids, entries in army_groups.items():
                 armies = ", ".join(names.get(i, f"Army #{i}") for i in ids)
-                items = []
+                scopes: dict[str, list[Document]] = defaultdict(list)
                 for row in entries:
-                    scope = (f'<span class="scope">{esc(row["scope"])}</span> · '
-                             if row["scope"] else "")
-                    review = details("Evidence", f"<pre>{raw(row['evidence'])}</pre>")
-                    items.append(
-                        f"<li>{scope}<strong>{esc(row['text'])}</strong>"
-                        f'<div class="technical-only">{review}</div></li>'
+                    scopes[row["scope"]].append(row)
+                groups = []
+                for scope, changes in scopes.items():
+                    # Only share headings, not event identities or evidence.
+                    for separator in (" · ", " / "):
+                        prefix = title + separator
+                        if scope.casefold().startswith(prefix.casefold()):
+                            scope = scope[len(prefix):]
+                            break
+                    heading = f'<h4 class="scope">{esc(scope)}</h4>' if scope else ""
+                    items = []
+                    for row in changes:
+                        review = details("Evidence", f"<pre>{raw(row['evidence'])}</pre>")
+                        items.append(
+                            f"<li><strong>{esc(row['text'])}</strong>"
+                            f'<div class="technical-only">{review}</div></li>'
+                        )
+                    groups.append(
+                        f'<div class="change-group">{heading}<ul>{"".join(items)}</ul></div>'
                     )
                 blocks.append(
-                    f'<p class="armies">{esc(armies)}</p><ul>{"".join(items)}</ul>'
+                    f'<div class="army-group"><p class="armies">{esc(armies)}</p>'
+                    + "".join(groups) + "</div>"
                 )
             articles.append(
                 f"<article><h3>{esc(earlier)} – {esc(later)}</h3>{''.join(blocks)}</article>"
@@ -331,19 +464,79 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>Unit version history — private preview</title>'
         f"<style>{STYLE}</style></head><body><header><h1>Unit version history</h1>"
-        "<p>Private N5 preview · Changes observed between the listed dates. "
+        '<p class="notice">Private N5 preview · Changes observed between the listed dates. '
         "History is incomplete; dates are not confirmed publication dates. "
         "Army list presence does not establish playable availability. "
-        "Army names use current labels.</p>"
+        "Army names use current labels. MOV is displayed in inches.</p>"
         '<label><input type="checkbox" id="technical"> Show technical evidence</label>'
         f'<div class="technical-only">{coverage_details}</div>'
-        '</header><nav aria-label="Unit navigation"><label for="search">Find a Unit</label>'
+        '</header><div class="layout"><nav aria-label="Unit navigation">'
+        '<label for="search">Find a Unit</label>'
         '<input id="search" type="search" placeholder="Unit name or slug">'
         '<label><input type="checkbox" id="with-history" checked> Only Units with changes</label>'
         '<label for="unit-select">Unit</label><select id="unit-select" size="6">'
         + "".join(options) + '</select><p id="shown" aria-live="polite"></p></nav>'
-        '<main>' + "".join(sections) + f"</main><script>{SCRIPT}</script></body></html>"
+        '<main><p id="empty" hidden>No matching Units.</p>'
+        + "".join(sections) + f"</main></div><script>{SCRIPT}</script></body></html>"
     )
+
+
+def browser_review(output: Path, units: list[Document], selected: list[int]) -> None:
+    """Exercise the exact private HTML locally, including responsive navigation."""
+    playwright = importlib.import_module("playwright.sync_api")
+    available = {u["logicalUnitId"]: u for u in units if u["entries"]}
+    selected = selected or [next(iter(available))]
+    require(all(i in available for i in selected), "Select Units with history for browser review")
+    with playwright.sync_playwright() as driver:
+        browser = driver.chromium.launch()
+        try:
+            for width, height, theme in ((1280, 900, "light"), (390, 844, "dark")):
+                page = browser.new_page(
+                    viewport={"width": width, "height": height}, color_scheme=theme,
+                )
+                errors: list[str] = []
+                requests: list[str] = []
+                page.on("pageerror", lambda error, errors=errors: errors.append(str(error)))
+                page.on("request", lambda request, requests=requests: requests.append(request.url))
+                page.goto(output.resolve().as_uri())
+                require(page.locator(".unit:visible").count() == 1, "Initial selection differs")
+                page.locator("#search").fill("no-matching-unit-xyz")
+                require(page.locator("#empty").is_visible(), "Missing empty-search state")
+                page.locator("#search").fill("")
+                page.locator("#with-history").uncheck()
+                require(page.locator("#unit-select option").count() == len(units),
+                        "All-Unit navigation differs")
+                page.locator("#with-history").check()
+                for identity in selected:
+                    unit = available[identity]
+                    page.locator("#search").fill(unit["slug"] or unit["name"])
+                    page.locator("#unit-select").select_option(f"unit-{identity}")
+                    target = page.locator(f"#unit-{identity}")
+                    require(target.is_visible(), "Selected Unit is hidden")
+                    require(page.locator(".unit:visible").count() == 1, "Unit selection differs")
+                    require(target.locator("article").count() > 0, "Missing selected timeline")
+                    require(not target.locator(".technical-only").first.is_visible(),
+                            "Technical evidence visible by default")
+                    page.locator("#technical").check()
+                    require(target.locator(".technical-only").first.is_visible(),
+                            "Technical evidence toggle differs")
+                    target.locator(".technical-only summary").first.click()
+                    require(target.locator("details[open] pre").first.is_visible(),
+                            "Evidence disclosure did not open")
+                    page.locator("#technical").uncheck()
+                    page.evaluate("window.scrollTo(0, 0)")
+                    require(page.evaluate("document.documentElement.scrollWidth <= innerWidth"),
+                            "Preview overflows viewport")
+                    screenshot = output.with_name(f"{output.stem}-{identity}-{width}-{theme}.png")
+                    require(not screenshot.exists(), "Screenshot already exists")
+                    page.screenshot(path=screenshot)
+                require(not errors, f"Browser errors: {errors}")
+                require(not any(url.startswith(("http:", "https:")) for url in requests),
+                        "Unexpected network requests")
+                page.close()
+                print(f"Browser review: {width}px {theme}, {len(selected)} Units: PASS")
+        finally:
+            browser.close()
 
 
 def main() -> int:
@@ -353,6 +546,8 @@ def main() -> int:
     for arg in ("preview", "semantic"):
         parser.add_argument("--" + arg + "-sha256", required=True)
     parser.add_argument("--inspect-unit", type=int, action="append", default=[])
+    parser.add_argument("--browser-review", action="store_true",
+                        help="Check the generated HTML in Chromium and save private screenshots.")
     args = parser.parse_args()
     private = (ROOT / "generated").resolve()
     for path in (args.preview, args.semantic, args.output):
@@ -405,6 +600,8 @@ def main() -> int:
                 ],
             }, ensure_ascii=True))
     print(f"Private player-facing preview: {args.output}")
+    if args.browser_review:
+        browser_review(args.output, units, args.inspect_unit)
     return 0
 
 

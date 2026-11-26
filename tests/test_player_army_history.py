@@ -102,8 +102,47 @@ def test_partial_profile_and_attachment_scope():
 
 
 def test_scalar_display_uses_units_and_non_applicable_marker():
-    assert player.scalar_text("move", {"present": True, "value": [10, 10]}) == "10-10 cm"
+    assert player.scalar_text("move", {"present": True, "value": [10, 10]}) == '4-4"'
+    assert player.scalar_text("move", {"present": True, "value": [15, 5]}) == '6-2"'
+    assert player.scalar_text("move", {"present": True, "value": [-1, -1]}) == "—"
     assert player.scalar_text("bs", {"present": True, "value": -1}) == "—"
+
+
+def test_compact_option_labels_distinguish_siblings_without_shared_references(monkeypatch):
+    def resolve(values, field, army, contexts):
+        return [{"filter": {"name": v}, "occurrence": {}} for v in values], "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+    options = {
+        1: {"name": "Trooper", "weapons": ["Pistol", "Rifle"], "points": 10, "swc": 0},
+        2: {"name": "Trooper", "weapons": ["Pistol", "HMG"], "points": 20, "swc": 1},
+        3: {"name": "Trooper", "weapons": ["Pistol", "HMG"], "points": 21, "swc": 1},
+    }
+    labels = player.compact_option_labels(options, {}, [])
+    assert labels == {
+        1: "Trooper — Rifle",
+        2: "Trooper — HMG (20 Points, 1 SWC)",
+        3: "Trooper — HMG (21 Points, 1 SWC)",
+    }
+    options[3]["points"] = 20
+    labels = player.compact_option_labels(options, {}, [])
+    assert labels[2] == labels[3]
+    assert labels[2].endswith("(not uniquely distinguished)")
+
+
+def test_unresolved_option_references_do_not_suppress_known_common_items(monkeypatch):
+    def resolve(values, field, army, contexts):
+        if values == ["unknown"]:
+            return None, "unresolved"
+        return [{"filter": {"name": v}, "occurrence": {}} for v in values], "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+    labels = player.compact_option_labels({
+        1: {"name": "A", "weapons": ["Pistol"], "skills": ["unknown"]},
+        2: {"name": "B", "weapons": ["Pistol"]},
+    }, {}, [])
+    assert labels[1] == "A — Pistol; Unresolved Skills"
+    assert labels[2] == "B — Pistol"
 
 
 def test_html_keeps_all_units_searchable_and_escapes_historical_text():

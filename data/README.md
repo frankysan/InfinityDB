@@ -217,6 +217,9 @@ the retired source roots.
   Both input hashes and the linked databases/archive are verified. Optional
   repeatable `--inspect-unit ID` emits representative timelines for review.
   The output is standalone HTML, remains ignored and must not be published.
+  Optional `--browser-review` verifies navigation and evidence disclosure in
+  desktop and mobile Chromium viewports and saves private screenshots. Use
+  `--inspect-unit ID` to select representative Units for this review.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not

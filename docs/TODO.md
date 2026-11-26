@@ -289,6 +289,9 @@ make v1.3.0 depend on them.
   summary streams and 127 supported profile characteristic candidates.
   It resolves historical labels, consolidates equivalent Group-wide changes,
   and provides searchable Unit navigation with optional technical evidence.
+  The responsive timeline uses shared Army and scope headings, compact historical
+  loadout labels and standard MOV inch notation. Private browser checks cover
+  navigation, evidence disclosure and desktop/mobile layout.
   Review the generated preview before promoting any historical content.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
