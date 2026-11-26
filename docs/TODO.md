@@ -261,8 +261,12 @@ make v1.3.0 depend on them.
   six reconciled rekey occurrences, 280 one-sided addition/removal candidates
   (249 additions and 31 removals) and 558 review outcomes. The 280 candidates
   consolidate into 118 summaries, including 35 spanning multiple Armies.
-  Extend coverage to complex profiles, contextual availability and unresolved
-  lifecycle cases before selecting the public semantic projection.
+  Contextual availability covers 279 observations: 11 AVA changes, 254
+  list-presence candidates and 14 review outcomes. These consolidate into
+  118 summaries, 57 spanning multiple Armies. Preserve 208 declaration
+  claims separately, including 137 corroborated by observed list evidence.
+  Extend coverage to complex profiles and unresolved lifecycle cases before
+  selecting the public semantic projection.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,

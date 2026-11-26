@@ -129,6 +129,14 @@ Known composition-equivalent rekeys are not additions or removals; ambiguous
 modifications and unsupported composition remain review outcomes. Consolidate
 only identical payloads and observation windows across Armies.
 
+Contextual availability retains profile-scoped AVA and explicit disabled-state
+changes separately from observed Army-list presence. Format AVA using the
+current display convention, including Total for values of 100 or greater.
+Missing or ambiguous values remain review outcomes. A list appearance is
+not proof of playable availability. Preserve declared membership claims
+and link corroborating list evidence without treating the claims as additional
+timeline changes. Keep the Army scope and observation window explicit.
+
 ### Accepted authoring direction: one source family, version-tagged facts
 
 For maintained curation, **prefer one file per logical source family** rather

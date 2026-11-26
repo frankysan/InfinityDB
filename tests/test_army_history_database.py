@@ -512,3 +512,73 @@ def test_lifecycle_supports_first_or_last_loadout_without_inventing_continuity()
     )
     assert result is not None and status == "oneSided"
     assert result["kind"] == "loadoutAdded"
+
+
+@pytest.mark.parametrize(("raw", "expected"), [
+    (0, "0"), (2, "2"), (100, "Total"), ("T", "Total"), ("total", "Total"),
+    (None, None), (-1, None), (True, None), ("unknown", None),
+])
+def test_history_ava_display(raw, expected):
+    from tools.research.summarize_army_history import ava_display
+
+    assert ava_display({"present": True, "value": raw}) == expected
+    assert ava_display({"present": False}) is None
+
+
+def test_availability_retains_profile_scope_and_total():
+    from tools.research.summarize_army_history import availability_payload
+
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1)])
+    old["units"][0]["profileGroups"][0]["profiles"][0]["ava"] = 2
+    new["units"][0]["profileGroups"][0]["profiles"][0]["ava"] = 100
+    row = {
+        "kind": "ava", "path": ["units", 42, "profileGroups", 1, "profiles", 1, "ava"],
+        "before": {"present": True, "value": 2},
+        "after": {"present": True, "value": 100},
+    }
+    payload, status = availability_payload(old, new, row)
+    assert status == "observedFieldChange"
+    assert payload is not None and payload["summary"] == "AVA: 2 → Total"
+    assert payload["sourcePath"] == row["path"]
+    assert payload["historicalLabels"][-1]["name"] == "Test Profile"
+
+
+def test_availability_list_presence_does_not_claim_playable_availability():
+    from tools.research.summarize_army_history import availability_payload
+
+    new = semantic_group([], [semantic_option(1)])
+    old = {"units": []}
+    row = {
+        "kind": "unitListMembership", "path": ["units", 42],
+        "direction": "appeared", "possibleReplacementIds": [],
+        "before": {"present": False},
+        "after": {"present": True, "value": new["units"][0]},
+        "sourceRole": "mercenaryVariant", "declaredInThisArmy": False,
+    }
+    payload, status = availability_payload(old, new, row)
+    assert status == "observedListPresence"
+    assert payload is not None and payload["summary"] == "Appeared in Army list"
+    assert payload["declaredInThisArmy"] is False
+    row["possibleReplacementIds"] = [99]
+    assert availability_payload(old, new, row) == (None, "possibleReplacement")
+
+
+def test_availability_disabled_state_not_inferred_from_missing_value():
+    from tools.research.summarize_army_history import availability_payload
+
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1)])
+    old["units"][0]["profileGroups"][0]["options"][0]["disabled"] = False
+    new["units"][0]["profileGroups"][0]["options"][0]["disabled"] = True
+    row = {
+        "kind": "disabled", "path": ["units", 42, "profileGroups", 1, "options", 1, "disabled"],
+        "before": {"present": True, "value": False},
+        "after": {"present": True, "value": True},
+    }
+    payload, status = availability_payload(old, new, row)
+    assert status == "observedFieldChange"
+    assert payload is not None and payload["summary"] == "Disabled in Army source"
+    del old["units"][0]["profileGroups"][0]["options"][0]["disabled"]
+    row["before"] = {"present": False}
+    assert availability_payload(old, new, row) == (None, "unresolvedDisabledState")

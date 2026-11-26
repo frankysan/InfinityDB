@@ -11,6 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from infinity_db.army_history_consolidation import record_at
 from infinity_db.army_history_loadouts import composition
 from infinity_db.army_history_pilot import catalog_index, indexed
 from infinity_db.army_history_references import CATALOGS, resolve_references
@@ -354,6 +355,86 @@ def lifecycle_payload(
     }, "oneSided"
 
 
+def ava_display(record: Document) -> str | None:
+    if not record["present"]:
+        return None
+    value = record.get("value")
+    if type(value) not in (int, str):
+        return None
+    text = str(value).strip()
+    if text.casefold() in {"t", "total"}:
+        return "Total"
+    try:
+        number = int(text)
+    except ValueError:
+        return None
+    if number < 0:
+        return None
+    return "Total" if number >= 100 else str(number)
+
+
+def availability_payload(
+    old: Document, new: Document, row: Document,
+) -> tuple[Document | None, str]:
+    """Describe Army-local observations without inferring selection eligibility."""
+    path = row["path"]
+    kind = row["kind"]
+    if kind == "unitListMembership":
+        if row["possibleReplacementIds"]:
+            return None, "possibleReplacement"
+        left, right = indexed(old.get("units")), indexed(new.get("units"))
+        require(left is not None and right is not None, "Malformed Army lists")
+        assert left is not None and right is not None
+        unit = path[1]
+        appeared = row["direction"] == "appeared"
+        require((unit in left, unit in right) == (not appeared, appeared),
+                "Unit list presence differs")
+        source_row = right[unit] if appeared else left[unit]
+        side = "after" if appeared else "before"
+        require(encode(row[side]["value"]) == encode(source_row), "Unit list record differs")
+        return {
+            "kind": "armyListAppearance" if appeared else "armyListDisappearance",
+            "summary": "Appeared in Army list" if appeared else "Disappeared from Army list",
+            "sourceRole": row["sourceRole"], "declaredInThisArmy": row["declaredInThisArmy"],
+            "sourcePath": path, "historicalName": source_row.get("name"),
+        }, "observedListPresence"
+
+    left_record, right_record = record_at(old, path), record_at(new, path)
+    require(left_record is not None and right_record is not None, "Army field path differs")
+    assert left_record is not None and right_record is not None
+    field = path[-1]
+    for record, side in ((left_record, "before"), (right_record, "after")):
+        value = row[side]
+        require(value["present"] == (field in record[0]), "Army field presence differs")
+        if value["present"]:
+            require(encode(value["value"]) == encode(record[0][field]), "Army field value differs")
+    if kind == "ava":
+        a, b = ava_display(row["before"]), ava_display(row["after"])
+        if a is None or b is None:
+            return None, "unresolvedAVA"
+        if a == b:
+            return None, "unchangedDisplay"
+        summary = f"AVA: {a} → {b}"
+    elif kind == "disabled":
+        a, b = row["before"].get("value"), row["after"].get("value")
+        if (not row["before"]["present"] or not row["after"]["present"]
+                or type(a) is not bool or type(b) is not bool):
+            return None, "unresolvedDisabledState"
+        if a == b:
+            return None, "unchangedDisplay"
+        summary = "Disabled in Army source" if b else "Enabled in Army source"
+    else:
+        return None, "unsupportedAvailabilityField"
+    labels = [
+        {key: item[key] for key in ("id", *LABELS) if key in item}
+        for item in left_record[1]
+    ]
+    return {
+        "kind": kind, "summary": summary, "sourcePath": path,
+        "historicalLabels": labels, "before": row["before"], "after": row["after"],
+    }, "observedFieldChange"
+
+
 def build(preview: Document, archive: Path) -> Document:
     require(preview["publicationStatus"] == "privatePreviewOnly"
             and preview["archiveSha256"] == ARCHIVE_PIN and preview["edition"] == "n5",
@@ -378,6 +459,8 @@ def build(preview: Document, archive: Path) -> Document:
     rekey_positions: dict[tuple[int, int, int], list[int]] = {}
     lifecycle_rows = []
     lifecycle_rekeys = []
+    availability_rows = []
+    declaration_rows = []
     with closing(read_only(HISTORY)) as db:
         for pos, raw in db.execute(
             "SELECT position,body FROM history_record WHERE stream='loadoutMatch' "
@@ -409,6 +492,19 @@ def build(preview: Document, archive: Path) -> Document:
             (pos, json.loads(raw)) for pos, raw in db.execute(
                 "SELECT position,body FROM history_record WHERE stream='loadoutUnpaired' "
                 "ORDER BY position"
+            )
+        ]
+        availability_rows = [
+            (stream, pos, json.loads(raw)) for stream, pos, raw in db.execute(
+                "SELECT stream,position,body FROM history_record "
+                "WHERE stream IN ('armyFieldOccurrence','structuralOccurrence') "
+                "ORDER BY stream,position"
+            ) if stream == "armyFieldOccurrence" or json.loads(raw)["kind"] == "unitListMembership"
+        ]
+        declaration_rows = [
+            (pos, json.loads(raw)) for pos, raw in db.execute(
+                "SELECT position,body FROM history_record "
+                "WHERE stream='declaredMembershipClaim' ORDER BY position"
             )
         ]
         structural_count = sum(
@@ -516,6 +612,63 @@ def build(preview: Document, archive: Path) -> Document:
             key = encode({**identity, **payload})
             summary = lifecycle.setdefault(key, {**identity, **payload, "evidence": []})
             summary["evidence"].append(evidence)
+    availability: dict[str, Document] = {}
+    availability_outcomes = []
+    claims_by_comparison: dict[tuple[int, int], list[int]] = {}
+    declarations = []
+    for pos, row in declaration_rows:
+        linked = row["listEvidence"]
+        for ev in linked:
+            key = (ev["comparisonIndex"], ev["changeIndex"])
+            claims_by_comparison.setdefault(key, []).append(pos)
+        declarations.append({
+            "position": pos, "logicalUnitId": current.get(row["unitId"]),
+            "sourceUnitId": row["unitId"], "declaredArmyId": row["declaredFactionId"],
+            "direction": row["direction"],
+            "earlierObservedDate": row["earlierObservedDate"],
+            "laterObservedDate": row["laterObservedDate"],
+            "status": "corroboratedListObservation" if linked else "declarationOnly",
+            "listComparisonIndices": sorted({ev["comparisonIndex"] for ev in linked}),
+        })
+    for stream, pos, row in availability_rows:
+        ev = row["evidence"]
+        a, b = ev["earlier"], ev["later"]
+        unit = row["unitId"]
+        identity = {
+            "logicalUnitId": current.get(unit), "sourceUnitId": unit,
+            "earlierObservedDate": a["encodedRevisionDate"],
+            "laterObservedDate": b["encodedRevisionDate"],
+        }
+        evidence = {
+            "stream": stream, "position": pos, "comparisonIndex": ev["comparisonIndex"],
+            "armyId": ev["factionId"],
+            "declarationPositions": claims_by_comparison.get(
+                (ev["comparisonIndex"], ev["changeIndex"]), [],
+            ),
+        }
+        if unit not in current:
+            payload, status = None, "unresolvedUnitIdentity"
+        else:
+            payload, status = availability_payload(data(a["sha256"]), data(b["sha256"]), row)
+        counts[f"availability:{status}"] += 1
+        availability_outcomes.append({
+            **identity, **evidence, "sourcePath": row["path"], "outcome": status,
+        })
+        if payload is not None:
+            key = encode({**identity, **payload})
+            summary = availability.setdefault(key, {
+                **identity, **payload, "status": "observedCandidate", "evidence": [],
+            })
+            summary["evidence"].append(evidence)
+    counts["availabilityOccurrences"] = len(availability_rows)
+    counts["availabilityConsolidatedSummaries"] = len(availability)
+    counts["availabilityMultiArmySummaries"] = sum(
+        len({ev["armyId"] for ev in e["evidence"]}) > 1 for e in availability.values()
+    )
+    counts["declaredMembershipClaims"] = len(declarations)
+    counts["corroboratedMembershipClaims"] = sum(
+        d["status"] == "corroboratedListObservation" for d in declarations
+    )
     counts["lifecycleUnpairedOccurrences"] = len(lifecycle_rows)
     counts["lifecycleRekeyOccurrences"] = 2 * len(lifecycle_rekeys)
     counts["lifecycleConsolidatedSummaries"] = len(lifecycle)
@@ -527,13 +680,15 @@ def build(preview: Document, archive: Path) -> Document:
     counts["allGroupLoadoutSummaries"] = sum(e["allGroupLoadouts"] for e in events.values())
     counts["multiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in events.values())
     return {
-        "formatVersion": 3, "publicationStatus": "privateResearchOnly", "edition": "n5",
+        "formatVersion": 4, "publicationStatus": "privateResearchOnly", "edition": "n5",
         "archiveSha256": ARCHIVE_PIN, "armyDatabaseSha256": preview["armyDatabaseSha256"],
         "historyDatabaseSha256": preview["historyDatabaseSha256"],
         "counts": dict(counts), "summaries": list(events.values()), "outcomes": outcomes,
         "outsidePilotScope": outside_scope,
         "lifecycleSummaries": list(lifecycle.values()), "lifecycleOutcomes": lifecycle_outcomes,
         "lifecycleRekeys": lifecycle_rekeys,
+        "availabilitySummaries": list(availability.values()),
+        "availabilityOutcomes": availability_outcomes, "membershipDeclarations": declarations,
     }
 
 
