@@ -395,12 +395,14 @@ def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
                 )
                 status, _, body = wsgi_response(registered, path)
                 assert status == 200
+                assert b"var(" not in body
                 combined.update(len(body).to_bytes(8, "big"))
                 combined.update(body)
-    # Current reviewed ITS 18 after the v1.2.1 scenario copy update.
+    # v1.2.2 resolves standalone SVG colors and adds contrasting ruler endcaps.
+    # Battleground's curated mission and measurement coordinates are unchanged.
     # Length-prefixed six canonical JSON payloads and 24 SVG byte streams;
     # compare this digest after any intentional public contract change.
     assert combined.hexdigest() == (
-        "fbf91a1d57abfb25c9039a8c452c4ee22"
-        "dac04c1851a7ecb64c871921f36a390"
+        "9ffc0a08405e825348a6e58389b373d8e"
+        "92c2b4fc20c7496a75df6c4cdcf5821"
     )

@@ -279,7 +279,7 @@ def benchmark_unit_explorer(
     from threading import Thread
     from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 
-    from playwright.sync_api import sync_playwright
+    from playwright.sync_api import sync_playwright  # pyright: ignore[reportMissingImports]
 
     from infinity_db.web import create_app
 

@@ -1687,11 +1687,15 @@ def test_unit_explorer_capacity_scenario_against_current_snapshot() -> None:
         rules_database_path=Path("data/generated/rules_n5.db"),
     )
 
-    def fetch(path: str):
+    def fetch(path: str) -> Mapping[str, Any]:
         parsed = urlsplit(path)
         status, _, body = request(application, parsed.path, query=parsed.query)
         assert status == 200, path
-        return json.loads(body) if parsed.path.startswith("/api/") else None
+        if not parsed.path.startswith("/api/"):
+            return {}
+        payload = json.loads(body)
+        assert isinstance(payload, dict), path
+        return payload
 
     _, cases = discover_scenario(
         "http://example.invalid", timeout=10,
@@ -2518,10 +2522,11 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     assert status == 200
     assert b"Browse units<br" in units
     assert b'<span class="catalog-tag"><span aria-hidden="true"></span> Units</span>' in units
-    assert b'aria-label="Unit counts"' in units
+    assert b'aria-label="Matching units and armies"' in units
     assert b">01 / UNITS</span>" in units
     assert b"Enable JavaScript to browse and filter units." in units
-    assert b'<span class="stat-label">Armies</span>' in units
+    assert b'<span class="stat-label">Matching units</span>' in units
+    assert b'<span class="stat-label">Matching armies</span>' in units
     assert b"Unit catalog" not in units
     assert b"01 / CATALOG" not in units
     assert b"Browse the database" not in units
@@ -4105,8 +4110,15 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
     assert f'from "./api.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
-    assert f'from "./distance.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'from "./unit-presentation.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+
+    status, headers, presentation = request(
+        app, f"/static/unit-presentation.js?v={STATIC_ASSET_VERSION}",
+    )
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./distance.js?v={STATIC_ASSET_VERSION}"'.encode() in presentation
 
     status, _, settings = request(app, f"/static/settings.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
@@ -4149,9 +4161,9 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
     assert b"characteristic: domainMultiFilterIdentifiers(characteristic)" in body
     assert b"normalizeArmyFilterState(playableArmies)" in body
     for call in (
-        b'normalizeCatalogFilterState(skills.items, "skillId")',
-        b'normalizeCatalogFilterState(equipment.items, "equipmentId")',
-        b'normalizeCatalogFilterState(weapons.items, "weaponId")',
+        b'normalizeCatalogFilterState(skills, "skillId")',
+        b'normalizeCatalogFilterState(equipment, "equipmentId")',
+        b'normalizeCatalogFilterState(weapons, "weaponId")',
     ):
         assert call in body
     for call in (
@@ -4992,7 +5004,12 @@ def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> N
     assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in distance
     assert b"parameterSemantics?.positive_sign" in distance
 
-    for asset in ("skill.js", "skill-extras.js", "unit.js"):
+    status, _, unit = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'from "./unit-presentation.js"' in unit
+    assert b"formatProfileItem(item, fallbackLabel)" in unit
+
+    for asset in ("skill.js", "skill-extras.js", "unit-presentation.js"):
         status, _, body = request(app, f"/static/{asset}")
         assert status == 200
         assert b"parameter_semantics" in body

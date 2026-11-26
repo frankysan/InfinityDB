@@ -5,6 +5,7 @@ import re
 from dataclasses import asdict
 from pathlib import Path
 from subprocess import CompletedProcess
+from typing import Any
 
 import pytest
 
@@ -258,7 +259,7 @@ def test_collect_release_evidence_can_require_optional_full_asset_run(monkeypatc
 
 def _core_job_payload(
     url: str, *, source_id: int, wheel_id: int, deploy_id: int,
-) -> dict[str, object]:
+) -> dict[str, Any]:
     if url == release_ci.cross_browser_jobs_url(REPOSITORY, source_id):
         jobs = _source_jobs(source_id)
         return {"jobs": jobs, "total_count": len(jobs)}
