@@ -593,6 +593,37 @@ class ApiHandler:
         general_only: bool = False,
     ) -> dict[str, Any]:
         """Use the same General profile semantics for detail and Explorer."""
+        if general_only:
+            # General profiles need occurrence data, not source notes, charts,
+            # selection constraints, composite options or Army detail metadata.
+            # Keep every Army's profiles for snapshot-wide symbol resolution,
+            # including occurrences excluded by the current optional filters.
+            unit = {
+                **{key: unit[key] for key in ("id", "name", "isc", "slug") if key in unit},
+                "armies": [
+                    {
+                        "id": army["id"],
+                        "availability_flags": army.get("availability_flags", []),
+                        "profiles": [
+                            {key: value for key, value in profile.items() if key in {
+                                "profile_identity", "display_name", "name", "group_id",
+                                "type", "classification", "move_1", "move_2", "cc", "bs",
+                                "ph", "wip", "arm", "bts", "vitality", "silhouette",
+                                "is_structure", "ava", "logo_urls", "skills", "equipment",
+                                "characteristics",
+                            }}
+                            for profile in army.get("profiles", ())
+                        ],
+                        "loadouts": [
+                            {key: value for key, value in loadout.items() if key in {
+                                "group_id", "skills", "equipment", "weapons", "orders",
+                            }}
+                            for loadout in army.get("loadouts", ())
+                        ],
+                    }
+                    for army in unit.get("armies", ())
+                ],
+            }
         # Skill enrichment detaches the cached repository payload. All further
         # enrichment owns this copy, so no intermediate deep copies are needed.
         unit = self.skill_catalog.enrich_unit(unit)
@@ -600,14 +631,19 @@ class ApiHandler:
         unit = enrich_nested_catalog_slugs(
             self.database, unit, frozenset({"equipment", "weapons"}), in_place=True,
         )
-        attach_public_unit_slug(self.database, unit)
-        unit = enrich_army_references(self.database, unit, in_place=True)
+        if not general_only:
+            attach_public_unit_slug(self.database, unit)
+            unit = enrich_army_references(self.database, unit, in_place=True)
         self.symbol_catalog.enrich_unit(unit)
         return enrich_unit_presentation(
             unit, optional_filters=optional_filters, requested_army=requested_army,
-            source_skill_classifications=self.database.skill_source_classifications(),
+            source_skill_classifications=self._source_skill_classifications(),
             general_only=general_only,
         )
+
+    @instance_lru_cache(maxsize=1)
+    def _source_skill_classifications(self):
+        return self.database.skill_source_classifications()
 
     @instance_lru_cache(maxsize=512)
     def _extended_profiles(

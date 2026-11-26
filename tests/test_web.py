@@ -1791,6 +1791,36 @@ def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -
     assert calls.count(True) == 20
 
 
+@pytest.mark.parametrize("enabled", [False, True])
+def test_extended_general_projection_matches_all_current_units(enabled: bool) -> None:
+    from infinity_db.unit_presentation import (
+        OPTIONAL_AVAILABILITY_FLAGS,
+        extended_general_profiles,
+    )
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    api = application.api
+    flags = {flag: enabled for flag in OPTIONAL_AVAILABILITY_FLAGS}
+    units = api.database.list_units(
+        limit=10_000, _unbounded=True, mercs=enabled, specops=enabled,
+        teamops=enabled, reinforcement=enabled,
+    )["items"]
+    assert units
+    for item in units:
+        detail = api.database.get_unit(item["id"])
+        assert detail is not None
+        expected = extended_general_profiles(api._present_unit(
+            detail, optional_filters=flags,
+        ))
+        actual = extended_general_profiles(api._present_unit(
+            detail, optional_filters=flags, general_only=True,
+        ))
+        assert actual == expected, item["name"]
+
+
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
     assert status == 200

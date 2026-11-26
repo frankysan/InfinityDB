@@ -209,6 +209,30 @@ were 73 and 64 ms. Further optimization should focus on broad Rules record
 composition and uncached Extended Unit Explorer pages only if justified by
 additional profiling.
 
+### Extended Unit Explorer projection — 2026-11-26
+
+Windows Chrome, three fresh application/browser-context samples, both ITS
+seasons registered. The previous full-season baseline is `d6e30b8d`.
+The profile at `e733491` identified full Unit-detail enrichment as the
+dominant cost of an uncached Extended page. General-profile computation now
+receives only the required occurrence fields, retains all Army occurrences
+for symbol resolution, skips detail-only annotations, and reuses the
+snapshot-wide source Skill classifications. The existing General-profile
+calculation and legacy compact profile response are retained.
+
+Median interaction time, before / after (ms):
+
+- First Extended: browser 1131 / 887; API 939 / 738.
+- Uncached Extended next page: browser 973 / 768; API 762 / 571.
+- Cached Extended previous page: browser 131 / 151; API 17 / 16.
+- Compact initial load: browser 882 / 890; API 657 / 669.
+- Text search: browser 317 / 316; API 15 / 16.
+
+The improvements target uncached Extended interactions; the other paths
+remain broadly unchanged. Complete General-profile projections are compared
+with full Unit details across the current snapshot, with optional availability
+modes enabled and disabled.
+
 ### Rules composition reuse — 2026-11-26
 
 Windows Chrome, baseline `a46a7a1`, both ITS seasons registered, three

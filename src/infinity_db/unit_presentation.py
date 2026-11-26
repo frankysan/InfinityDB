@@ -658,12 +658,13 @@ def enrich_unit_presentation(
         )
     }
     armies = [army for army in unit.get("armies", ()) if isinstance(army, dict)]
-    unit["peripheral_types"] = [
-        {"id": type_id, "label": _PERIPHERAL_TYPE_LABELS.get(type_id, str(type_id))}
-        for type_id in unit.get("peripheral_type_ids", ())
-    ]
-    _annotate_peripheral_presentations(unit)
-    for army in armies:
+    if not general_only:
+        unit["peripheral_types"] = [
+            {"id": type_id, "label": _PERIPHERAL_TYPE_LABELS.get(type_id, str(type_id))}
+            for type_id in unit.get("peripheral_type_ids", ())
+        ]
+        _annotate_peripheral_presentations(unit)
+    for army in armies if not general_only else ():
         army["availability_badges"] = [
             {
                 "flag": flag,
@@ -683,7 +684,8 @@ def enrich_unit_presentation(
                 characteristic_presentation(characteristic)
                 for characteristic in profile.get("characteristics", ())
             ]
-    _annotate_composite_option_presentations(armies)
+    if not general_only:
+        _annotate_composite_option_presentations(armies)
 
     for army in armies:
         army["presentation_requested"] = _army_requested(army, requested_army)
