@@ -148,7 +148,7 @@ source-list membership as observed presence, not playable availability. The offl
 and provenance through optional technical controls; it is not a public API
 or publication approval.
 
-**Accepted direction for Unit details (not yet implemented).** Project
+**Accepted direction for Unit details (private pilot implemented).** Project
 historical changes onto the same application-facing General-profile and
 Army-specific profile/loadout boundaries used by current Unit details. A
 General-profile event must describe an observed change to that profile's
@@ -168,6 +168,18 @@ profile or losing their history. Source-only classification changes do not
 become changes to the General profile unless its projected facts changed.
 The [Unit history presentation](web-design-guidelines.md#unit-history-presentation)
 owns disclosure and layout.
+
+The contextual private preview uses the current materialized General profiles
+with all optional Unit categories enabled and current Army cards. The initial
+General-profile attribution pilot covers seven scalar fields only (CC, BS, PH,
+WIP, ARM, BTS and S). It requires one stable source Unit identity, every known
+Army context with matching exact observation windows, complete declared Army
+coverage, and one uniquely identified profile occurrence at each endpoint.
+Both endpoint values must agree across those contexts and with the canonical
+General-stat composition. Promoted entries appear only beneath that General
+profile; other entries retain their observed Army contexts. Ambiguous or removed
+Army cards retain a separate historical context. This is not yet the general
+historical shared-item composition or a public serving projection.
 
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets

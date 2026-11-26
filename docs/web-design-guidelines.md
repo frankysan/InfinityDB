@@ -201,7 +201,7 @@ desktop/mobile layouts and non-color text cues.
 
 ### Unit history presentation
 
-**Accepted design direction (not yet implemented).** Put a collapsed
+**Accepted design direction (private pilot implemented).** Put a collapsed
 **History** disclosure immediately beneath the current content of each
 General profile and within each applicable Army profile card. History
 belongs to the particular profile or Army context it describes; do not

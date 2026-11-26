@@ -16,7 +16,10 @@ from pathlib import Path
 from infinity_db.army_history_pilot import catalog_index
 from infinity_db.army_history_references import resolve_references
 from infinity_db.army_history_source import Document, digest, file_digest, read_history, require
+from infinity_db.database.repository import Database, identity_config_from_connection
+from infinity_db.identities import normalized_profile_identity
 from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
+from infinity_db.unit_presentation import OPTIONAL_AVAILABILITY_FLAGS, _general_stats
 from tools.research.build_army_history_database import ARCHIVE_PIN, encode
 from tools.research.project_army_history import ARMY, HISTORY, ROOT, read_only
 from tools.research.render_army_history import FIELDS, details, esc, raw, value_text
@@ -492,7 +495,404 @@ def presentation_rows(rows: list[Document]) -> list[Document]:
     return result
 
 
-def render(units: list[Document], names: dict[int, str], coverage: Document) -> str:
+CONTEXT_STYLE = """
+.profile-card,.army-card {background:var(--surface);border:1px solid var(--line);
+  border-radius:8px;padding:14px 16px;margin:0 0 12px}
+.army-card>summary,.history>summary {font-size:1rem;font-weight:600}
+.history {border-top:1px solid var(--line);padding-top:10px;margin-top:12px}
+.history article {margin:10px 0;padding:12px;background:var(--bg)}
+.history .change-group {padding:9px 0;border-top:1px solid var(--line)}
+.history .scope {font-weight:600;color:var(--ink)}
+.history-category {font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--muted);margin:9px 0 4px}
+.history-list {list-style:none;padding:0;margin:0}
+.history-list li {border-left:3px solid var(--line);padding:5px 9px;margin:3px 0}
+.history-list .costs {border-color:var(--accent)}
+.history-list .classification {border-style:dashed}
+.history-list .action {font-size:.75rem;color:var(--muted);font-weight:600;
+  display:inline-block;margin-right:6px}
+.history-list .change-line {padding:3px 0 3px 8px;border-left:3px solid var(--line)}
+.history-list .action-gained,.history-list .action-added {border-left-color:#31956b}
+.history-list .action-lost,.history-list .action-removed {border-left-color:#c95b60}
+.history-list .action-changed {border-left-color:var(--accent)}
+.history-list .action-classification {border-left-style:dashed}
+.history-list .change-line+.change-line {margin-top:3px}
+.history-list li {border-left:0;padding:2px 0}
+.history-list .technical-only {padding-left:11px}
+.statline {display:flex;flex-wrap:wrap;gap:6px 12px;margin:8px 0}
+.statline span {min-width:30px;text-align:center}
+.statline small {display:block;color:var(--muted)}
+.current-items {font-size:.9rem;margin:7px 0}
+.current-loadouts {font-size:.85rem}
+.current-loadouts li {margin:4px 0}
+"""
+
+GENERAL_STAT_FIELDS = {
+    "arm": "arm", "bs": "bs", "bts": "bts", "cc": "cc",
+    "ph": "ph", "wip": "wip", "s": "silhouette",
+}
+
+
+def scalar_general_target(
+    row: Document, source_ids: list[int], general: list[Document],
+    known_armies: set[int], endpoints: list[tuple[int, Document, Document]],
+    profile_identity: Callable[[object], str],
+) -> str | None:
+    """Pilot: unanimous scalar transitions on a single stable source Unit.
+
+    Every known list context must have the same exact observation window.
+    No missing, ambiguous, extra or moved profile occurrence is promoted.
+    """
+    if row["kind"] != "characteristic" or len(source_ids) != 1:
+        return None
+    path, field, before, after = row["identity"]
+    if field not in GENERAL_STAT_FIELDS or path[1] != source_ids[0]:
+        return None
+    if set(row["armyIds"]) != known_armies or not known_armies:
+        return None
+    if {army for army, _, _ in endpoints} != known_armies or len(endpoints) != len(known_armies):
+        return None
+    if not all(record.get("present") and type(record.get("value")) is int
+               for record in (before, after)):
+        return None
+    identities = set()
+    values: list[list[Document]] = [[], []]
+    prop = GENERAL_STAT_FIELDS[field]
+    for _, earlier, later in endpoints:
+        for side, army in enumerate((earlier, later)):
+            found = get_group(army, path[1], path[3])
+            if found is None:
+                return None
+            unit, group = found
+            profiles = indexed(group.get("profiles")) or {}
+            target = profiles.get(path[5])
+            if target is None or not target.get("name"):
+                return None
+            identity = profile_identity(target["name"])
+            identities.add(identity)
+            groups = indexed(unit.get("profileGroups"))
+            if groups is None:
+                return None
+            occurrences = []
+            for group_id, candidate_group in groups.items():
+                candidates = indexed(candidate_group.get("profiles"))
+                if candidates is None:
+                    return None
+                occurrences.extend(
+                    (group_id, profile_id) for profile_id, profile in candidates.items()
+                    if profile_identity(profile.get("name")) == identity
+                )
+            if occurrences != [(path[3], path[5])]:
+                return None
+            expected = (before, after)[side]["value"]
+            if target.get(field) != expected:
+                return None
+            values[side].append({prop: expected})
+    if len(identities) != 1:
+        return None
+    identity = next(iter(identities))
+    if not identity or sum(g["profile_identity"] == identity for g in general) != 1:
+        return None
+    if [_general_stats(value)[prop] for value in values] != [before["value"], after["value"]]:
+        return None
+    return identity
+
+
+def contextual_model(
+    units: list[Document], history: sqlite3.Connection, archive: Path,
+) -> dict[str, int]:
+    """Attach current card contexts; promote only fully covered scalar pilot rows."""
+    database = Database(ARMY)
+    general = database.general_profiles(
+        [u["logicalUnitId"] for u in units], frozenset(OPTIONAL_AVAILABILITY_FLAGS),
+    )
+    require(general is not None, "Current General-profile projection unavailable")
+    assert general is not None
+    with closing(read_only(ARMY)) as db:
+        db.row_factory = sqlite3.Row
+        config = identity_config_from_connection(db)
+        source_armies = defaultdict(set)
+        for app, source in db.execute(
+            "SELECT application_army_id,source_army_id FROM application_army_sources "
+            "WHERE has_army_list=1"
+        ):
+            source_armies[source].add(app)
+        memberships = set(
+            tuple(row) for row in db.execute("SELECT unit_id,army_id FROM army_units")
+        )
+    comparisons = {
+        (army, earlier, later): json.loads(body)
+        for army, earlier, later, body in history.execute(
+            "SELECT army_id,earlier_date,later_date,body FROM comparison"
+        )
+    }
+    inventory = dict(history.execute("SELECT unit_id,body FROM unit_identity"))
+    source = read_history(archive, ARCHIVE_PIN)
+
+    @lru_cache(maxsize=48)
+    def endpoint(sha: str) -> Document:
+        return source.read_object(sha)
+
+    counts: Counter[str] = Counter()
+    for unit in units:
+        logical = unit["logicalUnitId"]
+        current = database.get_unit(logical)
+        require(current is not None, "Current logical Unit missing")
+        assert current is not None
+        source_ids = current["source_ids"]
+        profiles = [p for p in general[logical] if p.get("presentation_visible") is not False]
+        unit["currentGeneral"] = profiles
+        unit["currentArmies"] = current["armies"]
+        unit["generalHistory"] = defaultdict(list)
+        unit["armyHistory"] = defaultdict(list)
+        unit["unmatchedHistory"] = defaultdict(list)
+        known_armies: set[int] = set()
+        declared_armies: set[int] = set()
+        declared_complete = True
+        if len(source_ids) == 1 and source_ids[0] in inventory:
+            for slug in json.loads(inventory[source_ids[0]])["slugEvidence"]:
+                for item in slug["occurrences"]:
+                    known_armies.add(item["factionId"])
+                    factions = item.get("factions")
+                    if isinstance(factions, list) and all(type(i) is int for i in factions):
+                        declared_armies.update(factions)
+                    else:
+                        declared_complete = False
+        current_source_armies = {army for source_id, army in memberships if source_id in source_ids}
+        for row in unit["entries"]:
+            target = None
+            if (row["kind"] == "characteristic" and declared_complete
+                    and declared_armies <= known_armies
+                    and current_source_armies <= known_armies
+                    and known_armies == set(row["armyIds"])):
+                pair = (row["earlierObservedDate"], row["laterObservedDate"])
+                records = [comparisons.get((army, *pair)) for army in sorted(known_armies)]
+                if all(record is not None for record in records):
+                    endpoints = [
+                        (army, endpoint(record["earlier"]["sha256"]),
+                         endpoint(record["later"]["sha256"]))
+                        for army, record in zip(sorted(known_armies), records, strict=True)
+                        if record is not None
+                    ]
+                    target = scalar_general_target(
+                        row, source_ids, profiles, known_armies, endpoints,
+                        lambda label: normalized_profile_identity(label, config),
+                    )
+            if target is not None:
+                unit["generalHistory"][target].append({
+                    **row, "evidence": {
+                        "observations": row["evidence"],
+                        "generalAttribution": {
+                            "profileIdentity": target, "knownArmyIds": sorted(known_armies),
+                            "declaredArmyIds": sorted(declared_armies),
+                            "method": "unanimousScalarExactWindows",
+                        },
+                    },
+                })
+                counts["generalEntries"] += 1
+                continue
+            identity = row["identity"]
+            source_id = identity[0][1] if isinstance(identity, list) else identity["sourceUnitId"]
+            for army in row["armyIds"]:
+                matches = [
+                    i for i, card in enumerate(current["armies"])
+                    if card["id"] in source_armies[army] and (source_id, army) in memberships
+                ]
+                if len(matches) == 1:
+                    unit["armyHistory"][matches[0]].append(row)
+                    counts["armyEntries"] += 1
+                else:
+                    unit["unmatchedHistory"][army].append(row)
+                    counts["unmatchedEntries"] += 1
+    return dict(counts)
+
+
+def category(row: Document) -> str:
+    kind, identity = row["kind"], row["identity"]
+    if kind == "characteristic":
+        return "Characteristics"
+    if kind == "classification":
+        return "Classification"
+    if kind == "lifecycleSummaries":
+        return "Loadout lifecycle"
+    if kind == "availabilitySummaries":
+        return "Availability"
+    if kind == "relationshipSummaries":
+        return "Relationships"
+    return {"points": "Costs", "swc": "Costs", "skills": "Skills",
+            "equip": "Equipment", "weapons": "Weapons"}.get(identity["field"], "Other changes")
+
+
+CATEGORY_ORDER = ("Characteristics", "Skills", "Equipment", "Weapons", "Costs",
+                  "Availability", "Loadout lifecycle", "Relationships", "Classification",
+                  "Other changes")
+
+
+def action_text(row: Document) -> tuple[str, str]:
+    text = row["text"]
+    for action in ("Changed", "Gained", "Lost", "Added", "Removed", "Appeared", "Disappeared"):
+        if text.startswith(action + " "):
+            return action, text[len(action) + 1:]
+    if row["kind"] == "classification":
+        return "Classification", text.removesuffix(" (classification)")
+    return "Changed", text
+
+
+def action_rows(row: Document) -> list[tuple[str, str]]:
+    """Split structured reference deltas without parsing player-facing strings."""
+    identity = row["identity"]
+    if row["kind"] != "summaries" or identity["field"] not in {"skills", "equip", "weapons"}:
+        return [action_text(row)]
+    lost, gained = identity["lost"], identity["gained"]
+    ids = {ref["filter"]["id"] for ref in lost} & {ref["filter"]["id"] for ref in gained}
+    result = []
+    for item_id in sorted(ids):
+        a = ", ".join(compact_reference(ref) for ref in lost if ref["filter"]["id"] == item_id)
+        b = ", ".join(compact_reference(ref) for ref in gained if ref["filter"]["id"] == item_id)
+        result.append(("Changed", f"{a} → {b}"))
+    for action, references in (("Gained", gained), ("Lost", lost)):
+        remaining = [compact_reference(ref) for ref in references if ref["filter"]["id"] not in ids]
+        if remaining:
+            result.append((action, ", ".join(remaining)))
+    return result or [action_text(row)]
+
+
+def context_history(rows: list[Document], names: dict[int, str], *, general: bool = False) -> str:
+    if not rows:
+        note = ("No confirmed shared changes in this pilot." if general
+                else "No supported changes found in the available history.")
+        return ('<details class="history"><summary>History</summary>'
+                f'<p class="notice">{note}</p></details>')
+    dates: dict[str, list[Document]] = defaultdict(list)
+    for row in rows:
+        dates[row["laterObservedDate"]].append(row)
+    articles = []
+    for date in sorted(dates, reverse=True):
+        scopes: dict[str, list[Document]] = defaultdict(list)
+        for row in dates[date]:
+            scopes["" if general else row["scope"]].append(row)
+        groups = []
+        for scope, changes in scopes.items():
+            categories: dict[str, list[Document]] = defaultdict(list)
+            for row in changes:
+                categories[category(row)].append(row)
+            blocks = []
+            for label in CATEGORY_ORDER:
+                if label not in categories:
+                    continue
+                items = []
+                for row in categories[label]:
+                    lines = "".join(
+                        f'<div class="change-line action-{esc(action.lower())}">'
+                        f'<span class="action">{esc(action)}</span>{esc(body)}</div>'
+                        for action, body in action_rows(row)
+                    )
+                    armies = ", ".join(names.get(i, f"Army #{i}") for i in row["armyIds"])
+                    evidence = (
+                        f"<p>{esc(armies)}</p><p>Observation window: "
+                        f"{esc(row['earlierObservedDate'])} – {esc(row['laterObservedDate'])}</p>"
+                        f"<pre>{raw(row['evidence'])}</pre>"
+                    )
+                    review = details("Evidence", evidence)
+                    items.append(
+                        f'<li class="{esc(label.lower().replace(" ", "-"))}">'
+                        f'{lines}<div class="technical-only">{review}</div></li>'
+                    )
+                blocks.append(f'<h5 class="history-category">{esc(label)}</h5>'
+                              f'<ul class="history-list">{"".join(items)}</ul>')
+            heading = f'<h4 class="scope">{esc(scope)}</h4>' if scope else ""
+            groups.append(f'<div class="change-group">{heading}{"".join(blocks)}</div>')
+        articles.append(f'<article><h3><time datetime="{esc(date)}">{esc(date)}</time></h3>'
+                        f'{"".join(groups)}</article>')
+    return ('<details class="history"><summary>History</summary>'
+            + "".join(articles) + "</details>")
+
+
+def statline(stats: Document) -> str:
+    movement = scalar_text("move", {"present": True, "value": [
+        stats.get("move_1"), stats.get("move_2"),
+    ]})
+    values = [("MOV", movement), *[
+        (label, stats.get(key)) for label, key in (
+            ("CC", "cc"), ("BS", "bs"), ("PH", "ph"), ("WIP", "wip"),
+            ("ARM", "arm"), ("BTS", "bts"), ("STR" if stats.get("is_structure") else "VITA",
+                                           "vitality"), ("S", "silhouette"),
+        )
+    ]]
+    return '<div class="statline">' + "".join(
+        f"<span><small>{label}</small>{esc('—' if value is None or value == -1 else value)}</span>"
+        for label, value in values
+    ) + "</div>"
+
+
+def current_item_text(items: list[Document]) -> str:
+    result = []
+    for item in items:
+        label = str(item.get("name") or "Unnamed item")
+        if item.get("quantity") not in (None, 1):
+            label = f"{item['quantity']} × {label}"
+        extras = [str(extra.get("name") or "?") for extra in item.get("extras", [])]
+        if extras:
+            label += " (" + ", ".join(extras) + ")"
+        result.append(label)
+    return ", ".join(result)
+
+
+def contextual_sections(unit: Document, names: dict[int, str]) -> str:
+    profiles = []
+    for profile in unit["currentGeneral"]:
+        items = "".join(
+            f'<p class="current-items"><strong>{label}:</strong> '
+            f'{esc(current_item_text(values))}</p>'
+            for key, label in (
+                ("skills", "Skills"), ("equipment", "Equipment"), ("weapons", "Weapons"),
+            )
+            if (values := profile["shared_items"].get(key, []))
+        )
+        history = context_history(unit["generalHistory"].get(profile["profile_identity"], []),
+                                  names, general=True)
+        profiles.append(f'<section class="profile-card"><h3>{esc(profile["display_name"])}</h3>'
+                        f'{statline(profile["stats"])}{items}{history}</section>')
+    armies = []
+    for index, army in enumerate(unit["currentArmies"]):
+        current = "".join(
+            f'<h4>{esc(profile.get("display_name") or profile["name"])}</h4>{statline(profile)}'
+            for profile in army["profiles"]
+        )
+        loadouts = []
+        for option in army["loadouts"]:
+            label = option["name"]
+            items = "; ".join(
+                current_item_text(option[field]) for field in ("weapons", "skills", "equipment")
+                if option.get(field)
+            )
+            if items:
+                label += " — " + items
+            loadouts.append(
+                f'<li>{esc(label)} <strong>· {esc(option["points"])} Points, '
+                f'{esc(option["swc"])} SWC</strong></li>'
+            )
+        if loadouts:
+            current += f'<h4>Loadouts</h4><ul class="current-loadouts">{"".join(loadouts)}</ul>'
+        history = context_history(unit["armyHistory"].get(index, []), names)
+        flags = ", ".join(army.get("availability_flags", []))
+        label = army["name"] + (f" ({flags})" if flags else "")
+        armies.append(f'<details class="army-card"{" open" if index == 0 else ""}>'
+                      f'<summary>{esc(label)}</summary>{current}{history}</details>')
+    unmatched = "".join(
+        f'<section class="profile-card"><h3>{esc(names.get(army, f"Army #{army}"))}</h3>'
+        f'{context_history(rows, names)}</section>'
+        for army, rows in sorted(unit["unmatchedHistory"].items())
+    )
+    if unmatched:
+        unmatched = ('<details class="army-card"><summary>Other historical contexts</summary>'
+                     + unmatched + "</details>")
+    return ('<h3>General profiles</h3>' + "".join(profiles)
+            + '<h3>Army profiles</h3>' + "".join(armies) + unmatched)
+
+
+def render(units: list[Document], names: dict[int, str], coverage: Document,
+           *, contextual: bool = False) -> str:
     options, sections = [], []
     for unit in units:
         title = (unit["name"] or "Unnamed Unit").strip()
@@ -503,6 +903,19 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
             f'data-history="{"yes" if unit["entries"] else "no"}">'
             f"{esc(title)}</option>"
         )
+        if contextual:
+            evidence = {k: unit[k] for k in (
+                "reviewEvidence", "catalogEvidence", "sourceIdentities", "semanticReview",
+            )}
+            review = details(
+                "Additional review and catalog evidence", f"<pre>{raw(evidence)}</pre>",
+            )
+            sections.append(
+                f'<section class="unit" id="{esc(anchor)}" hidden><h2>{esc(title)}</h2>'
+                + contextual_sections(unit, names)
+                + f'<div class="technical-only">{review}</div></section>'
+            )
+            continue
         dates: dict[str, list[Document]] = defaultdict(list)
         for row in unit["entries"]:
             dates[row["laterObservedDate"]].append(row)
@@ -572,12 +985,19 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>Unit version history — private preview</title>'
-        f"<style>{STYLE}</style></head><body><header><h1>Unit version history</h1>"
+        f"<style>{STYLE + (CONTEXT_STYLE if contextual else '')}</style></head>"
+        "<body><header><h1>"
+        + ("Unit details · History preview" if contextual else "Unit version history")
+        + "</h1>"
         '<p class="notice">Private N5 preview · '
         "Dates indicate when each change was first observed. "
         "History is incomplete; dates are not confirmed publication dates. "
         "Army list presence does not establish playable availability. "
-        "Army names use current labels. MOV is displayed in inches.</p>"
+        "Army names use current labels. MOV is displayed in inches. "
+        + ("Current cards show all optional Unit categories. General history is a conservative "
+           "scalar-only attribution pilot; other changes remain in their observed Army contexts. "
+           if contextual else "")
+        + "</p>"
         '<label><input type="checkbox" id="technical"> Show technical evidence</label>'
         f'<div class="technical-only">{coverage_details}</div>'
         '</header><div class="layout"><nav aria-label="Unit navigation">'
@@ -591,7 +1011,8 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
     )
 
 
-def browser_review(output: Path, units: list[Document], selected: list[int]) -> None:
+def browser_review(output: Path, units: list[Document], selected: list[int],
+                   *, contextual: bool = False) -> None:
     """Exercise the exact private HTML locally, including responsive navigation."""
     playwright = importlib.import_module("playwright.sync_api")
     available = {u["logicalUnitId"]: u for u in units if u["entries"]}
@@ -625,16 +1046,39 @@ def browser_review(output: Path, units: list[Document], selected: list[int]) -> 
                     require(target.is_visible(), "Selected Unit is hidden")
                     require(page.locator(".unit:visible").count() == 1, "Unit selection differs")
                     require(target.locator("article").count() > 0, "Missing selected timeline")
-                    require(not target.locator(".technical-only").first.is_visible(),
+                    if contextual:
+                        require(target.locator("details.history[open]").count() == 0,
+                                "History must be collapsed by default")
+                        page.evaluate("window.scrollTo(0, 0)")
+                        closed = output.with_name(
+                            f"{output.stem}-{identity}-{width}-{theme}-closed.png"
+                        )
+                        require(not closed.exists(), "Screenshot already exists")
+                        page.screenshot(path=closed)
+                        disclosure = target.locator("details.history:has(article)").first
+                        disclosure.evaluate("""element => {
+                            for (let parent = element.parentElement; parent;
+                                 parent = parent.parentElement)
+                                if (parent.tagName === 'DETAILS') parent.open = true;
+                        }""")
+                        disclosure.locator(":scope > summary").click()
+                        require(disclosure.locator("article").first.is_visible(),
+                                "History disclosure did not open")
+                    technical = target.locator(".technical-only:visible")
+                    require(technical.count() == 0,
                             "Technical evidence visible by default")
                     page.locator("#technical").check()
-                    require(target.locator(".technical-only").first.is_visible(),
-                            "Technical evidence toggle differs")
-                    target.locator(".technical-only summary").first.click()
-                    require(target.locator("details[open] pre").first.is_visible(),
+                    require(technical.count() > 0, "Technical evidence toggle differs")
+                    technical.first.locator("summary").first.click()
+                    require(technical.first.locator("details[open] pre").first.is_visible(),
                             "Evidence disclosure did not open")
                     page.locator("#technical").uncheck()
-                    page.evaluate("window.scrollTo(0, 0)")
+                    if contextual:
+                        target.locator("details.history[open]>summary").first.evaluate(
+                            "element => element.scrollIntoView({block: 'start'})"
+                        )
+                    else:
+                        page.evaluate("window.scrollTo(0, 0)")
                     require(page.evaluate("document.documentElement.scrollWidth <= innerWidth"),
                             "Preview overflows viewport")
                     screenshot = output.with_name(f"{output.stem}-{identity}-{width}-{theme}.png")
@@ -656,6 +1100,12 @@ def main() -> int:
     for arg in ("preview", "semantic"):
         parser.add_argument("--" + arg + "-sha256", required=True)
     parser.add_argument("--inspect-unit", type=int, action="append", default=[])
+    parser.add_argument("--inspect-name", action="append", default=[],
+                        help="Select a uniquely matching Unit name for review.")
+    parser.add_argument("--inspect-general", action="store_true",
+                        help="Include one Unit with confirmed General-profile history.")
+    parser.add_argument("--contextual", action="store_true",
+                        help="Render current profile cards with scoped historical disclosures.")
     parser.add_argument("--browser-review", action="store_true",
                         help="Check the generated HTML in Chromium and save private screenshots.")
     args = parser.parse_args()
@@ -683,6 +1133,18 @@ def main() -> int:
         units, counts = model(preview, semantic, historical_scopes(
             db, ROOT / "archive/army-history-v1.zip",
         ))
+        if args.contextual:
+            counts.update(contextual_model(units, db, ROOT / "archive/army-history-v1.zip"))
+    for query in args.inspect_name:
+        matches = [u["logicalUnitId"] for u in units
+                   if query.casefold() in u["name"].casefold() and u["entries"]]
+        require(len(matches) == 1, f"Inspect name must match one Unit with history: {query}")
+        args.inspect_unit.extend(matches)
+    if args.inspect_general:
+        require(args.contextual, "General history review requires contextual mode")
+        candidates = [u["logicalUnitId"] for u in units if u["generalHistory"]]
+        require(bool(candidates), "No confirmed General-profile history for review")
+        args.inspect_unit = list(dict.fromkeys([*args.inspect_unit, candidates[0]]))
     coverage = {
         "previewSha256": args.preview_sha256, "semanticSha256": args.semantic_sha256,
         **{k: preview[k] for k in ("archiveSha256", "armyDatabaseSha256",
@@ -691,7 +1153,7 @@ def main() -> int:
         "semanticCounts": semantic["counts"], "presentationCounts": counts,
         "reviewInputs": [args.preview.name, args.semantic.name],
     }
-    html = render(units, names, coverage)
+    html = render(units, names, coverage, contextual=args.contextual)
     require(file_digest(ARMY) == preview["armyDatabaseSha256"], "Army database changed")
     require(file_digest(HISTORY) == preview["historyDatabaseSha256"], "History database changed")
     with args.output.open("x", encoding="utf-8", newline="\n") as handle:
@@ -711,7 +1173,7 @@ def main() -> int:
             }, ensure_ascii=True))
     print(f"Private player-facing preview: {args.output}")
     if args.browser_review:
-        browser_review(args.output, units, args.inspect_unit)
+        browser_review(args.output, units, args.inspect_unit, contextual=args.contextual)
     return 0
 
 

@@ -237,6 +237,84 @@ def test_exact_cross_catalog_transition_keeps_both_source_observations():
         assert len([r for r in units[0]["entries"] if r["kind"] == "summaries"]) == 2
 
 
+def test_contextual_scalar_attribution_requires_every_known_army_and_unique_profile():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    row = next(r for r in units[0]["entries"] if r["kind"] == "characteristic")
+    row["armyIds"] = [101, 102]
+
+    def endpoint(value, duplicate=False):
+        profiles = [{"id": 2, "name": "Peripheral <X>", "bs": value}]
+        if duplicate:
+            profiles.append({"id": 3, "name": "Peripheral <X>", "bs": value})
+        return {"units": [{"id": 42, "profileGroups": [{"id": 1, "profiles": profiles}]}]}
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    profiles = [{"profile_identity": "peripheral <x>"}]
+    ends = [(101, endpoint(11), endpoint(12)), (102, endpoint(11), endpoint(12))]
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102}, ends, identity,
+    ) == "peripheral <x>"
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102, 103}, ends, identity,
+    ) is None
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102}, ends[:1], identity,
+    ) is None
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102},
+        [ends[0], (102, endpoint(11, True), endpoint(12))], identity,
+    ) is None
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102},
+        [ends[0], (102, endpoint(10), endpoint(12))], identity,
+    ) is None
+
+
+def test_contextual_history_uses_collapsed_disclosures_and_typed_categories():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    unit = units[0]
+    scalar = next(r for r in unit["entries"] if r["kind"] == "characteristic")
+    costs = [r for r in unit["entries"] if r["kind"] == "summaries"]
+    unit.update(currentGeneral=[{
+        "profile_identity": "profile", "display_name": "General profile <X>",
+        "stats": {"move_1": 10, "move_2": 10, "bs": 12}, "shared_items": {},
+    }], currentArmies=[{
+        "id": 101, "name": "Army A", "profiles": [], "loadouts": [],
+    }], generalHistory={"profile": [scalar]}, armyHistory={0: costs}, unmatchedHistory={})
+    html = player.contextual_sections(unit, {101: "Army A", 102: "Army B"})
+    general, army = html.split("<h3>Army profiles</h3>")
+    assert '<details class="history"><summary>History</summary>' in general
+    assert '<details class="history"><summary>History</summary>' in army
+    assert 'class="history" open' not in html
+    assert "General profile &lt;X&gt;" in general
+    assert "Characteristics" in general and "BS: 11 → 12" in general
+    assert "Costs" in army and "Points: 32 → 30" in army
+    assert "BS: 11 → 12" not in army
+    assert "Points: 32 → 30" not in general
+    assert "Observation window:" in html
+
+
+def test_contextual_action_rows_keep_reference_changes_distinct():
+    def ref(item_id, label, extra=None):
+        occurrence = {"extra": [{"name": extra}]} if extra else {}
+        return {"filter": {"id": item_id, "name": label}, "occurrence": occurrence}
+    row = {
+        "kind": "summaries", "identity": {
+            "field": "skills",
+            "lost": [ref(1, "Dodge", "+2.5"), ref(2, "Forward Observer")],
+            "gained": [ref(1, "Dodge", "+5"), ref(3, "NCO")],
+        }, "text": "Compound reference delta",
+    }
+    assert player.action_rows(row) == [
+        ("Changed", "Dodge (+2.5) → Dodge (+5)"),
+        ("Gained", "NCO"), ("Lost", "Forward Observer"),
+    ]
+
+
 def test_group_wide_same_delta_different_cost_pairs_stay_separate():
     preview, semantic = fixture()
     row = semantic["summaries"][0]

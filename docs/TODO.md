@@ -307,7 +307,12 @@ make v1.3.0 depend on them.
     and [Unit history presentation](web-design-guidelines.md#unit-history-presentation).
     Validate historical General-profile changes against the shared composition
     contract, keep Army-only changes in their owning cards, and review dense
-    histories such as Minutemen before public integration.
+    histories such as Minutemen before public integration. The private contextual
+    preview now renders current profile and Army cards, with typed collapsed
+    histories and separate unmatched contexts. Its exact-window scalar pilot
+    attributed 31 shared changes; extend attribution to historical shared-item
+    composition and review the remaining Army-context and unresolved entries
+    before public integration.
   - [ ] Review publication rights before exposing derived historical data.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional
