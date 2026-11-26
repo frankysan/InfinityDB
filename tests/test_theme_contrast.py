@@ -144,6 +144,8 @@ NON_TEXT_CONTRAST_PAIRS = (
         "color-status-warning-indicator",
         "color-status-warning-surface",
     ),
+    ("history addition", "color-status-history-addition", "color-surface-default"),
+    ("history removal", "color-status-history-removal", "color-surface-default"),
     ("loading spinner", "color-spinner-active", "color-spinner-track"),
     ("extended profile accent", "color-profile-accent", "color-surface-default"),
     ("FAQ edge", "color-text-rule-heading", "color-surface-default"),
@@ -252,6 +254,18 @@ def test_registered_explicit_themes_have_one_palette_file_each() -> None:
     assert registered == palette_files
 
 
+def test_every_faction_has_three_independent_appearance_seeds() -> None:
+    tokens = _theme_tokens("light")
+    expected = {
+        f"appearance-{slug}-{role}"
+        for _, slug, _ in ARMY_THEMES
+        for role in ("accent", "surface", "chrome")
+    }
+    assert {name for name in tokens if name.startswith("appearance-")} == expected
+    for name in expected:
+        _rgb(tokens[name])
+
+
 def _audited_palettes() -> Iterator[tuple[str, dict[str, str]]]:
     stylesheet = army_palette_stylesheet().decode()
     for mode in ("light", "dark"):
@@ -298,7 +312,15 @@ def test_every_explicit_theme_meets_compact_text_contrast_contract() -> None:
         _assert_contrast_pairs(
             theme,
             tokens,
-            default_pairs + TEXT_CONTRAST_PAIRS,
+            default_pairs + TEXT_CONTRAST_PAIRS + (
+                ("page text", "color-text-primary", "color-surface-page"),
+                ("page secondary text", "color-text-secondary", "color-surface-page"),
+                ("footer", "color-text-footer", "color-surface-page"),
+                ("active navigation", "color-nav-text-active", "color-nav-surface-active"),
+                ("hovered navigation", "color-nav-text-active", "color-nav-surface-hover"),
+                ("hovered primary button", "color-text-on-action", "color-action-primary-hover"),
+                ("skip link", "color-text-on-highlight", "color-action-highlight"),
+            ),
             NORMAL_TEXT_MINIMUM,
         )
 

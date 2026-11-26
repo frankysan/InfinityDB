@@ -539,17 +539,33 @@ Faction themes are authored interpretations, not official paint recipes.
 Use Army colors, the published faction SVG emblems under `static/armies/`,
 and miniature paint schemes as inspiration. Corvus Belli's
 [painting article](https://infinityuniverse.com/en/news/alternative-color-scheme-for-infinity-troops)
-describes the studio blue, orange, green, earth, red and cool-gray schemes.
-Give each palette distinguishable chrome, page surfaces and action accents;
-do not simply tint all roles with a single weak color. The authored directions
-are cyan/blue (PanOceania), orange (Yu Jing), military olive (Ariadna),
-sand and olive (Haqqislam), red and charcoal (Nomads), alien plum
-(Combined Army), cool lavender (ALEPH), amber and graphite (Tohaa),
-jade (Non-Aligned Armies), navy and gold (O-12), and crimson and teal (JSA).
-Keep default InfinityDB unchanged and preserve the established Army identity
-colors even where the appearance seeds differ.
+describes the studio blue, yellow/orange, green, earth, red and cool-gray schemes.
+The [official Infinity paint sets](https://thearmypainter.com/pages/infinity),
+developed with Corvus Belli, provide additional faction-specific color families.
+The [Beyond Operation Sandtrap](https://store.corvusbelli.com/en/infinity/wargame/miniatures/beyond-operation-sandtrap)
+miniatures illustrate the contrast between PanOceania's blue armor and JSA's
+cool neutral armor and red accents. The
+[Combined Army paint set](https://thearmypainter.com/products/private-label-corvus-belli-combined-army-paint-set-wp8104p)
+uses corrupted reds and neutral mechanical greys, supporting restrained plum tones.
+
+Give each palette distinguishable chrome, page surfaces and action accents.
+Use dark navy, steel blue and cyan (PanOceania), golden yellow and ochre
+(Yu Jing), military olive (Ariadna), sand and olive (Haqqislam), red and charcoal
+(Nomads), desaturated grey-plum (Combined Army), cool lavender (ALEPH),
+amber and graphite (Tohaa), jade (Non-Aligned Armies), navy and gold (O-12),
+and muted teal-grey with crimson (JSA). The editable appearance seeds are in
+`static/themes/light.css` and are shared by both modes. Keep default InfinityDB
+and established Army identity colors unchanged.
 
 ### Maintain measurable contrast and non-color meaning
+
+Follow [WCAG 2.2](https://www.w3.org/TR/WCAG22/) success criteria 1.4.1, 1.4.3
+and 1.4.11. As a design principle, distinguish neutral/base, primary,
+secondary and accent families, as in the
+[US Web Design System](https://designsystem.digital.gov/design-tokens/color/theme-tokens/).
+Reserve strong chroma for smaller accents and use restrained large surfaces.
+Check actual adjacent foreground/background pairs, including interactive
+states; do not infer accessibility from the seed colors alone.
 
 Normal and compact text roles must maintain at least 4.5:1 contrast against the surfaces they own in every shipped theme. Meaningful focus indicators and other graphical cues that communicate state or structure must maintain at least 3:1 against the adjacent audited surface. Disabled controls and purely decorative separators are not treated as normal readable content.
 

@@ -3596,7 +3596,11 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"function initializeSettings()" in settings
     assert b"function initializeThemeSelector()" in settings
     assert b'document.getElementById("theme-selector")' in settings
-    assert b"themeOptions().map" in settings
+    assert b"populateSelector(selector, themeOptions())" in settings
+    assert b"function initializePaletteSelector()" in settings
+    assert b'document.getElementById("theme-palette-selector")' in settings
+    assert b"populateSelector(selector, paletteOptions())" in settings
+    assert b"savePaletteSelection(selector.value)" in settings
     assert b'saveThemeSelection(selector.value)' in settings
     assert b'new CustomEvent("themechange"' in settings
     assert b"function initializeDistanceUnitToggle()" in settings
@@ -4581,7 +4585,12 @@ def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable)
 
     light_tokens = set(re.findall(r"--([\w-]+):", light_theme.group(0)))
     dark_tokens = set(re.findall(r"--([\w-]+):", dark_theme.group(0)))
-    assert dark_tokens == light_tokens
+    assert dark_tokens == {name for name in light_tokens if not name.startswith("appearance-")}
+
+    status, _, generated = request(app, "/static/themes/army.css")
+    assert status == 200
+    generated_css = generated.decode("utf-8")
+    assert set(re.findall(r"--([\w-]+):", generated_css)) <= dark_tokens
 
     component_css = (
         css[: root.start()]
@@ -4589,6 +4598,10 @@ def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable)
         + css[light_theme.end() : dark_theme.start()]
         + css[dark_theme.end() :]
     )
+    # The generated faction overrides are another owned palette source,
+    # not component-level color literals.
+    assert component_css.count(generated_css) == 1
+    component_css = component_css.replace(generated_css, "", 1)
     color_literals = re.findall(
         r"#[0-9a-fA-F]{3,8}\b|(?:rgb|rgba)\([^)]*\)",
         component_css,

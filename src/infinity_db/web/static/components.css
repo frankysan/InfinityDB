@@ -2008,13 +2008,13 @@ h1>span {
 .unit-history-change[data-action="gained"],
 .unit-history-change[data-action="added"],
 .unit-history-change[data-action="appeared"] {
-  border-left-color: #31956b;
+  border-left-color: var(--color-status-history-addition);
 }
 
 .unit-history-change[data-action="lost"],
 .unit-history-change[data-action="removed"],
 .unit-history-change[data-action="disappeared"] {
-  border-left-color: #c95b60;
+  border-left-color: var(--color-status-history-removal);
 }
 
 .unit-history-change[data-action="classification"] {

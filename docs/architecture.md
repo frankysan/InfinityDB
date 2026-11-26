@@ -635,10 +635,11 @@ palette files under `static/themes/` (`light.css` and `dark.css`),
 `static/page-overrides.css` owns late page-specific exceptions that intentionally sit after the
 shared rules. `/static/styles.css` remains the stable public stylesheet URL; the presentation layer
 composes those sources with generated Army palette overrides immediately after the base palettes.
-`theme_palette.py` defines eleven faction-inspired palettes separately from the
-unchanged Army identity pairs in `themes/light.css`, sharing resolved tokens
-with the standalone SVG renderer. The generated
-stylesheet is cached and included in static-asset revision hashing.
+`theme_palette.py` resolves eleven faction-inspired palettes from the authored
+appearance seeds in `themes/light.css`, separately from the unchanged Army
+identity pairs. Both modes share these seeds with the standalone SVG renderer.
+The generated stylesheet is cached and included in static-asset revision
+hashing. Seed-only changes do not require database regeneration.
 
 Theme defaults to **InfinityDB**; Theme mode defaults to **Auto**, following the operating-system
 color scheme. Both use the existing session-first, optional-cookie persistence contract. The mode

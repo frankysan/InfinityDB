@@ -13,8 +13,8 @@ ThemeMode = Literal["light", "dark"]
 DEFAULT_PALETTE = "infinitydb"
 
 # Numerical Army IDs, canonical source slugs and player-facing labels.
-# Army identity colors remain owned by themes/light.css. Appearance seeds below
-# are separately curated; they never change the colors of Army identity badges.
+# Army identity colors and separately authored appearance seeds are owned by
+# themes/light.css; only the latter determine the optional theme appearance.
 ARMY_THEMES = (
     (101, "panoceania", "PanOceania"),
     (201, "yu-jing", "Yu Jing"),
@@ -30,22 +30,6 @@ ARMY_THEMES = (
 )
 PALETTE_IDS = frozenset((DEFAULT_PALETTE, *(slug for _, slug, _ in ARMY_THEMES)))
 
-# (action accent, page/card hue, navigation/chrome hue). These are authored UI
-# colors, not official paint specifications. See the web design guidelines for
-# visual source references and rationale.
-_APPEARANCE_SEEDS = {
-    "panoceania": ("#009fe4", "#137fc4", "#005e9d"),
-    "yu-jing": ("#f1861d", "#e4852b", "#9c4a09"),
-    "ariadna": ("#557b2c", "#6b7d42", "#3a581e"),
-    "haqqislam": ("#afca0b", "#bfa26c", "#8a6535"),
-    "nomads": ("#e30a14", "#76535a", "#39252a"),
-    "combined-army": ("#a044a5", "#8f3c96", "#712578"),
-    "aleph": ("#504f8f", "#9691c5", "#514e8b"),
-    "tohaa": ("#f4960b", "#666666", "#3b3b3b"),
-    "non-aligned-armies": ("#379b79", "#77b8a1", "#287b60"),
-    "o-12": ("#fdc309", "#414c94", "#2e2560"),
-    "jsa": ("#cd1333", "#4ca49e", "#277d78"),
-}
 _THEME_DIRECTORY = Path(__file__).resolve().parent / "web" / "static" / "themes"
 _TOKEN_RE = re.compile(r"--([\w-]+):\s*([^;]+);")
 _HEX_RE = re.compile(r"#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?")
@@ -192,7 +176,11 @@ def theme_tokens(mode: ThemeMode, palette: str = DEFAULT_PALETTE) -> dict[str, s
     base = _base_tokens(mode)
     if palette == DEFAULT_PALETTE:
         return dict(base)
-    accent, surface, chrome = (_rgb(value) for value in _APPEARANCE_SEEDS[palette])
+    seeds = _base_tokens("light")
+    accent, surface, chrome = (
+        _rgb(seeds[f"appearance-{palette}-{role}"])
+        for role in ("accent", "surface", "chrome")
+    )
     result = dict(base)
     for name, value in base.items():
         if (

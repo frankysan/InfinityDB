@@ -80,6 +80,8 @@
   --color-status-warning-surface: #3a2f12;
   --color-status-warning-text: #f1d17a;
   --color-status-warning-indicator: #dca73a;
+  --color-status-history-addition: #31956b;
+  --color-status-history-removal: #c95b60;
   --color-range-neutral: #0879a6;
   --color-range-positive: #2b7b2a;
   --color-range-caution: #f7c83c;

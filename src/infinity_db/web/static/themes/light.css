@@ -85,6 +85,8 @@
   --color-status-warning-surface: #fff3d5;
   --color-status-warning-text: #704d00;
   --color-status-warning-indicator: #b58123;
+  --color-status-history-addition: #31956b;
+  --color-status-history-removal: #c95b60;
   --color-range-neutral: #007cb1;
   --color-range-positive: #33852b;
   --color-range-caution: #fcc002;
@@ -218,6 +220,44 @@
   --color-faction-o-12-secondary: #1c173b;
   --color-faction-jsa-primary: #e3f2f1;
   --color-faction-jsa-secondary: #4ca49e;
+  /* Authored faction-theme seeds, shared by Light and Dark.
+   * These are UI design colors, not official paint specifications.
+   * Keep them independent of the faction identity colors above.
+   * See docs/web-design-guidelines.md for source references.
+   */
+  --appearance-panoceania-accent: #009fe4;
+  --appearance-panoceania-surface: #5388bc;
+  --appearance-panoceania-chrome: #19385e;
+  --appearance-yu-jing-accent: #ffd029;
+  --appearance-yu-jing-surface: #e0bd4e;
+  --appearance-yu-jing-chrome: #735818;
+  --appearance-ariadna-accent: #557b2c;
+  --appearance-ariadna-surface: #6b7d42;
+  --appearance-ariadna-chrome: #3a581e;
+  --appearance-haqqislam-accent: #afca0b;
+  --appearance-haqqislam-surface: #bfa26c;
+  --appearance-haqqislam-chrome: #8a6535;
+  --appearance-nomads-accent: #e30a14;
+  --appearance-nomads-surface: #76535a;
+  --appearance-nomads-chrome: #39252a;
+  --appearance-combined-army-accent: #96718f;
+  --appearance-combined-army-surface: #82717e;
+  --appearance-combined-army-chrome: #574653;
+  --appearance-aleph-accent: #504f8f;
+  --appearance-aleph-surface: #9691c5;
+  --appearance-aleph-chrome: #514e8b;
+  --appearance-tohaa-accent: #f4960b;
+  --appearance-tohaa-surface: #666666;
+  --appearance-tohaa-chrome: #3b3b3b;
+  --appearance-non-aligned-armies-accent: #379b79;
+  --appearance-non-aligned-armies-surface: #77b8a1;
+  --appearance-non-aligned-armies-chrome: #287b60;
+  --appearance-o-12-accent: #fdc309;
+  --appearance-o-12-surface: #414c94;
+  --appearance-o-12-chrome: #2e2560;
+  --appearance-jsa-accent: #cd1333;
+  --appearance-jsa-surface: #839e9f;
+  --appearance-jsa-chrome: #577579;
   /* Skill category colors used by infinitythewiki.com. */
   --color-skill-category-automatic: #000000;
   --color-skill-category-deployment: #4b0082;
