@@ -129,6 +129,17 @@ original comparison and candidate links. Use observation ranges
 until independently established update dates exist. Technical evidence
 belongs in developer review, not normal player copy.
 
+Direct attachment history additionally compares observed changes to Include
+and Peripheral fields on surviving source owners. Resolve Include targets
+within the endpoint Army and Unit, and resolve Peripheral references through
+unique exact local definitions. Ignore equivalent Peripheral rekeys and
+reference display ordering, normalize default quantities, and retain
+multiplicity. Summarize supported one-sided changes and quantity changes
+with the owner and target context; do not infer a replacement between
+different target identities. Preserve raw comparison links and unresolved
+outcomes. Attachment changes are source-scoped candidates, not evidence of
+playable availability or a rules-derived Controller relationship.
+
 Loadout lifecycle summaries use the structural occurrence and reconciliation
 evidence separately from effective changes on surviving loadouts. A supported
 one-sided key appearance or disappearance with no replacement evidence becomes

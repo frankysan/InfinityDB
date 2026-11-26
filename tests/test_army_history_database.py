@@ -674,3 +674,76 @@ def test_stable_include_edges_allow_direct_owner_changes_but_not_inheritance():
     new["units"][0]["profileGroups"][0]["options"][0]["includes"][0]["q"] = 1
     new["units"][0]["profileGroups"][1]["options"] = []
     assert semantic_summary(old, new, "skills", paths) == (None, "includesOrPeripheral")
+
+
+def relationship_change(old, new, field):
+    a = old["units"][0]["profileGroups"][0]["options"][0]
+    b = new["units"][0]["profileGroups"][0]["options"][0]
+    return {
+        "path": ["units", 42, "profileGroups", 1, "options", 1, field],
+        "ancestorOrRecordLabelChanged": False,
+        "before": {"present": True, "value": a[field]} if field in a else {"present": False},
+        "after": {"present": True, "value": b[field]} if field in b else {"present": False},
+    }
+
+
+def test_relationship_history_peripheral_quantity_and_rekey():
+    from tools.research.summarize_army_history import relationship_payload
+
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1)])
+    for data, identity in ((old, 7), (new, 9)):
+        data["filters"]["peripheral"] = [{"id": identity, "name": "Attached Model"}]
+        data["units"][0]["profileGroups"][0]["options"][0]["peripheral"] = [
+            {"id": identity, "order": identity},
+        ]
+    assert relationship_payload(old, new, relationship_change(old, new, "peripheral")) == (
+        None, "unchangedRelationship",
+    )
+    new["units"][0]["profileGroups"][0]["options"][0]["peripheral"][0]["q"] = 2
+    result, status = relationship_payload(old, new, relationship_change(old, new, "peripheral"))
+    assert status == "changedRelationship"
+    assert result is not None
+    assert result["summary"] == "Changed Peripheral attachment: Attached Model → 2 × Attached Model"
+    new["filters"]["peripheral"][0]["name"] = "Different Model"
+    assert relationship_payload(old, new, relationship_change(old, new, "peripheral")) == (
+        None, "possibleAttachmentReplacement",
+    )
+
+
+def test_relationship_history_include_addition_and_unresolved_target():
+    from tools.research.summarize_army_history import relationship_payload
+
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1)])
+    for data in (old, new):
+        data["units"][0]["profileGroups"].append({
+            "id": 2, "name": "Included", "profiles": [
+                {"id": 2, "name": "Included Profile", "skills": [{"id": 2}]},
+            ], "options": [semantic_option(7)],
+        })
+    new["units"][0]["profileGroups"][0]["options"][0]["includes"] = [{"group": 2, "option": 7}]
+    result, status = relationship_payload(old, new, relationship_change(old, new, "includes"))
+    assert status == "changedRelationship"
+    assert result is not None and result["summary"] == "Added Include: Included Profile (Test)"
+    assert result["relationshipScope"] == "directOwner"
+    assert result["lost"] == []
+    new["units"][0]["profileGroups"][1]["options"] = []
+    assert relationship_payload(old, new, relationship_change(old, new, "includes")) == (
+        None, "unresolvedAttachmentTarget",
+    )
+
+
+def test_relationship_history_rejects_unresolved_definitions_and_ambiguous_owners():
+    from tools.research.summarize_army_history import relationship_payload
+
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1)])
+    new["filters"]["peripheral"] = [
+        {"id": 7, "name": "Attached Model"}, {"id": 9, "name": "Attached Model"},
+    ]
+    new["units"][0]["profileGroups"][0]["options"][0]["peripheral"] = [{"id": 7}]
+    change = relationship_change(old, new, "peripheral")
+    assert relationship_payload(old, new, change) == (None, "unresolvedAttachmentTarget")
+    change["ancestorOrRecordLabelChanged"] = True
+    assert relationship_payload(old, new, change) == (None, "changedLabels")

@@ -44,14 +44,14 @@ def get_group(data: Document, unit_id: int, group_id: int) -> tuple[Document, Do
     return unit, groups[group_id]
 
 
-def include_signature(owner: Document, data: Document, unit: int) -> str | None:
+def include_rows(owner: Document, data: Document, unit: int) -> list[Document] | None:
     """Resolve direct Include edges in the endpoint Army and Unit namespace.
 
     Retain target identities and multiplicity, not a flattened target profile.
     """
     includes = owner.get("includes")
     if includes is None:
-        return encode([])
+        return []
     if not isinstance(includes, list):
         return None
     result = []
@@ -83,7 +83,12 @@ def include_signature(owner: Document, data: Document, unit: int) -> str | None:
             "profiles": [{"id": identity, **{k: profiles[identity].get(k) for k in LABELS}}
                          for identity in sorted(profiles)],
         })
-    return encode(sorted(result, key=encode))
+    return sorted(result, key=encode)
+
+
+def include_signature(owner: Document, data: Document, unit: int) -> str | None:
+    rows = include_rows(owner, data, unit)
+    return None if rows is None else encode(rows)
 
 
 def comparable_relationships(
@@ -595,6 +600,107 @@ def availability_payload(
     }, "observedFieldChange"
 
 
+def peripheral_rows(owner: Document, data: Document) -> list[Document] | None:
+    refs = owner.get("peripheral", [])
+    if not isinstance(refs, list):
+        return None
+    if not refs:
+        return []
+    filters = data.get("filters")
+    definitions = indexed(filters.get("peripheral")) if isinstance(filters, dict) else None
+    unique = peripheral_definitions(data)
+    if definitions is None:
+        return None
+    result = []
+    for ref in refs:
+        if (not isinstance(ref, dict) or type(ref.get("id")) is not int
+                or ref["id"] not in unique or set(ref) - {"id", "q", "order", "extra"}
+                or ref.get("extra") not in (None, [])):
+            return None
+        quantity = ref.get("q")
+        if quantity is None:
+            quantity = 1
+        if type(quantity) is not int or quantity < 1:
+            return None
+        result.append({
+            "definition": {k: v for k, v in definitions[ref["id"]].items() if k != "id"},
+            "quantity": quantity,
+        })
+    return sorted(result, key=encode)
+
+
+def relationship_label(row: Document, field: str) -> str:
+    if field == "peripheral":
+        name = row["definition"]["name"]
+    else:
+        names = [p.get("name") or p.get("isc") for p in row["profiles"]]
+        name = " / ".join(n for n in names if n) or row["groupLabels"]["name"] or "Included profile"
+        option = row["optionLabels"]["name"]
+        if option and option != name:
+            name += f" ({option})"
+    return f"{row['quantity']} × {name}" if row["quantity"] != 1 else name
+
+
+def relationship_payload(
+    old: Document, new: Document, change: Document,
+) -> tuple[Document | None, str]:
+    """Compare direct, explicitly owned attachment edges, not inherited capabilities."""
+    path = change["path"]
+    field = path[-1]
+    if len(path) not in (5, 7) or field not in {"includes", "peripheral"}:
+        return None, "unsupportedOwner"
+    if change["ancestorOrRecordLabelChanged"]:
+        return None, "changedLabels"
+    a, b = record_at(old, path), record_at(new, path)
+    if a is None or b is None:
+        return None, "unresolvedOwner"
+    if any(not same_labels(left, right) for left, right in zip(a[1], b[1], strict=True)):
+        return None, "changedLabels"
+    for record, side in ((a[0], "before"), (b[0], "after")):
+        saved = change[side]
+        require(saved["present"] == (field in record), "Attachment field presence differs")
+        if saved["present"]:
+            require(encode(saved["value"]) == encode(record[field]), "Attachment field differs")
+        if saved["present"] and not isinstance(saved["value"], list):
+            return None, "unresolvedAttachmentShape"
+    if field == "includes":
+        left, right = include_rows(a[0], old, path[1]), include_rows(b[0], new, path[1])
+    else:
+        left, right = peripheral_rows(a[0], old), peripheral_rows(b[0], new)
+    if left is None or right is None:
+        return None, "unresolvedAttachmentTarget"
+    lcount, rcount = Counter(map(encode, left)), Counter(map(encode, right))
+    if lcount == rcount:
+        return None, "unchangedRelationship"
+
+    def target_key(row: Document) -> str:
+        return encode({k: v for k, v in row.items() if k != "quantity"})
+
+    lost = [json.loads(key) for key in sorted(lcount - rcount)
+            for _ in range((lcount - rcount)[key])]
+    gained = [json.loads(key) for key in sorted(rcount - lcount)
+              for _ in range((rcount - lcount)[key])]
+    # Simultaneous changes to different target identities are possible rekeys
+    # or replacements. Only a shared exact target can be called a change.
+    if lost and gained and {target_key(r) for r in lost} != {target_key(r) for r in gained}:
+        return None, "possibleAttachmentReplacement"
+    label = "Include" if field == "includes" else "Peripheral attachment"
+    parts = []
+    if lost and gained:
+        parts.append(f"Changed {label}: " + ", ".join(relationship_label(r, field) for r in lost)
+                     + " → " + ", ".join(relationship_label(r, field) for r in gained))
+    elif gained:
+        parts.append(f"Added {label}: " + ", ".join(relationship_label(r, field) for r in gained))
+    else:
+        parts.append(f"Removed {label}: " + ", ".join(relationship_label(r, field) for r in lost))
+    return {
+        "field": field, "sourcePath": path,
+        "historicalLabels": [{k: r[k] for k in ("id", *LABELS) if k in r} for r in a[1]],
+        "summary": "; ".join(parts), "lost": lost, "gained": gained,
+        "relationshipScope": "directOwner", "status": "observedCandidate",
+    }, "changedRelationship"
+
+
 def build(preview: Document, archive: Path) -> Document:
     require(preview["publicationStatus"] == "privatePreviewOnly"
             and preview["archiveSha256"] == ARCHIVE_PIN and preview["edition"] == "n5",
@@ -621,6 +727,7 @@ def build(preview: Document, archive: Path) -> Document:
     lifecycle_rekeys = []
     availability_rows = []
     declaration_rows = []
+    relationship_rows = []
     with closing(read_only(HISTORY)) as db:
         for pos, raw in db.execute(
             "SELECT position,body FROM history_record WHERE stream='loadoutMatch' "
@@ -665,6 +772,16 @@ def build(preview: Document, archive: Path) -> Document:
             (pos, json.loads(raw)) for pos, raw in db.execute(
                 "SELECT position,body FROM history_record "
                 "WHERE stream='declaredMembershipClaim' ORDER BY position"
+            )
+        ]
+        relationship_rows = [
+            (ci, index, unit, json.loads(raw), json.loads(comparison))
+            for ci, index, unit, raw, comparison in db.execute(
+                "SELECT c.comparison_index,c.change_index,c.unit_id,c.body,p.body "
+                "FROM comparison_change c JOIN comparison p USING(comparison_index) "
+                "WHERE c.unit_id IS NOT NULL "
+                "AND json_extract(c.body,'$.path[#-1]') IN ('includes','peripheral') "
+                "ORDER BY c.comparison_index,c.change_index"
             )
         ]
         structural_count = sum(
@@ -833,6 +950,37 @@ def build(preview: Document, archive: Path) -> Document:
                 **identity, **payload, "status": "observedCandidate", "evidence": [],
             })
             summary["evidence"].append(evidence)
+    relationships: dict[str, Document] = {}
+    relationship_outcomes = []
+    for ci, index, unit, change, ev in relationship_rows:
+        a, b = ev["earlier"], ev["later"]
+        identity = {
+            "logicalUnitId": current.get(unit), "sourceUnitId": unit,
+            "earlierObservedDate": a["encodedRevisionDate"],
+            "laterObservedDate": b["encodedRevisionDate"],
+        }
+        evidence = {
+            "comparisonIndex": ci, "changeIndex": index, "armyId": ev["factionId"],
+            "category": change["category"],
+        }
+        if unit not in current:
+            payload, status = None, "unresolvedUnitIdentity"
+        else:
+            payload, status = relationship_payload(data(a["sha256"]), data(b["sha256"]), change)
+        field = change["path"][-1]
+        counts[f"relationship:{field}:{status}"] += 1
+        relationship_outcomes.append({
+            **identity, **evidence, "sourcePath": change["path"], "outcome": status,
+        })
+        if payload is not None:
+            key = encode({**identity, **payload})
+            summary = relationships.setdefault(key, {**identity, **payload, "evidence": []})
+            summary["evidence"].append(evidence)
+    counts["relationshipOccurrences"] = len(relationship_rows)
+    counts["relationshipConsolidatedSummaries"] = len(relationships)
+    counts["relationshipMultiArmySummaries"] = sum(
+        len({ev["armyId"] for ev in e["evidence"]}) > 1 for e in relationships.values()
+    )
     counts["availabilityOccurrences"] = len(availability_rows)
     counts["availabilityConsolidatedSummaries"] = len(availability)
     counts["availabilityMultiArmySummaries"] = sum(
@@ -853,7 +1001,7 @@ def build(preview: Document, archive: Path) -> Document:
     counts["allGroupLoadoutSummaries"] = sum(e["allGroupLoadouts"] for e in events.values())
     counts["multiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in events.values())
     return {
-        "formatVersion": 5, "publicationStatus": "privateResearchOnly", "edition": "n5",
+        "formatVersion": 6, "publicationStatus": "privateResearchOnly", "edition": "n5",
         "archiveSha256": ARCHIVE_PIN, "armyDatabaseSha256": preview["armyDatabaseSha256"],
         "historyDatabaseSha256": preview["historyDatabaseSha256"],
         "counts": dict(counts), "summaries": list(events.values()), "outcomes": outcomes,
@@ -862,6 +1010,8 @@ def build(preview: Document, archive: Path) -> Document:
         "lifecycleRekeys": lifecycle_rekeys,
         "availabilitySummaries": list(availability.values()),
         "availabilityOutcomes": availability_outcomes, "membershipDeclarations": declarations,
+        "relationshipSummaries": list(relationships.values()),
+        "relationshipOutcomes": relationship_outcomes,
     }
 
 

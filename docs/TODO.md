@@ -269,6 +269,12 @@ make v1.3.0 depend on them.
   list-presence candidates and 14 review outcomes. These consolidate into
   118 summaries, 57 spanning multiple Armies. Preserve 208 declaration
   claims separately, including 137 corroborated by observed list evidence.
+
+  Attachment history accounts for 7,545 raw relationship observations:
+  7,437 equivalent Peripheral changes, 29 supported Include/Peripheral
+  changes (13 consolidated summaries, eight spanning multiple Armies),
+  and 79 possible attachment replacements. Preserve the latter as review
+  outcomes without inferring new target identities.
   Resolve remaining relationship changes and lifecycle cases, including
   possible replacements and unsupported complex lifecycle composition,
   before selecting the public semantic projection.
