@@ -117,6 +117,7 @@ def benchmark(army: Path, destination: Path, *, iterations: int) -> dict[str, An
     generation_seconds = perf_counter() - started
 
     # Verify persisted coverage and exact JSON round-trip for every selection.
+    published_selections = 0
     for mask in range(1 << len(OPTIONAL_AVAILABILITY_FLAGS)):
         for offset in range(0, len(unit_ids), 100):
             batch = unit_ids[offset:offset + 100]
@@ -125,6 +126,13 @@ def benchmark(army: Path, destination: Path, *, iterations: int) -> dict[str, An
                 expected[unit_id, mask] for unit_id in batch
             ]:
                 raise ValueError(f"Projection parity failed for mask {mask}, offset {offset}")
+            published = app.database.general_profiles(batch, _flags(mask))
+            if published is not None:
+                if [_encode(published[unit_id]) for unit_id in batch] != [
+                    expected[unit_id, mask] for unit_id in batch
+                ]:
+                    raise ValueError(f"Published parity failed for mask {mask}, offset {offset}")
+                published_selections += len(batch)
     with closing(sqlite3.connect(destination)) as db:
         unique_payloads = db.execute("SELECT COUNT(*) FROM payload").fetchone()[0]
         if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
@@ -132,7 +140,7 @@ def benchmark(army: Path, destination: Path, *, iterations: int) -> dict[str, An
 
     batch = [item["id"] for item in app.database.list_units(limit=50)["items"]]
     flags = _flags(0)
-    cold, warm, persisted, startup, after_list = [], [], [], [], []
+    cold, warm, persisted, startup, after_list, published_times = [], [], [], [], [], []
     for _ in range(iterations):
         started = perf_counter()
         fresh = _app(army)
@@ -148,6 +156,14 @@ def benchmark(army: Path, destination: Path, *, iterations: int) -> dict[str, An
         persisted.append(perf_counter() - started)
         if _encode(reference) != _encode(repeated) or _encode(reference) != _encode(materialized):
             raise ValueError("Runtime Explorer batch differs from persisted projection")
+        if published_selections:
+            started = perf_counter()
+            published = fresh.database.general_profiles(batch, flags)
+            published_times.append(perf_counter() - started)
+            if published is None or _encode(reference) != _encode([
+                published[unit_id] for unit_id in batch
+            ]):
+                raise ValueError("Runtime Explorer batch differs from published projection")
 
         # Extended is normally selected after the initial compact list.
         list_ready = _app(army)
@@ -184,6 +200,8 @@ def benchmark(army: Path, destination: Path, *, iterations: int) -> dict[str, An
         "runtimeAfterList": _summary(after_list),
         "runtimeWarm": _summary(warm),
         "persistedBatch": _summary(persisted),
+        "publishedSelections": published_selections,
+        **({"publishedBatch": _summary(published_times)} if published_times else {}),
     }
 
 

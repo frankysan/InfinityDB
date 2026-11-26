@@ -127,6 +127,28 @@ def project(
             _publisher(army, army.with_name("army.raw.db"), *sources)
 
         monkeypatch.setattr(builder, name, legacy_source)
+    # The synthetic source changes provenance only, not Unit or Rules semantics.
+    # Reuse the shipped projection in failure-isolation tests. The real
+    # pinned-source build exercises actual composition.
+    def copied_general_profiles(stage: Path, _root: Path) -> None:
+        from infinity_db.general_profile_storage import (
+            MASK_COUNT,
+            availability_mask,
+            read_general_profiles,
+            write_general_profiles,
+        )
+
+        with closing(sqlite3.connect(RELEASE / "army.db")) as connection:
+            ids = [row[0] for row in connection.execute("SELECT id FROM logical_units")]
+            selections = {
+                mask: read_general_profiles(connection, ids, mask)
+                for mask in range(MASK_COUNT)
+            }
+        write_general_profiles(stage / "army.db", lambda unit_id, flags: selections[
+            availability_mask(frozenset(flag for flag, enabled in flags.items() if enabled))
+        ][unit_id])
+
+    monkeypatch.setattr(builder, "_build_general_profiles", copied_general_profiles)
     return root, args
 
 
@@ -166,6 +188,8 @@ def _fake_army(args: argparse.Namespace, record: dict[str, Any]) -> int:
             "symbol_path_metadata",
             "published_symbol_assets",
             "published_symbol_paths",
+            "general_profile_selections",
+            "general_profile_payloads",
         ):
             db.execute(f"DROP TABLE IF EXISTS {name}")
         db.execute("PRAGMA user_version=26")
@@ -365,7 +389,7 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
     original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
-        ("army", "require Army schema v31"),
+        ("army", "require Army schema v32"),
         ("rules", "require Rules schema v17"),
         ("provenance", "require recorded matched build provenance"),
     ):

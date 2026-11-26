@@ -441,17 +441,11 @@ make v1.3.0 depend on them.
 
 - [ ] **Data processing + Web backend (v1.3.0):** Begin the transition to
   [build-time materialized application projections](architecture.md#design-direction-build-time-materialization).
-  Disposable General-profile projection pilot: all 11,808 selections (738
-  logical Units, 16 masks each), 932 distinct payloads, complete JSON
-  round-trip parity. The
-  [measured baseline](testing.md#general-profile-materialization-pilot)
-  supports proceeding to production storage and serving.
-  - [ ] Pilot materialized General profiles in the existing runtime database
-    build. Cover all 16 optional availability combinations per logical Unit,
-    deduplicate identical projections where useful, and preserve explicit
-    requested-Army behavior on Unit details. Retain the canonical composition
-    logic and source occurrence provenance; select the persisted representation
-    at runtime instead of rebuilding full Unit details for Extended Explorer.
+  Army v32 now materializes all 16 General-profile combinations in the
+  complete build and serves Extended Explorer via a batched SQLite lookup.
+  All 11,808 published selections match the final Rules runtime composer.
+  See [measured baseline](testing.md#general-profile-materialization-pilot).
+  Unit details retain their contextual composer.
   - [ ] Compare generated projections with the current runtime reference across
     the snapshot and all availability combinations, including contextual symbols,
     AVA, shared items, distinct identities and requested-Army exceptions.

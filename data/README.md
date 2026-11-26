@@ -286,10 +286,10 @@ the retired source roots.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — four tracked runtime databases: `army.db`
-  (Army v31/compatibility 40), `rules_n5.db` (Rules v17),
+  (Army v32/compatibility 41), `rules_n5.db` (Rules v17),
   `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
   Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
-  and symbol mappings remain embedded in Army/Rules. The ITS databases
+  symbol mappings and General profiles remain embedded in Army/Rules. The ITS databases
   publish season-specific missions and applicable tournament/Extra policies.
   Superseded ITS 18 Battleground facts and source identity remain in
   `curated/its/n5-its-season-18.json`, not a selectable older revision.
@@ -349,8 +349,10 @@ takes its source-only relationships from `normalized.json`, reconstructs
 the necessary source tables in memory, and verifies the complete normalized
 model against the selected Army database's export-generation fingerprint.
 Army v27–v31 overlays use the same verified normalized source without opening
-or updating the temporary raw SQLite sibling. The standalone export and
-raw-pair inspection interfaces remain supported.
+or updating the temporary raw SQLite sibling. The v32 projection composes
+General profiles from the v31 Army and temporary core Rules model, before
+final Rules publications bind the resulting Army bytes. The standalone
+export and raw-pair inspection interfaces remain supported.
 The builder validates all
 four runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
@@ -384,7 +386,7 @@ exist for independent development commands; they are not serving dependencies.
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
 `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
-Army v31 / Rules v17 / ITS v2, with matched provenance
+Army v32 / Rules v17 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -423,9 +425,9 @@ transitional fixtures when explicitly requested by development code.
 the selected three-database set, without selecting environment paths or discovering
 another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current four-file runtime layout embeds Army v31 Equipment presentation
+The current four-file runtime layout embeds Army v32 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
-Army overview text, legacy identities and symbol mappings/hashes,
+Army overview text, legacy identities, symbol mappings/hashes and General profiles,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
 and Ammunition publications. P2.4 materialization is complete for the normal runtime.
 Older v10–v16 Rules layouts
@@ -454,6 +456,10 @@ v31 symbol lookups and cache identity use embedded maps/hashes plus actual
 packaged SVG/static bytes, without reading the publication manifest. The
 builder and application startup verify published SVG hashes; selected-set
 database health checks validate the stored projection without opening assets.
+v32 General-profile payloads and the 16-mask selection matrix are generated
+during the complete build and validated by the Army content checksum.
+Extended Explorer reads them in one batch; Unit details retain the contextual
+composer.
 For a standalone raw-pair publication, the two siblings retain matching
 export metadata. In complete runtime builds, Army v27–v31 overlays instead
 recheck the complete normalized source model against the pinned base export

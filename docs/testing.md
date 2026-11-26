@@ -232,9 +232,24 @@ took 51.95 s; the disposable SQLite file was 2,727,936 bytes (Army DB:
 9,199,616 bytes). Median/p95 for 50 Units (five samples): cold composition
 596.3/617.0 ms, after compact list 610.7/617.8 ms, repeated cached composition
 0.32/0.36 ms, persisted batch 2.61/2.77 ms. Application startup median 2489 ms.
-These are component timings, not HTTP/browser latency. Integrated database
-size, deterministic builds, detail parity, requested-Army handling, startup
-and worker memory remain to be validated.
+These are component timings, not HTTP/browser latency.
+
+Integrated Army v32, Windows, same recorded source, Python 3.14.10,
+SQLite 3.50.4: Army DB 11,911,168 bytes; complete build 109.4 s.
+All 11,808 published selections matched the final Rules composer.
+Median/p95 (three samples, 50 Units): runtime cold 693.8/702.1 ms,
+after compact list 562.5/572.3 ms, cached 0.32/0.33 ms, actual
+repository batch lookup 3.78/4.01 ms; startup median 3082 ms.
+The benchmark additionally verifies all published selections on v32.
+Two complete recorded-source builds produced byte-identical Army and Rules
+databases (109.4/109.6 s), with unchanged ITS databases.
+
+Windows Chrome with `--browser --with-seasons --cold-iterations 3`:
+median/p95 Extended 272.9/305.7 ms (API 77.3/82.1 ms), Extended next
+283.4/407.1 ms (API 72.9/73.4 ms), Extended previous 154.2/158.1 ms
+(API 21.3/25.3 ms). These are diagnostic comparisons with the preceding
+browser baseline, not a controlled same-run comparison.
+Worker-memory measurements remain outstanding.
 
 ### Detail and catalog browser performance — 2026-11-25
 

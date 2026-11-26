@@ -942,6 +942,16 @@ class Database:
                 ARMY_V27_PUBLISHED_TABLES,
                 read_equipment_encodings,
             )
+            from infinity_db.general_profile_storage import (
+                ARMY_COMPATIBILITY_VERSION as GENERAL_PROFILE_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.general_profile_storage import (
+                ARMY_SCHEMA_VERSION as GENERAL_PROFILE_SCHEMA_VERSION,
+            )
+            from infinity_db.general_profile_storage import (
+                ARMY_V32_PUBLISHED_TABLES,
+                validate_general_profiles,
+            )
             from infinity_db.skill_classification_storage import (
                 ARMY_COMPATIBILITY_VERSION as SKILL_COMPATIBILITY_VERSION,
             )
@@ -976,13 +986,14 @@ class Database:
             if application_id != APPLICATION_ID or version not in {
                 SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION, FILTER_SCHEMA_VERSION,
                 REFERENCE_SCHEMA_VERSION,
-                SYMBOL_SCHEMA_VERSION,
+                SYMBOL_SCHEMA_VERSION, GENERAL_PROFILE_SCHEMA_VERSION,
             }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
             if source_consistency and version != SCHEMA_VERSION:
                 raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
                 DATABASE_TABLES if source_consistency else
+                ARMY_V32_PUBLISHED_TABLES if version == GENERAL_PROFILE_SCHEMA_VERSION else
                 ARMY_V31_PUBLISHED_TABLES if version == SYMBOL_SCHEMA_VERSION else
                 ARMY_V30_PUBLISHED_TABLES if version == REFERENCE_SCHEMA_VERSION else
                 ARMY_V29_PUBLISHED_TABLES if version == FILTER_SCHEMA_VERSION else
@@ -1020,7 +1031,8 @@ class Database:
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
             expected_compatibility = (
-                SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
+                GENERAL_PROFILE_COMPATIBILITY_VERSION if version == GENERAL_PROFILE_SCHEMA_VERSION
+                else SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
                 else REFERENCE_COMPATIBILITY_VERSION if version == REFERENCE_SCHEMA_VERSION
                 else FILTER_COMPATIBILITY_VERSION if version == FILTER_SCHEMA_VERSION
                 else SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
@@ -1042,6 +1054,8 @@ class Database:
                 read_army_reference_data(connection)
             if version >= SYMBOL_SCHEMA_VERSION:
                 read_symbol_publication(connection)
+            if version >= GENERAL_PROFILE_SCHEMA_VERSION:
+                validate_general_profiles(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -1216,6 +1230,21 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def general_profiles(
+        self, unit_ids: list[int], enabled_flags: frozenset[str],
+    ) -> dict[int, list[dict[str, Any]]] | None:
+        """Read the v32 projection in one query; older schemas retain composition."""
+        from infinity_db.general_profile_storage import (
+            ARMY_SCHEMA_VERSION,
+            availability_mask,
+            read_general_profiles,
+        )
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_general_profiles(connection, unit_ids, availability_mask(enabled_flags))
 
     def symbol_publication(self):
         """Read v31 runtime symbol mappings; earlier schemas retain the manifest adapter."""

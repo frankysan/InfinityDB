@@ -142,6 +142,12 @@ _register(
     CANONICAL,
     reason="Source-bound reviewed application classifications, filter overlays or editorial copy.",
 )
+
+_register(
+    ["general_profile_payloads", "general_profile_selections"],
+    CONTEXTUAL,
+    reason="Build-time General-profile payloads selected by logical Unit and availability mask.",
+)
 _register(
     ["legacy_army_identities"],
     CONTEXTUAL,
@@ -399,6 +405,7 @@ TABLE_POLICY["units"] = _policy(
 # helpers. validate() is intentionally excluded from the audited serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
+    "general_profiles",
     "symbol_publication",
     "army_reference_data",
     "application_catalog_id",
@@ -551,6 +558,7 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
         ("armies", lambda db: db.list_armies()),
         ("army-reference-data", lambda db: db.army_reference_data()),
         ("symbol-publication", lambda db: db.symbol_publication()),
+        ("general-profiles", lambda db: db.general_profiles([unit_id], frozenset())),
         ("skill-source-classifications", lambda db: db.skill_source_classifications()),
         ("unit-filter-semantics", lambda db: db.unit_filter_semantics()),
         ("fireteam-armies", lambda db: db.list_fireteam_armies()),

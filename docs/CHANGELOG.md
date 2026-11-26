@@ -12,11 +12,17 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- No player-facing changes.
+- Faster initial Extended Unit Explorer results and new pages or availability selections.
 
 ### Added
 
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.
+
+### Changed
+
+- **Data processing + Web backend:** Materialized deduplicated General-profile
+  selections during database generation; Extended Explorer reads them in one
+  batch while preserving the public profile and availability semantics.
 
 ### Fixed
 

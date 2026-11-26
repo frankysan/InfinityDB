@@ -63,6 +63,7 @@ def copy_base_army(destination: Path) -> None:
             "source_classification_memberships", "source_classification_matches",
             "army_reference_metadata", "legacy_army_identities", "army_overview_text",
             "symbol_path_metadata", "published_symbol_assets", "published_symbol_paths",
+            "general_profile_selections", "general_profile_payloads",
         ):
             connection.execute(f"DROP TABLE IF EXISTS {table}")
         connection.execute("PRAGMA user_version=26")

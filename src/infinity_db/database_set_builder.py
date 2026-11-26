@@ -83,6 +83,17 @@ def collect_build_manifest(
     return manifest
 
 
+def _build_general_profiles(stage: Path, root: Path) -> None:
+    """Compose against core Rules before later publications bind the final Army bytes."""
+    from .general_profile_storage import publish_general_profiles
+
+    rules = stage / "general-profile-rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated/rules"), rules,
+                          finalize=False)
+    publish_general_profiles(stage / "army.db", rules)
+    rules.unlink()
+
+
 def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
     army, rules = stage / "army.db", stage / "rules_n5.db"
     generation = verified_normalized_generation(army, stage / "normalized.json")
@@ -234,6 +245,7 @@ def build_database_set(
             root / "src/infinity_db/web/static",
             normalized=normalized,
         )
+        _build_general_profiles(stage, root)
         _build_rules_and_publications(stage, root, manifest)
         from .rules_database import RulesDatabase
 

@@ -18,7 +18,7 @@ from infinity_db.army_overview import (
 )
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
 from infinity_db.catalog_rules import CatalogRules
-from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
+from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.database.repository import instance_lru_cache
 from infinity_db.declaration_matrix import (
@@ -51,15 +51,14 @@ from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_id
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_composition import present_unit
 from infinity_db.unit_presentation import (
     OPTIONAL_AVAILABILITY_FLAGS,
     enrich_unit_filter_presentation,
     enrich_unit_list_presentation,
-    enrich_unit_presentation,
     extended_general_profiles,
 )
 from infinity_db.unit_slugs import (
-    attach_public_unit_slug,
     enrich_nested_unit_slugs,
     enrich_unit_items,
 )
@@ -592,52 +591,11 @@ class ApiHandler:
         optional_filters: dict[str, bool], requested_army: str | None = None,
         general_only: bool = False,
     ) -> dict[str, Any]:
-        """Use the same General profile semantics for detail and Explorer."""
-        if general_only:
-            # General profiles need occurrence data, not source notes, charts,
-            # selection constraints, composite options or Army detail metadata.
-            # Keep every Army's profiles for snapshot-wide symbol resolution,
-            # including occurrences excluded by the current optional filters.
-            unit = {
-                **{key: unit[key] for key in ("id", "name", "isc", "slug") if key in unit},
-                "armies": [
-                    {
-                        "id": army["id"],
-                        "availability_flags": army.get("availability_flags", []),
-                        "profiles": [
-                            {key: value for key, value in profile.items() if key in {
-                                "profile_identity", "display_name", "name", "group_id",
-                                "type", "classification", "move_1", "move_2", "cc", "bs",
-                                "ph", "wip", "arm", "bts", "vitality", "silhouette",
-                                "is_structure", "ava", "logo_urls", "skills", "equipment",
-                                "characteristics",
-                            }}
-                            for profile in army.get("profiles", ())
-                        ],
-                        "loadouts": [
-                            {key: value for key, value in loadout.items() if key in {
-                                "group_id", "skills", "equipment", "weapons", "orders",
-                            }}
-                            for loadout in army.get("loadouts", ())
-                        ],
-                    }
-                    for army in unit.get("armies", ())
-                ],
-            }
-        # Skill enrichment detaches the cached repository payload. All further
-        # enrichment owns this copy, so no intermediate deep copies are needed.
-        unit = self.skill_catalog.enrich_unit(unit)
-        unit = self.equipment_catalog.enrich_unit(unit, in_place=True)
-        unit = enrich_nested_catalog_slugs(
-            self.database, unit, frozenset({"equipment", "weapons"}), in_place=True,
-        )
-        if not general_only:
-            attach_public_unit_slug(self.database, unit)
-            unit = enrich_army_references(self.database, unit, in_place=True)
-        self.symbol_catalog.enrich_unit(unit)
-        return enrich_unit_presentation(
-            unit, optional_filters=optional_filters, requested_army=requested_army,
+        return present_unit(
+            unit, database=self.database, skill_catalog=self.skill_catalog,
+            equipment_catalog=self.equipment_catalog, symbol_catalog=self.symbol_catalog,
             source_skill_classifications=self._source_skill_classifications(),
+            optional_filters=optional_filters, requested_army=requested_army,
             general_only=general_only,
         )
 
@@ -1721,9 +1679,13 @@ class ApiHandler:
                         enabled_flags = frozenset(
                             flag for flag in OPTIONAL_AVAILABILITY_FLAGS if query[flag]
                         )
+                        profiles = self.database.general_profiles(
+                            [item["id"] for item in payload["items"]], enabled_flags,
+                        ) if self.variant_usage is not None else None
                         for item in payload["items"]:
-                            item["general_profiles"] = self._extended_profiles(
-                                item["id"], enabled_flags,
+                            item["general_profiles"] = (
+                                profiles[item["id"]] if profiles is not None
+                                else self._extended_profiles(item["id"], enabled_flags)
                             )
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST

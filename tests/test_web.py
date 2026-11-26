@@ -1749,7 +1749,7 @@ def test_unit_filter_catalogs_match_public_catalog_identities(monkeypatch) -> No
         ]
 
 
-def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -> None:
+def test_materialized_extended_profiles_preserve_detail_and_availability(monkeypatch) -> None:
     from infinity_db.unit_presentation import extended_general_profiles
 
     application = create_app(
@@ -1776,7 +1776,7 @@ def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -
         first = json.loads(body)
         assert first["items"]
         calls_after_first = len(calls)
-        # A different page size reuses the projection, not a cached list response.
+        # A different page size uses the stored projection, not a cached list response.
         status, _, body = request(
             application, "/api/units", query=query.replace("limit=10", "limit=5"),
         )
@@ -1788,7 +1788,8 @@ def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -
             status, _, body = request(application, f"/api/units/{item['id']}", query=settings)
             assert status == 200
             assert item["general_profiles"] == extended_general_profiles(json.loads(body))
-    assert calls.count(True) == 20
+    assert calls.count(True) == 0
+    assert calls.count(False) == 20
 
 
 @pytest.mark.parametrize("enabled", [False, True])

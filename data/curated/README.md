@@ -20,7 +20,7 @@ labels, independently of their physical `local/data/pdf/` layout.
   the copy is synthesized from current Army/rules data with external faction background used only
   as secondary context, and is kept separate from source-derived identity semantics.
   Current complete builds embed these summaries and the explicitly authored
-  `legacy-armies.json` identities in Army v31, retaining the Army v30 schema
+  `legacy-armies.json` identities in Army v32, retaining the Army v30 schema
   contract. Serving reads the selected SQLite projection; earlier schemas and
   source-only tools retain the JSON adapters. The
   [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30)

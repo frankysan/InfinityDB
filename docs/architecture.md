@@ -173,7 +173,7 @@ See `data/README.md` and `data/curated/README.md` for the concrete file contract
 
 ## Design direction: build-time materialization
 
-**Accepted direction for v1.3.0; not yet implemented.**
+**Accepted direction for v1.3.0; Extended Explorer General profiles implemented.**
 
 The immutable runtime database set is the publication boundary. Move suitable
 deterministic composition, enrichment and indexing from request handling into
@@ -194,14 +194,14 @@ measured need justifies additional infrastructure.
 
 The first candidate is the General profile. Its four optional availability
 flags (Mercenaries, Spec-Ops, Team Operations and Reinforcements) give
-16 combinations per logical Unit. Generate the applicable representations
-and deduplicate identical derived payloads where beneficial, preserving
-the selection mapping, profile identity, shared items, symbols and availability.
-A Unit-detail request may also explicitly include a requested Army; preserve
-that context-specific behavior rather than assuming the 16 flag combinations
-cover every request. The existing [General profile contract](data-model.md#general-profile)
-remains authoritative. Extended Explorer rows must continue to agree with
-Unit details for equivalent selections.
+16 combinations per logical Unit. Army v32 publishes a complete selection
+matrix and deduplicated General-profile payloads. Extended Explorer reads
+the appropriate projections in a single batch instead of reconstructing
+Unit details. A Unit-detail request may explicitly include a requested Army;
+the shared runtime composer retains that behavior. The existing
+[General profile contract](data-model.md#general-profile) remains authoritative.
+Extended Explorer rows must continue to agree with Unit details for
+equivalent selections.
 
 Potential subsequent candidates include canonical Unit details, composed
 Rules records and relations, Skill/Equipment/Weapon enrichment, search
@@ -458,7 +458,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v31, Rules v17 and ITS v2,
+The complete serving contract requires Army v32, Rules v17 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

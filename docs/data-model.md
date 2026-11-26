@@ -8,11 +8,11 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The complete serving runtime uses Army v31 in `army.db`, Rules v17 in
-`rules_n5.db` and ITS schema v2 in `its_18.db` (current revision
-2026.09.11). Structured references, source/citation identity and symbol
-mappings are embedded. Serving requires all three, validates the current ITS
-publication against the matched Army/Rules build and does not read build JSON.
+The complete serving runtime uses Army v32 in `army.db`, Rules v17 in
+`rules_n5.db` and ITS schema v2 in `its_17.db` and `its_18.db`.
+Structured references, source/citation identity, symbol mappings and Extended
+Explorer General-profile projections are embedded. Serving requires all four,
+validates matched build/source provenance and does not read build JSON.
 The [data lifecycle](../data/README.md) owns current build/serve paths.
 Earlier schema/publication migration descriptions below are historical where
 they explicitly identify an older version. **Dated source-variant review notes** record the findings
@@ -830,10 +830,11 @@ applicable loadout, or present with different quantities, is not promoted.
 Existing identical-extra shared variants retain their own identity. Source
 profile/loadout payloads, relationship semantics and filtering remain unchanged.
 
-The accepted [build-time materialization direction](architecture.md#design-direction-build-time-materialization)
-will change when General profiles are composed, not their identity, semantics
-or provenance. The v1.3.0 pilot is tracked in the performance backlog;
-current publication still uses runtime composition.
+The [build-time materialization direction](architecture.md#design-direction-build-time-materialization)
+changes when General profiles are composed, not their identity, semantics
+or provenance. Army v32 stores the Extended Explorer projection; the full
+Unit detail composer still handles contextual presentation, including an
+explicit requested Army.
 
 ### Unit and General-profile symbols
 
@@ -2887,7 +2888,7 @@ validated JSON adapter; current serving uses the v17 SQLite projection.
 
 The editable `config/catalogs/equipment-presentation-encodings.json`
 retains two reviewed Cube/Cube 2.0 characteristic mappings.
-The current Army v31 runtime retains the presentation tables first
+The current Army v32 runtime retains the presentation tables first
 introduced in Army v27/compatibility 36, without altering
 the narrow Army importer.
 `equipment_presentation_encodings` stores the exact canonical
@@ -2920,7 +2921,7 @@ retains six reviewed exceptions for Army's skill-like source bucket:
 Bangbomb, BTS=3, GizmoKit, Infinity Team-Ops, MediKit and
 Regular. These are source classifications, **not** newly created
 N5 canonical Skills. The Army v28/compatibility 37 schema first embedded these
-classifications; the current v31 runtime retains them.
+classifications; the current v32 runtime retains them.
 `skill_source_classifications` stores each exact numeric or
 slug source reference, explicit reference kind, ordered position,
 resolved application Skill identity, reviewed classification
@@ -2947,7 +2948,7 @@ preserves exact source Skill identity semantics.
 ### Unit Explorer filter semantics in Army v29
 
 The Army v29/compatibility 38 schema introduced the selected
-filter metadata used by current v31, built from the editable
+filter metadata used by current v32, built from the editable
 `config/catalogs/unit-filter-semantics.json` build input.
 `hidden_unit_characteristics` retains the two normalized slugs,
 source characteristic IDs, authored reasons and source ordering.
@@ -2972,7 +2973,7 @@ retain the validated maintained-JSON adapter.
 ### Army overview and historical identities in Army v30
 
 The Army v30/compatibility 39 schema introduced the 58 summaries
-retained in the current v31 runtime from
+retained in the current v32 runtime from
 `data/curated/identities/army-overview.json` and the two identities from
 `data/curated/identities/legacy-armies.json`. The JSON files remain editable
 build inputs; the summaries are InfinityDB editorial copy rather than official
@@ -3007,7 +3008,8 @@ source-review tools retain the validated JSON adapters.
 
 ### Published symbol mappings in Army v31
 
-The current complete build publishes **Army v31/compatibility 40**. `published_symbol_paths` stores all 2,019 exact
+Army v31/compatibility 40 introduced the symbol projection retained in v32.
+`published_symbol_paths` stores all 2,019 exact
 mapping keys, unique by mapping kind and identity: 60 faction/source IDs,
 918 Unit slugs, 1,033 source profile-logo URLs and eight semantic profile
 identities. These retain the existing source lookup namespaces; they are
@@ -3039,6 +3041,31 @@ application's responses. The optional legacy static JSON route uses a short
 cache lifetime and does not participate in the asset fingerprint. Release
 candidate checks compute the same revision from the candidate's selected Army
 database rather than a process-global default publication.
+
+### General-profile projection in Army v32
+
+The final complete build publishes Army v32/compatibility 41.
+`general_profile_payloads` stores deduplicated canonical JSON arrays of
+Extended Explorer General profiles. `general_profile_selections` maps each
+logical Unit ID and availability mask to exactly one payload via foreign keys.
+Mask bits 0–3 represent Mercenaries, Spec-Ops, Team Operations and
+Reinforcements respectively; each Unit has all 16 combinations, including
+empty results. Both tables participate in the published content checksum.
+Validation checks complete coverage and payload references.
+
+The shared Unit composer uses embedded Army identities, classifications,
+catalogs and symbol mappings plus a temporary core Rules model constructed
+from the same pinned curated inputs as the final Rules database. Materialize
+before building Army-bound Rules publications, so their exact Army file
+fingerprints remain valid without circular byte-hash dependencies.
+The final paired Rules model is the reference for full-snapshot parity.
+The projection does not incorporate ITS-only rules or requested-Army context.
+
+Extended Explorer reads the applicable payloads in one batch using the same
+availability selection as its dynamic list query. Earlier schemas and
+explicit fixtures without the matching embedded Rules publication retain
+runtime composition. Unit detail and its requested-Army presentation are
+unchanged; source occurrences remain authoritative.
 
 ### Restriction persistence and version-aware API
 
@@ -3092,7 +3119,7 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `infinity-db build` creates Army v31 and Rules v17 together in the
+Normal `infinity-db build` creates Army v32 and Rules v17 together in the
 selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded
@@ -4485,7 +4512,7 @@ and adds the reviewed embedded projections through v9–v17 as build-time
 stages. These stages are used to produce the current v17 publication, not
 an invitation to serve a historical database in place of a complete set.
 Normal checkout/Docker serving requires the validated current Rules v17
-publication together with matched Army v31 and ITS 18 v2; separately
+publication together with matched Army v32 and both ITS v2 seasons; separately
 selected non-complete databases are only for explicit inspection or
 targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)
 owns operational selection.
