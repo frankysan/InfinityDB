@@ -43,9 +43,9 @@ in the linked workstreams; retire this milestone summary when the release closes
   catalog usage, scoped filter inputs and reference projections are implemented.
   Finish the remaining [performance and build work](#performance-storage-and-build-tooling).
 - **Data processing + Web backend + Web frontend:** Initial N5 Unit history is
-  embedded in the normal build. Extend the accepted corpus to newer direct
-  snapshots and retain explicit coverage limits. Initial history disclosures
-  are implemented; see [history follow-up](#per-reference-change-history).
+  embedded in the normal build and includes the latest available direct snapshot.
+  Initial history disclosures are implemented; retain coverage limits and
+  [extend history](#per-reference-change-history) when new source states are available.
 - **Web frontend + Web backend:** Faction palettes and the initial rules-content
   hierarchy and official Army deep links are implemented. Complete remaining
   [representative visual review](#reference-presentation-and-feedback).
@@ -174,9 +174,12 @@ make v1.3.0 depend on them.
   The v35 projection, enabled by default, is documented in the
   [history data model](data-model.md#private-army-history-research-database)
   and [presentation contract](web-design-guidelines.md#unit-history-presentation).
-  - [ ] Extend the accepted corpus to newer direct Army snapshots before
-    publishing their history; validate identity, source revision dates,
-    comparison scope, provenance and contextual General/Army attribution.
+  - [ ] Extend the accepted corpus for new source states, material contextual
+    metadata, or a newly selected current Army archive not already accepted as
+    a direct endpoint, before publishing its history.
+    Validate identity, revision dates, comparison scope, provenance and contextual
+    General/Army attribution. The [intake review](n5-source-history.md#direct-snapshot-intake-review)
+    found no additional source states among currently available manifest-backed archives.
   - [ ] Improve coverage where independently supported: unresolved loadout
     replacement/modification groups, changed labels, missing definitions,
     unresolved reference shapes, ambiguous same-day alternatives, complex

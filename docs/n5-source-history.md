@@ -772,6 +772,45 @@ For the remaining database and player-facing work, see the
 or regeneration requires explicit selection and validation; do not silently
 replace this baseline.
 
+### Direct snapshot intake review
+
+On 2026-11-26 the accepted corpus was independently reverified against the six
+locally available manifest-backed English Army archives. The November 25
+snapshot is already a direct observation in the corpus. The five additional
+September acquisitions contain identical source states for all 58 Armies:
+36 documents at revision `7.26246.158` and 22 at `7.26246.159`. The September
+25 morning/evening and September 29 ZIPs have identical SHA-256; the September
+29 manifest is v3, while the two September 18 manifests are v1 and the two
+September 25 manifests are v2.
+
+All 290 September faction documents match existing N5 comparison keys
+(edition, Army ID, encoded revision date and exact document SHA-256).
+The September metadata bytes are not already present, but their parsed
+contents match existing metadata associated with each of those 58 comparison
+keys. No new dates, distinct same-day contents or missing metadata contexts
+were found. Adding these acquisitions would add direct corroboration, not
+new source states. The existing accepted archive, reports, research database
+and published history remain unchanged. The September 10 archive has no
+matching manifest and was excluded. This review does not establish exhaustive
+history coverage or rule out future useful provenance reconciliation.
+
+Use the read-only intake diagnostic before rebuilding the corpus for a
+new snapshot. It verifies the accepted archive and receipt, each explicitly
+selected ZIP and its matching manifest, and reports new Army/date keys,
+same-day alternatives (including parsed-equivalent contents) and contextual
+metadata differences. Legacy manifests may be inspected by this diagnostic;
+the producer's stricter acceptance contract is unchanged.
+
+```powershell
+python -m tools.research.audit_army_history_intake "local/data/raw/army/JSON 20260929-114335.zip"
+```
+
+A material new source state or context triggers the existing producer/consumer
+regeneration and acceptance workflow, not automatic publication. A newly
+selected current Army archive must also be accepted as a direct endpoint
+before a normal history-enabled build, even when its source states are
+already represented in the corpus.
+
 ## Cross-source reconciliation procedure
 
 For each suspected discrepancy or missing rule:
