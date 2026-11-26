@@ -661,8 +661,9 @@ def historical_shared_delta(
     profile_identity: Callable[[object], str],
     excluded: set[tuple[str, int]], aliases: set[tuple[str, int]],
     equipment_classes: dict[int, tuple[str, str]] | None = None,
+    target_profile_id: int | None = None,
 ) -> tuple[str, Document] | None:
-    """Compare exact endpoint projections; require stable single-profile groups.
+    """Compare exact endpoint projections for one uniquely identified profile.
 
     Only accepted effective occurrence changes can be promoted. A synthetic
     common base with differing extras is not an exact source occurrence.
@@ -670,6 +671,13 @@ def historical_shared_delta(
     sample = rows[0]["identity"]
     group_id, field = sample["groupId"], sample["field"]
     prop = ITEM_FIELDS[field]
+    if target_profile_id is not None:
+        # Group-owned loadout effects must not be attributed to just one form.
+        if field == "weapons" or any(
+            [p["profileId"] for p in row["identity"].get("profiles", [])]
+            != [target_profile_id] for row in rows
+        ):
+            return None
     equipment_classes = equipment_classes or {}
     # Current presentation classification is not a historical gameplay claim.
     # Reject a classified occurrence if its native counterpart may also exist.
@@ -681,11 +689,26 @@ def historical_shared_delta(
     owner_options: list[list[Document]] = [[], []]
     for _, old, new, meta_old, meta_new in endpoints:
         context, _ = stable_context(
-            old, new, source_id, group_id, allow_stable_relationships=True,
+            old, new, source_id, group_id, profile_id=target_profile_id,
+            allow_stable_relationships=True,
         )
         if context is None:
             return None
         pa, oa, pb, ob = context
+        if target_profile_id is not None:
+            first, second = get_group(old, source_id, group_id), get_group(new, source_id, group_id)
+            assert first is not None and second is not None
+            siblings_a = indexed(first[1].get("profiles"))
+            siblings_b = indexed(second[1].get("profiles"))
+            if (not siblings_a or not siblings_b or len(siblings_a) < 2
+                    or siblings_a.keys() != siblings_b.keys()
+                    or any(not same_labels(siblings_a[i], siblings_b[i]) for i in siblings_a)):
+                return None
+            if any(
+                profile_identity(p.get("name")) != profile_identity(pa["name"])
+                for row in rows for p in row["identity"]["profiles"]
+            ):
+                return None
         if any(
             not comparable_relationships(oa[i], ob[i], old, new, source_id, True)
             or (any(o.get("includes") or o.get("peripheral") for o in (oa[i], ob[i]))
@@ -755,6 +778,15 @@ def historical_shared_delta(
         {_item_identity(item): item for item in projected_items(p, o, field)}
         for p, o in zip(owner_profiles, owner_options, strict=True)
     ]
+    # In a multi-profile Group, only promote direct profile-owned changes.
+    # The same loadout is part of every sibling's canonical projection.
+    profile_items = [
+        {_item_identity(item) for item in _common_items(profiles, prop)}
+        for profiles in owner_profiles
+    ]
+    loadout_ids = {
+        item["id"] for options in owner_options for option in options for item in option[prop]
+    }
     delta: Document = {"lost": [], "gained": []}
     for direction, own, other in (("lost", before, after), ("gained", after, before)):
         accepted = {
@@ -763,6 +795,11 @@ def historical_shared_delta(
         }
         for key in own.keys() - other.keys():
             item = own[key]
+            if target_profile_id is not None and (
+                key not in profile_items[0 if direction == "lost" else 1]
+                or item["id"] in loadout_ids
+            ):
+                continue
             ref = item["reference"]
             original = {
                 "id": ref["filter"]["id"], "quantity": ref["occurrence"].get("q"),
@@ -925,6 +962,7 @@ def contextual_model(
                 and declared_armies <= known_armies and current_source_armies <= known_armies):
             buckets: dict[tuple, list[int]] = defaultdict(list)
             blocked: set[tuple] = set()
+            multi_target: dict[tuple, set[int]] = defaultdict(set)
             for index, row in enumerate(entries):
                 identity = row["identity"]
                 if row["kind"] not in {"summaries", "classification"}:
@@ -933,10 +971,16 @@ def contextual_model(
                 if row["kind"] == "classification":
                     blocked.update((*pair, identity[f]) for f in ("beforeField", "afterField"))
                 elif identity["field"] in ITEM_FIELDS and identity["sourceUnitId"] == source_ids[0]:
-                    buckets[(*pair, identity["field"])].append(index)
+                    key = (*pair, identity["field"])
+                    targets = identity.get("profiles", [])
+                    if len(targets) > 1:
+                        multi_target[key].update(p["profileId"] for p in targets)
+                    else:
+                        profile_id = targets[0]["profileId"] if targets else None
+                        buckets[(*key, profile_id)].append(index)
             for key, indexes in buckets.items():
-                earlier, later, group, field = key
-                if key in blocked:
+                earlier, later, group, field, profile_id = key
+                if key[:-1] in blocked or profile_id in multi_target[key[:-1]]:
                     continue
                 records = [comparisons.get((army, earlier, later)) for army in sorted(known_armies)]
                 if any(record is None for record in records):
@@ -953,7 +997,7 @@ def contextual_model(
                 result = historical_shared_delta(
                     candidates, source_ids[0], profiles, item_endpoints,
                     lambda label: normalized_profile_identity(label, config), excluded, aliases,
-                    equipment_classes,
+                    equipment_classes, target_profile_id=profile_id,
                 )
                 if result is None:
                     continue
@@ -978,12 +1022,14 @@ def contextual_model(
                             "generalAttribution": {
                                 "profileIdentity": target, "method": "sharedItemsExactWindows",
                                 "comparisonEndpoints": records, "sourceField": field,
-                                "delta": display_delta,
+                                "sourceProfileId": profile_id, "delta": display_delta,
                             },
                         },
                     })
                     counts["generalEntries"] += 1
                     counts["generalItemEntries"] += 1
+                    if profile_id is not None:
+                        counts["multiProfileItemEntries"] += 1
                     if field != display_field:
                         counts["classifiedEquipmentEntries"] += 1
                 for index in indexes:
@@ -1448,6 +1494,8 @@ def main() -> int:
                         help="Select a uniquely matching Unit name for review.")
     parser.add_argument("--inspect-general", action="store_true",
                         help="Include one Unit with confirmed General-profile history.")
+    parser.add_argument("--inspect-multi-profile", action="store_true",
+                        help="Include Units with promoted multi-profile Group changes.")
     parser.add_argument("--contextual", action="store_true",
                         help="Render current profile cards with scoped historical disclosures.")
     parser.add_argument("--browser-review", action="store_true",
@@ -1489,6 +1537,20 @@ def main() -> int:
         candidates = [u["logicalUnitId"] for u in units if u["generalHistory"]]
         require(bool(candidates), "No confirmed General-profile history for review")
         args.inspect_unit = list(dict.fromkeys([*args.inspect_unit, candidates[0]]))
+    if args.inspect_multi_profile:
+        require(args.contextual, "Multi-profile review requires contextual mode")
+        for unit in units:
+            for target, rows in unit["generalHistory"].items():
+                changes = [row for row in rows if row["evidence"].get("generalAttribution", {}).get(
+                    "sourceProfileId",
+                ) is not None]
+                if changes:
+                    args.inspect_unit.append(unit["logicalUnitId"])
+                    print(json.dumps({
+                        "unit": unit["name"], "profileIdentity": target,
+                        "multiProfileChanges": [row["text"] for row in changes],
+                    }, ensure_ascii=True))
+        args.inspect_unit = list(dict.fromkeys(args.inspect_unit))
     coverage = {
         "previewSha256": args.preview_sha256, "semanticSha256": args.semantic_sha256,
         **{k: preview[k] for k in ("archiveSha256", "armyDatabaseSha256",

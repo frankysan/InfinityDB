@@ -489,6 +489,48 @@ def test_historical_shared_items_allow_stable_direct_attachments(monkeypatch):
     ) is None
 
 
+def test_multi_profile_history_promotes_only_direct_profile_owned_changes(monkeypatch):
+    skill = {"filter": {"id": 5, "name": "Skill"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(first, second=(), options=(), sibling_name="Peripheral"):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [
+                {"id": 2, "name": "Controller", "skills": list(first)},
+                {"id": 3, "name": sibling_name, "skills": list(second)},
+            ], "options": [{"id": 1, "skills": list(options)}],
+        }]}]}
+
+    row = {"identity": {
+        "field": "skills", "groupId": 1, "lost": [], "gained": [skill],
+        "profiles": [{"profileId": 2, "name": "Controller", "allProfileLoadouts": True}],
+    }}
+    general = [{"profile_identity": "controller"}, {"profile_identity": "peripheral"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    def compare(before, after, selected: int | None = 2):
+        return player.historical_shared_delta(
+            [row], 42, general, [(101, before, after, [], [])], identity,
+            set(), set(), target_profile_id=selected,
+        )
+
+    assert compare(endpoint([]), endpoint([skill])) == (
+        "controller", {"lost": [], "gained": [skill]},
+    )
+    assert compare(endpoint([]), endpoint([], [skill])) is None
+    assert compare(endpoint([]), endpoint([], options=[skill])) is None
+    assert compare(endpoint([], options=[skill]), endpoint([skill])) is None
+    assert compare(endpoint([]), endpoint([skill], sibling_name="Other")) is None
+    assert compare(endpoint([]), endpoint([skill]), selected=3) is None
+    assert compare(endpoint([]), endpoint([skill]), selected=None) is None
+
+
 def test_contextual_action_rows_keep_reference_changes_distinct():
     def ref(item_id, label, extra=None):
         occurrence = {"extra": [{"name": extra}]} if extra else {}

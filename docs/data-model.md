@@ -191,10 +191,15 @@ current classification and neither endpoint contains a possible native
 counterpart. Preserve the source bucket in the evidence; this is presentation
 policy, not a historical rules classification claim. Other source-classified
 Skills remain excluded. The item pilot allows stable, uniquely resolved direct
-attachments, without flattening their capabilities into the Controller. It
-excludes changed or unresolved attachments, multi-profile Groups and disabled
-loadouts. Ambiguous or removed Army cards retain a separate historical context.
-This remains a private, conservative projection, not a public serving API.
+attachments, without flattening their capabilities into the Controller. In a
+multi-profile Group, promote a Skill or Equipment change only when accepted
+summaries explicitly identify a single profile, all sibling profile IDs and
+labels remain stable, and the exact occurrence is owned by the target profile
+rather than a loadout. Do not promote overlapping multi-target summaries or
+group-owned loadout changes to one profile. Changed or unresolved attachments
+and disabled loadouts remain excluded. Ambiguous or removed Army cards retain
+a separate historical context. This remains a private, conservative projection,
+not a public serving API.
 
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets
