@@ -988,17 +988,29 @@ class Database:
                 ARMY_V29_PUBLISHED_TABLES,
                 read_unit_filter_semantics,
             )
+            from infinity_db.unit_input_storage import (
+                ARMY_COMPATIBILITY_VERSION as CONTEXT_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.unit_input_storage import (
+                ARMY_SCHEMA_VERSION as CONTEXT_SCHEMA_VERSION,
+            )
+            from infinity_db.unit_input_storage import (
+                ARMY_V34_PUBLISHED_TABLES,
+                validate_filter_contexts,
+            )
 
             if application_id != APPLICATION_ID or version not in {
                 SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION, FILTER_SCHEMA_VERSION,
                 REFERENCE_SCHEMA_VERSION,
                 SYMBOL_SCHEMA_VERSION, EXPLORER_SCHEMA_VERSION, GENERAL_PROFILE_SCHEMA_VERSION,
+                CONTEXT_SCHEMA_VERSION,
             }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
             if source_consistency and version != SCHEMA_VERSION:
                 raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
                 DATABASE_TABLES if source_consistency else
+                ARMY_V34_PUBLISHED_TABLES if version >= CONTEXT_SCHEMA_VERSION else
                 ARMY_V33_PUBLISHED_TABLES if version >= EXPLORER_SCHEMA_VERSION else
                 ARMY_V31_PUBLISHED_TABLES if version == SYMBOL_SCHEMA_VERSION else
                 ARMY_V30_PUBLISHED_TABLES if version == REFERENCE_SCHEMA_VERSION else
@@ -1037,7 +1049,8 @@ class Database:
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
             expected_compatibility = (
-                GENERAL_PROFILE_COMPATIBILITY_VERSION if version == GENERAL_PROFILE_SCHEMA_VERSION
+                CONTEXT_COMPATIBILITY_VERSION if version == CONTEXT_SCHEMA_VERSION
+                else GENERAL_PROFILE_COMPATIBILITY_VERSION if version == GENERAL_PROFILE_SCHEMA_VERSION
                 else EXPLORER_COMPATIBILITY_VERSION if version == EXPLORER_SCHEMA_VERSION
                 else SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
                 else REFERENCE_COMPATIBILITY_VERSION if version == REFERENCE_SCHEMA_VERSION
@@ -1063,6 +1076,8 @@ class Database:
                 read_symbol_publication(connection)
             if version >= EXPLORER_SCHEMA_VERSION:
                 validate_general_profiles(connection)
+            if version >= CONTEXT_SCHEMA_VERSION:
+                validate_filter_contexts(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -3254,6 +3269,15 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def _scoped_unit_filter_contexts(self) -> dict[str, tuple[MatchContext, ...]]:
+        """Load immutable published contexts, or compose older explicit fixtures."""
+        from infinity_db.unit_input_storage import ARMY_SCHEMA_VERSION, read_filter_contexts
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] >= ARMY_SCHEMA_VERSION:
+                return read_filter_contexts(connection)
+        return self._compose_scoped_unit_filter_contexts()
+
+    def _compose_scoped_unit_filter_contexts(self) -> dict[str, tuple[MatchContext, ...]]:
         """Index source-owned properties once; never infer Controller attachment.
 
         A profile group identifies compatible selectable loadouts but can contain
@@ -3324,7 +3348,8 @@ class Database:
                 "FROM profile_payload_occurrences AS p "
                 "JOIN profile_payloads AS pp ON pp.id = p.profile_payload_id "
                 "JOIN profile_groups AS pg ON pg.army_id = p.army_id "
-                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id"
+                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id "
+                "ORDER BY p.army_id, p.unit_id, p.group_id, p.profile_id"
             ):
                 properties = set(profile_payload_props[int(row["profile_payload_id"])])
                 if row["type_id"] is not None:
@@ -3348,7 +3373,8 @@ class Database:
                 "SELECT o.army_id, o.unit_id, o.group_id, o.option_id, "
                 "o.loadout_payload_id, o.points, o.swc, p.disabled "
                 "FROM loadout_payload_occurrences AS o "
-                "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id"
+                "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id "
+                "ORDER BY o.army_id, o.unit_id, o.group_id, o.option_id"
             ):
                 army, unit, group, option = (
                     int(row["army_id"]), int(row["unit_id"]),

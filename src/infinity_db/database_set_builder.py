@@ -42,6 +42,7 @@ from .skill_classification_storage import publish_skill_classifications
 from .symbol_path_storage import publish_symbol_paths
 from .trait_wiki_references import load_trait_wiki_references
 from .unit_filter_storage import publish_unit_filter_semantics
+from .unit_input_storage import publish_filter_contexts
 from .variant_usage import build_variant_usage_from_normalized
 from .variant_usage_reference import publication_from_candidate
 from .weapon_ammunition_references import load_ammunition_reference_map
@@ -247,6 +248,7 @@ def build_database_set(
             normalized=normalized,
         )
         _build_general_profiles(stage, root)
+        publish_filter_contexts(stage / "army.db")
         _build_rules_and_publications(stage, root, manifest)
         from .rules_database import RulesDatabase
 

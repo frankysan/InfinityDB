@@ -311,6 +311,25 @@ Weapons 213.27/8.64. The pilot took 2.492 s to build and occupied
 1,695,744 bytes. These are server-side component timings, not browser,
 startup or complete enriched detail measurements.
 
+### Scoped Unit filter input materialization
+
+Army v34 publishes the canonical scoped context index with interned property
+sets and exact source occurrence coordinates. Run
+`python -m tools.performance.benchmark_unit_inputs --iterations 5` to reproduce
+the component pilot. Windows medians: context construction 366.51 ms versus
+143.75 ms projected; peak traced Python allocations 66,271,675 versus
+40,917,695 bytes. The separate graph pilot measured 84.92 versus 68.07 ms,
+with peak allocations rising from 12,505,493 to 22,236,018 bytes and
+2,981,243 additional serialized bytes; retain the relational Unit graph.
+
+The recorded-source rebuild took 118.05 s; Army grew from 11,911,168 to
+14,516,224 bytes. Rules grew from 9,965,568 to 9,973,760 bytes;
+ITS remained unchanged. All published context rows matched the canonical
+composer; representative result, numeric and prospective-count queries
+matched for each of the three scopes. Corrupt projections fail closed.
+Timings are standalone component measurements, not full request or browser
+latency; traced peak allocations are not worker RSS.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db

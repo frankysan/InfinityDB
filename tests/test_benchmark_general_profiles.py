@@ -88,6 +88,7 @@ def test_legacy_schema_and_empty_batch_are_distinct(tmp_path: Path) -> None:
     shutil.copyfile(Path("data/generated/army.db"), path)
     assert Database(path).general_profiles([], frozenset()) == {}
     with closing(sqlite3.connect(path)) as db, db:
+        db.execute("DROP TABLE unit_filter_contexts")
         db.execute("DROP TABLE general_profile_selections")
         db.execute("DROP TABLE general_profile_payloads")
         db.execute("PRAGMA user_version=31")

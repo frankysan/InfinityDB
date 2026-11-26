@@ -286,7 +286,7 @@ the retired source roots.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — four tracked runtime databases: `army.db`
-  (Army v33/compatibility 42), `rules_n5.db` (Rules v20/compatibility 22),
+  (Army v34/compatibility 43), `rules_n5.db` (Rules v20/compatibility 22),
   `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
   Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
   symbol mappings and General profiles remain embedded in Army/Rules. The ITS databases
@@ -386,7 +386,7 @@ exist for independent development commands; they are not serving dependencies.
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
 `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
-Army v33 / Rules v20 / ITS v2, with matched provenance
+Army v34 / Rules v20 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -428,7 +428,7 @@ transitional fixtures when explicitly requested by development code.
 the selected four-database set, without selecting environment paths or discovering
 another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current four-file runtime layout embeds Army v33 Equipment presentation
+The current four-file runtime layout embeds Army v34 Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
 Army overview text, legacy identities, symbol mappings/hashes and General profiles,
 plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll

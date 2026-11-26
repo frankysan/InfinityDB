@@ -1,6 +1,6 @@
 """Validate the selected SQLite runtime set without loose JSON fallbacks.
 
-Current serving requires Army v33, Rules v20, and the independently
+Current serving requires Army v34, Rules v20, and the independently
 published ITS Season 17 and 18 databases. Earlier two-file embedded schemas remain
 inspectable for explicit development/research fixtures; v10/v11 layouts
 requiring JSON publications are unsupported.
@@ -20,12 +20,12 @@ from typing import Any
 from .army_reference_storage import ARMY_SCHEMA_VERSION as ARMY_REFERENCE_SCHEMA_VERSION
 from .build_provenance import validate_set_provenance
 from .database.repository import Database
-from .general_profile_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .publication_registry import PublicationRegistry
 from .rules_database import CATALOG_SCHEMA_VERSION as COMPLETE_RULES_SCHEMA_VERSION
 from .rules_database import RulesDatabase
 from .search_index_storage import PublishedSearchIndex, search_scope
 from .unit_filter_storage import ARMY_SCHEMA_VERSION as UNIT_FILTER_SCHEMA_VERSION
+from .unit_input_storage import ARMY_SCHEMA_VERSION as COMPLETE_ARMY_SCHEMA_VERSION
 from .variant_usage_reference import load_runtime_variant_usage
 
 ARMY_DATABASE_FILENAME = "army.db"

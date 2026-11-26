@@ -188,6 +188,7 @@ def _fake_army(args: argparse.Namespace, record: dict[str, Any]) -> int:
             "symbol_path_metadata",
             "published_symbol_assets",
             "published_symbol_paths",
+            "unit_filter_contexts",
             "general_profile_selections",
             "general_profile_payloads",
         ):
@@ -401,7 +402,7 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
     original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
-        ("army", "require Army schema v33"),
+        ("army", "require Army schema v34"),
         ("rules", "require Rules schema v20"),
         ("provenance", "require recorded matched build provenance"),
     ):

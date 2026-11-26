@@ -213,6 +213,11 @@ complete serving requires matching Army and ordered season fingerprints.
 Rules v20 adds canonical catalog summaries, filter identities and Army detail
 usage, with shared logical Unit display records instead of repeated Unit
 payloads. Curated detail enrichment and contextual filter counts remain dynamic.
+Army v34 publishes the canonical source-owned filter contexts with shared
+property sets and exact occurrence coordinates. The same runtime matcher
+selects eligible occurrences and evaluates prospective counts. The Unit graph
+remains relational: the pilot's small construction-time gain did not justify
+its additional storage and peak allocations.
 Potential subsequent candidates include maintained-text tokens, Glossary entries
 and Scenario map SVGs. Respect publication/season scope and
 materialize only snapshot-dependent portions.
@@ -465,7 +470,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v33, Rules v20 and ITS v2,
+The complete serving contract requires Army v34, Rules v20 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

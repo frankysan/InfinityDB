@@ -44,6 +44,8 @@ from infinity_db.symbol_path_storage import ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA
 from infinity_db.symbol_path_storage import ARMY_V31_PUBLISHED_TABLES
 from infinity_db.unit_filter_storage import ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION
 from infinity_db.unit_filter_storage import ARMY_V29_PUBLISHED_TABLES
+from infinity_db.unit_input_storage import ARMY_SCHEMA_VERSION as CONTEXT_SCHEMA_VERSION
+from infinity_db.unit_input_storage import ARMY_V34_PUBLISHED_TABLES
 
 if __package__:
     from .audit_runtime_database_surface import audit_database as audit_runtime_surface
@@ -119,6 +121,7 @@ PUBLISHED_TABLES_BY_VERSION = {
     SYMBOL_SCHEMA_VERSION: ARMY_V31_PUBLISHED_TABLES,
     EXPLORER_SCHEMA_VERSION: ARMY_V32_PUBLISHED_TABLES,
     GENERAL_PROFILE_SCHEMA_VERSION: ARMY_V33_PUBLISHED_TABLES,
+    CONTEXT_SCHEMA_VERSION: ARMY_V34_PUBLISHED_TABLES,
 }
 
 EXTENSION_CANONICAL_TABLES = {
@@ -140,6 +143,7 @@ EXTENSION_CONTEXTUAL_TABLES = {
     "army_overview_text",
     "published_symbol_paths",
     "general_profile_selections",
+    "unit_filter_contexts",
 }
 
 DERIVED_CANONICAL_TABLES = {
@@ -186,7 +190,7 @@ def _table_classification(published_tables: Mapping[str, Any]) -> dict[str, str]
         or unknown_derived_policy
         or (EXTENSION_CANONICAL_TABLES & EXTENSION_CONTEXTUAL_TABLES)
         or extensions - extension_policy
-        or extension_policy != set(ARMY_V32_PUBLISHED_TABLES) - set(PUBLISHED_DATABASE_TABLES)
+        or extension_policy != set(ARMY_V34_PUBLISHED_TABLES) - set(PUBLISHED_DATABASE_TABLES)
     ):
         raise DatabaseSeparationAuditError("Maintained database-separation policy is invalid")
 

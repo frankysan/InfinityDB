@@ -8,7 +8,7 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The complete serving runtime uses Army v33 in `army.db`, Rules v20 in
+The complete serving runtime uses Army v34 in `army.db`, Rules v20 in
 `rules_n5.db` and ITS schema v2 in `its_17.db` and `its_18.db`.
 Structured references, source/citation identity, symbol mappings and
 shared General-profile projections are embedded. Serving requires all four,
@@ -2945,7 +2945,7 @@ replace normalized occurrences or encode arbitrary filter combinations.
 
 The editable `config/catalogs/equipment-presentation-encodings.json`
 retains two reviewed Cube/Cube 2.0 characteristic mappings.
-The current Army v33 runtime retains the presentation tables first
+The current Army v34 runtime retains the presentation tables first
 introduced in Army v27/compatibility 36, without altering
 the narrow Army importer.
 `equipment_presentation_encodings` stores the exact canonical
@@ -3128,6 +3128,22 @@ v32 remains readable for Extended Explorer only; earlier schemas and
 fixtures without matching embedded Rules retain runtime composition.
 Source occurrences remain authoritative.
 
+### Scoped filter context projection in Army v34
+
+Army v34/compatibility 43 adds `unit_filter_contexts`, a single
+checksum-covered JSON document with interned property sets, exact
+source-occurrence contexts (including numeric AVA, points and SWC), and
+ordered context references for each of the profile, loadout and logical
+Unit matching scopes. The build calls the canonical context composer;
+identical property sets and identical contexts share storage without
+merging different source occurrence identities. The reader restores immutable
+property sets and the existing MatchContext instances. Older schemas retain
+the canonical runtime composer.
+
+The projection does not precompute user selections, eligibility, prospective
+counts or matching results. Availability, Army selection, search, numeric
+filters, AND/OR combinations and pagination retain their dynamic behavior.
+
 ### Restriction persistence and version-aware API
 
 The separate Restrictions schema was introduced in Rules v9 and is
@@ -3180,7 +3196,7 @@ comparison is maintained in `infinity_db.sqlite_comparison`; current database-se
 validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
-Normal `infinity-db build` creates Army v33 and Rules v20 together in the
+Normal `infinity-db build` creates Army v34 and Rules v20 together in the
 selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded
@@ -4573,7 +4589,7 @@ and adds the reviewed embedded projections through v9–v20 as build-time
 stages. These stages are used to produce the current v20 publication, not
 an invitation to serve a historical database in place of a complete set.
 Normal checkout/Docker serving requires the validated current Rules v20
-publication together with matched Army v33 and both ITS v2 seasons; separately
+publication together with matched Army v34 and both ITS v2 seasons; separately
 selected non-complete databases are only for explicit inspection or
 targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)
 owns operational selection.
