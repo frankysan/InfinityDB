@@ -96,6 +96,31 @@ def test_every_published_catalog_detail_and_summary_matches_composer(
     assert app.database.get_catalog_item("weapons", "no-such-weapon-xyz") is None
 
 
+@pytest.mark.parametrize(("catalog", "slug"), [
+    ("skills", "mimetism"),
+    ("equipment", "medikit"),
+    ("weapons", "combi-rifle"),
+])
+def test_published_catalog_detail_is_not_retained(catalog: str, slug: str) -> None:
+    app = create_app_from_database_set(RELEASE)
+    database = app.database
+    assert database.catalog_projection is not None
+
+    def read(db: Database):
+        return db.get_skill(slug) if catalog == "skills" else db.get_catalog_item(catalog, slug)
+
+    original = read(database)
+    assert original is not None
+    expected = deepcopy(original)
+    original["variants"].clear()
+    assert read(database) == expected
+
+    legacy = Database(RELEASE / "army.db")
+    legacy_detail = read(legacy)
+    assert legacy_detail == expected
+    assert read(legacy) is legacy_detail
+
+
 @pytest.mark.parametrize("mutation", [
     "DELETE FROM catalog_summaries",
     "DELETE FROM catalog_usage_units",

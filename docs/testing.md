@@ -406,17 +406,26 @@ Page cold/repeat medians (Windows; Linux-dev): Minutemen 344.5/71.3;
 These are three-sample diagnostic host comparisons, not OS-isolated
 comparisons or production tail estimates.
 
-For the catalog-cache tradeoff, run
+The four-cache bypass pilot at `02a94c41` compared fresh processes using
+`benchmark_catalog_cache` with and without `--without-cache`. All four runs
+used the same validated snapshot and produced identical response digests.
+For 249 catalog details, final resident memory (MiB, cached/bypassed) was
+162.7/123.2 on Windows (Python 3.14.10) and 166.5/128.6 on Linux-dev
+(Python 3.14.4). Repeated WSGI medians in ms for Mimetism, MediKit and
+Combi Rifle were 51.49/54.15, 26.97/35.52, 47.22/55.37 on Windows and
+53.50/62.61, 28.45/32.61, 53.41/58.99 on Linux-dev.
+The full-catalog scan is a high-cardinality stress workload, not typical
+traffic; resident memory is for one process, not aggregate Gunicorn memory.
+
+Published catalog details now bypass their LRU caches; small summary and
+legacy composition caches remain. To reproduce the narrower comparison, run
 `python -m tools.performance.benchmark_catalog_cache` in a fresh process,
-then repeat with `--without-cache`. The diagnostic bypasses four repository
-LRU wrappers only, with the same validated database set and workload; compare
-the response digests as well as memory and latency. It samples single-process
-resident memory (working set on Windows), not aggregate Gunicorn memory.
-Windows Python 3.14.10, 249 catalog details: final resident memory was
-162.7 MiB cached versus 123.2 MiB bypassed. Repeated WSGI medians for
-Mimetism, MediKit and Combi Rifle were 51.49/54.15, 26.97/35.52 and
-47.22/55.37 ms (cached/bypassed). Response digests matched. The full-catalog
-scan is a high-cardinality stress workload, not typical traffic.
+then repeat with `--with-detail-cache` to restore the old detail LRU policy
+only. Compare response digests, resident memory and repeat-request times.
+The Windows implementation diagnostic retained 123.3 MiB versus 162.9 MiB
+with detail caching restored, with identical response digests. These runs
+overlapped development checks, so their timings are not a controlled latency
+comparison. The complete catalog-projection suite passed (22 tests).
 
 ### Detail and catalog browser performance — 2026-11-25
 

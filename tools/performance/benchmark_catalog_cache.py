@@ -1,4 +1,4 @@
-"""Compare resident memory and serving latency with catalog query caches bypassed."""
+"""Compare resident memory and serving latency with catalog-detail caching restored."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ from statistics import median
 from time import perf_counter
 from typing import Any, cast
 
+from infinity_db.database.repository import instance_lru_cache
 from infinity_db.web.app import create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 
@@ -55,7 +56,7 @@ def resident_bytes() -> int | None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db-dir", type=Path, default=Path("data/generated"))
-    parser.add_argument("--without-cache", action="store_true")
+    parser.add_argument("--with-detail-cache", action="store_true")
     args = parser.parse_args()
 
     started = perf_counter()
@@ -64,12 +65,10 @@ def main() -> None:
     database = app.database
     if database.catalog_projection is None:
         raise ValueError("This benchmark requires the published catalog projection")
-    if args.without_cache:
-        # Bypass only these instance LRU wrappers, retaining projection selection,
-        # identity resolution, reference enrichment and every other runtime cache.
-        for name in ("list_catalog_items", "list_catalog_filter_items",
-                     "get_skill", "get_catalog_item"):
-            method = getattr(type(database), name).__wrapped__
+    if args.with_detail_cache:
+        # Restore the old detail LRU policy only for this diagnostic process.
+        for name in ("get_skill", "get_catalog_item"):
+            method = instance_lru_cache(maxsize=128)(getattr(type(database), name))
             setattr(database, name, method.__get__(database))
 
     def request(route: str) -> bytes:
@@ -118,7 +117,7 @@ def main() -> None:
 
     print(json.dumps({
         "platform": platform.platform(), "python": platform.python_version(),
-        "snapshot": app.snapshot_revision, "without_cache": args.without_cache,
+        "snapshot": app.snapshot_revision, "with_detail_cache": args.with_detail_cache,
         "startup_ms": round(startup * 1000, 2),
         "catalog_details": count, "scan_median_ms": round(median(cold) * 1000, 2),
         "resident_bytes": memory, "repeat_wsgi_median_ms": timings,
