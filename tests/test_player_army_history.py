@@ -172,7 +172,45 @@ def test_same_observation_date_shares_heading_but_preserves_distinct_windows():
     assert counts["timelineEntries"] == 3
     html = player.render(units, {101: "Army A", 102: "Army B", 103: "Army C"}, {})
     assert html.count('<time datetime="2025-02-01">') == 1
-    assert html.count("<strong>Points: 32 → 30</strong>") == 2
+    assert html.count("<strong>Points: 32 → 30</strong>") == 1
     assert "Observation window: 2025-01-01 – 2025-02-01" in html
     assert "Observation window: 2025-01-15 – 2025-02-01" in html
-    assert "Army C" in html
+    assert '<p class="armies">Army A, Army B, Army C</p>' in html
+
+
+def test_presentation_keeps_distinct_targets_and_overlapping_army_observations():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    variant = {**row, "earlierObservedDate": "2025-01-15",
+               "evidence": [{"armyId": 101}, {"armyId": 103}]}
+    semantic["summaries"] = [row, variant]
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(player.presentation_rows(rows)) == 2
+
+    variant["evidence"] = [{"armyId": 103}]
+    variant["groupId"] = 2
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(player.presentation_rows(rows)) == 2
+
+    variant["groupId"] = 1
+    variant["laterObservedDate"] = "2025-03-01"
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(player.presentation_rows(rows)) == 2
+
+
+def test_group_wide_same_delta_different_cost_pairs_stay_separate():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    row["loadouts"].append({"optionId": 2, "label": "Rifle", "before": 30, "after": 28})
+    variant = {**row, "loadouts": [
+        {"optionId": 1, "label": "HMG", "before": 35, "after": 33},
+        {"optionId": 2, "label": "Rifle", "before": 33, "after": 31},
+    ], "evidence": [{"armyId": 103}]}
+    semantic["summaries"] = [row, variant]
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(rows) == 2
+    assert len(player.presentation_rows(rows)) == 2

@@ -136,9 +136,10 @@ consolidates changes by exact observation window and Army scope, and combines
 equal group-wide effects even where the affected loadout definitions differ
 between Armies. The player-facing timeline groups entries by their first
 observed date (the later endpoint), not an inferred publication date. Preserve
-each complete observation window in technical evidence, even when entries
-share a date heading. Retain distinct cost pairs, partial scopes, source
-identities and underlying evidence. Display source-list membership as observed presence,
+each complete observation window in technical evidence. Within a date, display
+equivalent effects once across disjoint Army scopes even if their earlier
+observation dates differ. Retain distinct cost pairs, partial scopes, source
+identities, overlapping Army observations and underlying evidence. Display source-list membership as observed presence,
 not playable availability. The offline preview exposes unresolved outcomes
 and provenance through optional technical controls; it is not a public API
 or publication approval.

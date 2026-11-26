@@ -331,6 +331,20 @@ def historical_scopes(db: sqlite3.Connection, archive: Path) -> ScopeResolver:
     return resolve
 
 
+def effect_identity(row: Document) -> Document | list:
+    identity = row["identity"]
+    if row["kind"] == "summaries" and identity["allGroupLoadouts"]:
+        # The same group-wide effect may cover different loadout definitions.
+        loadouts = identity["loadouts"]
+        identity = {k: v for k, v in identity.items() if k != "loadouts"}
+        if identity["field"] in {"points", "swc"}:
+            # A shared delta is not sufficient if the actual costs differ.
+            identity["costPairs"] = sorted({
+                encode([target["before"], target["after"]]) for target in loadouts
+            })
+    return identity
+
+
 def model(
     preview: Document, semantic: Document, resolve: ScopeResolver,
 ) -> tuple[list[Document], dict[str, int]]:
@@ -373,12 +387,7 @@ def model(
         # is not an identity. Preserve all original evidence.
         merged: dict[str, Document] = {}
         for row in unit["entries"]:
-            identity = row["identity"]
-            if row["kind"] == "summaries" and identity["allGroupLoadouts"]:
-                # Equivalent group-wide changes need not have identical loadout
-                # definitions in every Army. The full scope, effect and display
-                # (including any exact cost pair) must still match.
-                identity = {k: v for k, v in identity.items() if k != "loadouts"}
+            identity = effect_identity(row)
             key = encode({
                 **{k: v for k, v in row.items() if k not in {"armyIds", "evidence", "identity"}},
                 "identity": identity,
@@ -398,6 +407,33 @@ def model(
     )), dict(counts)
 
 
+def presentation_rows(rows: list[Document]) -> list[Document]:
+    """Share equivalent dated changes across disjoint Army scopes, not source windows."""
+    candidates: dict[str, list[Document]] = defaultdict(list)
+    for row in rows:
+        identity = effect_identity(row)
+        if isinstance(identity, dict):
+            identity = {k: v for k, v in identity.items() if k != "earlierObservedDate"}
+        key = encode({
+            "kind": row["kind"], "date": row["laterObservedDate"], "scope": row["scope"],
+            "text": row["text"], "identity": identity,
+        })
+        candidates[key].append(row)
+
+    result = []
+    for changes in candidates.values():
+        army_ids = [army for row in changes for army in row["armyIds"]]
+        if len(army_ids) != len(set(army_ids)):
+            # Multiple observations for one Army may represent alternatives or
+            # distinct transitions. Do not hide them in a combined display.
+            result.extend({**row, "observations": [row]} for row in changes)
+        else:
+            result.append({
+                **changes[0], "armyIds": sorted(army_ids), "observations": changes,
+            })
+    return result
+
+
 def render(units: list[Document], names: dict[int, str], coverage: Document) -> str:
     options, sections = [], []
     for unit in units:
@@ -414,7 +450,7 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
             dates[row["laterObservedDate"]].append(row)
         articles = []
         for observed in sorted(dates, reverse=True):
-            rows = dates[observed]
+            rows = presentation_rows(dates[observed])
             army_groups: dict[tuple[int, ...], list[Document]] = defaultdict(list)
             for row in rows:
                 army_groups[tuple(row["armyIds"])].append(row)
@@ -435,11 +471,20 @@ def render(units: list[Document], names: dict[int, str], coverage: Document) -> 
                     heading = f'<h4 class="scope">{esc(scope)}</h4>' if scope else ""
                     items = []
                     for row in changes:
-                        window = f"{row['earlierObservedDate']} – {row['laterObservedDate']}"
-                        review = details(
-                            "Evidence", f"<p>Observation window: {esc(window)}</p>"
-                            f"<pre>{raw(row['evidence'])}</pre>",
-                        )
+                        observations = []
+                        for source in row["observations"]:
+                            window = (
+                                f"{source['earlierObservedDate']} – {source['laterObservedDate']}"
+                            )
+                            source_armies = ", ".join(
+                                names.get(i, f"Army #{i}") for i in source["armyIds"]
+                            )
+                            observations.append(
+                                f"<p>{esc(source_armies)}</p>"
+                                f"<p>Observation window: {esc(window)}</p>"
+                                f"<pre>{raw(source['evidence'])}</pre>"
+                            )
+                        review = details("Evidence", "".join(observations))
                         items.append(
                             f"<li><strong>{esc(row['text'])}</strong>"
                             f'<div class="technical-only">{review}</div></li>'
