@@ -249,21 +249,21 @@ make v1.3.0 depend on them.
   entries), 1,806 composition field candidates and all 265 Army observations.
   It retains reference multiplicity, historical target labels, evidence
   drilldown and separate review/catalog links. Private review remains required
-  before promotion. The effective-loadout pilot processes 2,999 source
-  Group-field comparisons: 1,658 complete changed, 222 complete unchanged,
+  before promotion. The effective-loadout pilot processes 3,001 source
+  Group-field comparisons: 1,660 complete changed, 222 complete unchanged,
   661 partial changed, 31 partial unchanged and 427 wholly unresolved.
   Partial continuity compares surviving or uniquely reconciled pairs
-  independently of unresolved siblings. It consolidates 2,689 Army-scoped
-  summaries into 1,179, of which 380 cover all loadouts in their Group and
+  independently of unresolved siblings. It consolidates 2,692 Army-scoped
+  summaries into 1,182, of which 381 cover all loadouts in their Group and
   465 combine multiple Armies. All 148 multi-profile comparisons now have
   at least partial coverage. Direct-owner scope retains 462 pair-field
   comparisons with stable Include edges and 291 with stable Peripheral
   attachments (overlapping counts); no inherited capabilities are inferred.
-  Three accepted rekey collections are available; 131 composition candidates
+  Four accepted rekey collections are available; 131 composition candidates
   remain outside the pilot scope.
   Lifecycle accounting covers all 844 structural loadout occurrences:
-  six reconciled rekey occurrences, 280 one-sided addition/removal candidates
-  (249 additions and 31 removals) and 558 review outcomes. The 280 candidates
+  ten reconciled rekey occurrences, 280 one-sided addition/removal candidates
+  (249 additions and 31 removals) and 554 review outcomes. The 280 candidates
   consolidate into 118 summaries, including 35 spanning multiple Armies.
   Contextual availability covers 279 observations: 11 AVA changes, 254
   list-presence candidates and 14 review outcomes. These consolidate into
@@ -278,6 +278,13 @@ make v1.3.0 depend on them.
   Resolve remaining relationship changes and lifecycle cases, including
   possible replacements and unsupported complex lifecycle composition,
   before selecting the public semantic projection.
+
+  The normalized continuity pass resolves two additional rekey pairs (four
+  structural occurrences), bringing effective composition to 1,182 summaries
+  from 3,001 Group-field comparisons. All 79 attachment replacement cases
+  remain unresolved. Preserve the remaining replacement hints for review;
+  prioritize the streamlined private player-facing preview rather than
+  progressively weakening automatic continuity criteria.
   - [ ] Review and promote the player-facing history projection, including
     unresolved records and human-readable changes, using the private preview.
     Keep unresolved loadout replacements, modification groups, changed labels,

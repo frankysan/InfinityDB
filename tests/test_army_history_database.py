@@ -747,3 +747,64 @@ def test_relationship_history_rejects_unresolved_definitions_and_ambiguous_owner
     assert relationship_payload(old, new, change) == (None, "unresolvedAttachmentTarget")
     change["ancestorOrRecordLabelChanged"] = True
     assert relationship_payload(old, new, change) == (None, "changedLabels")
+
+
+def test_normalized_rekey_preserves_quantity_equivalence_and_cost_change():
+    from tools.research.summarize_army_history import normalized_rekeys
+
+    old = semantic_group([], [semantic_option(1, [{"id": 1}], points=20)])
+    new = semantic_group([], [semantic_option(2, [{"id": 1, "q": 1}], points=18)])
+    assert normalized_rekeys(old, new, 42, 1, [{}], [{}]) == {1: 2}
+    result, status = semantic_summary(old, new, "points", [], {1: 2})
+    assert status == "comparable"
+    assert result is not None and result[0]["summary"] == "-2 Points"
+    new["units"][0]["profileGroups"][0]["options"][0]["skills"][0]["q"] = 2
+    assert normalized_rekeys(old, new, 42, 1, [{}], [{}]) == {}
+
+
+def test_normalized_rekey_rejects_surviving_duplicate():
+    from tools.research.summarize_army_history import normalized_rekeys
+
+    old = semantic_group([], [semantic_option(1, [{"id": 1}]),
+                              semantic_option(3, [{"id": 1}])])
+    new = semantic_group([], [semantic_option(2, [{"id": 1}]),
+                              semantic_option(3, [{"id": 1}])])
+    assert normalized_rekeys(old, new, 42, 1, [{}], [{}]) == {}
+
+
+def test_normalized_rekey_requires_resolved_include_and_peripheral_targets():
+    from tools.research.summarize_army_history import normalized_rekeys
+
+    old = semantic_group([], [semantic_option(1, [{"id": 1}])])
+    new = semantic_group([], [semantic_option(2, [{"id": 1}])])
+    for data, identity in ((old, 7), (new, 9)):
+        groups = data["units"][0]["profileGroups"]
+        groups[0]["options"][0]["includes"] = [{"group": 2, "option": 5}]
+        groups[0]["options"][0]["peripheral"] = [{"id": identity}]
+        groups.append({
+            "id": 2, "name": "Included", "profiles": [{"id": 2, "name": "Included"}],
+            "options": [semantic_option(5)],
+        })
+        data["filters"]["peripheral"] = [{"id": identity, "name": "Attached Model"}]
+    assert normalized_rekeys(old, new, 42, 1, [{}], [{}]) == {1: 2}
+    new["units"][0]["profileGroups"][1]["options"] = []
+    assert normalized_rekeys(old, new, 42, 1, [{}], [{}]) == {}
+
+
+def test_attachment_target_rekey_is_not_an_attachment_change():
+    from tools.research.summarize_army_history import relationship_payload
+
+    old = semantic_group([], [semantic_option(1)])
+    new = semantic_group([], [semantic_option(1)])
+    for data, identity in ((old, 7), (new, 9)):
+        groups = data["units"][0]["profileGroups"]
+        groups[0]["options"][0]["includes"] = [{"group": 2, "option": identity}]
+        groups.append({
+            "id": 2, "name": "Included", "profiles": [{"id": 2, "name": "Included"}],
+            "options": [semantic_option(identity)],
+        })
+    change = relationship_change(old, new, "includes")
+    assert relationship_payload(old, new, change) == (None, "possibleAttachmentReplacement")
+    assert relationship_payload(old, new, change, {(2, 9): 7}) == (
+        None, "unchangedRelationship",
+    )

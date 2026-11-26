@@ -149,6 +149,15 @@ Known composition-equivalent rekeys are not additions or removals; ambiguous
 modifications and unsupported composition remain review outcomes. Consolidate
 only identical payloads and observation windows across Armies.
 
+A second continuity pass permits exact normalized composition equivalence:
+resolve references and retain metadata and unknown fields, normalize default
+quantities and empty extras, and resolve stable Include and unique Peripheral
+targets. Require stable parent and loadout labels and uniqueness among all
+siblings at both endpoints, including survivors. Retain both unpaired source
+records as evidence for each reconciled pair. Verified rekeys may normalize
+Include target identity in attachment comparisons. Do not promote distinctive
+reference modification hints into accepted continuity without stronger evidence.
+
 Contextual availability retains profile-scoped AVA and explicit disabled-state
 changes separately from observed Army-list presence. Format AVA using the
 current display convention, including Total for values of 100 or greater.

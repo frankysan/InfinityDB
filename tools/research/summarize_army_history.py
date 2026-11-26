@@ -276,7 +276,10 @@ def pair_delta(
         left, _ = composition(oa, old, contexts_a)
         right, _ = composition(ob, new, contexts_b)
         if left is None or right is None or encode(left) != encode(right):
-            return None, "rekeyCompositionConflict"
+            left = normalized_loadout(oa, old, unit, contexts_a)
+            right = normalized_loadout(ob, new, unit, contexts_b)
+            if left is None or right is None or encode(left) != encode(right):
+                return None, "rekeyCompositionConflict"
     if field in CATALOGS:
         a, status_a = effective(pa, oa, field, old, contexts_a)
         b, status_b = effective(pb, ob, field, new, contexts_b)
@@ -629,6 +632,74 @@ def peripheral_rows(owner: Document, data: Document) -> list[Document] | None:
     return sorted(result, key=encode)
 
 
+def normalized_loadout(
+    row: Document, data: Document, unit: int,
+    contexts: list[dict[str, dict[int, tuple[str, ...]]]],
+) -> Document | None:
+    """Keep all non-cost source fields, normalizing only established equivalents."""
+    payload = {k: v for k, v in row.items() if k not in {"id", "name", "points", "swc"}}
+    for field in CATALOGS:
+        refs, _ = resolve_references(row.get(field, []), field, data, contexts)
+        if refs is None:
+            return None
+        normalized = []
+        for ref in refs:
+            occurrence = dict(ref["occurrence"])
+            quantity = occurrence.get("q")
+            if quantity is None or type(quantity) is int and quantity == 1:
+                occurrence.pop("q", None)
+            extras = occurrence.pop("extra", None)
+            if extras:
+                occurrence["extra"] = sorted(extras, key=encode)
+            normalized.append({**ref, "occurrence": occurrence})
+        payload[field] = sorted(normalized, key=encode)
+    includes = include_rows(row, data, unit)
+    peripherals = peripheral_rows(row, data)
+    if includes is None or peripherals is None:
+        return None
+    payload["includes"] = includes
+    payload["peripheral"] = peripherals
+    return payload
+
+
+def normalized_rekeys(
+    old: Document, new: Document, unit: int, group: int,
+    contexts_a: list[dict[str, dict[int, tuple[str, ...]]]],
+    contexts_b: list[dict[str, dict[int, tuple[str, ...]]]],
+) -> dict[int, int]:
+    """Require unique full normalized composition, including surviving siblings."""
+    a, b = get_group(old, unit, group), get_group(new, unit, group)
+    if a is None or b is None or not all(same_labels(x, y) for x, y in zip(a, b, strict=True)):
+        return {}
+    pa, pb = indexed(a[1].get("profiles")), indexed(b[1].get("profiles"))
+    if not pa or not pb or pa.keys() != pb.keys():
+        return {}
+    if any(not same_labels(pa[i], pb[i]) for i in pa):
+        return {}
+    oa, ob = indexed(a[1].get("options")), indexed(b[1].get("options"))
+    if not oa or not ob or not (oa.keys() - ob.keys()) or not (ob.keys() - oa.keys()):
+        return {}
+    left = {i: normalized_loadout(row, old, unit, contexts_a) for i, row in oa.items()}
+    right = {i: normalized_loadout(row, new, unit, contexts_b) for i, row in ob.items()}
+    if any(v is None for v in (*left.values(), *right.values())):
+        return {}
+    lkeys, rkeys = {i: encode(v) for i, v in left.items()}, {i: encode(v) for i, v in right.items()}
+    lc, rc = Counter(lkeys.values()), Counter(rkeys.values())
+    by_signature = {v: i for i, v in rkeys.items() if rc[v] == 1}
+    result = {}
+    for i in sorted(oa.keys() - ob.keys()):
+        payload = left[i]
+        assert payload is not None
+        if not any(payload.get(field) for field in (*CATALOGS, "includes", "peripheral")):
+            continue
+        signature = lkeys[i]
+        j = by_signature.get(signature)
+        if (lc[signature] == 1 and j is not None and j not in oa
+                and same_labels(oa[i], ob[j])):
+            result[i] = j
+    return result
+
+
 def relationship_label(row: Document, field: str) -> str:
     if field == "peripheral":
         name = row["definition"]["name"]
@@ -643,6 +714,7 @@ def relationship_label(row: Document, field: str) -> str:
 
 def relationship_payload(
     old: Document, new: Document, change: Document,
+    target_rekeys: dict[tuple[int, int], int] | None = None,
 ) -> tuple[Document | None, str]:
     """Compare direct, explicitly owned attachment edges, not inherited capabilities."""
     path = change["path"]
@@ -669,6 +741,11 @@ def relationship_payload(
         left, right = peripheral_rows(a[0], old), peripheral_rows(b[0], new)
     if left is None or right is None:
         return None, "unresolvedAttachmentTarget"
+    if field == "includes" and target_rekeys:
+        right = [
+            {**row, "option": target_rekeys.get((row["group"], row["option"]), row["option"])}
+            for row in right
+        ]
     lcount, rcount = Counter(map(encode, left)), Counter(map(encode, right))
     if lcount == rcount:
         return None, "unchangedRelationship"
@@ -810,6 +887,57 @@ def build(preview: Document, archive: Path) -> Document:
                 entry["positions"].append(pos)
 
     counts: Counter[str] = Counter()
+    normalized_matches = []
+    normalized_positions: dict[int, Document] = {}
+    unresolved_collections: dict[
+        tuple[int, int, int], dict[tuple[str, int], tuple[int, Document]]
+    ] = {}
+    for pos, row in lifecycle_rows:
+        occurrence = row["occurrence"]
+        path, ev = occurrence["path"], occurrence["evidence"]
+        if len(path) != 6 or path[1] not in current:
+            continue
+        key = (ev["comparisonIndex"], path[1], path[3])
+        side = "after" if occurrence["direction"] == "appeared" else "before"
+        unresolved_collections.setdefault(key, {})[(side, path[-1])] = (pos, row)
+    for (ci, unit, group), rows in sorted(unresolved_collections.items()):
+        if {side for side, _ in rows} != {"before", "after"}:
+            continue
+        ev = next(iter(rows.values()))[1]["occurrence"]["evidence"]
+        a, b = ev["earlier"], ev["later"]
+        old, new = data(a["sha256"]), data(b["sha256"])
+        pairs = normalized_rekeys(
+            old, new, unit, group,
+            [metadata(sha) for sha in a["metadataSha256"]],
+            [metadata(sha) for sha in b["metadataSha256"]],
+        )
+        for i, j in sorted(pairs.items()):
+            if ("before", i) not in rows or ("after", j) not in rows:
+                continue
+            before_pos, before = rows[("before", i)]
+            after_pos, after = rows[("after", j)]
+            mapping = rekeys.setdefault((ci, unit, group), {})
+            require(i not in mapping and j not in mapping.values(), "Conflicting normalized rekey")
+            mapping[i] = j
+            match = {
+                "comparisonIndex": ci, "armyId": ev["factionId"], "sourceUnitId": unit,
+                "groupId": group, "beforeOptionId": i, "afterOptionId": j,
+                "beforeUnpairedPosition": before_pos, "afterUnpairedPosition": after_pos,
+                "kind": "normalizedSameComposition",
+            }
+            normalized_matches.append(match)
+            normalized_positions[before_pos] = normalized_positions[after_pos] = match
+            for field in ("points", "swc"):
+                left = before["occurrence"]["before"]["value"]
+                right = after["occurrence"]["after"]["value"]
+                if encode(left.get(field)) != encode(right.get(field)):
+                    work.setdefault((ci, unit, group, field), {
+                        "evidence": ev, "paths": [], "positions": [],
+                    })
+    normalized_by_group: dict[tuple[int, int, int], list[Document]] = {}
+    for match in normalized_matches:
+        key = (match["comparisonIndex"], match["sourceUnitId"], match["groupId"])
+        normalized_by_group.setdefault(key, []).append(match)
     events: dict[str, Document] = {}
     outcomes = []
     for (ci, unit, group, field), entry in sorted(work.items()):
@@ -826,6 +954,7 @@ def build(preview: Document, archive: Path) -> Document:
             "comparisonIndex": ci, "armyId": ev["factionId"],
             "candidatePositions": sorted(set(entry["positions"])),
             "loadoutMatchPositions": rekey_positions.get((ci, unit, group), []),
+            "normalizedRekeys": normalized_by_group.get((ci, unit, group), []),
             "coverage": coverage,
         }
         identity = {
@@ -883,7 +1012,10 @@ def build(preview: Document, archive: Path) -> Document:
             "comparisonIndex": ev["comparisonIndex"], "armyId": ev["factionId"],
             "loadoutUnpairedPosition": pos,
         }
-        if unit not in current:
+        if pos in normalized_positions:
+            payload, status = None, "normalizedSameComposition"
+            evidence["normalizedRekey"] = normalized_positions[pos]
+        elif unit not in current:
             payload, status = None, "unresolvedUnitIdentity"
         else:
             payload, status = lifecycle_payload(
@@ -891,7 +1023,10 @@ def build(preview: Document, archive: Path) -> Document:
                 [metadata(sha) for sha in a["metadataSha256"]],
                 [metadata(sha) for sha in b["metadataSha256"]],
             )
-        outcome = "review:" + status if payload is None else payload["kind"]
+        outcome = (
+            status if status == "normalizedSameComposition"
+            else "review:" + status if payload is None else payload["kind"]
+        )
         counts[f"lifecycle:{outcome}"] += 1
         lifecycle_outcomes.append({
             **identity, **evidence, "optionId": path[-1],
@@ -966,7 +1101,20 @@ def build(preview: Document, archive: Path) -> Document:
         if unit not in current:
             payload, status = None, "unresolvedUnitIdentity"
         else:
-            payload, status = relationship_payload(data(a["sha256"]), data(b["sha256"]), change)
+            target_rekeys = {
+                (g, later): earlier
+                for (comparison, source_unit, g), mapping in rekeys.items()
+                if comparison == ci and source_unit == unit
+                for earlier, later in mapping.items()
+            } if change["path"][-1] == "includes" else {}
+            payload, status = relationship_payload(
+                data(a["sha256"]), data(b["sha256"]), change, target_rekeys,
+            )
+            if target_rekeys:
+                evidence["targetRekeys"] = [
+                    {"groupId": g, "beforeOptionId": i, "afterOptionId": j}
+                    for (g, j), i in sorted(target_rekeys.items())
+                ]
         field = change["path"][-1]
         counts[f"relationship:{field}:{status}"] += 1
         relationship_outcomes.append({
@@ -994,6 +1142,7 @@ def build(preview: Document, archive: Path) -> Document:
     counts["lifecycleRekeyOccurrences"] = 2 * len(lifecycle_rekeys)
     counts["lifecycleConsolidatedSummaries"] = len(lifecycle)
     counts["lifecycleMultiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in lifecycle.values())
+    counts["normalizedRekeyMatches"] = len(normalized_matches)
     counts["acceptedRekeyCollections"] = len(rekeys)
     counts["outsidePilotScopeCandidates"] = len(outside_scope)
     counts["sourceGroupFieldComparisons"] = len(work)
@@ -1001,13 +1150,13 @@ def build(preview: Document, archive: Path) -> Document:
     counts["allGroupLoadoutSummaries"] = sum(e["allGroupLoadouts"] for e in events.values())
     counts["multiArmySummaries"] = sum(len(e["evidence"]) > 1 for e in events.values())
     return {
-        "formatVersion": 6, "publicationStatus": "privateResearchOnly", "edition": "n5",
+        "formatVersion": 7, "publicationStatus": "privateResearchOnly", "edition": "n5",
         "archiveSha256": ARCHIVE_PIN, "armyDatabaseSha256": preview["armyDatabaseSha256"],
         "historyDatabaseSha256": preview["historyDatabaseSha256"],
         "counts": dict(counts), "summaries": list(events.values()), "outcomes": outcomes,
         "outsidePilotScope": outside_scope,
         "lifecycleSummaries": list(lifecycle.values()), "lifecycleOutcomes": lifecycle_outcomes,
-        "lifecycleRekeys": lifecycle_rekeys,
+        "lifecycleRekeys": lifecycle_rekeys, "normalizedRekeys": normalized_matches,
         "availabilitySummaries": list(availability.values()),
         "availabilityOutcomes": availability_outcomes, "membershipDeclarations": declarations,
         "relationshipSummaries": list(relationships.values()),
