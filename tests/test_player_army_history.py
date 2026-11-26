@@ -320,6 +320,104 @@ def test_contextual_direct_owner_scope_shares_heading_but_keeps_evidence():
     assert "Scope: Own capabilities only (excluding attached entities)." in html
 
 
+def test_historical_shared_items_use_both_endpoints_and_retain_residuals(monkeypatch):
+    def ref(item_id):
+        return {"filter": {"id": item_id, "name": f"Item {item_id}"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return [ref(i) for i in values], "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(shared, first, second):
+        return {"units": [{"id": 42, "name": "Unit", "profileGroups": [{
+            "id": 1, "name": "Group",
+            "profiles": [{"id": 2, "name": "Profile", "skills": shared}],
+            "options": [{"id": 1, "skills": first}, {"id": 2, "skills": second}],
+        }]}]}
+
+    before = endpoint([1], [], [])
+    after = endpoint([2], [3], [])
+    row = {
+        "kind": "summaries", "identity": {
+            "field": "skills", "groupId": 1, "lost": [ref(1)], "gained": [ref(2), ref(3)],
+        }, "text": "old", "evidence": {"original": True},
+    }
+    general = [{"profile_identity": "profile"}]
+    ends = [(101, before, after, [], []), (102, before, after, [], [])]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    result = player.historical_shared_delta([row], 42, general, ends, identity, set(), set())
+    assert result == ("profile", {"lost": [ref(1)], "gained": [ref(2)]})
+    assert result is not None
+    residual = player.subtract_shared(row, result[1])
+    assert residual is not None
+    assert residual["text"] == "Gained Item 3"
+    assert residual["evidence"] == row["evidence"]
+    assert row["identity"]["gained"] == [ref(2), ref(3)]
+    assert player.historical_shared_delta(
+        [row], 42, general, ends, identity, set(), {("skills", 2)},
+    ) is None
+    # A skill gained by only one Army is not a shared gain.
+    divergent = [(101, before, after, [], []), (102, before, before, [], [])]
+    assert player.historical_shared_delta(
+        [row], 42, general, divergent, identity, set(), set(),
+    ) == ("profile", {"lost": [ref(1)], "gained": []})
+
+
+def test_historical_equipment_and_weapon_projection_uses_canonical_owners(monkeypatch):
+    def ref(item_id, extras=()):
+        return {
+            "filter": {"id": item_id, "name": f"Item {item_id}"},
+            "occurrence": {"extra": [{"id": i, "name": str(i)} for i in extras]},
+        }
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(field, profile, options):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [{"id": 2, "name": "Profile", field: profile}],
+            "options": [{"id": i, field: items} for i, items in enumerate(options, 1)],
+        }]}]}
+
+    general = [{"profile_identity": "profile"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    old, new, specific = ref(1), ref(2), ref(3)
+    for field, before, after in (
+        ("equip", endpoint("equip", [old], [[], []]),
+         endpoint("equip", [new], [[specific], []])),
+        ("weapons", endpoint("weapons", [], [[old], [old]]),
+         endpoint("weapons", [], [[new, specific], [new]])),
+    ):
+        row = {"identity": {
+            "field": field, "groupId": 1, "lost": [old], "gained": [new, specific],
+        }}
+        result = player.historical_shared_delta(
+            [row], 42, general, [(101, before, after, [], [])], identity, set(), set(),
+        )
+        assert result == ("profile", {"lost": [old], "gained": [new]})
+
+    # The canonical projection can show a common base even when extras differ.
+    # Do not turn that synthetic display item into an exact historical occurrence.
+    before = endpoint("weapons", [], [[], []])
+    after = endpoint("weapons", [], [[ref(2, (10,))], [ref(2, (20,))]])
+    row = {"identity": {
+        "field": "weapons", "groupId": 1, "lost": [],
+        "gained": [ref(2, (10,)), ref(2, (20,))],
+    }}
+    assert player.historical_shared_delta(
+        [row], 42, general, [(101, before, after, [], [])], identity, set(), set(),
+    ) is None
+
+
 def test_contextual_action_rows_keep_reference_changes_distinct():
     def ref(item_id, label, extra=None):
         occurrence = {"extra": [{"name": extra}]} if extra else {}

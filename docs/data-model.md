@@ -170,16 +170,26 @@ The [Unit history presentation](web-design-guidelines.md#unit-history-presentati
 owns disclosure and layout.
 
 The contextual private preview uses the current materialized General profiles
-with all optional Unit categories enabled and current Army cards. The initial
-General-profile attribution pilot covers seven scalar fields only (CC, BS, PH,
-WIP, ARM, BTS and S). It requires one stable source Unit identity, every known
-Army context with matching exact observation windows, complete declared Army
-coverage, and one uniquely identified profile occurrence at each endpoint.
-Both endpoint values must agree across those contexts and with the canonical
-General-stat composition. Promoted entries appear only beneath that General
-profile; other entries retain their observed Army contexts. Ambiguous or removed
-Army cards retain a separate historical context. This is not yet the general
-historical shared-item composition or a public serving projection.
+with all optional Unit categories enabled and current Army cards. General
+history covers seven scalar fields (CC, BS, PH, WIP, ARM, BTS and S) and
+supported shared Skill, Equipment and Weapon occurrence changes. It requires
+one stable source Unit identity, every known Army context with matching exact
+observation windows, complete declared Army coverage, and one uniquely
+identified profile occurrence at each endpoint. Scalar endpoint values must
+agree across those contexts and with the canonical General-stat composition.
+
+For shared items, compare both historical endpoint projections using the
+canonical shared-item functions, including the loadouts present at each
+endpoint. Promote only exact occurrence changes supported by accepted semantic
+summaries. Remove the promoted occurrences from the Army display rows, retaining
+all residual effects and original evidence. Do not promote synthetic common
+bases with varying extras, unresolved references, catalog aliases requiring
+identity reconciliation, source-classified Skills, cross-catalog transitions,
+or Units with snapshot-bound reviewed loadout capabilities. The item pilot
+also excludes multi-profile Groups, disabled loadouts and attachment-bearing
+contexts rather than guessing their composition. Ambiguous or removed Army
+cards retain a separate historical context. This remains a private,
+conservative projection, not a public serving API.
 
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets

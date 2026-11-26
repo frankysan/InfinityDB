@@ -19,11 +19,26 @@ from infinity_db.army_history_source import Document, digest, file_digest, read_
 from infinity_db.database.repository import Database, identity_config_from_connection
 from infinity_db.identities import normalized_profile_identity
 from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
-from infinity_db.unit_presentation import OPTIONAL_AVAILABILITY_FLAGS, _general_stats
+from infinity_db.unit_presentation import (
+    OPTIONAL_AVAILABILITY_FLAGS,
+    _common_bases_with_varying_extras,
+    _common_items,
+    _general_profile_skills,
+    _general_stats,
+    _item_identity,
+    _unique_items,
+)
 from tools.research.build_army_history_database import ARCHIVE_PIN, encode
 from tools.research.project_army_history import ARMY, HISTORY, ROOT, read_only
 from tools.research.render_army_history import FIELDS, details, esc, raw, value_text
-from tools.research.summarize_army_history import compact_reference, get_group, indexed
+from tools.research.summarize_army_history import (
+    compact_reference,
+    get_group,
+    indexed,
+    occurrence_key,
+    reference_summary,
+    stable_context,
+)
 
 SCALARS = frozenset({"arm", "bs", "bts", "cc", "move", "ph", "s", "str", "w", "wip"})
 STREAMS = ("summaries", "lifecycleSummaries", "availabilitySummaries", "relationshipSummaries")
@@ -598,10 +613,155 @@ def scalar_general_target(
     return identity
 
 
+ITEM_FIELDS = {"skills": "skills", "equip": "equipment", "weapons": "weapons"}
+
+
+def historical_items(
+    owner: Document, field: str, army: Document, metadata: list,
+) -> list[Document] | None:
+    refs, _ = resolve_references(owner.get(field, []), field, army, metadata)
+    if refs is None:
+        return None
+    items = []
+    for ref in refs:
+        occurrence = ref["occurrence"]
+        quantity = occurrence.get("q")
+        if set(occurrence) - {"q", "extra"} or (
+            quantity is not None and (type(quantity) is not int or quantity < 1)
+        ):
+            return None
+        items.append({
+            "id": ref["filter"]["id"], "name": ref["filter"]["name"],
+            "quantity": quantity, "extras": occurrence.get("extra") or [],
+            "reference": ref,
+        })
+    return items
+
+
+def projected_items(
+    profiles: list[Document], loadouts: list[Document], field: str,
+) -> list[Document]:
+    """Reuse the same shared-item composition as current General profiles."""
+    prop = ITEM_FIELDS[field]
+    if field == "skills":
+        return _general_profile_skills(profiles, loadouts)
+    owners = loadouts if field == "weapons" else profiles
+    return _unique_items([
+        *_common_items(owners, prop), *_common_bases_with_varying_extras(loadouts, prop),
+    ])
+
+
+def historical_shared_delta(
+    rows: list[Document], source_id: int, general: list[Document],
+    endpoints: list[tuple[int, Document, Document, list, list]],
+    profile_identity: Callable[[object], str],
+    excluded: set[tuple[str, int]], aliases: set[tuple[str, int]],
+) -> tuple[str, Document] | None:
+    """Compare exact endpoint projections; require stable single-profile groups.
+
+    Only accepted effective occurrence changes can be promoted. A synthetic
+    common base with differing extras is not an exact source occurrence.
+    """
+    sample = rows[0]["identity"]
+    group_id, field = sample["groupId"], sample["field"]
+    prop = ITEM_FIELDS[field]
+    identities = set()
+    owner_profiles: list[list[Document]] = [[], []]
+    owner_options: list[list[Document]] = [[], []]
+    for _, old, new, meta_old, meta_new in endpoints:
+        context, _ = stable_context(old, new, source_id, group_id)
+        if context is None:
+            return None
+        pa, oa, pb, ob = context
+        for side, (army, meta, profile, options) in enumerate((
+            (old, meta_old, pa, oa), (new, meta_new, pb, ob),
+        )):
+            if not profile.get("name") or any(
+                option.get("disabled") or option.get("includes") or option.get("peripheral")
+                for option in options.values()
+            ):
+                return None
+            identity = profile_identity(profile["name"])
+            identities.add(identity)
+            found = get_group(army, source_id, group_id)
+            assert found is not None
+            groups = indexed(found[0].get("profileGroups"))
+            if groups is None:
+                return None
+            occurrences = []
+            for gid, group in groups.items():
+                candidates = indexed(group.get("profiles"))
+                if candidates is None:
+                    return None
+                occurrences.extend(
+                    (gid, pid) for pid, candidate in candidates.items()
+                    if profile_identity(candidate.get("name")) == identity
+                )
+            if occurrences != [(group_id, profile["id"])]:
+                return None
+            for owner, destination in (
+                (profile, owner_profiles[side]),
+                *((o, owner_options[side]) for o in options.values()),
+            ):
+                items = historical_items(owner, field, army, meta)
+                if items is None or any((field, item["id"]) in aliases for item in items):
+                    return None
+                destination.append({prop: items})
+    if len(identities) != 1:
+        return None
+    identity = next(iter(identities))
+    if not identity or sum(g["profile_identity"] == identity for g in general) != 1:
+        return None
+    # Compute both shared projections, including options entering or leaving the list.
+    before, after = [
+        {_item_identity(item): item for item in projected_items(p, o, field)}
+        for p, o in zip(owner_profiles, owner_options, strict=True)
+    ]
+    delta: Document = {"lost": [], "gained": []}
+    for direction, own, other in (("lost", before, after), ("gained", after, before)):
+        accepted = {
+            occurrence_key(ref)
+            for row in rows for ref in row["identity"][direction]
+        }
+        for key in own.keys() - other.keys():
+            item = own[key]
+            ref = item["reference"]
+            original = {
+                "id": ref["filter"]["id"], "quantity": ref["occurrence"].get("q"),
+                "extras": ref["occurrence"].get("extra") or [],
+            }
+            if (_item_identity(original) != key or occurrence_key(ref) not in accepted
+                    or (field, item["id"]) in excluded):
+                continue
+            delta[direction].append(ref)
+        delta[direction].sort(key=occurrence_key)
+    return (identity, delta) if delta["lost"] or delta["gained"] else None
+
+
+def subtract_shared(row: Document, delta: Document) -> Document | None:
+    """Keep nonshared effects and original evidence; remove one occurrence per key."""
+    identity = row["identity"]
+    residual = {}
+    for direction in ("lost", "gained"):
+        remaining = Counter(map(occurrence_key, delta[direction]))
+        refs = []
+        for ref in identity[direction]:
+            key = occurrence_key(ref)
+            if remaining[key]:
+                remaining[key] -= 1
+            else:
+                refs.append(ref)
+        residual[direction] = refs
+    if not residual["lost"] and not residual["gained"]:
+        return None
+    return {**row, "identity": {**identity, **residual},
+            "text": reference_summary(residual)}
+
+
 def contextual_model(
     units: list[Document], history: sqlite3.Connection, archive: Path,
 ) -> dict[str, int]:
-    """Attach current card contexts; promote only fully covered scalar pilot rows."""
+    """Attach current card contexts and promote fully covered shared changes."""
     database = Database(ARMY)
     general = database.general_profiles(
         [u["logicalUnitId"] for u in units], frozenset(OPTIONAL_AVAILABILITY_FLAGS),
@@ -620,6 +780,28 @@ def contextual_model(
         memberships = set(
             tuple(row) for row in db.execute("SELECT unit_id,army_id FROM army_units")
         )
+        source_fields = {v: k for k, v in ITEM_FIELDS.items()}
+        aliases = {
+            (source_fields[catalog], source_id)
+            for catalog, source_id, app_id in db.execute(
+                "SELECT catalog,source_item_id,application_item_id "
+                "FROM application_catalog_sources"
+            )
+            if catalog in source_fields and source_id != app_id
+        }
+        excluded = {
+            ("skills", source_id) for (source_id,) in db.execute(
+                "SELECT s.source_item_id FROM application_catalog_sources s "
+                "JOIN skill_source_classifications c "
+                "ON s.application_item_id=c.application_skill_id "
+                "WHERE s.catalog='skills'"
+            )
+        }
+        # Do not retrospectively project snapshot-bound reviewed capabilities.
+        from infinity_db.database.reviewed_loadout_capabilities import (
+            published_reviewed_loadout_capabilities,
+        )
+        reviewed_units = {fact["unit_id"] for fact in published_reviewed_loadout_capabilities(db)}
     comparisons = {
         (army, earlier, later): json.loads(body)
         for army, earlier, later, body in history.execute(
@@ -632,6 +814,10 @@ def contextual_model(
     @lru_cache(maxsize=48)
     def endpoint(sha: str) -> Document:
         return source.read_object(sha)
+
+    @lru_cache(maxsize=64)
+    def metadata(sha: str) -> dict:
+        return catalog_index(endpoint(sha))
 
     counts: Counter[str] = Counter()
     for unit in units:
@@ -659,7 +845,69 @@ def contextual_model(
                     else:
                         declared_complete = False
         current_source_armies = {army for source_id, army in memberships if source_id in source_ids}
-        for row in unit["entries"]:
+        entries = unit["entries"]
+        residuals: dict[int, Document | None] = {}
+        if (len(source_ids) == 1 and source_ids[0] not in reviewed_units
+                and declared_complete and known_armies
+                and declared_armies <= known_armies and current_source_armies <= known_armies):
+            buckets: dict[tuple, list[int]] = defaultdict(list)
+            blocked: set[tuple] = set()
+            for index, row in enumerate(entries):
+                identity = row["identity"]
+                if row["kind"] not in {"summaries", "classification"}:
+                    continue
+                pair = (row["earlierObservedDate"], row["laterObservedDate"], identity["groupId"])
+                if row["kind"] == "classification":
+                    blocked.update((*pair, identity[f]) for f in ("beforeField", "afterField"))
+                elif identity["field"] in ITEM_FIELDS and identity["sourceUnitId"] == source_ids[0]:
+                    buckets[(*pair, identity["field"])].append(index)
+            for key, indexes in buckets.items():
+                earlier, later, group, field = key
+                if key in blocked:
+                    continue
+                records = [comparisons.get((army, earlier, later)) for army in sorted(known_armies)]
+                if any(record is None for record in records):
+                    continue
+                item_endpoints = [
+                    (army, endpoint(record["earlier"]["sha256"]),
+                     endpoint(record["later"]["sha256"]),
+                     [metadata(sha) for sha in record["earlier"]["metadataSha256"]],
+                     [metadata(sha) for sha in record["later"]["metadataSha256"]])
+                    for army, record in zip(sorted(known_armies), records, strict=True)
+                    if record is not None
+                ]
+                candidates = [entries[i] for i in indexes]
+                result = historical_shared_delta(
+                    candidates, source_ids[0], profiles, item_endpoints,
+                    lambda label: normalized_profile_identity(label, config), excluded, aliases,
+                )
+                if result is None:
+                    continue
+                target, delta = result
+                unit["generalHistory"][target].append({
+                    "kind": "summaries", "scope": "",
+                    "earlierObservedDate": earlier, "laterObservedDate": later,
+                    "armyIds": sorted(known_armies), "text": reference_summary(delta),
+                    "identity": {"field": field, "sourceUnitId": source_ids[0],
+                                 "groupId": group, **delta},
+                    "evidence": {
+                        "observations": [row["evidence"] for row in candidates],
+                        "generalAttribution": {
+                            "profileIdentity": target, "method": "sharedItemsExactWindows",
+                            "comparisonEndpoints": records, "delta": delta,
+                        },
+                    },
+                })
+                counts["generalEntries"] += 1
+                counts["generalItemEntries"] += 1
+                for index in indexes:
+                    residual = subtract_shared(entries[index], delta)
+                    residuals[index] = residual
+                    if residual is None:
+                        counts["fullyPromotedItemRows"] += 1
+            entries = [residuals.get(i, row) for i, row in enumerate(entries)]
+            entries = [row for row in entries if row is not None]
+        for row in entries:
             target = None
             if (row["kind"] == "characteristic" and declared_complete
                     and declared_armies <= known_armies
@@ -1003,7 +1251,8 @@ def render(units: list[Document], names: dict[int, str], coverage: Document,
         "Army list presence does not establish playable availability. "
         "Army names use current labels. MOV is displayed in inches. "
         + ("Current cards show all optional Unit categories. General history is a conservative "
-           "scalar-only attribution pilot; other changes remain in their observed Army contexts. "
+           "exact-window attribution pilot for characteristics and shared items; "
+           "other changes remain in their observed Army contexts. "
            "Capability changes describe the listed profiles and loadouts, not attached entities. "
            if contextual else "")
         + "</p>"
