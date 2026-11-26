@@ -531,6 +531,71 @@ def test_multi_profile_history_promotes_only_direct_profile_owned_changes(monkey
     assert compare(endpoint([]), endpoint([skill]), selected=None) is None
 
 
+def test_common_revision_records_selects_unique_per_army_windows():
+    records = {(101, "2025-10-15"): [("2025-10-02", {"id": 1})],
+               (102, "2025-10-15"): [("2025-09-30", {"id": 2})]}
+    rows = [
+        {"armyIds": [101], "earlierObservedDate": "2025-10-02",
+         "laterObservedDate": "2025-10-15"},
+        {"armyIds": [102], "earlierObservedDate": "2025-09-30",
+         "laterObservedDate": "2025-10-15"},
+    ]
+    assert player.common_revision_records(records, {101, 102}, "2025-10-15", rows) == [
+        (101, "2025-10-02", {"id": 1}), (102, "2025-09-30", {"id": 2}),
+    ]
+    assert player.common_revision_records(records, {101, 102, 103}, "2025-10-15", rows) is None
+    assert player.common_revision_records(records, {101, 102}, "2025-10-16", rows) is None
+    wrong = [{**rows[0], "earlierObservedDate": "2025-10-01"}, rows[1]]
+    assert player.common_revision_records(records, {101, 102}, "2025-10-15", wrong) is None
+    records[(102, "2025-10-15")].append(("2025-10-01", {"id": 3}))
+    assert player.common_revision_records(records, {101, 102}, "2025-10-15", rows) is None
+
+
+def test_common_revision_scalars_keep_conflicting_transitions_and_later_dates_separate():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    row = next(r for r in units[0]["entries"] if r["kind"] == "characteristic")
+    other = {**row, "earlierObservedDate": "2025-09-30", "armyIds": [102]}
+    conflict = {**other, "identity": [*row["identity"][:3], {"present": True, "value": 13}]}
+    later = {**other, "laterObservedDate": "2025-10-16"}
+    assert player.same_revision_scalars([row, other, conflict, later]) == [[0, 1], [2], [3]]
+
+
+def test_common_revision_items_require_independent_army_support(monkeypatch):
+    skill = {"filter": {"id": 5, "name": "Skill"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(skills):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [{"id": 2, "name": "Profile", "skills": skills}],
+            "options": [{"id": 1}, {"id": 2}],
+        }]}]}
+
+    row = {"armyIds": [101], "identity": {
+        "field": "skills", "groupId": 1, "lost": [], "gained": [skill],
+    }}
+    other = {**row, "armyIds": [102]}
+    general = [{"profile_identity": "profile"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    def compare(rows, endpoints):
+        return player.unanimous_revision_delta(
+            rows, 42, general, endpoints, identity, set(), set(), {}, None,
+        )
+
+    before, after = endpoint([]), endpoint([skill])
+    ends = [(101, before, after, [], []), (102, before, after, [], [])]
+    assert compare([row, other], ends) == ("profile", {"lost": [], "gained": [skill]})
+    assert compare([row], ends) is None
+    assert compare([row, other], [ends[0], (102, after, after, [], [])]) is None
+
+
 def test_contextual_action_rows_keep_reference_changes_distinct():
     def ref(item_id, label, extra=None):
         occurrence = {"extra": [{"name": extra}]} if extra else {}

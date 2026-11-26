@@ -309,13 +309,15 @@ make v1.3.0 depend on them.
     contract, keep Army-only changes in their owning cards, and review dense
     histories such as Minutemen before public integration. The private contextual
     preview now renders current profile and Army cards, with typed collapsed
-    histories and separate unmatched contexts. The exact-window pilot now
-    includes 31 shared characteristic and 115 shared-item entries, retaining
+    histories and separate unmatched contexts. The shared-revision pilot now
+    includes 31 shared characteristic and 130 shared-item entries, retaining
     Army-level residual changes. It supports stable direct attachments,
-    reviewed source-classified Equipment without a native counterpart, and
-    explicitly scoped profile-owned changes in stable multi-profile Groups.
-    Extend coverage for other classified items, multi-target and group-owned
-    loadout changes, and incomplete or asynchronous observations where evidence
+    reviewed source-classified Equipment without a native counterpart,
+    explicitly scoped profile-owned changes in stable multi-profile Groups,
+    and different earlier revision dates with a common later revision date
+    and independently supported transitions. Extend coverage for other
+    classified items, multi-target and group-owned loadout changes, and
+    incomplete observations or differing later revision dates where evidence
     permits; review remaining Army-context and unresolved entries before
     public integration.
   - [ ] Review publication rights before exposing derived historical data.

@@ -134,8 +134,9 @@ summary streams with supported profile characteristic candidates. It resolves
 historical Group and owner labels against the pinned comparison endpoints,
 consolidates changes by exact observation window and Army scope, and combines
 equal group-wide effects even where the affected loadout definitions differ
-between Armies. The player-facing timeline groups entries by their first
-observed date (the later endpoint), not an inferred publication date. Preserve
+between Armies. The player-facing timeline groups entries by the later endpoint's encoded
+JSON revision date, not the backup acquisition date or an inferred public
+publication date. Preserve
 each complete observation window in technical evidence. Within a date, display
 equivalent effects once across disjoint Army scopes even if their earlier
 observation dates differ. Retain distinct cost pairs, partial scopes, source
@@ -173,10 +174,14 @@ The contextual private preview uses the current materialized General profiles
 with all optional Unit categories enabled and current Army cards. General
 history covers seven scalar fields (CC, BS, PH, WIP, ARM, BTS and S) and
 supported shared Skill, Equipment and Weapon occurrence changes. It requires
-one stable source Unit identity, every known Army context with matching exact
-observation windows, complete declared Army coverage, and one uniquely
-identified profile occurrence at each endpoint. Scalar endpoint values must
-agree across those contexts and with the canonical General-stat composition.
+one stable source Unit identity, every known Army context with a unique
+comparison ending on the same encoded JSON revision date, complete declared
+Army coverage, and one uniquely identified profile occurrence at each endpoint.
+Scalar endpoint values must agree across those contexts and with the canonical
+General-stat composition. Earlier revision dates may differ. In that case,
+shared-item promotion additionally requires the same occurrence transition to
+be independently supported in every Army's own comparison. Preserve every
+individual comparison window; do not merge changes with different later dates.
 
 For shared items, compare both historical endpoint projections using the
 canonical shared-item functions, including the loadouts present at each

@@ -559,7 +559,7 @@ def scalar_general_target(
 ) -> str | None:
     """Pilot: unanimous scalar transitions on a single stable source Unit.
 
-    Every known list context must have the same exact observation window.
+    Every known list context must end on the same encoded revision date.
     No missing, ambiguous, extra or moved profile occurrence is promoted.
     """
     if row["kind"] != "characteristic" or len(source_ids) != 1:
@@ -854,6 +854,78 @@ def subtract_shared(row: Document, delta: Document) -> Document | None:
             "text": reference_summary(residual)}
 
 
+def common_revision_records(
+    comparisons: dict[tuple[int, str], list[tuple[str, Document]]],
+    armies: set[int], later: str, rows: list[Document],
+) -> list[tuple[int, str, Document]] | None:
+    """Select one unambiguous comparison ending at the same revision per Army."""
+    if not armies:
+        return None
+    records = []
+    windows = {}
+    for army in sorted(armies):
+        choices = comparisons.get((army, later), [])
+        if len(choices) != 1:
+            return None
+        earlier, record = choices[0]
+        if earlier >= later:
+            return None
+        windows[army] = earlier
+        records.append((army, earlier, record))
+    if any(
+        row["laterObservedDate"] != later
+        or any(windows.get(army) != row["earlierObservedDate"] for army in row["armyIds"])
+        for row in rows
+    ):
+        return None
+    return records
+
+
+def same_revision_scalars(entries: list[Document]) -> list[list[int]]:
+    """Group equal scalar transitions by later revision, not acquisition window."""
+    buckets: dict[str, list[int]] = defaultdict(list)
+    for index, row in enumerate(entries):
+        if row["kind"] == "characteristic":
+            key = encode([row["laterObservedDate"], row["identity"]])
+            buckets[key].append(index)
+    return list(buckets.values())
+
+
+def unanimous_revision_delta(
+    rows: list[Document], source_id: int, general: list[Document],
+    endpoints: list[tuple[int, Document, Document, list, list]],
+    profile_identity: Callable[[object], str],
+    excluded: set[tuple[str, int]], aliases: set[tuple[str, int]],
+    equipment_classes: dict[int, tuple[str, str]], profile_id: int | None,
+) -> tuple[str, Document] | None:
+    """Require each Army to independently support the promoted item transition."""
+    result = historical_shared_delta(
+        rows, source_id, general, endpoints, profile_identity, excluded, aliases,
+        equipment_classes, target_profile_id=profile_id,
+    )
+    if result is None:
+        return None
+    target, delta = result
+    supported = {direction: {occurrence_key(ref) for ref in delta[direction]}
+                 for direction in ("lost", "gained")}
+    for endpoint in endpoints:
+        local_rows = [row for row in rows if endpoint[0] in row["armyIds"]]
+        if not local_rows:
+            return None
+        local = historical_shared_delta(
+            local_rows, source_id, general, [endpoint], profile_identity, excluded, aliases,
+            equipment_classes, target_profile_id=profile_id,
+        )
+        if local is None or local[0] != target:
+            return None
+        for direction in supported:
+            supported[direction] &= {occurrence_key(ref) for ref in local[1][direction]}
+    delta = {direction: [ref for ref in delta[direction]
+                        if occurrence_key(ref) in supported[direction]]
+             for direction in supported}
+    return (target, delta) if delta["lost"] or delta["gained"] else None
+
+
 def contextual_model(
     units: list[Document], history: sqlite3.Connection, archive: Path,
 ) -> dict[str, int]:
@@ -912,12 +984,11 @@ def contextual_model(
             published_reviewed_loadout_capabilities,
         )
         reviewed_units = {fact["unit_id"] for fact in published_reviewed_loadout_capabilities(db)}
-    comparisons = {
-        (army, earlier, later): json.loads(body)
-        for army, earlier, later, body in history.execute(
-            "SELECT army_id,earlier_date,later_date,body FROM comparison"
-        )
-    }
+    comparisons: dict[tuple[int, str], list[tuple[str, Document]]] = defaultdict(list)
+    for army, earlier, later, body in history.execute(
+        "SELECT army_id,earlier_date,later_date,body FROM comparison"
+    ):
+        comparisons[(army, later)].append((earlier, json.loads(body)))
     inventory = dict(history.execute("SELECT unit_id,body FROM unit_identity"))
     source = read_history(archive, ARCHIVE_PIN)
 
@@ -967,7 +1038,7 @@ def contextual_model(
                 identity = row["identity"]
                 if row["kind"] not in {"summaries", "classification"}:
                     continue
-                pair = (row["earlierObservedDate"], row["laterObservedDate"], identity["groupId"])
+                pair = (row["laterObservedDate"], identity["groupId"])
                 if row["kind"] == "classification":
                     blocked.update((*pair, identity[f]) for f in ("beforeField", "afterField"))
                 elif identity["field"] in ITEM_FIELDS and identity["sourceUnitId"] == source_ids[0]:
@@ -979,26 +1050,36 @@ def contextual_model(
                         profile_id = targets[0]["profileId"] if targets else None
                         buckets[(*key, profile_id)].append(index)
             for key, indexes in buckets.items():
-                earlier, later, group, field, profile_id = key
+                later, group, field, profile_id = key
                 if key[:-1] in blocked or profile_id in multi_target[key[:-1]]:
                     continue
-                records = [comparisons.get((army, earlier, later)) for army in sorted(known_armies)]
-                if any(record is None for record in records):
+                candidates = [entries[i] for i in indexes]
+                selected = common_revision_records(comparisons, known_armies, later, candidates)
+                if selected is None:
                     continue
+                earlier = min(start for _, start, _ in selected)
+                asynchronous = len({start for _, start, _ in selected}) > 1
+                records = [record for _, _, record in selected]
                 item_endpoints = [
                     (army, endpoint(record["earlier"]["sha256"]),
                      endpoint(record["later"]["sha256"]),
                      [metadata(sha) for sha in record["earlier"]["metadataSha256"]],
                      [metadata(sha) for sha in record["later"]["metadataSha256"]])
-                    for army, record in zip(sorted(known_armies), records, strict=True)
-                    if record is not None
+                    for army, _, record in selected
                 ]
-                candidates = [entries[i] for i in indexes]
-                result = historical_shared_delta(
-                    candidates, source_ids[0], profiles, item_endpoints,
-                    lambda label: normalized_profile_identity(label, config), excluded, aliases,
-                    equipment_classes, target_profile_id=profile_id,
-                )
+                def identity_for(label: object) -> str:
+                    return normalized_profile_identity(label, config)
+
+                if asynchronous:
+                    result = unanimous_revision_delta(
+                        candidates, source_ids[0], profiles, item_endpoints, identity_for,
+                        excluded, aliases, equipment_classes, profile_id,
+                    )
+                else:
+                    result = historical_shared_delta(
+                        candidates, source_ids[0], profiles, item_endpoints, identity_for,
+                        excluded, aliases, equipment_classes, target_profile_id=profile_id,
+                    )
                 if result is None:
                     continue
                 target, delta = result
@@ -1020,14 +1101,22 @@ def contextual_model(
                         "evidence": {
                             "observations": [row["evidence"] for row in candidates],
                             "generalAttribution": {
-                                "profileIdentity": target, "method": "sharedItemsExactWindows",
+                                "profileIdentity": target,
+                                "method": ("sharedItemsCommonRevision" if asynchronous
+                                           else "sharedItemsExactWindows"),
                                 "comparisonEndpoints": records, "sourceField": field,
+                                "comparisonWindows": [
+                                    {"armyId": army, "earlier": start, "later": later}
+                                    for army, start, _ in selected
+                                ],
                                 "sourceProfileId": profile_id, "delta": display_delta,
                             },
                         },
                     })
                     counts["generalEntries"] += 1
                     counts["generalItemEntries"] += 1
+                    if asynchronous:
+                        counts["commonRevisionItemEntries"] += 1
                     if profile_id is not None:
                         counts["multiProfileItemEntries"] += 1
                     if field != display_field:
@@ -1039,37 +1128,54 @@ def contextual_model(
                         counts["fullyPromotedItemRows"] += 1
             entries = [residuals.get(i, row) for i, row in enumerate(entries)]
             entries = [row for row in entries if row is not None]
-        for row in entries:
-            target = None
-            if (row["kind"] == "characteristic" and declared_complete
-                    and declared_armies <= known_armies
-                    and current_source_armies <= known_armies
-                    and known_armies == set(row["armyIds"])):
-                pair = (row["earlierObservedDate"], row["laterObservedDate"])
-                records = [comparisons.get((army, *pair)) for army in sorted(known_armies)]
-                if all(record is not None for record in records):
-                    endpoints = [
-                        (army, endpoint(record["earlier"]["sha256"]),
-                         endpoint(record["later"]["sha256"]))
-                        for army, record in zip(sorted(known_armies), records, strict=True)
-                        if record is not None
-                    ]
-                    target = scalar_general_target(
-                        row, source_ids, profiles, known_armies, endpoints,
-                        lambda label: normalized_profile_identity(label, config),
-                    )
-            if target is not None:
+        promoted_scalars: set[int] = set()
+        if (declared_complete and declared_armies <= known_armies
+                and current_source_armies <= known_armies):
+            for indexes in same_revision_scalars(entries):
+                candidates = [entries[i] for i in indexes]
+                row = candidates[0]
+                army_ids = [army for candidate in candidates for army in candidate["armyIds"]]
+                if set(army_ids) != known_armies or len(army_ids) != len(known_armies):
+                    continue
+                later = row["laterObservedDate"]
+                selected = common_revision_records(comparisons, known_armies, later, candidates)
+                if selected is None:
+                    continue
+                endpoints = [
+                    (army, endpoint(record["earlier"]["sha256"]),
+                     endpoint(record["later"]["sha256"]))
+                    for army, _, record in selected
+                ]
+                merged = {**row, "armyIds": sorted(army_ids),
+                          "earlierObservedDate": min(start for _, start, _ in selected)}
+                target = scalar_general_target(
+                    merged, source_ids, profiles, known_armies, endpoints,
+                    lambda label: normalized_profile_identity(label, config),
+                )
+                if target is None:
+                    continue
+                asynchronous = len({start for _, start, _ in selected}) > 1
                 unit["generalHistory"][target].append({
-                    **row, "evidence": {
-                        "observations": row["evidence"],
+                    **merged, "evidence": {
+                        "observations": [candidate["evidence"] for candidate in candidates],
                         "generalAttribution": {
                             "profileIdentity": target, "knownArmyIds": sorted(known_armies),
                             "declaredArmyIds": sorted(declared_armies),
-                            "method": "unanimousScalarExactWindows",
+                            "method": ("unanimousScalarCommonRevision" if asynchronous
+                                       else "unanimousScalarExactWindows"),
+                            "comparisonWindows": [
+                                {"armyId": army, "earlier": start, "later": later}
+                                for army, start, _ in selected
+                            ],
                         },
                     },
                 })
                 counts["generalEntries"] += 1
+                if asynchronous:
+                    counts["commonRevisionScalarEntries"] += 1
+                promoted_scalars.update(indexes)
+        for index, row in enumerate(entries):
+            if index in promoted_scalars:
                 continue
             identity = row["identity"]
             source_id = identity[0][1] if isinstance(identity, list) else identity["sourceUnitId"]
@@ -1174,9 +1280,19 @@ def context_history(rows: list[Document], names: dict[int, str], *, general: boo
                         for action, body in action_rows(row)
                     )
                     armies = ", ".join(names.get(i, f"Army #{i}") for i in row["armyIds"])
+                    windows = row["evidence"].get("generalAttribution", {}).get(
+                        "comparisonWindows", [],
+                    ) if isinstance(row["evidence"], dict) else []
+                    window_text = (
+                        "<p>Comparison windows: " + "; ".join(
+                            f"{esc(names.get(w['armyId'], str(w['armyId'])))}: "
+                            f"{esc(w['earlier'])} – {esc(w['later'])}" for w in windows
+                        ) + "</p>" if windows else
+                        f"<p>Observation window: {esc(row['earlierObservedDate'])} – "
+                        f"{esc(row['laterObservedDate'])}</p>"
+                    )
                     evidence = (
-                        f"<p>{esc(armies)}</p><p>Observation window: "
-                        f"{esc(row['earlierObservedDate'])} – {esc(row['laterObservedDate'])}</p>"
+                        f"<p>{esc(armies)}</p>" + window_text
                         + ("<p>Scope: Own capabilities only (excluding attached entities).</p>"
                            if row["scope"].endswith(" · Own capabilities only") else "")
                         + f"<pre>{raw(row['evidence'])}</pre>"
@@ -1378,12 +1494,12 @@ def render(units: list[Document], names: dict[int, str], coverage: Document,
         + ("Unit details · History preview" if contextual else "Unit version history")
         + "</h1>"
         '<p class="notice">Private N5 preview · '
-        "Dates indicate when each change was first observed. "
-        "History is incomplete; dates are not confirmed publication dates. "
+        "Dates come from the later Army JSON revision identifiers. "
+        "History is incomplete; dates are not independently confirmed publication dates. "
         "Army list presence does not establish playable availability. "
         "Army names use current labels. MOV is displayed in inches. "
         + ("Current cards show all optional Unit categories. General history is a conservative "
-           "exact-window attribution pilot for characteristics and shared items; "
+           "shared-revision attribution pilot for characteristics and shared items; "
            "other changes remain in their observed Army contexts. "
            "Capability changes describe the listed profiles and loadouts, not attached entities. "
            if contextual else "")
