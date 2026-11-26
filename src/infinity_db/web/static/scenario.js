@@ -487,6 +487,7 @@ function inlineScenarioRuleArticle(inclusion) {
   for (const [index, paragraph] of (inclusion.paragraphs || []).entries()) {
     const text = document.createElement("p");
     text.className = "detail-copy";
+    text.setAttribute("data-provenance", "maintained-rule");
     appendMaintainedText(text, inclusion.paragraph_tokens?.[index], paragraph);
     article.append(text);
   }
@@ -538,12 +539,13 @@ function issuesSection(item) {
   if (!(item.source_issues || []).length) return null;
   const cards = item.source_issues.map((issue) => {
     const card = document.createElement("article");
-    card.className = "surface surface--highlighted scenario-source-issue";
+    card.className = "surface surface--subtle scenario-source-issue";
     card.id = `scenario-source-issue-${issue.id}`;
     const heading = document.createElement("div");
     heading.className = "scenario-source-issue-heading";
     const title = document.createElement("h3");
     const reviewed = issue.status === "reviewed-resolution";
+    card.setAttribute("data-provenance", reviewed ? "reviewed-interpretation" : "source-uncertainty");
     title.textContent = reviewed ? "Reviewed interpretation" : "Needs verification";
     const badge = document.createElement("span");
     badge.className = "detail-badge";

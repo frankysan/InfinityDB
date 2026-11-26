@@ -1353,7 +1353,7 @@ h1>span {
   margin: 0;
 }
 
-/* Keep authored explanations and source notes distinct from gameplay rules. */
+/* Content hierarchy follows reviewed evidence, never prose heuristics. */
 .rules-provenance-caption {
   margin: 0;
   color: var(--color-text-secondary);
@@ -1366,13 +1366,68 @@ h1>span {
   font-weight: 650;
 }
 
-.detail-fact-group[data-provenance="reviewed-explanation"] {
-  border-inline-start: 2px solid var(--color-border-muted);
-  padding-inline-start: var(--space-3);
+[data-provenance="maintained-rule"].detail-copy {
+  color: var(--color-text-primary);
+}
+
+[data-provenance="reviewed-explanation"],
+[data-provenance="reviewed-interpretation"],
+[data-provenance="source-example"],
+[data-provenance="source-faq"] {
+  background: var(--color-surface-default);
+  color: var(--color-text-primary);
+  border-inline-start: 3px solid var(--color-profile-accent);
+  padding: var(--space-1) var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+[data-provenance="source-example"] {
+  border-inline-start-style: dashed;
+}
+
+[data-provenance="reviewed-interpretation"] {
+  border-inline-start-style: double;
+  border-inline-start-width: 4px;
+}
+
+[data-provenance="source-faq"] {
+  border-inline-start-color: var(--color-text-rule-heading);
+}
+
+[data-provenance="source-discrepancy"],
+[data-provenance="source-uncertainty"] {
+  border-inline-start: 3px solid var(--color-status-warning-indicator);
+  background: var(--color-status-warning-surface);
+  color: var(--color-status-warning-text);
+  overflow-wrap: anywhere;
+}
+
+:is([data-provenance="source-discrepancy"], [data-provenance="source-uncertainty"])
+  :is(h3, p, a, a:hover) {
+  color: inherit;
+}
+
+:is([data-provenance="source-discrepancy"], [data-provenance="source-uncertainty"]) a {
+  text-decoration: underline;
+}
+
+.immunity-reviewed-cases > .detail-list {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.immunity-reviewed-cases li > .detail-source {
+  font-family: var(--font-family-compact);
+  font-weight: 600;
+}
+
+[data-provenance="reviewed-explanation"] > .rules-provenance-caption {
+  font-style: italic;
 }
 
 .rules-source-note {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   line-height: 1.5;
   border-inline-start: 2px solid var(--color-border-default);

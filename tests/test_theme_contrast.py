@@ -72,6 +72,8 @@ TEXT_CONTRAST_PAIRS = (
     ("settings choice text", "color-nav-choice-muted", "color-nav-control-surface"),
     ("primary button", "color-text-on-action", "color-action-primary"),
     ("warning status", "color-status-warning-text", "color-status-warning-surface"),
+    ("rules prose", "color-text-primary", "color-surface-subtle"),
+    ("rules source context", "color-text-secondary", "color-surface-subtle"),
     (
         "default availability badge",
         "color-availability-default-text",
@@ -137,6 +139,7 @@ NON_TEXT_CONTRAST_PAIRS = (
     ),
     ("loading spinner", "color-spinner-active", "color-spinner-track"),
     ("extended profile accent", "color-profile-accent", "color-surface-default"),
+    ("FAQ edge", "color-text-rule-heading", "color-surface-default"),
     (
         "subordinate profile accent",
         "color-profile-accent-subordinate",

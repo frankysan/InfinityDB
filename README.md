@@ -101,7 +101,9 @@ its application metrics.
   surfaces, visibility, Cover, zones, Coherency and replacement positioning, with
   Move's declaration requirements and Silhouette diagrams.
 - Presents dated N5 FAQ clarifications alongside the affected rules and scenarios,
-  with concise citations and disclosed source disagreements. The **Deployed objects**
+  with concise citations and disclosed source disagreements. Distinct visual
+  treatments identify reviewed interpretations and explicitly sourced examples.
+  The **Deployed objects**
   reference presents 17 reviewed objects in individual cards, retaining disputed
   or unknown attributes and verified delivery/Unit-use context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions

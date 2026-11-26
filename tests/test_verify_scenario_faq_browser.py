@@ -167,6 +167,72 @@ def chrome() -> Iterator[Any]:
             browser.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+def test_rules_content_hierarchy_across_palettes(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Audit real cards across every palette without reclassifying source text."""
+    from infinity_db.theme_palette import palette_options
+
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for path, expected_roles in (
+            ("/skills/immunity", {
+                "reviewed-explanation": "solid", "source-example": "dashed",
+                "reviewed-interpretation": "double",
+            }),
+            ("/fireteams", {"source-faq": "solid", "source-discrepancy": "solid"}),
+            ("/scenarios/domination?army_points=350", {"source-uncertainty": "solid"}),
+        ):
+            page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+            for role in expected_roles:
+                page.locator(f'[data-provenance="{role}"]').first.wait_for(
+                    state="visible", timeout=30000,
+                )
+            failures = page.evaluate(
+                """({palettes, roles}) => {
+                  const root = document.documentElement;
+                  const failures = [];
+                  for (const palette of palettes) {
+                    for (const mode of ["light", "dark"]) {
+                      root.dataset.themePalette = palette;
+                      root.dataset.theme = mode;
+                      for (const [role, border] of Object.entries(roles)) {
+                        const node = document.querySelector('[data-provenance="' + role + '"]');
+                        const style = getComputedStyle(node);
+                        const expectedSurface = role.startsWith("source-discrepancy")
+                          || role === "source-uncertainty"
+                          ? "--color-status-warning-surface" : "--color-surface-default";
+                        const probe = document.createElement("span");
+                        probe.style.color = "var(" + expectedSurface + ")";
+                        root.append(probe);
+                        const expected = getComputedStyle(probe).color;
+                        probe.remove();
+                        if (style.borderInlineStartStyle !== border
+                            || style.backgroundColor !== expected) {
+                          failures.push([palette, mode, role, style.borderInlineStartStyle,
+                            style.backgroundColor, expected]);
+                        }
+                      }
+                      if (root.scrollWidth > innerWidth + 1) {
+                        failures.push([palette, mode, "overflow", root.scrollWidth]);
+                      }
+                    }
+                  }
+                  return failures;
+                }""",
+                {"palettes": [option["value"] for option in palette_options()],
+                 "roles": expected_roles},
+            )
+            assert not failures, (path, failures)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
     ("slug", "page_number", "required", "excluded", "inbound_path"),

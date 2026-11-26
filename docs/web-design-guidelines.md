@@ -169,10 +169,13 @@ references, with theme tokens and a second cue beyond color:
   do not repeat a maintenance disclaimer on every card or suggest that its
   gameplay meaning differs from cited official rules.
 - **Explanations, examples and reviewed interpretations:** keep gameplay
-  requirements/effects at body size. Distinguish explanations under
-  **Clarifications and examples**, with an explicit InfinityDB-reviewed
-  caption and a neutral left border. Keep reviewed interaction provenance.
-  A curation review date alone is not an official rules effective date.
+  requirements/effects in upright primary body text. Use an inset explanation
+  with a solid leading edge and an italic InfinityDB-reviewed caption for mixed
+  **Clarifications and examples**. Use a dashed edge for explicitly identified
+  source examples and a double edge for reviewed interpretations, accompanied
+  by a compact semibold evidence label before the explanation. Do not classify
+  unstructured prose by keyword. A curation review date alone is not an
+  official rules effective date.
 - **Source history/context:** label editorial `facts.sourceNotes` as
   **Source context**, in secondary type with a neutral divider, preserving
   maintained links. Cite sources as **Sources**, without conflating Wiki
@@ -187,6 +190,8 @@ references, with theme tokens and a second cue beyond color:
   **Source discrepancy — cited publications differ** in the ordinary
   interface even while explanatory detail remains collapsible. The warning
   uses readable text, a leading border and accessible warning theme colors.
+  Unresolved scenario source uncertainty uses the same warning treatment;
+  reviewed scenario interpretations use the interpretation treatment.
   Inline `[[review-needed:source-conflict]]` markers retain their own
   visible uncertainty labels. Do not silently select a winner or hide
   material gameplay ambiguity in Developer Mode.
@@ -197,7 +202,9 @@ This **provenance presentation contract** does not authorize invented source
 classifications or complete an audit of every Army statline, scenario
 discrepancy, or possible historical update. Maintain the source-model
 boundaries in [data-model.md](data-model.md) and test both light/dark,
-desktop/mobile layouts and non-color text cues.
+desktop/mobile layouts and non-color text cues. Use the shared provenance
+styles across all palettes; distinguish categories without changing body
+font family or relying on color alone.
 
 ### Unit history presentation
 

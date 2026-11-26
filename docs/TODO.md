@@ -373,15 +373,13 @@ make v1.3.0 depend on them.
   Add independent sectorial palettes only if established source color pairs
   become available; do not invent them.
 - [ ] **Web frontend + Data processing:** Establish and implement a shared
-  visual hierarchy for official rules text, recent official rule/stat changes,
-  examples, explanations, corrections, interpretations and source
-  inconsistencies. Compare typography (family, style, weight and features),
-  color and other semantic treatments on representative existing cards in
-  light/dark and Army-derived themes. Preserve provenance and accessible
-  non-color meaning; integrate official-change notices with the
-  [per-reference change history](#per-reference-change-history) work, not a
-  parallel mechanism. Record the selected policy in
-  [web design guidelines](web-design-guidelines.md).
+  visual hierarchy for rules provenance. Initial text, border, evidence-label
+  and warning treatments are implemented, with automated desktop/mobile
+  coverage across all palettes. Review representative cards visually and refine
+  typography and spacing as needed. Add explicit correction and recent-change
+  treatments only for verified upstream changes, through the
+  [per-reference change history](#per-reference-change-history) work. The
+  presentation policy is in [web design guidelines](web-design-guidelines.md).
 - [ ] **Web frontend + Web backend + Deployment:** Add a shared, minimal
   bug/error reporting form with lightweight spam/bot protection. Include
   the current page and relevant entity context by default, let the reporter

@@ -33,6 +33,7 @@ export function faqRulingsSection(items) {
   for (const ruling of items) {
     const card = document.createElement("article");
     card.className = "surface surface--subtle detail-section faq-ruling faq-dated-clarification";
+    card.setAttribute("data-provenance", "source-faq");
 
     const question = document.createElement("h3");
     question.className = "surface-titlebar surface-titlebar--subtle";
@@ -52,6 +53,7 @@ export function faqRulingsSection(items) {
     if (ruling.conflicting_citations?.length) {
       const discrepancy = document.createElement("details");
       discrepancy.className = "faq-source-discrepancy";
+      discrepancy.setAttribute("data-provenance", "source-discrepancy");
       const label = document.createElement("summary");
       label.textContent = "Source discrepancy — cited publications differ";
       const explanation = document.createElement("p");

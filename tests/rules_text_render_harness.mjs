@@ -18,7 +18,7 @@ class Node {
   set textContent(value) { this.children = [new Node("#text", String(value))]; }
   get textContent() { return this.tag === "#text"
     ? this.value : this.children.map((child) => child.textContent).join(""); }
-  setAttribute() {}
+  setAttribute(name, value) { this[name] = value; }
   addEventListener() {}
 }
 
@@ -152,6 +152,7 @@ const reviewed = clarifications.children.find((node) => (
   ))
 ));
 assert.ok(reviewed);
+assert.equal(reviewed["data-provenance"], "reviewed-explanation");
 assert.equal(reviewed.children[0].textContent, "Clarifications and examples");
 assert.ok(reviewed.children[1].textContent.includes("InfinityDB-reviewed explanation"));
 assert.equal(reviewed.children[2].tag, "ul");
@@ -177,6 +178,7 @@ const FAQ = faqRulingsSection([
 ]);
 const dated = FAQ.children.find((node) => node.tag === "article");
 assert.ok(dated.className.includes("faq-dated-clarification"));
+assert.equal(dated["data-provenance"], "source-faq");
 assert.ok(dated.children.some((node) => (
   node.className === "detail-source rules-source-citations faq-publication-source"
   && node.textContent.includes("Sources: N5 FAQ v0.1, p. 3")
@@ -197,6 +199,7 @@ const warning = conflicted.children.find((node) => (
   node.className === "faq-source-discrepancy"
 ));
 assert.ok(warning);
+assert.equal(warning["data-provenance"], "source-discrepancy");
 assert.equal(warning.children[0].textContent, "Source discrepancy — cited publications differ");
 assert.ok(warning.children[1].textContent.includes("publications differ"));
 

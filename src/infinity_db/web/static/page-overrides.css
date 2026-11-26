@@ -695,7 +695,6 @@ html:not([data-developer-mode="true"])
   display: grid;
   gap: 12px;
   padding: var(--space-2) 18px;
-  border-inline-start: 3px solid var(--color-border-strong);
 }
 
 .faq-dated-clarification > .surface-titlebar {
@@ -717,10 +716,7 @@ html:not([data-developer-mode="true"])
 
 .faq-source-discrepancy {
   margin-top: 12px;
-  border-inline-start: 3px solid var(--color-status-warning-indicator);
   padding: var(--space-2) var(--space-3);
-  background: var(--color-status-warning-surface);
-  color: var(--color-status-warning-text);
   font-size: var(--font-size-sm);
 }
 
