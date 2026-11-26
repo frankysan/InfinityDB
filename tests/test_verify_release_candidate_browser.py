@@ -350,6 +350,8 @@ def test_release_gate_runs_real_local_chromium_when_available(
 
     class ThreadedServer(ThreadingMixIn, WSGIServer):
         daemon_threads = True
+        # Allow concurrent Chromium asset requests on a busy Windows test host.
+        request_queue_size = 64
 
     class QuietHandler(WSGIRequestHandler):
         def log_message(self, format: str, *args: object) -> None:

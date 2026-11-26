@@ -908,6 +908,16 @@ def select_its_scenario(
         scenario_id, expected_domain="scenario", context="ITS scenario identity",
     )
     inspect_its_database(path)
+    return _read_validated_its_scenario(
+        path, season_id=season_id, revision=revision, scenario_id=scenario_id,
+    )
+
+
+def _read_validated_its_scenario(
+    path: Path, *,
+    season_id: str, revision: str, scenario_id: str,
+) -> dict[str, Any] | None:
+    """Read an exact mission from an already validated immutable season snapshot."""
     with closing(sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)) as connection:
         connection.row_factory = sqlite3.Row
         row = connection.execute(

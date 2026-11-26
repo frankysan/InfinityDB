@@ -78,6 +78,7 @@ def _report(module: Any, *, failed: bool = False) -> dict[str, Any]:
                 "version": "test",
                 "snapshotRevision": "snapshot",
             },
+            "scenario": {"name": "general", "warmupPasses": 1, "cases": []},
             "phases": [{
                 "name": "steady", "concurrency": 1, "requestsPerSecond": 1.0,
                 "errorRate": 0.0 if not failed else 1.0,

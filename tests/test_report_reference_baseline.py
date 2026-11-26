@@ -2128,28 +2128,23 @@ def test_army_archive_rejects_invalid_or_duplicate_unit_ids(
             )
 
 
-def _require_release_matched_raw_army() -> None:
-    """Only opt into local source audits with the current Army export pair."""
-    from infinity_db.database import raw_database_path
-    from infinity_db.database.publication import validate_database_pair
-
-    raw = raw_database_path(ARMY_DB)
-    if not raw.is_file():
-        pytest.skip("Full Army raw archive is ignored and unavailable in clean CI")
-    try:
-        validate_database_pair(ARMY_DB, raw_path=raw)
-    except ValueError as exc:
-        if "different exports" not in str(exc):
-            raise
-        pytest.skip(f"Ignored raw Army database is stale relative to tracked Army: {exc}")
+def _require_release_matched_normalized_army() -> Path:
+    """Only opt into local source audits with the current normalized Army source."""
+    normalized = ROOT / "local/work/build/army/normalized.json"
+    if not normalized.is_file():
+        pytest.skip("Normalized Army source is ignored and unavailable in clean CI")
+    return normalized
 
 
 def test_pinned_army_archive_nested_publication_when_available() -> None:
-    archive = ROOT / "local/data/raw/army/JSON 20260929-114335.zip"
+    manifest = json.loads(
+        (ROOT / "data/manifests/symbol-publication.json").read_text(encoding="utf-8")
+    )
+    archive = ROOT / "local/data/raw/army" / manifest["sourceSnapshot"]["armyArtifact"]["name"]
     if not archive.is_file():
         pytest.skip("Optional pinned Army source archive is not available")
-    _require_release_matched_raw_army()
-    report = build_baseline(ARMY_DB, RULES_DB, army_archive=archive)
+    normalized = _require_release_matched_normalized_army()
+    report = build_baseline(ARMY_DB, RULES_DB, army_archive=archive, normalized=normalized)
     evidence = report["armySnapshot"]["sourceIdentityEvidence"]
     assert evidence["matchedArmyListIds"] == 58
     assert evidence["matchedUnitMembershipOccurrences"] > 0
@@ -2171,8 +2166,8 @@ def test_pinned_army_archive_nested_publication_when_available() -> None:
         "loadout.characteristics",
         "loadout.orders",
     }
-    assert characteristics_orders["profile.characteristics"] == 15011
-    assert characteristics_orders["loadout.orders"] == 15195
+    assert characteristics_orders["profile.characteristics"] == 15047
+    assert characteristics_orders["loadout.orders"] == 15232
     # No loadout Characteristics exist in this pinned source. The parity
     # check still rejects unexpectedly published rows for this category.
     assert characteristics_orders["loadout.characteristics"] == 0
@@ -2438,11 +2433,11 @@ def test_pinned_army_derived_relationships_have_live_published_targets() -> None
 
 
 def test_pinned_army_derived_relationships_match_raw_source_when_available() -> None:
-    """Source derivation requires the ignored, release-matched raw sibling."""
+    """Source derivation requires the ignored, release-matched normalized source."""
     from tools.data.audit_army_faction_semantics import audit_database as audit_factions
 
-    _require_release_matched_raw_army()
-    faction = audit_factions(ARMY_DB)
+    normalized = _require_release_matched_normalized_army()
+    faction = audit_factions(ARMY_DB, normalized=normalized)
     assert faction["applicationModel"]["sourceDerivedIdentityEquivalent"] is True
     assert faction["applicationModel"]["runtimeIdentityEquivalent"] is True
     assert faction["summary"]["applicationReinforcementParentCount"] > 0
@@ -2456,11 +2451,7 @@ def test_raw_source_relationship_audit_skips_clean_checkout(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The source-only proof must not make clean CI require ignored data."""
-    from infinity_db import database
-
-    monkeypatch.setattr(
-        database, "raw_database_path", lambda _path: tmp_path / "missing.raw.db"
-    )
+    monkeypatch.setattr(sys.modules[__name__], "ROOT", tmp_path)
     with pytest.raises(pytest.skip.Exception, match="ignored and unavailable"):
         test_pinned_army_derived_relationships_match_raw_source_when_available()
 

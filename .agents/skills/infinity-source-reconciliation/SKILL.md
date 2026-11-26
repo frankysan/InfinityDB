@@ -28,6 +28,9 @@ hand those parts to the appropriate workflow after the source semantics are clea
    publication date, acquisition identity, and archived member/revision distinct. For N5, follow
    the reconciliation order and source-history policy in
    [N5 source history](../../../docs/n5-source-history.md#cross-source-reconciliation-procedure).
+   For every incoming Army snapshot, apply the mandatory
+   [Army snapshot reconciliation](../../../data/README.md#army-snapshot-reconciliation)
+   procedure before publication, including revalidation of snapshot-bound corrections.
 3. Prefer the applicable versioned official publication, FAQ/errata, and pinned Army source.
    Consult the exact Wiki revision and historical evidence where required. Treat dated official
    update posts as supplementary evidence; do not let a blog post replace a versioned rules PDF,

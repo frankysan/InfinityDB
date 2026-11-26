@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from infinity_db.database import Database
-from infinity_db.unit_presentation import enrich_unit_presentation
+from infinity_db.unit_presentation import enrich_unit_presentation, extended_general_profiles
 
 DATABASE = Path("data/generated/army.db")
 PROPERTIES = ("skills", "equipment", "weapons")
@@ -100,6 +100,39 @@ def test_identical_multiple_extra_variants_do_not_add_an_unnecessary_plain_base(
     shared = result["general_profiles"][0]["shared_items"]["weapons"]
     assert sorted(entry["extras"][0]["id"] for entry in shared) == [90, 91]
     assert all(entry["extras"] for entry in shared)
+
+
+def test_extended_projection_preserves_general_shared_items_and_visibility() -> None:
+    unit = fixture_loadouts(
+        {"weapons": [item(33), item(44)]},
+        {"weapons": [item(44)]},
+    )
+    army = unit["armies"][0]
+    army["profiles"][0]["ava"] = 2
+    alternative = deepcopy(army)
+    alternative["id"] = 102
+    alternative["availability_flags"] = ["reinforcement"]
+    alternative["profiles"][0]["ava"] = 1
+    alternative["loadouts"] = [{"group_id": 1, "weapons": [item(55)]}]
+    unit["armies"].append(alternative)
+    peripheral = {
+        "profile_identity": "peripheral", "display_name": "Peripheral", "group_id": 2,
+        "skills": [item(66)],
+    }
+    army["profiles"].append(peripheral)
+    result = enrich_unit_presentation(
+        unit, optional_filters={"reinforcement": False}, source_skill_classifications=(),
+    )
+    profiles = extended_general_profiles(result)
+    assert len(profiles) == 2
+    assert profiles[0]["shared_items"]["weapons"] == [item(44)]
+    assert profiles[0]["availability"] == [{"army_id": 101, "ava": "2"}]
+    assert profiles[1]["shared_items"]["skills"] == [item(66)]
+    assert profiles[1]["shared_items"]["weapons"] == []
+    assert all(
+        {key: value for key, value in row.items() if key != "availability"} == general
+        for row, general in zip(profiles, result["general_profiles"], strict=True)
+    )
 
 
 def test_harbingers_breaker_pistol_variant_is_presented_in_general_profile() -> None:

@@ -8,6 +8,52 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.2.2] - 2026-11-26
+
+### Player summary
+
+- Improved standalone scenario SVG compatibility and range helper endcap contrast.
+- Extended Unit Explorer results now show General profiles, including the
+  Skills, Equipment and Weapons shared by their profile variants.
+- Army filter counts and the Armies summary reflect matching Units and their
+  visible availability. Matching armies shows the availability total and a
+  collapsible breakdown by Army type. Army overview links use current filter defaults.
+- Faster Unit Explorer initial loading, filter changes and Extended results,
+  with unchanged matching and availability semantics.
+- Faster Unit details, Skill and Weapon catalogs, scenario Skill pages and
+  global search. Skill and Equipment pages transfer less data in normal mode.
+- Consolidated equivalent Scenario Skills across Core N5 and ITS seasons, with
+  applicable scenario links and exact seasonal or mission-specific differences.
+
+### Added
+
+- **Web backend + Web frontend:** Show only the General profiles in Extended
+  Unit Explorer results, including shared Skills, Equipment and Weapons as
+  plain text. Army-specific variants and loadouts remain on the Unit page.
+- **Data processing + Web backend + Web frontend:** Group reviewed equivalent
+  Scenario Skills and ITS CivEvac/Casevac into canonical catalog and Search
+  identities; retain context-specific rules, source citations and scoped routes.
+
+### Changed
+
+- **Web backend + Web frontend:** Reduce repeated Unit Explorer filtering and
+  General profile work; accelerate Unit Profile help, reference catalog loading,
+  scenario Skill lookups and global search. Load exact variant usage on demand
+  in Developer Mode rather than transferring it for every Skill or Equipment page.
+- **Project infrastructure:** Reuse successful hosted validation for identical
+  merge trees when the release evidence checks permit it.
+- **Project infrastructure:** Support representative Unit Explorer HTTP capacity
+  workloads and disposable runtime-image capacity measurements.
+
+### Fixed
+
+- **Web backend:** Resolve map colors and font sizes before SVG serialization and
+  draw contrasting ruler endcaps without changing measurement coordinates.
+- **Web backend + Web frontend:** Calculate Army usage across the filtered Unit
+  population before pagination, respecting optional availability settings.
+  Army overview links use Same profile and AND defaults and enable
+  Reinforcements for Reinforcement sections.
+
 ## [1.2.1] - 2026-11-25
 
 ### Player summary

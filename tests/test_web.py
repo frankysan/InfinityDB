@@ -696,7 +696,10 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b"article.id = `army-${armyValue(army)}`;" in script
     assert b"requestAnimationFrame(revealHashTarget);" in script
     assert b'target.scrollIntoView({ block: "center" });' in script
-    assert b'shareStateHref("/units", "units", { army_id: armyValue(army) })' in script
+    assert b'shareStateHref("/units", "units", filters)' in script
+    assert b"army_id: armyValue(army)" in script
+    assert b'matching_scope: "profile"' in script
+    assert b"and_filters: UNIT_EXPLORER_DEFAULT_AND_FILTERS" in script
     assert b"army.overview_group" in script
     assert b"reinforcementRelationships(army, visibleArmies)" in script
     assert b"army.parent_armies" in script
@@ -1572,6 +1575,7 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert status == 200
     normal = next(item for item in json.loads(body)["items"] if item["id"] == 1)
     assert "profiles" not in normal
+    assert "general_profiles" not in normal
 
     status, _, body = request(app, "/api/units", query="extended=1")
     assert status == 200
@@ -1582,12 +1586,240 @@ def test_unit_extended_results_are_opt_in_and_include_profile_context(app: Calla
     assert profile["type_label"] == "Line Trooper"
     assert profile["classification"] == "Light Infantry"
     assert profile["characteristic_presentations"] == []
+    assert "loadouts" not in profile
+    assert "skills" not in profile
+    status, _, detail_body = request(
+        app, "/api/units/1", query="mercs=0&specops=0&teamops=0&reinforcement=0",
+    )
+    assert status == 200
+    general = item["general_profiles"]
+    assert len(general) == 1
+    assert [
+        {key: value for key, value in row.items() if key != "availability"}
+        for row in general
+    ] == [
+        row for row in json.loads(detail_body)["general_profiles"]
+        if row["presentation_visible"]
+    ]
+    shared = general[0]["shared_items"]
+    assert shared["skills"][0]["name"] == "Stealth"
+    assert shared["skills"][0]["extras"][0]["name"] == "+3"
+    assert shared["equipment"][0]["name"] == "Medikit"
+    assert shared["equipment"][0]["quantity"] == 2
+    assert shared["weapons"][0]["quantity"] == 2
+    assert shared["weapons"][0]["extras"][0]["name"] == "AP"
+    assert general[0]["availability"] == [
+        {"army_id": 101, "ava": "2"}, {"army_id": 201, "ava": "2"},
+    ]
     assert {entry["army_id"] for entry in profile["availability"]} == {101, 201}
     assert {entry["ava"] for entry in profile["availability"]} == {2}
 
     status, _, body = request(app, "/api/units", query="extended=yes")
     assert status == 400
     assert json.loads(body)["error"] == "extended must be 0 or 1"
+
+def test_skill_detail_in_place_enrichment_matches_detached_reference() -> None:
+    from infinity_db.army_slugs import enrich_army_references
+    from infinity_db.domain_references import enrich_rule_relation_references
+    from infinity_db.maintained_text_references import enrich_maintained_text_references
+    from infinity_db.unit_slugs import enrich_nested_unit_slugs
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    api = application.api
+    original = api.skill_catalog.get_skill("mimetism")
+    assert original is not None
+    expected = enrich_nested_unit_slugs(api.database, original)
+    expected = enrich_army_references(api.database, expected)
+    expected = api.symbol_catalog.enrich_nested_units(expected)
+    expected = enrich_rule_relation_references(api.database, expected)
+    expected = enrich_maintained_text_references(
+        api.database, api.rules_database, expected,
+        additional_records=api._season_rule_records,
+    )
+    expected["variant_usage_published"] = api.variant_usage is not None
+    for _ in range(2):
+        status, _, body = request(application, "/api/skills/mimetism")
+        assert status == 200
+        assert json.loads(body) == expected
+    assert api.skill_catalog.get_skill("mimetism") == original
+
+
+def test_unit_profile_help_uses_only_attribute_entries_and_caches_payload(monkeypatch) -> None:
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    expected = [
+        item for item in application.api.glossary_catalog.embedded_entries()
+        if item["domain_slug"] == "attributes"
+    ]
+    # A fresh app must not build the full Glossary to serve this projection.
+    fresh = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("Unit Profile help must not construct the full Glossary")
+
+    monkeypatch.setattr(fresh.api.glossary_catalog, "entries", unexpected)
+    status, _, body = request(fresh, "/api/unit-profile-help")
+    assert status == 200
+    payload = json.loads(body)
+    assert payload["attributes"] == expected
+    assert payload["items"]
+    monkeypatch.setattr(fresh.api.glossary_catalog, "attribute_entries", unexpected)
+    status, _, repeated = request(fresh, "/api/unit-profile-help")
+    assert status == 200
+    assert repeated == body
+
+
+def test_unit_explorer_capacity_scenario_against_current_snapshot() -> None:
+    from urllib.parse import urlsplit
+
+    from tools.performance.capacity_test import discover_scenario
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+
+    def fetch(path: str) -> Mapping[str, Any]:
+        parsed = urlsplit(path)
+        status, _, body = request(application, parsed.path, query=parsed.query)
+        assert status == 200, path
+        if not parsed.path.startswith("/api/"):
+            return {}
+        payload = json.loads(body)
+        assert isinstance(payload, dict), path
+        return payload
+
+    _, cases = discover_scenario(
+        "http://example.invalid", timeout=10,
+        fetch_json=lambda _base_url, path: fetch(path),
+        scenario="unit-explorer",
+    )
+    for case in cases:
+        payload = fetch(case.path)
+        if case.name == "explorer-filters":
+            assert payload["catalogs"]["skills"]
+        elif case.name.startswith("explorer-extended"):
+            assert payload["items"]
+            assert all("general_profiles" in item for item in payload["items"])
+        elif case.path.startswith("/api/units?"):
+            assert "prospective_counts" in payload
+            assert "army_usage_counts" in payload
+
+
+def test_unit_filter_catalogs_match_public_catalog_identities(monkeypatch) -> None:
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    status, _, body = request(application, "/api/unit-filters")
+    assert status == 200
+    original = json.loads(body)
+    status, _, body = request(application, "/api/unit-filters", query="catalogs=0")
+    assert status == 200
+    assert json.loads(body) == original
+    status, _, body = request(application, "/api/unit-filters", query="catalogs=invalid")
+    assert status == 400
+
+    def unexpected_usage_query(*args, **kwargs):
+        pytest.fail("Filter initialization must not calculate catalog usage")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(application.database, "list_catalog_items", unexpected_usage_query)
+        patch.setattr(application.equipment_catalog, "_units_for_encoding", unexpected_usage_query)
+        status, _, body = request(application, "/api/unit-filters", query="catalogs=1")
+        assert status == 200
+    payload = json.loads(body)
+    catalogs = payload.pop("catalogs")
+    assert payload == original
+    for catalog, options in catalogs.items():
+        status, _, body = request(application, f"/api/{catalog}")
+        assert status == 200
+        assert options == [
+            {key: value for key, value in item.items()
+             if key in {"id", "name", "slug", "source_ids"}}
+            for item in json.loads(body)["items"]
+        ]
+
+
+def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -> None:
+    from infinity_db.unit_presentation import extended_general_profiles
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    # Several real Units, including a multi-profile Unit and an optional-only path.
+    flags = (
+        "mercs=0&specops=0&teamops=0&reinforcement=0",
+        "mercs=1&specops=1&teamops=1&reinforcement=1",
+    )
+    original = application.api._present_unit
+    calls = []
+
+    def present(*args, **kwargs):
+        calls.append(kwargs.get("general_only", False))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(application.api, "_present_unit", present)
+    for settings in flags:
+        query = f"limit=10&extended=1&matching_scope=profile&{settings}"
+        status, _, body = request(application, "/api/units", query=query)
+        assert status == 200
+        first = json.loads(body)
+        assert first["items"]
+        calls_after_first = len(calls)
+        # A different page size reuses the projection, not a cached list response.
+        status, _, body = request(
+            application, "/api/units", query=query.replace("limit=10", "limit=5"),
+        )
+        assert status == 200
+        second = json.loads(body)
+        assert second["items"] == first["items"][:5]
+        assert len(calls) == calls_after_first
+        for item in first["items"]:
+            status, _, body = request(application, f"/api/units/{item['id']}", query=settings)
+            assert status == 200
+            assert item["general_profiles"] == extended_general_profiles(json.loads(body))
+    assert calls.count(True) == 20
+
+
+@pytest.mark.parametrize("enabled", [False, True])
+def test_extended_general_projection_matches_all_current_units(enabled: bool) -> None:
+    from infinity_db.unit_presentation import (
+        OPTIONAL_AVAILABILITY_FLAGS,
+        extended_general_profiles,
+    )
+
+    application = create_app(
+        Path("data/generated/army.db"),
+        rules_database_path=Path("data/generated/rules_n5.db"),
+    )
+    api = application.api
+    flags = {flag: enabled for flag in OPTIONAL_AVAILABILITY_FLAGS}
+    units = api.database.list_units(
+        limit=10_000, _unbounded=True, mercs=enabled, specops=enabled,
+        teamops=enabled, reinforcement=enabled,
+    )["items"]
+    assert units
+    for item in units:
+        detail = api.database.get_unit(item["id"])
+        assert detail is not None
+        expected = extended_general_profiles(api._present_unit(
+            detail, optional_filters=flags,
+        ))
+        actual = extended_general_profiles(api._present_unit(
+            detail, optional_filters=flags, general_only=True,
+        ))
+        assert actual == expected, item["name"]
+
 
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=101")
@@ -2039,6 +2271,9 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     assert b'id="unit-count-details"' in body
     assert b'id="unit-count-shown-breakdown"' in body
     assert b'id="unit-count-filtered-breakdown"' in body
+    assert b'id="army-count-details"' in body
+    assert b'id="army-count-shown-breakdown"' in body
+    assert b"Matching armies" in body
     assert b"Optional availability categories may overlap" in body
     for filter_id in (
         b'troop-type-filter',
@@ -2102,14 +2337,15 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
 
     status, _, unit_list_script = request(app, "/static/unit-list.js")
     assert status == 200
-    assert b'unit-extended-profile-subordinate' in unit_list_script
+    assert b'unit-extended-profile-subordinate' not in unit_list_script
+    assert b'unit.general_profiles' in unit_list_script
+    assert b'Shared by all variants of this profile' in unit_list_script
     assert b'unit-profile-availability-value' in unit_list_script
     assert b'if (!extended && displayArmySymbol)' in unit_list_script
     assert b'nameCell.colSpan = 2' in unit_list_script
     assert b'row.append(nameCell, idCell)' in unit_list_script
     assert b'unit-profile-characteristic-symbol' in unit_list_script
-    assert b'unit-profile-characteristic-fallback' in unit_list_script
-    assert b'descriptor.developer_only' in unit_list_script
+    assert b'profile.symbol_descriptors' in unit_list_script
     assert b'developerOnlyCharacteristic' not in unit_list_script
     assert b'unit-profile-troop-type-long' in unit_list_script
     assert b'unit-profile-troop-type-short' in unit_list_script
@@ -2316,10 +2552,11 @@ def test_player_page_framing_uses_reference_language(app: Callable) -> None:
     assert status == 200
     assert b"Browse units<br" in units
     assert b'<span class="catalog-tag"><span aria-hidden="true"></span> Units</span>' in units
-    assert b'aria-label="Unit counts"' in units
+    assert b'aria-label="Matching units and armies"' in units
     assert b">01 / UNITS</span>" in units
     assert b"Enable JavaScript to browse and filter units." in units
-    assert b'<span class="stat-label">Armies</span>' in units
+    assert b'<span class="stat-label">Matching units</span>' in units
+    assert b'<span class="stat-label">Matching armies</span>' in units
     assert b"Unit catalog" not in units
     assert b"01 / CATALOG" not in units
     assert b"Browse the database" not in units
@@ -3903,8 +4140,15 @@ def test_versioned_modules_reference_their_matching_release_dependencies(app: Ca
     assert headers["cache-control"] == "public, max-age=31536000, immutable"
     assert f'from "./api.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./preferences.js?v={STATIC_ASSET_VERSION}"'.encode() in body
-    assert f'from "./distance.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+    assert f'from "./unit-presentation.js?v={STATIC_ASSET_VERSION}"'.encode() in body
     assert f'from "./share-state.js?v={STATIC_ASSET_VERSION}"'.encode() in body
+
+    status, headers, presentation = request(
+        app, f"/static/unit-presentation.js?v={STATIC_ASSET_VERSION}",
+    )
+    assert status == 200
+    assert headers["cache-control"] == "public, max-age=31536000, immutable"
+    assert f'from "./distance.js?v={STATIC_ASSET_VERSION}"'.encode() in presentation
 
     status, _, settings = request(app, f"/static/settings.js?v={STATIC_ASSET_VERSION}")
     assert status == 200
@@ -3947,9 +4191,9 @@ def test_unit_explorer_domain_filters_prefer_public_slugs(app: Callable) -> None
     assert b"characteristic: domainMultiFilterIdentifiers(characteristic)" in body
     assert b"normalizeArmyFilterState(playableArmies)" in body
     for call in (
-        b'normalizeCatalogFilterState(skills.items, "skillId")',
-        b'normalizeCatalogFilterState(equipment.items, "equipmentId")',
-        b'normalizeCatalogFilterState(weapons.items, "weaponId")',
+        b'normalizeCatalogFilterState(skills, "skillId")',
+        b'normalizeCatalogFilterState(equipment, "equipmentId")',
+        b'normalizeCatalogFilterState(weapons, "weaponId")',
     ):
         assert call in body
     for call in (
@@ -4790,7 +5034,12 @@ def test_skill_distance_display_uses_api_parameter_semantics(app: Callable) -> N
     assert b"function formatSkillDistanceExtra(value, parameterSemantics = null)" in distance
     assert b"parameterSemantics?.positive_sign" in distance
 
-    for asset in ("skill.js", "skill-extras.js", "unit.js"):
+    status, _, unit = request(app, "/static/unit.js")
+    assert status == 200
+    assert b'from "./unit-presentation.js"' in unit
+    assert b"formatProfileItem(item, fallbackLabel)" in unit
+
+    for asset in ("skill.js", "skill-extras.js", "unit-presentation.js"):
         status, _, body = request(app, f"/static/{asset}")
         assert status == 200
         assert b"parameter_semantics" in body
@@ -5538,6 +5787,72 @@ def test_reference_catalog_pages_and_apis_are_served(app: Callable, catalog: str
         },
     }
     assert json.loads(body)["items"] == [expected[catalog]]
+
+
+def test_global_search_lightweight_projections_match_full_catalogs(monkeypatch) -> None:
+    directory = Path("data/generated")
+    application = create_app(
+        directory / "army.db", directory / "rules_n5.db",
+        season_databases={
+            "its-17": directory / "its_17.db",
+            "its-18": directory / "its_18.db",
+        },
+    )
+    api = application.api
+    search = api.search_catalog
+    full_skills = api.skill_catalog.list_skills()
+    full_equipment = api.equipment_catalog.list_equipment()
+    full_weapons = api.database.list_catalog_items("weapons")
+    full_glossary = [
+        item for item in api.glossary_catalog.entries() if item["embedded"]
+    ]
+
+    def search_fields(items):
+        return [
+            {key: item[key] for key in (
+                "id", "slug", "name", "aliases", "alternate_names", "scenario",
+            ) if key in item}
+            for item in items
+        ]
+
+    assert search_fields(api.skill_catalog.list_skills(filter_only=True)) == search_fields(
+        full_skills
+    )
+    assert search_fields(api.equipment_catalog.list_equipment(filter_only=True)) == search_fields(
+        full_equipment
+    )
+    assert search_fields(api.database.list_catalog_filter_items("weapons")) == search_fields(
+        full_weapons
+    )
+
+    from infinity_db.glossary_catalog import GlossaryCatalog
+
+    fresh_glossary = GlossaryCatalog(api.database, api.rules_database)
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("Search must not construct a full catalog or Glossary")
+
+    monkeypatch.setattr(fresh_glossary, "entries", unexpected)
+    assert fresh_glossary.embedded_entries() == full_glossary
+    # Compare complete ranked search results with the original full projections.
+    queries = (
+        "mimetism", "activate console", "hack consoles", "combi", "cube",
+        "firewall", "dragoes", "casevac", "close combat", "spiral", "a",
+        "nonexistent search term",
+    )
+    with monkeypatch.context() as old:
+        old.setattr(api.skill_catalog, "list_skills", lambda **kwargs: full_skills)
+        old.setattr(api.equipment_catalog, "list_equipment", lambda **kwargs: full_equipment)
+        old.setattr(
+            api.database, "list_catalog_filter_items", lambda catalog: full_weapons,
+        )
+        old.setattr(api.glossary_catalog, "embedded_entries", lambda: full_glossary)
+        expected = {query: search.search(query) for query in queries}
+
+    monkeypatch.setattr(search, "glossary_catalog", fresh_glossary)
+    monkeypatch.setattr(api.database, "list_catalog_items", unexpected)
+    for query in queries:
+        assert search.search(query) == expected[query]
 
 
 def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None:
@@ -6412,9 +6727,10 @@ def test_variant_usage_page_modules_are_packaged_and_capability_gated(
         status, _, body = request(app, f"/static/{filename}")
         assert status == 200
         assert b'from "./variant-usage.js"' in body
-        assert b"variant_usage_published" in body
-        assert b"exactVariantRuleIds" in body
-        assert b"getVariantUsages(variantRuleIds, pageController.signal)" in body
+        assert b"loadExactVariantUsage" in body
+    assert b"variant_usage_published" in module
+    assert b"developerModeEnabled()" in module
+    assert b"getVariantUsages(ruleIds, signal)" in module
 
     status, _, unit = request(app, "/static/unit.js")
     assert status == 200
@@ -6448,6 +6764,9 @@ def test_variant_usage_browser_does_not_fetch_unpublished_index(
             page.goto(f"http://variant-usage.test/{catalog}/{slug}", wait_until="domcontentloaded")
             selector = "#skill-content" if catalog == "skills" else "#item-content"
             page.locator(selector).wait_for(state="visible", timeout=30000)
+            page.locator('button[aria-controls="settings-menu"]').click()
+            page.locator("#developer-mode-toggle").set_checked(True)
+            page.wait_for_load_state("networkidle")
             assert not requests
             assert page.locator(".exact-variant-usage").count() == 0
             page.close()
@@ -6527,6 +6846,9 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                 route_browser_page(page, app, "http://variant-usage.test")
                 errors: list[str] = []
                 page.on("pageerror", lambda error, failures=errors: failures.append(str(error)))
+                requests: list[str] = []
+                page.on("request", lambda request, seen=requests: seen.append(request.url)
+                        if "/api/variant-usage" in request.url else None)
                 try:
                     response = page.goto(
                         f"http://variant-usage.test/{catalog}/{slug}",
@@ -6534,13 +6856,16 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                     )
                     assert response is not None and response.status == 200
                     usage = page.locator(".exact-variant-usage")
-                    usage.wait_for(state="attached", timeout=30000)
-                    assert usage.is_hidden(), (catalog, width)
+                    page.locator("#skill-content" if catalog == "skills"
+                                 else "#item-content").wait_for(state="visible")
+                    page.wait_for_load_state("networkidle")
+                    assert usage.count() == 0 and not requests, (catalog, width)
                     page.locator('button[aria-controls="settings-menu"]').click()
                     toggle = page.locator("#developer-mode-toggle")
                     toggle.set_checked(True)
                     page.locator('button[aria-controls="settings-menu"]').click()
                     usage.wait_for(state="visible", timeout=30000)
+                    assert len(requests) == 1
                     assert "Only complete, source-reviewed variants" in usage.inner_text()
                     group = usage.locator(".exact-variant-group")
                     assert group.count() == 1
@@ -6572,6 +6897,7 @@ def test_variant_usage_browser_links_exact_contexts_and_unit_profile_groups(
                         state="visible", timeout=30000,
                     )
                     assert links.count() == 2
+                    assert len(requests) == 1
                     assert all(
                         f"#{anchor}" in (links.nth(index).get_attribute("href") or "")
                         for index in range(links.count())

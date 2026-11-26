@@ -9,20 +9,36 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  pull-requests: read
 
 jobs:
   deployment-smoke:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Check out exact candidate
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify identical merged PR evidence
+        id: merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -m tools.ci.identical_merge
+          --repository "${{ github.repository }}" --commit "${{ github.sha }}"
+          --github-output "$GITHUB_OUTPUT"
 
       - name: Set up Python for deterministic publication build
+        if: steps.merge.outputs.reuse != 'true'
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
       - name: Verify embedded deployed objects in the tracked database set
+        if: steps.merge.outputs.reuse != 'true'
         run: |
           PYTHONPATH=src python - <<'PY'
           from pathlib import Path
@@ -42,12 +58,15 @@ jobs:
           PY
 
       - name: Validate pinned exact-variant release publication
+        if: steps.merge.outputs.reuse != 'true'
         run: PYTHONPATH=src python -m tools.verify_deployment_assets --skip-svg
 
       - name: Build application image from verified tracked databases
+        if: steps.merge.outputs.reuse != 'true'
         run: docker build --tag infinity-db:deployment-smoke .
 
       - name: Validate image and production startup
+        if: steps.merge.outputs.reuse != 'true'
         run: sh scripts/verify-container-image.sh infinity-db:deployment-smoke --published-assets
 
 

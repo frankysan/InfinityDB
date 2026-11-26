@@ -70,6 +70,48 @@ def test_discover_scenario_covers_representative_pages_and_apis() -> None:
     ]
 
 
+def test_unit_explorer_scenario_uses_scoped_counts_and_extended_pages() -> None:
+    from urllib.parse import parse_qs, urlsplit
+
+    def fetch_json(_base_url: str, path: str):
+        if path == "/api/version":
+            return {
+                "version": "1.2.2+dev",
+                "snapshot_revision": "snapshot-1",
+                "static_revision": "static-1",
+            }
+        parsed = urlsplit(path)
+        assert parsed.path == "/api/units"
+        assert parse_qs(parsed.query)["counts"] == ["prospective"]
+        return {
+            "items": [{"id": 1, "name": "Ranger Prototype"}],
+            "prospective_counts": {
+                "skills": {"11": 2, "12": 10, "13": 0},
+                "equipment": {"21": 3, "22": 7, "cube": 99},
+            },
+        }
+
+    _, cases = discover_scenario(
+        "http://example.invalid", timeout=1, fetch_json=fetch_json, scenario="unit-explorer",
+    )
+    paths = {case.name: case.path for case in cases}
+    assert len(paths) == len(cases) == 15
+    assert paths["explorer-filters"] == "/api/unit-filters?catalogs=1"
+    assert paths["explorer-armies"] == "/api/armies"
+    for scope in ("profile", "loadout", "unit"):
+        params = parse_qs(urlsplit(paths[f"explorer-{scope}"]).query)
+        assert params["matching_scope"] == [scope]
+        assert params["skill_id"] == ["12"]
+        assert params["equipment_id"] == ["22"]
+        assert params["counts"] == ["prospective"]
+    extended = parse_qs(urlsplit(paths["explorer-extended-next"]).query)
+    assert extended["extended"] == ["1"]
+    assert extended["offset"] == ["50"]
+    standard = parse_qs(urlsplit(paths["explorer-standard"]).query)
+    assert all(standard[key] == ["0"] for key in ("mercs", "specops", "teamops", "reinforcement"))
+    assert "Ranger" not in _report_path(paths["explorer-search"])
+
+
 def test_report_path_redacts_synthetic_search_terms_but_keeps_bounded_parameters() -> None:
     assert _report_path("/api/search?q=Ranger") == "/api/search?q=%3Csynthetic%3E"
     assert _report_path("/api/units?limit=50") == "/api/units?limit=50"

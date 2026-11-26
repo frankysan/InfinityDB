@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
-from infinity_db.its_season_database import build_its_database
+from infinity_db.its_season_database import (
+    build_its_database,
+    inspect_its_database,
+    select_its_scenario,
+)
 from infinity_db.publication_registry import PublicationReference, PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
@@ -43,6 +48,39 @@ def test_registry_resolves_same_scenario_id_by_owner_and_revision(
     assert manifest["revision"] == REVISION
     assert manifest["requiredCoreRulesRevision"] == "5.3"
     assert len(manifest["sha256"]) == 64
+
+
+def test_registered_scenarios_reuse_validated_snapshot_without_mutation(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "its_18.db"
+    build_its_database(ITS_SOURCE, path)
+    reference = PublicationReference("its-18", "scenario:battleground", REVISION)
+    expected = select_its_scenario(
+        path, season_id="its-18", revision=REVISION, scenario_id=reference.record_id,
+    )
+    assert expected is not None
+    with patch(
+        "infinity_db.publication_registry.inspect_its_database",
+        wraps=inspect_its_database,
+    ) as inspect:
+        registry = PublicationRegistry(RulesDatabase(RULES_PATH), {"its-18": path})
+        assert inspect.call_count == 1
+        with patch(
+            "infinity_db.publication_registry._read_validated_its_scenario",
+            side_effect=AssertionError("Registered scenarios must not be read again"),
+        ):
+            selected = registry.resolve(reference)
+            assert selected == expected
+            assert selected is not None
+            selected["record"]["facts"].clear()
+            selected["publication"]["sources"].clear()
+            entries = registry.scenario_entries()
+            assert len(entries) == 20
+            entries[0][0]["facts"].clear()
+            assert registry.resolve(reference) == expected
+            assert registry.scenario_entries()[0][0]["facts"]
+        assert inspect.call_count == 1
 
 
 def test_explicit_owner_revision_and_context_fail_closed(
@@ -395,12 +433,14 @@ def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
                 )
                 status, _, body = wsgi_response(registered, path)
                 assert status == 200
+                assert b"var(" not in body
                 combined.update(len(body).to_bytes(8, "big"))
                 combined.update(body)
-    # Current reviewed ITS 18 after the v1.2.1 scenario copy update.
+    # v1.2.2 resolves standalone SVG colors and adds contrasting ruler endcaps.
+    # Battleground's curated mission and measurement coordinates are unchanged.
     # Length-prefixed six canonical JSON payloads and 24 SVG byte streams;
     # compare this digest after any intentional public contract change.
     assert combined.hexdigest() == (
-        "fbf91a1d57abfb25c9039a8c452c4ee22"
-        "dac04c1851a7ecb64c871921f36a390"
+        "9ffc0a08405e825348a6e58389b373d8e"
+        "92c2b4fc20c7496a75df6c4cdcf5821"
     )

@@ -694,6 +694,42 @@ InfinityDB snapshot versions. Their evidence-backed interpretation and the
 required distinction between source revision and snapshot acquisition date are
 documented in [`docs/data-model.md`](../docs/data-model.md#army-source-revision-interpretation).
 
+### Army snapshot reconciliation
+
+For every new Army snapshot, reconcile source discrepancies **before promoting
+its runtime publication**. This is part of normal Army integration, not a
+separate exhaustive review of every unchanged rule or profile.
+
+1. Pin the previously published and incoming ZIP/manifest pairs by archive
+   SHA-256 and source revisions. Compare the semantic contents of Army lists
+   and shared metadata, ignoring JSON object-property ordering.
+2. Recheck Army-dependent entries in the
+   [official source clarification register](../docs/official-source-clarifications.md)
+   against their exact affected source identities. Record confirmed corrections,
+   continuing discrepancies, changed scope and new evidence in the owning
+   register entry. Retain historical evidence; close a discrepancy only when
+   an applicable official source establishes the correction or ruling.
+3. Review changed source relationships, unresolved references (including
+   Army-local Fireteam/FTO targets), unreviewed variant signatures and
+   added/removed variant groups. Investigate new anomalies and disappearances
+   individually; an unchanged normalization-warning count does not establish
+   that the discrepancy inventory is unchanged. Distinguish actual source
+   conflicts from ordinary data updates and application defects.
+4. Before the complete rebuild, revalidate every snapshot-bound curated
+   correction against the incoming source, including exact owner coordinates,
+   names and relevant values. Update its source binding only where the evidence
+   still supports it; retire superseded corrections and preserve prior provenance
+   in Git. Never carry a correction forward merely by changing its archive hash.
+5. Reconcile affected publication expectations, player-facing caveats and
+   source-parity tests. Run relevant semantic audits and focused checks, then
+   normal complete-build and release validation. Record genuine unresolved
+   player-relevant questions without inventing gameplay effects.
+
+Follow the [source-reconciliation workflow](../.agents/skills/infinity-source-reconciliation/SKILL.md)
+for evidence and interpretation. Keep substantive findings in their existing
+canonical owners; do not create a second discrepancy register or a recurring
+release audit diary.
+
 ### Cross-repository acquisition handoff (P5.3)
 
 Optional acquisition may run from a different Git repository or machine.

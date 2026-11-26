@@ -28,10 +28,12 @@ def enrich_nested_catalog_slugs(
     database: Database,
     value: dict[str, Any],
     catalogs: frozenset[str],
+    *,
+    in_place: bool = False,
 ) -> dict[str, Any]:
     """Attach public slugs to named catalog occurrence lists in a nested payload."""
 
-    result = deepcopy(value)
+    result = value if in_place else deepcopy(value)
 
     def walk(node: Any) -> None:
         if isinstance(node, dict):

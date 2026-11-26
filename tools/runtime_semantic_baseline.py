@@ -18,7 +18,7 @@ from tools.browser_wsgi_transport import wsgi_response
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.json"
-CURRENT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.1.json"
+CURRENT_BASELINE = ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.2.json"
 FORMAT = "InfinityDB P1 runtime semantic baseline"
 FORMAT_VERSION = 1
 ORIGIN = "http://runtime-baseline.test"

@@ -1,7 +1,7 @@
 import { distanceUnit } from "./preferences.js";
 import { shareStateHref } from "./share-state.js";
 import { staticSymbolPath, unitSymbol } from "./unit-symbols.js";
-import { formatMovement } from "./unit-presentation.js";
+import { formatMovement, formatProfileItem } from "./unit-presentation.js";
 
 function displayArmies(armies) {
   return [...armies].sort((left, right) => left.id - right.id);
@@ -22,16 +22,18 @@ function movement(profile) {
 }
 
 function statline(profile) {
+  const attributes = profile.stats || {};
+  const differences = new Set(profile.different_stat_labels || []);
   const stats = [
-    ["MOV", movement(profile)],
-    ["CC", text(profile.cc)],
-    ["BS", text(profile.bs)],
-    ["PH", text(profile.ph)],
-    ["WIP", text(profile.wip)],
-    ["ARM", text(profile.arm)],
-    ["BTS", text(profile.bts)],
-    [profile.is_structure ? "STR" : "VITA", text(profile.vitality)],
-    ["S", text(profile.silhouette)],
+    ["MOV", movement(attributes)],
+    ["CC", text(attributes.cc)],
+    ["BS", text(attributes.bs)],
+    ["PH", text(attributes.ph)],
+    ["WIP", text(attributes.wip)],
+    ["ARM", text(attributes.arm)],
+    ["BTS", text(attributes.bts)],
+    [attributes.is_structure ? "STR" : "VITA", text(attributes.vitality)],
+    ["S", text(attributes.silhouette)],
   ];
   const list = document.createElement("dl");
   list.className = "unit-extended-statline";
@@ -40,7 +42,9 @@ function statline(profile) {
     const term = document.createElement("dt");
     term.textContent = label;
     const description = document.createElement("dd");
-    description.textContent = value;
+    const varies = differences.has(label === "STR" ? "VITA" : label);
+    description.textContent = value + (varies ? "*" : "");
+    if (varies) description.title = "Varies between profile variants";
     item.append(term, description);
     list.append(item);
   }
@@ -70,13 +74,44 @@ function profileAvailability(profile, armiesById) {
     }
     const value = document.createElement("span");
     value.className = "unit-profile-availability-value";
-    value.textContent = entry.ava === "total" ? "Total" : text(entry.ava);
+    value.textContent = text(entry.ava).replace(/\btotal\b/g, "Total");
     const availability = entry.ava == null ? "attached profile" : `AVA ${value.textContent}`;
     item.title = `${army.name} — ${availability}`;
     item.append(value);
     list.append(item);
   }
   return list;
+}
+
+function capabilityLines(context) {
+  const lines = document.createElement("div");
+  lines.className = "unit-extended-capabilities";
+  for (const [key, label, fallback] of [
+    ["skills", "Skills", "Skill"],
+    ["equipment", "Equipment", "Equipment"],
+    ["weapons", "Weapons", "Weapon"],
+  ]) {
+    const items = context[key] || [];
+    if (!items.length) continue;
+    const line = document.createElement("div");
+    const heading = document.createElement("strong");
+    heading.textContent = label + ": ";
+    line.append(heading, items.map((item) => formatProfileItem(item, fallback).label).join(", "));
+    lines.append(line);
+  }
+  return lines;
+}
+
+function profileCapabilities(profile) {
+  const section = document.createElement("div");
+  section.className = "unit-extended-capability-section";
+  const heading = document.createElement("strong");
+  heading.textContent = "Shared by all variants of this profile";
+  section.append(heading);
+  const lines = capabilityLines(profile.shared_items || {});
+  if (!lines.childElementCount) lines.textContent = "No shared Skills, Equipment or Weapons";
+  section.append(lines);
+  return section;
 }
 
 function extendedProfilesRow(unit, columnCount) {
@@ -88,22 +123,14 @@ function extendedProfilesRow(unit, columnCount) {
   surface.className = "unit-extended-profiles";
   const armiesById = new Map((unit.armies || []).map((army) => [army.id, army]));
 
-  for (const [index, profile] of (unit.profiles || []).entries()) {
+  for (const profile of unit.general_profiles || []) {
     const profileRow = document.createElement("section");
     profileRow.className = "unit-extended-profile";
-    if (index > 0) profileRow.classList.add("unit-extended-profile-subordinate");
 
     const heading = document.createElement("div");
     heading.className = "unit-extended-profile-heading";
-    if (index > 0) {
-      const attachment = document.createElement("span");
-      attachment.className = "unit-profile-attachment";
-      attachment.setAttribute("aria-hidden", "true");
-      attachment.textContent = "↳";
-      heading.append(attachment);
-    }
     const title = document.createElement("strong");
-    title.textContent = profile.name || unit.name;
+    title.textContent = `General profile — ${profile.display_name || unit.name}`;
     const meta = document.createElement("span");
     meta.className = "unit-extended-profile-meta";
     if (profile.type) {
@@ -130,28 +157,26 @@ function extendedProfilesRow(unit, columnCount) {
     const characteristics = document.createElement("div");
     characteristics.className = "unit-profile-characteristics";
     characteristics.setAttribute("aria-label", "Characteristics");
-    for (const descriptor of profile.characteristic_presentations || []) {
-      if (descriptor.symbol) {
-        const symbol = document.createElement("img");
-        symbol.className = "unit-profile-characteristic-symbol";
-        if (descriptor.developer_only) symbol.classList.add("developer-only");
-        symbol.src = staticSymbolPath(descriptor.symbol.symbol_path);
-        symbol.alt = descriptor.symbol.label;
-        symbol.title = descriptor.symbol.label;
-        symbol.width = 18;
-        symbol.height = 18;
-        characteristics.append(symbol);
-        continue;
-      }
-      const fallback = document.createElement("span");
-      fallback.className = "unit-profile-characteristic-fallback";
-      if (descriptor.developer_only) fallback.classList.add("developer-only");
-      fallback.textContent = descriptor.name;
-      characteristics.append(fallback);
+    for (const descriptor of profile.symbol_descriptors || []) {
+      const symbol = document.createElement("img");
+      symbol.className = "unit-profile-characteristic-symbol";
+      symbol.src = staticSymbolPath(descriptor.symbol_path);
+      symbol.alt = descriptor.label;
+      symbol.title = descriptor.label;
+      symbol.width = 18;
+      symbol.height = 18;
+      characteristics.append(symbol);
     }
-    if (!characteristics.childElementCount) characteristics.textContent = "No characteristics";
     body.append(characteristics, profileAvailability(profile, armiesById));
     profileRow.append(heading, body);
+    if (profile.different_stat_labels?.length) {
+      const note = document.createElement("div");
+      note.className = "unit-extended-profile-meta";
+      note.textContent = "* Attribute varies between profile variants";
+      profileRow.append(note);
+    }
+    const capabilities = profileCapabilities(profile);
+    if (capabilities.childElementCount) profileRow.append(capabilities);
     surface.append(profileRow);
   }
 
@@ -304,7 +329,7 @@ export function renderUnitRows(container, units, { extended = false } = {}) {
       row.append(nameCell, armyCell, idCell);
     }
     fragment.append(row);
-    if (extended && unit.profiles?.length) fragment.append(extendedProfilesRow(unit, 3));
+    if (extended && unit.general_profiles?.length) fragment.append(extendedProfilesRow(unit, 3));
   }
   container.replaceChildren(fragment);
 }

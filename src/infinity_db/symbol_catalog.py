@@ -240,10 +240,12 @@ class SymbolCatalog:
         for unit in units:
             self.enrich_unit(unit)
 
-    def enrich_nested_units(self, value: dict[str, Any]) -> dict[str, Any]:
-        """Return a detached payload with nested ``units`` collections enriched."""
+    def enrich_nested_units(
+        self, value: dict[str, Any], *, in_place: bool = False,
+    ) -> dict[str, Any]:
+        """Enrich nested ``units`` collections, copying by default."""
 
-        result = deepcopy(value)
+        result = value if in_place else deepcopy(value)
 
         def walk(node: Any) -> None:
             if isinstance(node, dict):

@@ -9,6 +9,7 @@ from infinity_db.domain_slugs import require_domain_slug, route_slug_from_typed_
 from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_geometry import MarkerElement, marker_diameter_mm, parse_scenario_geometry
+from infinity_db.scenario_skill_identity import consolidate_family, consolidate_scenario_actions
 
 
 def _scenario_slug(record: dict[str, Any]) -> str:
@@ -251,8 +252,8 @@ class ScenarioCatalog:
             )
         ]
 
-    def scenario_skill_items(self) -> list[dict[str, Any]]:
-        """Project explicitly typed ITS actions as normal, scenario-scoped Skills."""
+    def _scenario_skill_records(self) -> list[dict[str, Any]]:
+        """Build and retain the internal scenario Skill projection."""
         if self._scenario_skills_cache is None:
             items: list[dict[str, Any]] = []
             known_labels = {
@@ -439,66 +440,8 @@ class ScenarioCatalog:
                         "rules": [skill_rule],
                         "variants": [],
                     })
-            self._scenario_skill_aliases = {item["slug"]: deepcopy(item) for item in items}
-            shared: dict[str, list[dict[str, Any]]] = {}
-            published: list[dict[str, Any]] = []
-            for item in items:
-                identity = item["rules"][0].get("sharedSkill")
-                if identity is None or identity.get("overriddenFields"):
-                    published.append(item)
-                else:
-                    shared.setdefault(identity["id"], []).append(item)
+            published, self._scenario_skill_aliases = consolidate_scenario_actions(items)
             legacy_slugs = set(self._scenario_skill_aliases)
-            for identifier, uses in shared.items():
-                slug = identifier.removeprefix("skill:")
-                if slug in legacy_slugs or any(item["slug"] == slug for item in published):
-                    raise ValueError(f"Shared scenario Skill {identifier!r} conflicts with a route")
-                first = uses[0]
-                first_rule = first["rules"][0]
-                version = first_rule["sharedSkill"]["version"]
-                for use in uses[1:]:
-                    rule = use["rules"][0]
-                    if (
-                        rule["sharedSkill"]["version"] != version
-                        or use["name"] != first["name"]
-                        or rule["facts"] != first_rule["facts"]
-                        or rule["skill_types"] != first_rule["skill_types"]
-                        or rule["labels"] != first_rule["labels"]
-                        or rule["sharedSkill"].get("origin")
-                        != first_rule["sharedSkill"].get("origin")
-                    ):
-                        raise ValueError(
-                            f"Conflicting facts for pinned shared scenario Skill {identifier!r}"
-                        )
-                canonical = deepcopy(first)
-                canonical["id"] = slug
-                canonical["slug"] = slug
-                canonical.pop("scenario", None)
-                canonical["scenarios"] = [deepcopy(use["scenario"]) for use in uses]
-                canonical["aliases"] = [use["slug"] for use in uses]
-                merged_rule = canonical["rules"][0]
-                merged_rule["id"] = identifier
-                merged_rule["scope"]["seasons"] = list(dict.fromkeys(
-                    use["scenario"]["collection"] for use in uses
-                ))
-                merged_rule["scope"]["scenarios"] = list(dict.fromkeys(
-                    use["scenario"]["id"] for use in uses
-                ))
-                merged_rule["applicable_scenarios"] = [
-                    deepcopy(use["scenario"]) for use in uses
-                ]
-                merged_rule["citations"] = []
-                seen_citations: set[tuple[str, str, str, int | None]] = set()
-                for use in uses:
-                    for citation in use["rules"][0]["citations"]:
-                        key = (
-                            use["scenario"]["collection"], use["scenario"]["revision"],
-                            str(citation["source_id"]), citation.get("page"),
-                        )
-                        if key not in seen_citations:
-                            seen_citations.add(key)
-                            merged_rule["citations"].append(deepcopy(citation))
-                published.append(canonical)
             if self.publication_registry is not None:
                 season_skills: dict[str, dict[str, Any]] = {}
                 by_identity: dict[str, list[dict[str, Any]]] = {}
@@ -647,15 +590,57 @@ class ScenarioCatalog:
                         if key not in seen_pins:
                             seen_pins.add(key)
                             prior_rule["citations"].append(cite)
-                published.extend(season_skills.values())
+                # Exact pinned definitions above are still validated independently.
+                # Only explicitly reviewed source-local identities, or different
+                # pinned versions of the same identity, share a presentation.
+                reviewed_season_skills = {
+                    "civevac": "Take control of a Civilian and keep it in contact while moving.",
+                    "casevac": "Carry an eligible allied Trooper by entering Casevac State.",
+                }
+                for slug, groups in by_identity.items():
+                    pinned_identity = groups[0]["rules"][0].get("sharedSkill")
+                    if len(groups) == 1 or (
+                        slug not in reviewed_season_skills and pinned_identity is None
+                    ):
+                        published.extend(groups)
+                        continue
+                    canonical = consolidate_family(
+                        slug, groups[0]["name"],
+                        reviewed_season_skills.get(
+                            slug, "This Skill has season-specific definitions."
+                        ),
+                        groups,
+                    )
+                    canonical["applicability"] = {
+                        "context": groups[0]["applicability"]["context"],
+                        "revisions": [use["revision"] for use in canonical["seasons"]],
+                    }
+                    for group in groups:
+                        for use in group["seasons"]:
+                            route = f"{use['collection']}-{slug}"
+                            if route in self._scenario_skill_aliases or any(
+                                item["slug"] == route for item in published
+                            ):
+                                raise ValueError(
+                                    f"ITS season Skill {route!r} conflicts with a route"
+                                )
+                            alias = deepcopy(group)
+                            alias.update(id=route, slug=route, canonical_slug=slug)
+                            self._scenario_skill_aliases[route] = alias
+                    published.append(canonical)
             self._scenario_skills_cache = published
-        return deepcopy(self._scenario_skills_cache)
+        return self._scenario_skills_cache
+
+    def scenario_skill_items(self) -> list[dict[str, Any]]:
+        """Return detached scenario-scoped Skill records for the public catalog."""
+        return deepcopy(self._scenario_skill_records())
 
     def get_scenario_skill(self, slug: str) -> dict[str, Any] | None:
-        items = self.scenario_skill_items()
+        items = self._scenario_skill_records()
         if slug in self._scenario_skill_aliases:
             return deepcopy(self._scenario_skill_aliases[slug])
-        return next((item for item in items if item["slug"] == slug), None)
+        item = next((item for item in items if item["slug"] == slug), None)
+        return deepcopy(item) if item is not None else None
 
     def list_collections(self) -> list[dict[str, Any]]:
         """Return only current scenario sets with readable published missions."""

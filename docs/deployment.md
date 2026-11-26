@@ -483,6 +483,40 @@ contains the target version/snapshot identity, aggregate and per-route p50/p95/p
 request/error rate, status classes, and response sizes. The generated search term is synthetic and
 redacted from retained report paths. A non-zero load-phase error count makes the command fail.
 
+For the current Unit Explorer, use the separate `--scenario unit-explorer`
+workload. It discovers positive-count Skill and Equipment identities and
+exercises 15 routes/query shapes: page and filter initialization, scoped
+prospective counts, pagination, sorting, search, individual and combined
+filters (profile/loadout/unit), Extended pages and optional availability.
+It reports per-case timings and redacts the synthetic Unit search value.
+The general scenario remains the default; do not compare aggregate throughput
+across the two workloads. This is a warmed, repeatedly sampled HTTP workload,
+not a measurement of cold worker initialization or browser rendering.
+
+On the Linux development checkout, use the isolated test stack and collect a
+fresh resource and capacity report with the normal 2x4 worker configuration:
+
+```bash
+sh scripts/deploy-local-test.sh 8080
+```
+
+```bash
+COMPOSE_PROJECT_NAME=infinitydb-test .venv/bin/python -m tools.operations.deployment_resources --output local/performance/http-capacity/RUN_ID/resources.json -- .venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --scenario unit-explorer --output local/performance/http-capacity/RUN_ID/capacity.json
+```
+
+For an app-only capacity check without a Compose deployment, the disposable
+runtime image preview also supports `--capacity-output`:
+
+```bash
+.venv/bin/python -m tools.preview_runtime_image --tag infinity-db:preview-capacity --capacity-output local/performance/http-capacity/RUN_ID/capacity.json
+```
+
+It builds the normal Dockerfile, starts a read-only preview with an ephemeral
+IPv4 loopback port, waits for health, runs the same Unit Explorer workload,
+retains the JSON receipt and removes the owned container/image. This mode
+does not run semantic parity checks, Caddy, or the Compose resource sampler;
+use the full isolated stack for deployment-level resource evidence.
+
 The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 
@@ -548,6 +582,34 @@ After the experiment, restore the ordinary isolated 2x4 stack simply by redeploy
 ```bash
 sh scripts/deploy-local-test.sh 8080
 ```
+
+#### Unit Explorer app-only 2x4 measurement (2026-11-25)
+
+The disposable Docker preview on the Linux development worker ran the
+15-case Unit Explorer capacity scenario at commit `a1ad31c4` using the
+normal Dockerfile (Gunicorn 2x4, Python 3.11). The preview did not supply a
+development display-version override, so the API reported 1.2.1; the Git
+commit identifies the tested development code. Snapshot revision:
+`55375a32f200506ec03943c627f1d4face5b0a4fc17b4bd8ebb368bcd9c8ff13`.
+
+- Steady, concurrency 8 / 60 seconds: 112.2 requests/s, p50/p95/p99
+  23.2/193.9/289.0 ms, 6,745 requests, zero errors.
+- Burst, concurrency 32 / 10 seconds: 109.8 requests/s, p50/p95/p99
+  192.2/730.1/841.3 ms, 1,166 requests, zero errors.
+- Steady per-case p95: initial results 179.2 ms, filter initialization
+  96.8 ms, profile/loadout/unit matching 155.6/171.1/176.8 ms,
+  Extended first/next page 222.8/225.6 ms.
+- Burst Extended first/next page p95: 737.1/837.2 ms.
+
+The preview passed health, completed both phases and removed its disposable
+container and image. The JSON receipt is retained on the Linux worker under
+`local/performance/http-capacity/20261125-a1ad31c4/capacity.json`.
+This was a warmed repeated-query workload directly against Gunicorn; Caddy,
+matched production resource boundaries, concurrent host/container resource
+sampling and cold-worker latency were not measured. The similar throughput
+and higher burst latency suggest saturation under this synthetic workload,
+not a measured CPU or worker-count bottleneck. Do not compare the aggregate
+rates with the older general capacity scenario or infer a production SLO.
 
 #### Recorded 2x4 baseline (2026-10-06)
 
