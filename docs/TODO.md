@@ -47,8 +47,8 @@ in the linked workstreams; retire this milestone summary when the release closes
   Initial history disclosures are implemented; retain coverage limits and
   [extend history](#per-reference-change-history) when new source states are available.
 - **Web frontend + Web backend:** Faction palettes and the initial rules-content
-  hierarchy and official Army deep links are implemented. Complete remaining
-  [representative visual review](#reference-presentation-and-feedback).
+  hierarchy and official Army deep links are implemented; representative
+  [visual acceptance](testing.md#faction-palette-and-rules-content-visual-acceptance) passed.
 
 Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
 candidate acceptance remains in the release checklist.
@@ -221,14 +221,6 @@ make v1.3.0 depend on them.
 
 ### Reference presentation and feedback
 
-- [ ] **Web frontend + Web backend:** Complete representative desktop/mobile
-  visual review of the implemented faction palettes and shared rules-content
-  hierarchy. The eleven faction palettes, independent theme/mode preferences,
-  scenario SVG theming, contrast checks and initial evidence treatments are
-  documented in the [web design guidelines](web-design-guidelines.md).
-  Refine typography, spacing or colors only where review identifies a problem.
-  Add correction and recent-change treatments only for verified upstream
-  changes via [history follow-up](#per-reference-change-history).
 - [ ] **Web frontend + Web backend:** Consider independent sectorial palettes
   only with representative sectorial visual references; do not infer them
   solely from their parent faction.

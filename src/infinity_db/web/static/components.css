@@ -1366,7 +1366,11 @@ h1>span {
   font-weight: 650;
 }
 
-[data-provenance="maintained-rule"].detail-copy {
+/* Gameplay facts and evidence-card prose are primary reading content.
+   Secondary colors are reserved for citations and contextual captions. */
+[data-provenance="maintained-rule"].detail-copy,
+.detail-fact-group:is([data-provenance="maintained-rule"], [data-provenance="reviewed-explanation"]) > .detail-list,
+:is([data-provenance="source-faq"], [data-provenance="source-example"], [data-provenance="reviewed-interpretation"]) > .detail-copy {
   color: var(--color-text-primary);
 }
 

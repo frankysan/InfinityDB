@@ -217,6 +217,23 @@ def test_rules_content_hierarchy_across_palettes(
                             style.backgroundColor, expected]);
                         }
                       }
+                      const primary = getComputedStyle(root)
+                        .getPropertyValue("--color-text-primary");
+                      const probe = document.createElement("span");
+                      probe.style.color = primary;
+                      root.append(probe);
+                      const expectedPrimary = getComputedStyle(probe).color;
+                      probe.remove();
+                      for (const node of document.querySelectorAll(
+                        '.detail-fact-group:is([data-provenance="maintained-rule"],'
+                        + ' [data-provenance="reviewed-explanation"]) > .detail-list,'
+                        + ' :is([data-provenance="source-faq"], [data-provenance="source-example"],'
+                        + ' [data-provenance="reviewed-interpretation"]) > .detail-copy'
+                      )) {
+                        if (getComputedStyle(node).color !== expectedPrimary) {
+                          failures.push([palette, mode, "prose color", node.className]);
+                        }
+                      }
                       if (root.scrollWidth > innerWidth + 1) {
                         failures.push([palette, mode, "overflow", root.scrollWidth]);
                       }

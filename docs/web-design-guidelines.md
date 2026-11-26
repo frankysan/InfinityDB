@@ -181,9 +181,12 @@ references, with theme tokens and a second cue beyond color:
   maintained links. Cite sources as **Sources**, without conflating Wiki
   evidence, PDFs and official Army data.
 - **Dated FAQ/errata:** render an actual source-reviewed FAQ in its own
-  **FAQ clarifications** section with selected version, publication date and
-  linked citation. The date describes this source publication; it is
-  not an automatically assigned "new" or "changed" badge. Future official
+  **FAQ clarifications** section with selected version and linked citation.
+  Show a publication date only when independently established. The current FAQ
+  v0.1 date is an announcement-era source anchor, not an independently verified
+  PDF publication date (see [FAQ source scope](data-model.md#dated-faqerrata-layer-published-reviewed-subset)).
+  Do not present that anchor as a publication date or use an automatically
+  assigned "new" or "changed" badge. Future official
   errata must have equally explicit publication evidence before adopting
   a distinct revision status.
 - **Unresolved conflict:** when structured competing citations exist, show

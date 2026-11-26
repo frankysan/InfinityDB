@@ -47,7 +47,8 @@ are not retroactively relabeled.
 
 - **Web frontend:** Unified source-evidence presentation across rules, reviewed
   interactions, FAQ clarifications and scenario source notes without changing
-  gameplay content or assigning unverified update dates.
+  gameplay content or assigning unverified update dates. Gameplay facts and
+  explanation/FAQ prose use the primary text role in every palette.
 - **Data processing + Web backend:** Materialized deduplicated General-profile
   selections during database generation; Extended Explorer and Unit details
   share them while preserving public profile and availability semantics.

@@ -523,6 +523,38 @@ parents, actual snapshot routes, and the selected Army card at 1280 and
 390 CSS px. This is representative route acceptance, not an exhaustive
 live audit of every Unit or future Army application revision.
 
+### Faction palette and rules-content visual acceptance
+
+Windows Chromium review on 2026-11-26, using the complete selected v35 runtime
+database set. The [theme contrast](../tests/test_theme_contrast.py) suite passed
+7 tests. The hierarchy regression passed 2 tests at 1440 and 390 CSS px across
+all 12 palettes and both modes, including computed gameplay-prose color and
+the solid, dashed and double evidence borders. The scenario map browser
+regression passed 4 tests, verifying mode, palette and distance switching
+with standalone image responses.
+
+The screenshot diagnostic exercised Immunity, Fireteams, Domination (350 Army
+Points) and Zeros (Bakunin context) at both widths with every palette and
+mode: 192 page/viewport/theme combinations passed without page-level overflow
+or JavaScript errors. The final run used the actual Settings change handlers
+and awaited the selected scenario image. Representative screenshots were
+visually inspected, including light/dark rule bodies, explanation and example
+insets, FAQ conflict warnings, scenario uncertainty and Unit cards. Gameplay
+facts and evidence-card prose now use the primary text role rather than
+secondary text; source captions and citations retain secondary hierarchy.
+No palette seeds were changed. FAQ citation dates remain absent where only
+announcement-era anchors are established, not verified PDF publication dates.
+
+For future representative visual review, run with a new ignored output path:
+
+```powershell
+python -m tools.browser.review_reference_palettes --output local/validation/reference-palette-review-next
+```
+
+The final private screenshots are under
+`local/validation/reference-palette-review-20261126-final/`. This is not a
+pixel-diff baseline, exhaustive page audit, or release/cross-browser gate.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db
