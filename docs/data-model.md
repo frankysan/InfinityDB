@@ -184,12 +184,17 @@ endpoint. Promote only exact occurrence changes supported by accepted semantic
 summaries. Remove the promoted occurrences from the Army display rows, retaining
 all residual effects and original evidence. Do not promote synthetic common
 bases with varying extras, unresolved references, catalog aliases requiring
-identity reconciliation, source-classified Skills, cross-catalog transitions,
-or Units with snapshot-bound reviewed loadout capabilities. The item pilot
-also excludes multi-profile Groups, disabled loadouts and attachment-bearing
-contexts rather than guessing their composition. Ambiguous or removed Army
-cards retain a separate historical context. This remains a private,
-conservative projection, not a public serving API.
+identity reconciliation, cross-catalog transitions, or Units with snapshot-bound
+reviewed loadout capabilities. Source-classified Equipment can be presented
+under Equipment when the historical source ID and name match the reviewed
+current classification and neither endpoint contains a possible native
+counterpart. Preserve the source bucket in the evidence; this is presentation
+policy, not a historical rules classification claim. Other source-classified
+Skills remain excluded. The item pilot allows stable, uniquely resolved direct
+attachments, without flattening their capabilities into the Controller. It
+excludes changed or unresolved attachments, multi-profile Groups and disabled
+loadouts. Ambiguous or removed Army cards retain a separate historical context.
+This remains a private, conservative projection, not a public serving API.
 
 Direct attachment history additionally compares observed changes to Include
 and Peripheral fields on surviving source owners. Resolve Include targets

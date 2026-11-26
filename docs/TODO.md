@@ -310,11 +310,12 @@ make v1.3.0 depend on them.
     histories such as Minutemen before public integration. The private contextual
     preview now renders current profile and Army cards, with typed collapsed
     histories and separate unmatched contexts. The exact-window pilot now
-    includes 31 shared characteristic and 100 shared-item entries, retaining
-    Army-level residual changes. Extend coverage for classified items, complex
-    profile/loadout identities and incomplete or asynchronous observations
-    where evidence permits; review remaining Army-context and unresolved
-    entries before public integration.
+    includes 31 shared characteristic and 113 shared-item entries, retaining
+    Army-level residual changes. It supports stable direct attachments and
+    reviewed source-classified Equipment without a native counterpart. Extend
+    coverage for other classified items, multi-profile/loadout identities and
+    incomplete or asynchronous observations where evidence permits; review
+    remaining Army-context and unresolved entries before public integration.
   - [ ] Review publication rights before exposing derived historical data.
 
 - [ ] **Data processing + Web backend + Web frontend:** Add optional

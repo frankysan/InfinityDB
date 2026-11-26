@@ -418,6 +418,77 @@ def test_historical_equipment_and_weapon_projection_uses_canonical_owners(monkey
     ) is None
 
 
+def test_historical_classified_equipment_requires_exact_identity_and_no_native_counterpart(
+    monkeypatch,
+):
+    def ref(item_id, label):
+        return {"filter": {"id": item_id, "name": label}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(skills, equipment=()):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [{"id": 2, "name": "Profile",
+                                  "skills": skills, "equip": list(equipment)}],
+            "options": [{"id": 1}, {"id": 2}],
+        }]}]}
+
+    medikit = ref(5, "MediKit")
+    row = {"identity": {"field": "skills", "groupId": 1, "lost": [], "gained": [medikit]}}
+    general = [{"profile_identity": "profile"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    def compare(before, after):
+        return player.historical_shared_delta(
+            [row], 42, general, [(101, before, after, [], [])], identity,
+            {("skills", 5)}, set(), {5: ("MediKit", "medikit")},
+        )
+
+    assert compare(endpoint([]), endpoint([medikit])) == (
+        "profile", {"lost": [], "gained": [medikit]},
+    )
+    assert compare(endpoint([], [ref(106, "MediKit")]), endpoint([medikit])) is None
+    assert compare(endpoint([]), endpoint([ref(5, "Different item")])) is None
+
+
+def test_historical_shared_items_allow_stable_direct_attachments(monkeypatch):
+    skill = {"filter": {"id": 5, "name": "Skill"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(skills, includes):
+        return {"units": [{"id": 42, "profileGroups": [
+            {"id": 1, "profiles": [{"id": 2, "name": "Controller", "skills": skills}],
+             "options": [{"id": 1, "includes": includes}]},
+            {"id": 2, "profiles": [{"id": 3, "name": "Peripheral"}],
+             "options": [{"id": 1}]},
+        ]}]}
+
+    row = {"identity": {"field": "skills", "groupId": 1, "lost": [], "gained": [skill]}}
+    general = [{"profile_identity": "controller"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    edge = [{"group": 2, "option": 1}]
+    before, after = endpoint([], edge), endpoint([skill], edge)
+    assert player.historical_shared_delta(
+        [row], 42, general, [(101, before, after, [], [])], identity, set(), set(),
+    ) == ("controller", {"lost": [], "gained": [skill]})
+    assert player.historical_shared_delta(
+        [row], 42, general, [(101, before, endpoint([skill], []), [], [])],
+        identity, set(), set(),
+    ) is None
+
+
 def test_contextual_action_rows_keep_reference_changes_distinct():
     def ref(item_id, label, extra=None):
         occurrence = {"extra": [{"name": extra}]} if extra else {}

@@ -21,11 +21,13 @@ from infinity_db.identities import normalized_profile_identity
 from infinity_db.maintained_text import DISTANCE_CENTIMETERS_PER_INCH
 from infinity_db.unit_presentation import (
     OPTIONAL_AVAILABILITY_FLAGS,
+    _classify_skill_source_presentations,
     _common_bases_with_varying_extras,
     _common_items,
     _general_profile_skills,
     _general_stats,
     _item_identity,
+    _normalized_name,
     _unique_items,
 )
 from tools.research.build_army_history_database import ARCHIVE_PIN, encode
@@ -33,10 +35,12 @@ from tools.research.project_army_history import ARMY, HISTORY, ROOT, read_only
 from tools.research.render_army_history import FIELDS, details, esc, raw, value_text
 from tools.research.summarize_army_history import (
     compact_reference,
+    comparable_relationships,
     get_group,
     indexed,
     occurrence_key,
     reference_summary,
+    same_labels,
     stable_context,
 )
 
@@ -656,6 +660,7 @@ def historical_shared_delta(
     endpoints: list[tuple[int, Document, Document, list, list]],
     profile_identity: Callable[[object], str],
     excluded: set[tuple[str, int]], aliases: set[tuple[str, int]],
+    equipment_classes: dict[int, tuple[str, str]] | None = None,
 ) -> tuple[str, Document] | None:
     """Compare exact endpoint projections; require stable single-profile groups.
 
@@ -665,21 +670,39 @@ def historical_shared_delta(
     sample = rows[0]["identity"]
     group_id, field = sample["groupId"], sample["field"]
     prop = ITEM_FIELDS[field]
+    equipment_classes = equipment_classes or {}
+    # Current presentation classification is not a historical gameplay claim.
+    # Reject a classified occurrence if its native counterpart may also exist.
+    counterpart_names: set[str] = set()
+    invalid_classified_ids: set[int] = set()
+    counterpart_complete = True
     identities = set()
     owner_profiles: list[list[Document]] = [[], []]
     owner_options: list[list[Document]] = [[], []]
     for _, old, new, meta_old, meta_new in endpoints:
-        context, _ = stable_context(old, new, source_id, group_id)
+        context, _ = stable_context(
+            old, new, source_id, group_id, allow_stable_relationships=True,
+        )
         if context is None:
             return None
         pa, oa, pb, ob = context
+        if any(
+            not comparable_relationships(oa[i], ob[i], old, new, source_id, True)
+            or (any(o.get("includes") or o.get("peripheral") for o in (oa[i], ob[i]))
+                and not same_labels(oa[i], ob[i]))
+            for i in oa.keys() & ob.keys()
+        ):
+            return None
+        if any(
+            option.get("includes") or option.get("peripheral")
+            for options, other in ((oa, ob), (ob, oa))
+            for i, option in options.items() if i not in other
+        ):
+            return None
         for side, (army, meta, profile, options) in enumerate((
             (old, meta_old, pa, oa), (new, meta_new, pb, ob),
         )):
-            if not profile.get("name") or any(
-                option.get("disabled") or option.get("includes") or option.get("peripheral")
-                for option in options.values()
-            ):
+            if not profile.get("name") or any(o.get("disabled") for o in options.values()):
                 return None
             identity = profile_identity(profile["name"])
             identities.add(identity)
@@ -707,6 +730,21 @@ def historical_shared_delta(
                 if items is None or any((field, item["id"]) in aliases for item in items):
                     return None
                 destination.append({prop: items})
+                if field == "skills":
+                    invalid_classified_ids.update(
+                        item["id"] for item in items if item["id"] in equipment_classes
+                        and item["name"] != equipment_classes[item["id"]][0]
+                    )
+                if equipment_classes and field in {"skills", "equip"}:
+                    other = "equip" if field == "skills" else "skills"
+                    counterpart = historical_items(owner, other, army, meta)
+                    if counterpart is None:
+                        counterpart_complete = False
+                    else:
+                        counterpart_names.update(
+                            _normalized_name(item["name"]) for item in counterpart
+                            if other == "equip" or item["id"] in equipment_classes
+                        )
     if len(identities) != 1:
         return None
     identity = next(iter(identities))
@@ -730,9 +768,30 @@ def historical_shared_delta(
                 "id": ref["filter"]["id"], "quantity": ref["occurrence"].get("q"),
                 "extras": ref["occurrence"].get("extra") or [],
             }
-            if (_item_identity(original) != key or occurrence_key(ref) not in accepted
-                    or (field, item["id"]) in excluded):
+            if _item_identity(original) != key or occurrence_key(ref) not in accepted:
                 continue
+            classification = equipment_classes.get(item["id"]) if field == "skills" else None
+            if (field, item["id"]) in excluded:
+                if classification is None or not counterpart_complete:
+                    continue
+                source_name, slug = classification
+                if (item["id"] in invalid_classified_ids or item["name"] != source_name
+                        or _normalized_name(source_name) in counterpart_names
+                        or _normalized_name(slug) in counterpart_names):
+                    continue
+                # Use the actual presentation policy rather than a history-only category.
+                buckets = {"skills": [{**item, "slug": slug}], "equipment": [], "weapons": []}
+                _classify_skill_source_presentations(buckets, {slug: "equipment"})
+                if len(buckets["equipment"]) != 1:
+                    continue
+            elif field == "equip" and equipment_classes:
+                classified_names = {
+                    _normalized_name(name) for name, _ in equipment_classes.values()
+                } | {_normalized_name(slug) for _, slug in equipment_classes.values()}
+                if _normalized_name(item["name"]) in classified_names and (
+                    not counterpart_complete or _normalized_name(item["name"]) in counterpart_names
+                ):
+                    continue
             delta[direction].append(ref)
         delta[direction].sort(key=occurrence_key)
     return (identity, delta) if delta["lost"] or delta["gained"] else None
@@ -795,6 +854,20 @@ def contextual_model(
                 "JOIN skill_source_classifications c "
                 "ON s.application_item_id=c.application_skill_id "
                 "WHERE s.catalog='skills'"
+            )
+        }
+        equipment_classes = {
+            source_id: (source_name, slug)
+            for source_id, source_name, slug in db.execute(
+                "SELECT s.source_item_id,s.source_name,d.slug "
+                "FROM application_catalog_sources s "
+                "JOIN skill_source_classifications c "
+                "ON s.application_item_id=c.application_skill_id "
+                "JOIN application_domain_slugs d "
+                "ON d.domain='skills' AND d.application_id=s.application_item_id "
+                "WHERE s.catalog='skills' AND c.classification='equipment' "
+                "AND d.status='resolved' AND d.slug IS NOT NULL "
+                "AND s.source_item_id=s.application_item_id"
             )
         }
         # Do not retrospectively project snapshot-bound reviewed capabilities.
@@ -880,26 +953,39 @@ def contextual_model(
                 result = historical_shared_delta(
                     candidates, source_ids[0], profiles, item_endpoints,
                     lambda label: normalized_profile_identity(label, config), excluded, aliases,
+                    equipment_classes,
                 )
                 if result is None:
                     continue
                 target, delta = result
-                unit["generalHistory"][target].append({
-                    "kind": "summaries", "scope": "",
-                    "earlierObservedDate": earlier, "laterObservedDate": later,
-                    "armyIds": sorted(known_armies), "text": reference_summary(delta),
-                    "identity": {"field": field, "sourceUnitId": source_ids[0],
-                                 "groupId": group, **delta},
-                    "evidence": {
-                        "observations": [row["evidence"] for row in candidates],
-                        "generalAttribution": {
-                            "profileIdentity": target, "method": "sharedItemsExactWindows",
-                            "comparisonEndpoints": records, "delta": delta,
+                display_deltas: dict[str, Document] = {}
+                for direction in ("lost", "gained"):
+                    for ref in delta[direction]:
+                        classified = field == "skills" and ref["filter"]["id"] in equipment_classes
+                        display_field = "equip" if classified else field
+                        display_deltas.setdefault(
+                            display_field, {"lost": [], "gained": []},
+                        )[direction].append(ref)
+                for display_field, display_delta in display_deltas.items():
+                    unit["generalHistory"][target].append({
+                        "kind": "summaries", "scope": "",
+                        "earlierObservedDate": earlier, "laterObservedDate": later,
+                        "armyIds": sorted(known_armies), "text": reference_summary(display_delta),
+                        "identity": {"field": display_field, "sourceUnitId": source_ids[0],
+                                     "groupId": group, **display_delta},
+                        "evidence": {
+                            "observations": [row["evidence"] for row in candidates],
+                            "generalAttribution": {
+                                "profileIdentity": target, "method": "sharedItemsExactWindows",
+                                "comparisonEndpoints": records, "sourceField": field,
+                                "delta": display_delta,
+                            },
                         },
-                    },
-                })
-                counts["generalEntries"] += 1
-                counts["generalItemEntries"] += 1
+                    })
+                    counts["generalEntries"] += 1
+                    counts["generalItemEntries"] += 1
+                    if field != display_field:
+                        counts["classifiedEquipmentEntries"] += 1
                 for index in indexes:
                     residual = subtract_shared(entries[index], delta)
                     residuals[index] = residual
