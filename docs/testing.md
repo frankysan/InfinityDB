@@ -387,6 +387,37 @@ Glossary lookup at 4.11 ms, initial Glossary at 56.17 ms and repeat at
 5.00–5.39 ms with scenario selection. These are local component/request
 timings, not complete browser or startup timings.
 
+### Cross-platform materialization baseline — 2026-11-26
+
+Revision `7913c9df`, Army v34, Rules v23, both ITS seasons registered.
+Run the existing Explorer benchmark with `--browser --with-seasons
+--cold-iterations 3`; for the page benchmark use `--pages` instead of
+`--browser` and select `units/minutemen`, `skills/mimetism`, `skills`, and
+`search?q=mimetism` with repeated `--case` arguments.
+
+Median browser interaction times in ms, Windows / Linux-dev: initial Explorer
+714.1 / 921.0, Extended 386.7 / 489.0, Extended next 291.6 / 485.8,
+Extended previous 127.0 / 524.2. Corresponding API medians: initial 453.3 /
+476.7, Extended 83.2 / 110.1, next 75.7 / 104.5, previous 24.2 / 31.7.
+Application startup (Explorer samples) was 2770.0 / 4487.7 ms.
+Page cold/repeat medians (Windows; Linux-dev): Minutemen 344.5/71.3;
+417.0/121.9, Mimetism 384.2/130.4; 455.0/178.8, Skills catalog
+233.9/75.8; 265.2/130.2, global search 191.4/49.2; 204.2/92.8.
+These are three-sample diagnostic host comparisons, not OS-isolated
+comparisons or production tail estimates.
+
+For the catalog-cache tradeoff, run
+`python -m tools.performance.benchmark_catalog_cache` in a fresh process,
+then repeat with `--without-cache`. The diagnostic bypasses four repository
+LRU wrappers only, with the same validated database set and workload; compare
+the response digests as well as memory and latency. It samples single-process
+resident memory (working set on Windows), not aggregate Gunicorn memory.
+Windows Python 3.14.10, 249 catalog details: final resident memory was
+162.7 MiB cached versus 123.2 MiB bypassed. Repeated WSGI medians for
+Mimetism, MediKit and Combi Rifle were 51.49/54.15, 26.97/35.52 and
+47.22/55.37 ms (cached/bypassed). Response digests matched. The full-catalog
+scan is a high-cardinality stress workload, not typical traffic.
+
 ### Detail and catalog browser performance — 2026-11-25
 
 Run `python -m tools.performance.benchmark_runtime data/generated/army.db
