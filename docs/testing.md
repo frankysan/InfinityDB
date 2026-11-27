@@ -432,6 +432,53 @@ passed in 102.08 s. Rebuilt the runtime databases after the repository input
 change; the deployment provenance check (`--skip-svg`) passed. Aggregate
 Gunicorn memory remains a release/deployment measurement, not a pilot result.
 
+### Docker first-access and catalog detail baseline — 2026-11-27
+
+Linux-dev at `94e56857`, snapshot
+`e8060a35f1664ddb6b46475ab69ea42aceeb1b83e21352a0ac4d1c3d47cd2a89`.
+The development checkout still reports package version 1.2.2. Each case used
+a fresh disposable app-only image/container, Gunicorn 2 workers × 4 threads,
+no explicit resource limits, health checks only before the initial batch,
+8 first-access requests, 10 seconds steady at concurrency 8 and 5 seconds
+burst at concurrency 32. Both HTTP and resource receipts are retained under
+`local/performance/http-capacity/20261127-94e56857/` on Linux-dev.
+
+| Case | First p50/p95 (ms) | Steady p50/p95 (ms) | Burst p50/p95 (ms) | Steady req/s | Peak app MiB |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Minutemen | 3506.7/3534.4 | 28.7/53.7 | 124.9/222.0 | 261.5 | 231 |
+| Minutemen repeat | 3580.6/3600.7 | 30.1/54.9 | 122.1/236.5 | 250.9 | 244 |
+| Explorer initial | 3672.4/3792.2 | 12.6/193.8 | 394.0/675.7 | 116.9 | 339 |
+| Mimetism | 3044.6/3453.5 | 274.3/1327.7 | 1789.0/3975.5 | 15.0 | 244 |
+| MediKit | 2856.4/3162.7 | 159.6/580.5 | 576.4/2354.1 | 34.6 | 235 |
+| Combi Rifle | 2928.2/3430.1 | 198.6/1029.9 | 2060.9/2727.7 | 17.7 | 231 |
+
+All six runs exited successfully without HTTP errors, restarts or OOM events.
+Peak app memory is sampled container usage, not summed process RSS. The
+first-access figures are small concurrent batches, not per-worker cold
+percentiles. The short fixed-route stress workloads are not mixed traffic or
+browser rendering measurements; the Caddy/Compose release baseline remains
+outstanding.
+
+A separate Windows single-browser profile on the same revision showed the
+initial Minutemen API taking 240 ms under profiling, including 110 ms building
+the Unit graph and 41 ms constructing official Army links; the repeated API
+took 18 ms. The existing instance LRU releases its lock during computation,
+allowing concurrent misses to duplicate work. The contribution of duplicate
+initialization to the Docker latency has not yet been isolated.
+
+Mimetism's initial/repeated API profiles took 528/229 ms; the response was
+approximately 490 KB. The repeated profile still executed 583,615 function
+calls, dominated by recursive Army/Unit slug and symbol enrichment, deep
+copying, maintained-text references and relation enrichment. Materialized
+catalog usage already deduplicates underlying Unit records. The next pilot
+should reuse enriched shared Unit display data and avoid unnecessary copies
+and repeated traversal, or compare a compact immutable final-response
+representation if justified by storage/memory measurements. Do not restore
+the retired expanded-object caches without a measured tradeoff. Separately
+test preloading the shared Unit graph and other measured immutable indexes
+before Gunicorn forks, or coalescing concurrent initialization; neither
+strategy has yet been validated against the Docker baseline.
+
 ### Normalized source verification reuse
 
 Run the following read-only benchmark against a matched standalone Army export
