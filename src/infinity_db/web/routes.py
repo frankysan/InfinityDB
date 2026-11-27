@@ -70,6 +70,7 @@ _METRIC_FIXED_PATHS = frozenset(
         "/changes",
         "/armies",
         "/units",
+        "/unit-compare",
         "/skills",
         "/orders-aros",
         "/equipment",

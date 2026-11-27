@@ -58,6 +58,7 @@ ASSETS = {
     "/static/unit-presentation.js": ("unit-presentation.js", "text/javascript; charset=utf-8"),
     "/static/view-components.js": ("view-components.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
+    "/static/unit-compare.js": ("unit-compare.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
     "/static/theme-startup.js": ("theme-startup.js", "text/javascript; charset=utf-8"),
     "/static/theme.js": ("theme.js", "text/javascript; charset=utf-8"),
@@ -239,6 +240,12 @@ _FIXED_PAGES = {
         (("InfinityDB", "/"), ("Units", None)),
         "Units",
         "units",
+    ),
+    "/unit-compare": PageSpec(
+        "unit-compare.html",
+        (("InfinityDB", "/"), ("Unit comparison", None)),
+        "Unit comparison",
+        "unit-compare",
     ),
     "/search": PageSpec(
         "search.html",
@@ -620,6 +627,7 @@ def _render_page(
     navigation_markers = {
         "armies": "ARMIES_CURRENT",
         "units": "UNIT_EXPLORER_CURRENT",
+        "unit-compare": "UNIT_COMPARE_CURRENT",
         "skills": "SKILLS_CURRENT",
         "orders-aros": "ORDERS_AROS_CURRENT",
         "equipment": "EQUIPMENT_CURRENT",

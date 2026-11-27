@@ -19,6 +19,11 @@ const SCHEMAS = Object.freeze({
   catalog: Object.freeze({ scope: "c", fields: Object.freeze(["q"]) }),
   fireteams: Object.freeze({ scope: "f", fields: Object.freeze(["army"]) }),
   unit: Object.freeze({ scope: "d", fields: Object.freeze(["army_id"]) }),
+  comparison: Object.freeze({
+    scope: "p",
+    fields: Object.freeze(["left", "right", "left_army", "right_army",
+      "left_profile", "right_profile", "left_loadout", "right_loadout", "differences"]),
+  }),
   search: Object.freeze({ scope: "s", fields: Object.freeze(["q"]) }),
   glossary: Object.freeze({ scope: "g", fields: Object.freeze(["q"]) }),
   scenario: Object.freeze({ scope: "n", fields: Object.freeze(["army_points", "collection", "revision"]) }),

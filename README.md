@@ -61,6 +61,8 @@ its application metrics.
   Equipment and Weapons as plain text.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
+- Compares two current Army profiles and optional loadouts side by side, including
+  variants of the same Unit, with differences-only display and shareable selections.
 - Groups equivalent standard, reinforcement, and optional-mercenary source
   records into coherent unit views while preserving their distinct availability
   and army contexts.

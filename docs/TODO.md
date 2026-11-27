@@ -58,10 +58,6 @@ Complete the selected development work before the existing
 
 ### Optional additions (not release-blocking)
 
-- **Web frontend + Web backend:** [ITS season-wide rules](#its-scenarios-and-game-tools)
-  and [Unit comparison](#user-owned-tools-and-portable-data), both high
-  priority when capacity permits. Reuse materialized profiles and historical
-  comparison components where appropriate.
 - **Web frontend + Web backend + Deployment:** Shared
   [bug/error reporting form](#reference-presentation-and-feedback).
 
@@ -457,7 +453,6 @@ remains authoritative for list legality.
 - [ ] Evaluate an offline/portable model-collection tracker without accounts.
 - [ ] Support portable army lists, favourites and notes with export/import,
   independent of replaceable Army snapshots.
-- [ ] Add Unit comparison across profiles, loadouts, weapons, Skills and Equipment.
 - [ ] Build army-list export/integration with game-mode and mission-aware
   capability guidance, without claiming tournament legality or disclosing
   hidden information; coordinate with the ITS guidance above.

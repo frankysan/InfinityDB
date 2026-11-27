@@ -217,6 +217,31 @@ should join the catalog share-state schema rather than remaining browser-local s
 This state model is shared vocabulary, not a requirement that every domain implement all four
 states.
 
+## Unit comparison
+
+**Current.** `/unit-compare` is a read-only auxiliary Unit view, reachable from
+navigation, the landing page and Unit details. Two independently selected Units
+may be identical. Each side selects an actual Army context and profile, with an
+optional loadout from the same source profile group. The comparison uses the
+existing Unit list and detail API rather than a new database projection or
+independent gameplay model.
+
+The table compares source-layer Attributes, AVA, type, classification,
+characteristics, Points, SWC, Skills, Equipment, Weapons and attached-model
+references. Profile and loadout source entries remain separate; source Skill
+entries can include Training and Attribute modifiers. Differences-only mode
+hides equal rows, not individual shared items. The view is not a legality
+check or a composite-option/attachment builder.
+
+The comparison's versioned share-state token stores the two Unit identifiers,
+Army context keys, profile and loadout occurrence selectors, and differences-only
+state. Unit and Army identifiers prefer public slugs. Occurrence selectors
+are validated against the current response, with missing or ambiguous selections
+requiring an explicit replacement rather than silently substituting a different
+profile or loadout. Links compare the current snapshot, not a pinned historical
+snapshot. All optional availability categories are included without changing
+saved preferences; distance formatting follows the normal display preference.
+
 ## Armies
 
 **Current.** Armies are a top-level **overview** domain rather than a conventional catalog/detail

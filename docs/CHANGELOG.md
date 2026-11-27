@@ -22,6 +22,8 @@ are not retroactively relabeled.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
 - Open matching Unit entries directly in official Infinity Army from their Army profile cards.
+- Compare two current Army profiles and loadouts side by side, with differences-only
+  display and shareable selections.
 - Choose InfinityDB or one of eleven Army-inspired themes, independently of
   Auto, Light or Dark mode. Saved scenario maps retain the selected appearance.
 - Clearer distinctions between rules, explanations, source examples, reviewed
@@ -34,6 +36,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web frontend + Web backend:** Added Unit comparison using current Army profile
+  and loadout source entries, preserving group-local selections and URL-owned
+  state without additional database or API contracts.
 - **Web backend + Web frontend:** Present reviewed season-owned Rules, Skills,
   States and event policies in a collapsed Season Rules section on ITS scenario
   pages, with revision-specific citations and separately identified Extras.

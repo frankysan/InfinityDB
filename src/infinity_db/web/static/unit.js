@@ -1550,6 +1550,11 @@ function render(unit, helpItems = [], attributeItems = []) {
   unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
   meta.append(unitIds);
   status.hidden = true;
+  const compare = document.getElementById("unit-compare-link");
+  compare.href = shareStateHref("/unit-compare", "comparison", {
+    left: unit.public_slug || unit.slug || unit.id,
+  });
+  compare.hidden = false;
   const requestedArmy = unit.armies.find((army) => army.presentation_requested);
   const armies = unit.armies.filter((army) => army.presentation_visible);
   const generalProfiles = unit.general_profiles || [];

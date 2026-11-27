@@ -1241,6 +1241,80 @@ svg.scenario-map .label {
   }
 }
 
+.comparison-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.comparison-selector {
+  min-width: 0;
+}
+
+.comparison-selector .surface-body {
+  display: grid;
+  gap: 12px;
+}
+
+.comparison-selector form {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
+.comparison-selector form .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.comparison-selector select,
+.comparison-selector input {
+  width: 100%;
+  min-width: 0;
+}
+
+.comparison-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.comparison-table th:first-child {
+  width: 28%;
+}
+
+.comparison-table th,
+.comparison-table td {
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.comparison-difference-label {
+  display: block;
+  font-weight: normal;
+  font-size: var(--font-size-xs);
+}
+
+.comparison-different > th {
+  font-weight: 700;
+}
+
+.comparison-items {
+  margin: 0;
+  padding-inline-start: 1em;
+}
+
+@media (max-width: 760px) {
+  .comparison-selectors {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-table {
+    min-width: 520px;
+  }
+}
+
 /* Keep linked rule cards visible below the sticky navigation bar. */
 .rules-reference .detail-section[id] {
   scroll-margin-top: 6rem;
