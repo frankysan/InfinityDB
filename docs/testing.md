@@ -479,6 +479,20 @@ test preloading the shared Unit graph and other measured immutable indexes
 before Gunicorn forks, or coalescing concurrent initialization; neither
 strategy has yet been validated against the Docker baseline.
 
+### Catalog presentation materialization pilot — 2026-11-27
+
+Rules schema v24 adds a presentation-enriched JSON record alongside each shared
+raw catalog usage Unit record. Catalog API handlers process compact Unit IDs and
+expand them only after catalog-specific enrichment. The history-enabled integrated
+Windows build completed in 238.7 s. The Rules database grew from 10,481,664 to
+11,636,736 bytes (+1,155,072 bytes); Army and ITS database sizes were unchanged.
+The focused catalog projection, database-set, database-set builder and real
+ITS17 publication suites passed all 89 tests in 501.13 s, including v23 fallback
+and repeated fixture-build determinism.
+Deployment database and reference-publication verification passed with
+`python -m tools.verify_deployment_assets --skip-svg`. Docker latency, throughput
+and aggregate memory comparison remain outstanding.
+
 ### Normalized source verification reuse
 
 Run the following read-only benchmark against a matched standalone Army export

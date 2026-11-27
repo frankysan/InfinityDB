@@ -331,7 +331,7 @@ the retired source roots.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — four tracked runtime databases: `army.db`
-  (Army v35/compatibility 44), `rules_n5.db` (Rules v23/compatibility 25),
+  (Army v35/compatibility 44), `rules_n5.db` (Rules v24/compatibility 26),
   `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
   Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
   symbol mappings, General profiles and Unit history remain embedded in Army/Rules. The ITS databases
@@ -441,7 +441,7 @@ exist for independent development commands; they are not serving dependencies.
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
 `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
-Army v34/v35 / Rules v23 / ITS v2, with matched provenance
+Army v34/v35 / Rules v24 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.

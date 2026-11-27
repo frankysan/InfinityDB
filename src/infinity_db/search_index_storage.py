@@ -26,9 +26,9 @@ from .publication_registry import PublicationRegistry
 from .reference_catalog import LabelCatalog, RulesRecordCatalog
 from .reference_page_storage import collect_reference_pages, stage_reference_pages
 from .rules_database import (
+    CATALOG_PRESENTATION_COMPATIBILITY_VERSION,
+    CATALOG_PRESENTATION_SCHEMA_VERSION,
     COMPOSED_SCHEMA_VERSION,
-    REFERENCE_PAGE_COMPATIBILITY_VERSION,
-    REFERENCE_PAGE_SCHEMA_VERSION,
     RULES_METADATA_TABLE,
     SEARCH_INDEX_SCHEMA_VERSION,
     RulesDatabase,
@@ -183,10 +183,10 @@ def publish_search_index(
             stage_specialist_projection(db, candidates)
             stage_reference_targets(db, reference_targets)
             stage_reference_pages(db, reference_pages)
-            db.execute(f"PRAGMA user_version={REFERENCE_PAGE_SCHEMA_VERSION}")
+            db.execute(f"PRAGMA user_version={CATALOG_PRESENTATION_SCHEMA_VERSION}")
             for key, value in (
-                ("formatVersion", REFERENCE_PAGE_SCHEMA_VERSION),
-                ("databaseCompatibilityVersion", REFERENCE_PAGE_COMPATIBILITY_VERSION),
+                ("formatVersion", CATALOG_PRESENTATION_SCHEMA_VERSION),
+                ("databaseCompatibilityVersion", CATALOG_PRESENTATION_COMPATIBILITY_VERSION),
             ):
                 db.execute(
                     f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?", (str(value), key),

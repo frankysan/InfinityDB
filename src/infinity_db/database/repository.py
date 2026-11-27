@@ -3014,7 +3014,9 @@ class Database:
                 )
         return {**trait, "variants": variants}
 
-    def get_catalog_item(self, catalog: str, item_ref: int | str) -> dict[str, Any] | None:
+    def get_catalog_item(
+        self, catalog: str, item_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return an equipment or weapon item and its extra-specific unit usage."""
         if self.catalog_projection is None:
             return self._compose_catalog_item(catalog, item_ref)
@@ -3023,7 +3025,7 @@ class Database:
         application_item_id = self.application_catalog_id(catalog, item_ref)
         if application_item_id is None:
             return None
-        return self.catalog_projection.detail(catalog, application_item_id)
+        return self.catalog_projection.detail(catalog, application_item_id, expand_usage=expand_usage)
 
     @instance_lru_cache(maxsize=128)
     def _compose_catalog_item(self, catalog: str, item_ref: int | str) -> dict[str, Any] | None:
@@ -3207,14 +3209,16 @@ class Database:
             return ()
         return graph["source_ids_by_item"].get(application_skill_id, ())
 
-    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+    def get_skill(
+        self, skill_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return one Skill reference together with the units that use it."""
         if self.catalog_projection is None:
             return self._compose_skill(skill_ref)
         application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
             return None
-        return self.catalog_projection.detail("skills", application_skill_id)
+        return self.catalog_projection.detail("skills", application_skill_id, expand_usage=expand_usage)
 
     @instance_lru_cache(maxsize=128)
     def _compose_skill(self, skill_ref: int | str) -> dict[str, Any] | None:

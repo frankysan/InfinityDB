@@ -212,7 +212,11 @@ and ITS publications are finalized. Search matching and ranking remain dynamic;
 complete serving requires matching Army and ordered season fingerprints.
 Rules v20 adds canonical catalog summaries, filter identities and Army detail
 usage, with shared logical Unit display records instead of repeated Unit
-payloads. Curated detail enrichment and contextual filter counts remain dynamic.
+payloads. Rules v24 additionally publishes presentation-enriched shared Unit
+usage records, bound to the embedded Army symbol publication. The catalog API
+retains Unit IDs until after catalog-specific enrichment and expands the prepared
+records only for the final response. Raw repository reads remain unchanged;
+curated detail enrichment and contextual filter counts remain dynamic.
 Army v34 publishes the canonical source-owned filter contexts with shared
 property sets and exact occurrence coordinates. The same runtime matcher
 selects eligible occurrences and evaluates prospective counts. The Unit graph
@@ -487,7 +491,7 @@ available only on explicit request. Neither complete runtime builds nor the
 default standalone export creates it. Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v34/v35, Rules v23 and ITS v2,
+The complete serving contract requires Army v34/v35, Rules v24 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)

@@ -597,6 +597,10 @@ class ApiHandler:
             self.legacy_armies,
             published_search=search_index.search if search_index is not None else None,
         )
+        self._presented_catalog_usage = (
+            catalog_projection if catalog_projection is not None
+            and catalog_projection.has_presented_usage else None
+        )
         self.catalog_rules = CatalogRules(rules_database, database=database)
         self.symbol_catalog = symbol_catalog
         self.fireteam_rules_reference = fireteam_reference(rules_database)
@@ -1139,7 +1143,9 @@ class ApiHandler:
             try:
                 identifier = match.group("identifier")
                 skill_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.skill_catalog.get_skill(skill_ref)
+                payload = self.skill_catalog.get_skill(
+                    skill_ref, expand_usage=self._presented_catalog_usage is None,
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
@@ -1156,6 +1162,8 @@ class ApiHandler:
                         additional_records=self._season_rule_records,
                         in_place=True,
                     )
+                    if self._presented_catalog_usage is not None:
+                        self._presented_catalog_usage.present_usage(payload)
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill")
@@ -1166,7 +1174,9 @@ class ApiHandler:
             try:
                 identifier = match.group("identifier")
                 item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.equipment_catalog.get_equipment(item_ref)
+                payload = self.equipment_catalog.get_equipment(
+                    item_ref, expand_usage=self._presented_catalog_usage is None,
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
@@ -1185,6 +1195,8 @@ class ApiHandler:
                     enrich_maintained_text_references(
                         self.database, self.rules_database, payload, in_place=True,
                     )
+                    if self._presented_catalog_usage is not None:
+                        self._presented_catalog_usage.present_usage(payload)
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
@@ -1195,7 +1207,9 @@ class ApiHandler:
             try:
                 identifier = match.group("identifier")
                 item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.database.get_catalog_item("weapons", item_ref)
+                payload = self.database.get_catalog_item(
+                    "weapons", item_ref, expand_usage=self._presented_catalog_usage is None,
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
@@ -1216,6 +1230,8 @@ class ApiHandler:
                         self.database, self.rules_database, payload,
                         local_rule_ids=local_rule_ids,
                     )
+                    if self._presented_catalog_usage is not None:
+                        self._presented_catalog_usage.present_usage(payload)
                     attach_weapon_profile_citations(payload, self.weapon_profile_citations)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")

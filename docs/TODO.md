@@ -329,8 +329,10 @@ make v1.3.0 depend on them.
   as the next optimization targets.
   - [ ] Prioritize catalog details: extend the existing shared Unit usage
     projection with presentation enrichment, avoiding repeated expanded Unit
-    objects. Evaluate compact serialized responses only if significant runtime
-    costs remain; preserve response parity and measure storage/memory tradeoffs.
+    objects. The [Rules v24 pilot](testing.md#catalog-presentation-materialization-pilot--2026-11-27)
+    defers expansion until after catalog-specific enrichment. Confirm response
+    parity and storage/memory tradeoffs before adoption; evaluate compact
+    serialized responses only if significant runtime costs remain.
   - [ ] Investigate preloading expensive immutable indexes before Gunicorn
     forks to avoid redundant initialization across concurrent requests.
     Measure startup, first-access latency and aggregate memory before adoption.

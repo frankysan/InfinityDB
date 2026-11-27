@@ -11,17 +11,21 @@ from pathlib import Path
 
 import pytest
 
-from infinity_db.catalog_projection import CATALOGS, CatalogProjection
+from infinity_db.army_slugs import enrich_army_references
+from infinity_db.catalog_projection import CATALOGS, CatalogProjection, record_catalog_projection
 from infinity_db.database.repository import Database
 from infinity_db.database_set import SEASON_DATABASE_SOURCES
+from infinity_db.domain_references import enrich_rule_relation_references
 from infinity_db.maintained_text_references import (
     _enrich_rule_record,
     _Resolver,
     collect_reference_targets,
+    enrich_maintained_text_references,
 )
 from infinity_db.reference_page_storage import collect_reference_pages
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
+from infinity_db.unit_slugs import enrich_nested_unit_slugs
 from infinity_db.web.app import create_app, create_app_from_database_set
 from tools.browser_wsgi_transport import wsgi_response
 
@@ -36,7 +40,7 @@ def test_every_published_catalog_detail_and_summary_matches_composer(
 ) -> None:
     app = create_app_from_database_set(RELEASE)
     projection = app.database.catalog_projection
-    assert projection is not None
+    assert projection is not None and projection.has_presented_usage
     with monkeypatch.context() as context:
         context.setattr(CatalogProjection, "select", lambda path: None)
         legacy = create_app(
@@ -79,7 +83,7 @@ def test_every_published_catalog_detail_and_summary_matches_composer(
     for route in (
         "/api/skills", "/api/equipment", "/api/weapons",
         "/api/skills/mimetism", "/api/skills/scenario-activate-console",
-        "/api/equipment/cube", "/api/equipment/firewall",
+        "/api/equipment/cube", "/api/equipment/firewall", "/api/equipment/medikit",
         "/api/weapons/combi-rifle",
         "/api/glossary", "/api/unit-profile-help", "/api/orders-aros",
         "/api/rules/specialist-troops-standard", "/api/traits/zone-of-control-zc",
@@ -94,6 +98,65 @@ def test_every_published_catalog_detail_and_summary_matches_composer(
         assert json.loads(body) == json.loads(expected_body), route
     assert app.database.get_skill("no-such-skill-xyz") is None
     assert app.database.get_catalog_item("weapons", "no-such-weapon-xyz") is None
+
+    # The same usage presentation must serve both route identity forms.
+    for catalog, slug in (("skills", "mimetism"), ("equipment", "medikit"),
+                          ("weapons", "combi-rifle")):
+        item_id = app.database.application_catalog_id(catalog, slug)
+        assert item_id is not None
+        for candidate in (app, legacy):
+            status, _, body = wsgi_response(candidate, f"http://localhost/api/{catalog}/{item_id}")
+            slug_status, _, slug_body = wsgi_response(candidate, f"http://localhost/api/{catalog}/{slug}")
+            assert status == slug_status == 200
+            assert json.loads(body) == json.loads(slug_body)
+
+
+def test_every_presented_usage_record_matches_canonical_enrichment() -> None:
+    app = create_app_from_database_set(RELEASE)
+    projection = app.database.catalog_projection
+    assert projection is not None and projection.has_presented_usage
+    assert app.rules_database is not None
+    with closing(sqlite3.connect(projection.path)) as db:
+        rows = db.execute(
+            "SELECT unit_id,body FROM catalog_usage_units ORDER BY unit_id"
+        ).fetchall()
+    raw = {"id": 0, "variants": [{"units": [json.loads(body) for _, body in rows]}]}
+    expected = app.trait_catalog.enrich_catalog_item(raw)
+    expected = enrich_nested_unit_slugs(app.database, expected)
+    enrich_army_references(app.database, expected, in_place=True)
+    app.symbol_catalog.enrich_nested_units(expected, in_place=True)
+    enrich_rule_relation_references(app.database, expected, in_place=True)
+    enrich_maintained_text_references(app.database, app.rules_database, expected, in_place=True)
+    compact = {"id": 0, "variants": [{"units": [unit_id for unit_id, _ in rows]}]}
+    presented = deepcopy(compact)
+    projection.present_usage(presented)
+    assert presented == expected
+    presented["variants"][0]["units"][0].clear()
+    projection.present_usage(compact)
+    assert compact == expected
+
+
+def test_v23_catalog_usage_retains_live_enrichment(tmp_path: Path) -> None:
+    path = tmp_path / "rules_n5.db"
+    shutil.copyfile(RELEASE / "rules_n5.db", path)
+    with closing(sqlite3.connect(path)) as db, db:
+        db.execute("ALTER TABLE catalog_usage_units DROP COLUMN presented_body")
+        db.execute("PRAGMA user_version=23")
+        db.executemany(
+            "UPDATE __rules_metadata SET value=? WHERE key=?",
+            [("23", "formatVersion"), ("25", "databaseCompatibilityVersion")],
+        )
+        db.execute("DELETE FROM __rules_metadata WHERE key='catalogProjectionSha256'")
+        record_catalog_projection(db)
+    app = create_app_from_database_set(RELEASE)
+    older = create_app(RELEASE / "army.db", path, season_databases=SEASONS)
+    assert older.database.catalog_projection is not None
+    assert not older.database.catalog_projection.has_presented_usage
+    for route in ("/api/skills/mimetism", "/api/equipment/medikit", "/api/weapons/combi-rifle"):
+        status, _, body = wsgi_response(app, "http://localhost" + route)
+        old_status, _, old_body = wsgi_response(older, "http://localhost" + route)
+        assert status == old_status == 200
+        assert json.loads(body) == json.loads(old_body)
 
 
 @pytest.mark.parametrize(("catalog", "slug"), [
@@ -124,6 +187,7 @@ def test_published_catalog_detail_is_not_retained(catalog: str, slug: str) -> No
 @pytest.mark.parametrize("mutation", [
     "DELETE FROM catalog_summaries",
     "DELETE FROM catalog_usage_units",
+    "UPDATE catalog_usage_units SET presented_body='{}'",
     "UPDATE catalog_details SET body='null'",
     "DROP TABLE catalog_details",
 ])

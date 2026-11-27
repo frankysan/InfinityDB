@@ -143,10 +143,14 @@ class EquipmentCatalog:
             )
         return sorted(items, key=lambda item: (str(item["name"]).casefold(), str(item["id"])))
 
-    def get_equipment(self, item_ref: int | str) -> dict[str, Any] | None:
+    def get_equipment(
+        self, item_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return textual or presentation-encoded Equipment with canonical usage."""
 
-        source_item = self.database.get_catalog_item("equipment", item_ref)
+        source_item = self.database.get_catalog_item(
+            "equipment", item_ref, expand_usage=expand_usage,
+        )
         if source_item is not None:
             attach_public_catalog_slug(self.database, "equipment", source_item)
             return source_item

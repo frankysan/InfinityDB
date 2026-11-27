@@ -8,7 +8,7 @@ and which invariants runtime queries rely on. Historical audit counts, release b
 migration chronology belong in Git history or `docs/CHANGELOG.md`, not in this current-state
 contract.
 
-The complete serving runtime uses Army v34 or history-enabled v35 in `army.db`, Rules v23 in
+The complete serving runtime uses Army v34 or history-enabled v35 in `army.db`, Rules v24 in
 `rules_n5.db` and ITS schema v2 in `its_17.db` and `its_18.db`.
 Structured references, source/citation identity, symbol mappings and
 shared General-profile projections are embedded. The tracked v35 publication also
@@ -3160,6 +3160,18 @@ as global search. Complete serving requires it; explicitly selected older or
 partial sets use canonical runtime composition. The projection does not
 replace normalized occurrences or encode arbitrary filter combinations.
 
+### Catalog usage presentation in Rules v24
+
+Rules v24/compatibility 26 extends `catalog_usage_units` with `presented_body`,
+a second shared representation containing the canonical public Unit and Army
+slugs and symbol paths. The same Army SHA-256 scope covers the embedded symbol
+publication. The catalog fingerprint includes both bodies; raw consumers retain
+`body`. Source-backed catalog API detail routes enrich their compact variant
+records before expanding the ordered Unit IDs using the prepared presentation.
+Rules-only and presentation-encoded items and explicit older schemas retain
+the existing live enrichment path. Neither representation is retained in an
+expanded catalog cache.
+
 ### Specialist candidate projection in Rules v21
 
 Rules v21/compatibility 23 adds `specialist_candidates`, one sorted set
@@ -3459,7 +3471,7 @@ validation owns source binding, integrity and publication completeness. Neither
 requires replaying an old schema transition or synthesizing deployed-object JSON.
 
 Normal `infinity-db build` creates Army v35 (v34 only with `--no-unit-history`)
-and Rules v23 together in the selected complete directory. Rules embeds object identities, attributes and
+and Rules v24 together in the selected complete directory. Rules embeds object identities, attributes and
 evidence, delivery paths, unresolved paths and exact Unit uses, recording the
 required Army fingerprint without a self-referential Rules hash. Other embedded
 projections and shared build provenance are validated before replacement.
@@ -4847,10 +4859,10 @@ DDL; the rules schema script starts its transaction internally because `executes
 previously pending transaction.
 
 The complete Rules builder still constructs its initial v8 relational schema
-and adds the reviewed embedded projections through v9–v23 as build-time
-stages. These stages are used to produce the current v23 publication, not
+and adds the reviewed embedded projections through v9–v24 as build-time
+stages. These stages are used to produce the current v24 publication, not
 an invitation to serve a historical database in place of a complete set.
-Normal checkout/Docker serving requires the validated current Rules v23
+Normal checkout/Docker serving requires the validated current Rules v24
 publication together with matched Army v34/v35 and both ITS v2 seasons; separately
 selected non-complete databases are only for explicit inspection or
 targeted fixtures. The [runtime target contract](architecture.md#runtime-targets)

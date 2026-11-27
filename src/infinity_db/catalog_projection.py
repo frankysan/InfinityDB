@@ -11,11 +11,13 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from .army_slugs import enrich_army_references
 from .build_provenance import canonical_bytes
 from .database.repository import Database
 from .equipment_catalog import EquipmentCatalog
 from .publication_registry import PublicationRegistry
 from .rules_database import (
+    CATALOG_PRESENTATION_SCHEMA_VERSION,
     CATALOG_SCHEMA_VERSION,
     REFERENCE_PAGE_SCHEMA_VERSION,
     REFERENCE_TARGET_SCHEMA_VERSION,
@@ -25,6 +27,8 @@ from .rules_database import (
 )
 from .scenario_catalog import ScenarioCatalog
 from .skill_catalog import SkillCatalog
+from .symbol_catalog import SymbolCatalog
+from .unit_slugs import enrich_nested_unit_slugs
 
 CATALOGS = ("skills", "equipment", "weapons")
 SUMMARY_KEYS = tuple(
@@ -47,6 +51,7 @@ class CatalogRows:
     summaries: list[tuple[str, str, str]]
     details: list[tuple[str, int, str]]
     units: dict[int, str]
+    presented_units: dict[int, str]
 
 
 def collect_catalog_projection(
@@ -90,7 +95,16 @@ def collect_catalog_projection(
                     variants.append({**variant, "units": unit_ids})
                 detail = {**detail, "variants": variants}
             detail_rows.append((catalog, item_id, _encode(detail)))
-    return CatalogRows(summary_rows, detail_rows, units)
+    # Usage records contain only context-independent Unit/Army display data.
+    # The Army publication includes the exact symbol mapping used by the web app.
+    usage = {"units": [json.loads(body) for body in units.values()]}
+    usage = enrich_nested_unit_slugs(database, usage)
+    enrich_army_references(database, usage, in_place=True)
+    SymbolCatalog(publication=database.symbol_publication()).enrich_nested_units(
+        usage, in_place=True,
+    )
+    presented_units = {unit["id"]: _encode(unit) for unit in usage["units"]}
+    return CatalogRows(summary_rows, detail_rows, units, presented_units)
 
 
 def stage_catalog_projection(db: sqlite3.Connection, rows: CatalogRows) -> None:
@@ -99,7 +113,8 @@ def stage_catalog_projection(db: sqlite3.Connection, rows: CatalogRows) -> None:
         "body TEXT NOT NULL, PRIMARY KEY(catalog,view)) WITHOUT ROWID"
     )
     db.execute(
-        "CREATE TABLE catalog_usage_units (unit_id INTEGER PRIMARY KEY, body TEXT NOT NULL)"
+        "CREATE TABLE catalog_usage_units (unit_id INTEGER PRIMARY KEY, "
+        "body TEXT NOT NULL, presented_body TEXT NOT NULL)"
     )
     db.execute(
         "CREATE TABLE catalog_details (catalog TEXT NOT NULL, item_id INTEGER NOT NULL, "
@@ -107,7 +122,11 @@ def stage_catalog_projection(db: sqlite3.Connection, rows: CatalogRows) -> None:
     )
     db.executemany("INSERT INTO catalog_summaries VALUES (?,?,?)", rows.summaries)
     db.executemany("INSERT INTO catalog_details VALUES (?,?,?)", rows.details)
-    db.executemany("INSERT INTO catalog_usage_units VALUES (?,?)", sorted(rows.units.items()))
+    db.executemany(
+        "INSERT INTO catalog_usage_units VALUES (?,?,?)",
+        [(unit_id, body, rows.presented_units[unit_id])
+         for unit_id, body in sorted(rows.units.items())],
+    )
 
 
 def _projection_sha256(db: sqlite3.Connection) -> str:
@@ -168,6 +187,10 @@ def validate_catalog_projection(db: sqlite3.Connection) -> None:
         if json.loads(raw)["id"] != unit_id:
             raise ValueError("Invalid catalog projection Unit identity")
         units.add(unit_id)
+    if db.execute("PRAGMA user_version").fetchone()[0] >= CATALOG_PRESENTATION_SCHEMA_VERSION:
+        for unit_id, raw in db.execute("SELECT unit_id,presented_body FROM catalog_usage_units"):
+            if json.loads(raw)["id"] != unit_id:
+                raise ValueError("Invalid catalog projection presented Unit identity")
     if actual != expected or units != referenced:
         raise ValueError("Incomplete catalog projection usage coverage")
 
@@ -224,7 +247,15 @@ class CatalogProjection:
             raise ValueError(f"Missing catalog projection: {catalog}/{view}")
         return json.loads(row[0])
 
-    def detail(self, catalog: str, item_id: int) -> dict[str, Any] | None:
+    @cached_property
+    def has_presented_usage(self) -> bool:
+        with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+            version = db.execute("PRAGMA user_version").fetchone()[0]
+            return version >= CATALOG_PRESENTATION_SCHEMA_VERSION
+
+    def detail(
+        self, catalog: str, item_id: int, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
             row = db.execute(
                 "SELECT body FROM catalog_details WHERE catalog=? AND item_id=?",
@@ -233,19 +264,34 @@ class CatalogProjection:
             if row is None:
                 raise ValueError(f"Missing catalog detail projection: {catalog}/{item_id}")
             detail = json.loads(row[0])
-            if detail is None:
-                return None
-            ids = sorted({unit for variant in detail["variants"] for unit in variant["units"]})
-            units = {}
-            if ids:
-                placeholders = ",".join("?" for _ in ids)
-                units = {
-                    unit_id: json.loads(body) for unit_id, body in db.execute(
-                        "SELECT unit_id,body FROM catalog_usage_units "
-                        f"WHERE unit_id IN ({placeholders})",
-                        ids,
-                    )
-                }
-            for variant in detail["variants"]:
-                variant["units"] = [units[unit_id] for unit_id in variant["units"]]
+            if detail is not None and expand_usage:
+                self._expand_usage(db, detail, presented=False)
         return detail
+
+    def present_usage(self, detail: dict[str, Any]) -> None:
+        """Attach fresh, already enriched shared records after catalog-specific processing."""
+        if type(detail.get("id")) is not int:
+            # Rules-only or presentation-encoded catalog entries use the live path.
+            return
+        with closing(sqlite3.connect(self.path.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+            self._expand_usage(db, detail, presented=True)
+
+    @staticmethod
+    def _expand_usage(
+        db: sqlite3.Connection, detail: dict[str, Any], *, presented: bool,
+    ) -> None:
+        variants = detail["variants"]
+        ids = sorted({unit for variant in variants for unit in variant["units"]})
+        units = {}
+        if ids:
+            placeholders = ",".join("?" for _ in ids)
+            column = "presented_body" if presented else "body"
+            units = {
+                unit_id: json.loads(body) for unit_id, body in db.execute(
+                    f"SELECT unit_id,{column} FROM catalog_usage_units "
+                    f"WHERE unit_id IN ({placeholders})",
+                    ids,
+                )
+            }
+        for variant in variants:
+            variant["units"] = [units[unit_id] for unit_id in variant["units"]]

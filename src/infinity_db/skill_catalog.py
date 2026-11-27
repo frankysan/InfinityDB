@@ -416,9 +416,11 @@ class SkillCatalog:
             return {"kind": "random-chart", "title": "MetaChemistry chart", "rows": rows}
         return None
 
-    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+    def get_skill(
+        self, skill_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return one Army Skill reference enriched with curated declarations and rules."""
-        item = self.database.get_skill(skill_ref)
+        item = self.database.get_skill(skill_ref, expand_usage=expand_usage)
         if (
             item is not None
             and self.rules_database is not None
