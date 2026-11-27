@@ -56,6 +56,21 @@ candidate acceptance remains in the release checklist.
 Complete the selected development work before the existing
 [release checklist](releasing.md); no new release gates are introduced.
 
+### Remaining v1.3.0 additions
+
+- [Weapon Chart footnote references](#source-notation-and-rule-references):
+  complete review of remaining rows and modes; preserve explicitly unresolved
+  source discrepancies without requiring a publisher response.
+- [SQLite immutable mode](#performance-storage-and-build-tooling): evaluate
+  deployed snapshot replacement semantics and enable `immutable=1` only where
+  safe and justified by measurement.
+- [Raw SQLite retirement](#performance-storage-and-build-tooling): review
+  remaining opt-in interfaces and retire those without independent consumers;
+  preserve unique evidence and useful compatibility contracts.
+- [Two-snapshot comparison screen](#user-owned-tools-and-portable-data):
+  expose the existing structured Army snapshot diff capability in a browser
+  review surface, preserving provenance and uncertainty.
+
 ### Deferred beyond the committed scope
 
 Historical FAQ replay and comprehensive Rules history; ITS 16 Part II;
