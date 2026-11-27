@@ -538,7 +538,9 @@ The direct development application factory stays lazy; request-specific
 results remain lazy everywhere. Gunicorn already uses `--preload`.
 The seven focused Windows tests passed in 19.03 s (reference response parity,
 WSGI startup and opt-out, cache reuse without opening SQLite, and preview
-lifecycle); Ruff, Pyright and documentation checks passed.
+lifecycle); Ruff, Pyright and documentation checks passed. The orchestration
+belongs in the web application rather than the fingerprinted database
+repository; it does not change generated content.
 
 For a controlled comparison, use `tools.preview_runtime_image` with the
 same capacity case and distinct receipts/tags, first with `--lazy-indexes`

@@ -182,6 +182,15 @@ class Application:
         self.fireteam_rules_reference = self.api.fireteam_rules_reference
         self.request_metrics = RequestMetrics()
 
+    def preload_runtime_indexes(self) -> None:
+        """Warm shared snapshot indexes before accepting concurrent requests.
+
+        Both cached loaders close their read-only connections before returning.
+        Do not populate contextual result caches or retain a live connection.
+        """
+        self.database._unit_graph()
+        self.database._official_army_unit_links()
+
     def _snapshot_etag(self, path: str, query: str) -> str:
         """Return a snapshot validator scoped to one requested representation."""
 

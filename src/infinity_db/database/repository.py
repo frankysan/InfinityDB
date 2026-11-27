@@ -683,15 +683,6 @@ class Database:
         self.path = Path(path)
         self.catalog_projection: CatalogProjection | None = None
 
-    def preload_runtime_indexes(self) -> None:
-        """Warm shared snapshot indexes before accepting concurrent requests.
-
-        Both cached loaders close their read-only connections before returning.
-        Do not populate contextual result caches or retain a live connection.
-        """
-        self._unit_graph()
-        self._official_army_unit_links()
-
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
         if not self.path.is_file():

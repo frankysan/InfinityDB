@@ -37,6 +37,7 @@ from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app, create_app_from_database_set
+from infinity_db.web.app import Application
 from infinity_db.web.presentation import static_asset_revision
 from tools.browser.verify_general_rules_browser import source_rules
 
@@ -8277,8 +8278,8 @@ def test_wsgi_uses_explicit_complete_directory_from_environment(
         monkeypatch.setenv("INFINITY_DB_PRELOAD_INDEXES", "0")
     sys.modules.pop("infinity_db.web.wsgi", None)
     with patch.object(
-        Database, "preload_runtime_indexes", autospec=True,
-        side_effect=Database.preload_runtime_indexes,
+        Application, "preload_runtime_indexes", autospec=True,
+        side_effect=Application.preload_runtime_indexes,
     ) as preload:
         module = importlib.import_module("infinity_db.web.wsgi")
     assert module.app.database.path == directory / "army.db"
@@ -8286,7 +8287,7 @@ def test_wsgi_uses_explicit_complete_directory_from_environment(
     if lazy_indexes:
         preload.assert_not_called()
     else:
-        preload.assert_called_once_with(module.app.database)
+        preload.assert_called_once_with(module.app)
         with patch.object(
             module.app.database, "_connect",
             side_effect=AssertionError("Preloaded indexes must not reopen SQLite"),
@@ -8299,7 +8300,7 @@ def test_preloaded_runtime_indexes_preserve_reference_responses() -> None:
     directory = Path(__file__).parents[1] / "data/generated"
     lazy = create_app_from_database_set(directory)
     warm = create_app_from_database_set(directory)
-    warm.database.preload_runtime_indexes()
+    warm.preload_runtime_indexes()
     for path in (
         "/api/units/minutemen",
         "/api/units?limit=50&matching_scope=profile&counts=prospective",

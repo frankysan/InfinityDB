@@ -14,4 +14,4 @@ app = create_app_from_database_set(select_database_directory(required_environmen
 # Gunicorn --preload imports this module in the single-threaded master.
 # The opt-out supports equivalent lazy-index performance comparisons.
 if os.environ.get("INFINITY_DB_PRELOAD_INDEXES") != "0":
-    app.database.preload_runtime_indexes()
+    app.preload_runtime_indexes()
