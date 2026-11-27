@@ -5,6 +5,7 @@ class Node {
   constructor(tag='text', text='') { this.tag=tag; this._text=text; this.children=[]; this.className=''; this.classList={add(){}}; }
   set textContent(value){this._text=String(value); this.children=[];}
   get textContent(){return this._text+this.children.map(x=>x instanceof Node?x.textContent:String(x)).join('');}
+  setAttribute(name,value){this[name]=String(value);}
   append(...items){this.children.push(...items);}
   querySelector(){return this;}
 }

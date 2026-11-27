@@ -14,6 +14,7 @@ class FakeElement extends EventTarget {
     this.children = [];
     this.classList = { add() {} };
   }
+  setAttribute(name, value) { this[name] = String(value); }
   append(...nodes) { this.children.push(...nodes); }
   replaceChildren(...nodes) { this.children = nodes; }
 }
@@ -70,6 +71,8 @@ setImmediate(async () => {
   assert.equal(inline.children[0].children[0].children[0], "Dominate Zone");
   assert.equal(inline.children[1].children[0], "Only eligible Troopers count.");
   assert.equal(inline.children[2].children[0], "Null States do not.");
+  assert.equal(inline.children[1]["data-provenance"], "maintained-rule");
+  assert.equal(inline.children[2]["data-provenance"], "maintained-rule");
   const sector = context.conditionNode({
     kind: "dominated-region-comparison", comparison: "greater",
     elementIds: ["sector-center"], minimum: 1,

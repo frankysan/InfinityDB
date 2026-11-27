@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 from pathlib import Path
 
@@ -53,7 +54,7 @@ def main() -> int:
     }
     print(json.dumps(counts, indent=2), flush=True)
 
-    from playwright.sync_api import sync_playwright
+    sync_playwright = importlib.import_module("playwright.sync_api").sync_playwright
 
     other_context = next(
         int(key) for key, row in rows.items() if row["unmatched"] and row["general"]

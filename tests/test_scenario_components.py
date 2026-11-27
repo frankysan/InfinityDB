@@ -549,10 +549,11 @@ def test_scoped_skills_and_specialist_arrays_use_the_existing_detail_renderer(
             "src/infinity_db/web/static/rules-reference.js",
             str(document),
         ],
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
     )
+    assert result.returncode == 0, result.stderr
     rendered = json.loads(result.stdout)
     assert "Hack Consoles" in rendered["skills"][0]
     assert "Short Skills" in rendered["skills"][0] and "Attack" in rendered["skills"][0]

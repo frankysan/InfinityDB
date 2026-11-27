@@ -358,9 +358,9 @@ _register(
     ["army_lists"],
     SOURCE,
     reason=(
-        "Normal serving retains only the legacy source-list shape needed for the "
-        "compatibility `kind` field and reinforcement fallback; canonical Army identity "
-        "and hierarchy come from application_armies."
+        "Normal serving retains source-list fields for compatibility kind, reinforcement "
+        "fallback and exact upstream Army/Unit destinations, including resume slugs. "
+        "Canonical Army identity and hierarchy come from application_armies."
     ),
 )
 _register(

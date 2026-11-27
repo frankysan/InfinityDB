@@ -1374,10 +1374,14 @@ including the Battleground SVG, retain their earlier identity. All earlier
 fixtures remain unchanged. The v1.2.2 baseline updates the Battleground SVG
 bytes for standalone styling and ruler changes, the Extended Unit list response
 for shared General profile capabilities, and the Skill catalog for reviewed
-scenario identities. The other 38 probes retain their v1.2.1 identity. Checkout, image-preview and complete-build
-verification use the v1.2.2 snapshot by default; explicit `--baseline`
+scenario identities. The other 38 probes retain their v1.2.1 identity. The v1.3.0 baseline changes
+only the 112, Emergency Service Unit detail probe for embedded history and
+source-native official Army links. Removing only those additive fields from
+the current response reproduces the exact v1.2.2 semantic digest; the other
+40 probes remain unchanged. Checkout, image-preview and complete-build
+verification use the v1.3.0 snapshot by default; explicit `--baseline`
 still permits historical comparisons where supported. Use
-`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.2.2.json`
+`python -m tools.runtime_semantic_baseline --check --db-dir data/generated --baseline tests/fixtures/runtime-semantic-baseline-v1.3.0.json`
 for the current selected four-file runtime; `--identical-artifacts` additionally
 requires byte-identical artifact metadata. A future baseline may be freshly
 captured with `--capture --db-dir` to a **new** path, never overwriting the

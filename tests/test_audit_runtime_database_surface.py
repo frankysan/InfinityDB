@@ -143,14 +143,14 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     assert report["summary"] == {
         "surfaceCount": 51,
         "runtimeTableCount": 83,
-        "runtimeFieldCount": 394,
+        "runtimeFieldCount": 396,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 394,
+        "issue:none:fieldCount": 396,
         "role:canonical_application:fieldCount": 151,
         "role:contextual_application:fieldCount": 206,
-        "role:intentional_source_representation:fieldCount": 37,
+        "role:intentional_source_representation:fieldCount": 39,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == []
@@ -222,7 +222,9 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
         ]
         == CONTEXTUAL
     )
-    assert _field(report, "army_lists", "kind")["role"] == SOURCE
+    for name in ("kind", "resume", "reinforcement_id", "id"):
+        assert _field(report, "army_lists", name)["role"] == SOURCE
+        assert _field(report, "army_lists", name)["issue"] == NO_ISSUE
     assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE

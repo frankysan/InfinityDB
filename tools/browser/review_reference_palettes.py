@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 from pathlib import Path
 
 from infinity_db.theme_palette import palette_options
@@ -21,7 +22,7 @@ def main() -> int:
         raise ValueError("Use a new local/validation output directory")
     output.mkdir(parents=True, exist_ok=False)
     app = create_app_from_database_set(ROOT / "data/generated")
-    from playwright.sync_api import sync_playwright
+    sync_playwright = importlib.import_module("playwright.sync_api").sync_playwright
 
     palettes = [item["value"] for item in palette_options()]
     cases = [

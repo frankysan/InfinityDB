@@ -1788,7 +1788,12 @@ def test_materialized_extended_profiles_preserve_detail_and_availability(monkeyp
         for item in first["items"]:
             status, _, body = request(application, f"/api/units/{item['id']}", query=settings)
             assert status == 200
-            assert item["general_profiles"] == extended_general_profiles(json.loads(body))
+            detail = json.loads(body)
+            # History belongs to the detail cards, not the current Explorer projection.
+            assert all("history" not in profile for profile in item["general_profiles"])
+            for profile in detail["general_profiles"]:
+                profile.pop("history", None)
+            assert item["general_profiles"] == extended_general_profiles(detail)
     assert calls.count(True) == 0
     assert calls.count(False) == 20
     assert all(profiles is not None for profiles in detail_projections)
