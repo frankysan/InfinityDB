@@ -62,6 +62,7 @@ change, use [Army data pipeline](../infinity-army-data-pipeline/SKILL.md).
 
 - [Architecture](../../../docs/architecture.md)
 - [Data model](../../../docs/data-model.md)
+- [Rules model](../../../docs/data-model-rules.md)
 - [Application domains](../../../docs/application-domains.md)
 - [Project domains](../../../docs/project-domains.md)
 - [Development checks](../../../docs/testing.md)

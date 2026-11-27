@@ -12,8 +12,18 @@ Use these documents when deciding how the project works now:
 
 - `architecture.md` — system boundaries, engineering principles, ownership between subsystems,
   runtime/browser/deployment architecture, and accepted design direction.
-- `data-model.md` — current source/application identities, semantic provenance, persistence,
-  query semantics, and generated-database contracts.
+- [data-model.md](data-model.md) — shared provenance, runtime schemas, storage
+  and cross-domain identity; entry point for the focused model contracts.
+- [data-model-army.md](data-model-army.md) — Army, Unit, profile/loadout,
+  availability, contextual filtering, Peripherals and Fireteams.
+- [data-model-history.md](data-model-history.md) — historical Army evidence,
+  identity continuity and public Unit history.
+- [data-model-rules.md](data-model-rules.md) — canonical Rules, exact variants,
+  FAQ, restrictions and derived reference projections.
+- [data-model-weapons.md](data-model-weapons.md) — exact Weapon profiles,
+  source citations, Ammunition, Properties and deployed objects.
+- [data-model-scenarios.md](data-model-scenarios.md) — shared Core/ITS scenario
+  definition, configuration, scoring, geometry and authoring boundaries.
 - [its-season-database.md](its-season-database.md) — ITS Season 17/18 schema,
   season-source binding, builder and selected publication contract.
 - [season-publication-ownership.md](season-publication-ownership.md) — current

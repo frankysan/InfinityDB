@@ -113,7 +113,7 @@ Skills appear once in catalog/Search while existing action URLs remain valid.
 Synthetic fixtures prove the generic reuse contract; ITS 17 now uses the
 pinned authoring library, without claiming unreviewed cross-season semantic
 equivalence. The
-[data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse)
+[data-model decision](data-model-scenarios.md#accepted-cross-season-scenario-and-skill-reuse)
 owns the complete contract.
 
 ## Cross-boundary ownership

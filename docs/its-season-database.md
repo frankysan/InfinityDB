@@ -875,10 +875,11 @@ Both compile to separate tracked SQLite files in the four-file runtime bundle;
 source and library hashes, exact season/revision membership and independent
 citations are checked during build, application startup and deployment validation.
 
-This is proven on synthetic single-season, two-season and revision-tagged
-fixtures, **not** reviewed ITS 17 data. Generic component overrides and
-real migrations remain [unfinished](TODO.md#its-scenarios-and-game-tools); see the
-[canonical data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
+Synthetic single-season, two-season and revision-tagged fixtures validate the
+reuse contract; ITS 17 also uses the registered library in its reviewed publication.
+This does not establish equivalence for every cross-season mechanic. Generic
+component overrides and broader reuse remain [unfinished](TODO.md#its-scenarios-and-game-tools); see the
+[canonical data model](data-model-scenarios.md#accepted-cross-season-scenario-and-skill-reuse).
 
 ### Published 2026.09.11 hotfix curation
 

@@ -75,4 +75,6 @@ browser observations as supplementary evidence, not authoritative rules.
 - [Rules research](../../../docs/rules-research.md)
 - [Rules semantics](../../../docs/rules-semantics.md)
 - [Data model](../../../docs/data-model.md)
+- [Rules model](../../../docs/data-model-rules.md)
+- [Weapons model](../../../docs/data-model-weapons.md)
 - [Curated data contracts](../../../data/curated/README.md)

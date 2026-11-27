@@ -200,7 +200,7 @@ and raw shared-item buckets. Extended Explorer reads the appropriate
 projections in one batch; Unit details use them to calculate specific-item
 differences. An explicitly requested Army that changes the effective
 selection still uses the shared runtime composer. The existing
-[General profile contract](data-model.md#general-profile) remains authoritative;
+[General profile contract](data-model-army.md#general-profile) remains authoritative;
 both surfaces agree for equivalent selections.
 
 Rules v18 additionally publishes composed current Rules records with
@@ -310,7 +310,7 @@ renderer owns labels, links, list formatting, and ordinary Skill detail structur
 are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
 consume the materialized `rules_n5.db`, independently of curation files.
 
-[The data model](data-model.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
+[The data model](data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
 scenario collection/publication indexes and central revision-aware selection live in `rules_n5.db`. The
 JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
 `/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
@@ -361,7 +361,7 @@ publication validation, source provenance and current-revision selection, and
 retain existing scenario/Skill URLs as compatibility aliases when a definition
 becomes shared. Cross-season composition must be in place before curating ITS
 17 against ITS 18. The detailed authoring and override invariants belong in
-[the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
+[the data model](data-model-scenarios.md#accepted-cross-season-scenario-and-skill-reuse).
 
 **Implemented v1.2.2:** Separate a reviewed canonical
 Scenario Skill identity from the exact versioned definition and its applicability.
@@ -422,7 +422,7 @@ Core and ITS scenarios share this boundary; tournament pairing, rankings
 and mutable match state remain outside it.
 
 The detailed accepted scenario model belongs to
-[the data model](data-model.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in
+[the data model](data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in
 `docs/rules-semantics.md`; concrete implementation tasks remain in `docs/TODO.md`.
 
 ## Identifiers and routing
@@ -484,7 +484,7 @@ scenario/list content; neither may become a repository for user-authored content
 
 Implementation and codec choices remain post-1.0; the current browser `s=` format
 and server behavior are **unchanged** by this decision. See `docs/TODO.md` for
-benchmarks/acceptance tasks and `docs/data-model.md` for the authored-scenario model.
+benchmarks/acceptance tasks and `docs/data-model-scenarios.md` for the authored-scenario model.
 
 ## Acquisition and snapshot lifecycle
 

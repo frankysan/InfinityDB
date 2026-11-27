@@ -23,7 +23,7 @@ labels, independently of their physical `local/data/pdf/` layout.
   `legacy-armies.json` identities in Army v34, retaining the Army v30 schema
   contract. Serving reads the selected SQLite projection; earlier schemas and
   source-only tools retain the JSON adapters. The
-  [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30)
+  [data model](../../docs/data-model-army.md#army-overview-and-historical-identities-in-army-v30)
   owns identity, parentage and provenance safeguards.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
@@ -899,7 +899,7 @@ Acceptance by the generic record envelope does not imply a published application
 scenario authoring uses `facts.definitionVersion: 2` and composes explicit references from the same
 collection. Inline v1 records remain supported; export resolves v2 into self-contained v1-shaped
 runtime records. The canonical component/data contract is documented in
-[the scenario model](../../docs/data-model.md#scenario-model-implemented-core-and-future-extensions).
+[the scenario model](../../docs/data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions).
 
 An optional `scenarioComponents` object has `formatVersion: 1` and a `definitions` array. Each
 definition has a typed `id`, `kind` (`setup`, `geometry`, `objective`, or `end-condition`), `payload`,
@@ -942,7 +942,7 @@ Restrictions and embedded deployed objects; obsolete v8/v9 CLI modes are retired
 Low-level base reference exports remain useful for controlled semantic fixtures,
 not complete runtime publication. Complete `build --db-dir` exports v11/13 with relational exact
 variant usage linked to the existing reviewed definitions; it does not change
-curated format v23. The [data model](../../docs/data-model.md#rule-variant-usage-api)
+curated format v23. The [data model](../../docs/data-model-rules.md#rule-variant-usage-api)
 owns that projection and its source safeguards. The prepared 1.0.1 tracked release uses v10/12, while the
 tagged 1.0.0 release used v9/11. Verify the matched tracked artifact rather
 than assuming a fresh base export has identical release bytes.
@@ -1199,7 +1199,7 @@ but arbitrary combinations and the unqualified SR
 remain unresolved. Raw `UPGRADE:` spellings, including
 nonbreaking spaces, remain source evidence rather than a
 generic parser contract. See
-[the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--implemented-release-artifact-gated).
+[the source-parameter audit](../../docs/data-model-rules.md#rule-variant-usage-index--implemented-release-artifact-gated).
 
 For Hacking Device `100` and Plus `101`, reviewed program-specific
 single extras may also use `program-burst-mod` with

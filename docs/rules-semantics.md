@@ -3770,7 +3770,7 @@ The current chart read model recognizes the complete Army observations
 exclusions when combining Wildcard rows. Both occur in the pinned September 29
 Army archive, source revision `7.26246.158`. Other observations remain
 uninterpreted by this decoder; an unrecognized note does not prove eligibility.
-See [the data model](data-model.md#fireteams) for the publication contract.
+See [the data model](data-model-army.md#fireteams) for the publication contract.
 
 Sources:
 

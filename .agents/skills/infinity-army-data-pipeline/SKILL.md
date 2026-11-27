@@ -54,6 +54,7 @@ For source meaning or rules conflicts, first establish the evidence with
 
 - [Architecture](../../../docs/architecture.md)
 - [Data model](../../../docs/data-model.md)
+- [Army model](../../../docs/data-model-army.md)
 - [Data lifecycle](../../../data/README.md)
 - [Curated data contracts](../../../data/curated/README.md)
 - [Data and source validation](../../../docs/testing-data.md)

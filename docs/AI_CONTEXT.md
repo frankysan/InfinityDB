@@ -6,7 +6,8 @@ This file is a compact index of **non-obvious current invariants** for coding ag
 architecture mirror, release diary, or backlog. Before substantial work, use the canonical owners:
 
 - system boundaries and engineering principles: `docs/architecture.md`;
-- data semantics/persistence: `docs/data-model.md`;
+- data semantics/persistence: `docs/data-model.md` and its linked Army, history,
+  Rules, Weapons and scenario model contracts;
 - application-domain ownership: `docs/application-domains.md`;
 - browser visual/interaction rules: `docs/web-design-guidelines.md`;
 - curated schemas/review policy: `data/curated/README.md`;
@@ -179,10 +180,10 @@ set, not ignored source archives or working-tree curation.
 - Fireteam `equivalence_labels` is a legacy field for parenthetical source terms.
   Parentheses alone do not prove counts-as equivalence or profile eligibility;
   preserve the original note and the neutral **Chart terms** caption.
-  See `docs/data-model.md#fireteams` for annotation scope.
+  See `docs/data-model-army.md#fireteams` for annotation scope.
 - Fireteam combined-view Wildcard exclusions come from the backend's reviewed note decoding
   (`wildcards_excluded`); JavaScript must not interpret chart prose. A false flag does not certify
-  eligibility. See `docs/data-model.md#fireteams` for the bounded observation contract.
+  eligibility. See `docs/data-model-army.md#fireteams` for the bounded observation contract.
 - Fireteam `reference_issues` expose incomplete Unit/FTO evidence in normal rows; retain
   global-only links as navigation without implying Army-local eligibility. Original member
   comments stay visible. Reinforcement `parent_charts` retain independent parent limits;
@@ -252,7 +253,7 @@ Browser state rules:
 - Post-1.0 sharing must remain self-contained and decodable offline; no server-side
   short-link registry or authored-content persistence. A hash alone cannot recover
   arbitrary shared content. See `docs/architecture.md` (stateless sharing) and
-  `docs/data-model.md` (player-authored scenarios). The current `s=` codec is unchanged.
+  `docs/data-model-scenarios.md` (player-authored scenarios). The current `s=` codec is unchanged.
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
 - `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
   shared Settings controls. Page modules consume state instead of initializing shell controls.

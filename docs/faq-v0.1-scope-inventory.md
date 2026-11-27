@@ -204,7 +204,7 @@ reviewed earlier rule-revision compatibility, historical selected
 source/citation, scoped effective dates, retained topic identities,
 and conflict/supersession review. The ongoing 1.0 current-source
 completeness and discoverability gate remains open. See
-[the authoritative data model](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+[the authoritative data model](data-model-rules.md#dated-faqerrata-layer-published-reviewed-subset).
 
 ## Printed ITS section — uncovered questions
 

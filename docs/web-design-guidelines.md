@@ -201,7 +201,7 @@ references, with theme tokens and a second cue beyond color:
   **FAQ clarifications** section with selected version and linked citation.
   Show a publication date only when independently established. The current FAQ
   v0.1 date is an announcement-era source anchor, not an independently verified
-  PDF publication date (see [FAQ source scope](data-model.md#dated-faqerrata-layer-published-reviewed-subset)).
+  PDF publication date (see [FAQ source scope](data-model-rules.md#dated-faqerrata-layer-published-reviewed-subset)).
   Do not present that anchor as a publication date or use an automatically
   assigned "new" or "changed" badge. Future official
   errata must have equally explicit publication evidence before adopting
@@ -259,7 +259,7 @@ each revision date once per context. Aggregate the displayed posts and rows
 across Other historical contexts. Keep empty disclosures muted but readable
 and expandable, with an explicit "No confirmed updates" label. Identify
 incomplete history and the revision-date convention in every disclosure. The
-[historical data contract](data-model.md#private-army-history-research-database)
+[historical data contract](data-model-history.md#private-army-history-research-database)
 owns attribution, observation windows and unresolved evidence.
 
 ### Official Army links
@@ -269,7 +269,7 @@ profile card, outside its disclosure summary. Open the external destination
 in a separate tab and label distinct parent Army or source Unit destinations
 when necessary. Omit the link row for unsupported targets and never attach a
 current destination to a former historical context. Use the
-[data-model contract](data-model.md#official-army-unit-destinations) rather
+[data-model contract](data-model-army.md#official-army-unit-destinations) rather
 than deriving external paths from display names.
 
 ### Explain rules interactions, not just outcomes
@@ -416,7 +416,7 @@ not a list-building or active-game-state legality claim. Historical shared
 links without a scope show a labelled legacy compatibility setting until
 changed. Switching scope updates the result and all count labels in one
 request and persists through sharing, navigation and Back/Forward.
-The [data model](data-model.md#context-coherent-filtering) owns the query
+The [data model](data-model-army.md#context-coherent-filtering) owns the query
 and share-state contract.
 
 An individual Clear button resets both its selections and option search.

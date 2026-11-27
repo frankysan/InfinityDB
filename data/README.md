@@ -193,7 +193,7 @@ the retired source roots.
   Use a new output path for each rebuild; existing files are not overwritten.
   The database remains outside the tracked generated runtime set and is not
   a build, serving, packaging or deployment input. Its persistence model is
-  described in the [data model](../docs/data-model.md#private-army-history-research-database).
+  described in the [data model](../docs/data-model-history.md#private-army-history-research-database).
   Run `python -m tools.research.project_army_history --history-sha256 HASH
   --output local/data/history/generated/unit_history_preview.json` with the
   exact SHA-256 of the generated history database to prepare a private Unit

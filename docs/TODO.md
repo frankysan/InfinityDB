@@ -135,7 +135,7 @@ make v1.3.0 depend on them.
 - [ ] **Data processing + Web backend + Web frontend:** Extend the published N5
   Unit history beyond the initial accepted corpus.
   The v35 projection, enabled by default, is documented in the
-  [history data model](data-model.md#private-army-history-research-database)
+  [history data model](data-model-history.md#private-army-history-research-database)
   and [presentation contract](web-design-guidelines.md#unit-history-presentation).
   - [ ] Extend the accepted corpus for new source states, material contextual
     metadata, or a newly selected current Army archive not already accepted as
@@ -167,7 +167,7 @@ make v1.3.0 depend on them.
   announcement/PDF creation dates as verified publication days.
   Add browser controls only after a trustworthy historical read
   model exists; ambiguous dates must remain visibly qualified.
-  See the [current FAQ contract](data-model.md#dated-faqerrata-layer-published-reviewed-subset).
+  See the [current FAQ contract](data-model-rules.md#dated-faqerrata-layer-published-reviewed-subset).
 
 - [ ] **Data processing + Web backend + Web frontend:** Extend per-reference
   change indicators beyond the initial Unit histories to applicable Rules,
