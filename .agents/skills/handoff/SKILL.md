@@ -38,6 +38,10 @@ If current verification is unavailable, label the snapshot **"last reported — 
 - Tell the receiving agent to check connected workspace/repository tools **if available**, then inspect the actual checkout, read `AGENTS.md` and applicable local/project guidance before editing. If direct access is unavailable, disclose that and use available files or request the needed access rather than guessing.
 - Do not assume a new chat inherits the same connectors, files, instructions, or authorizations.
 
+For MCP-dependent work, record required tools, relevant job/evidence IDs and
+whether source implementation, gateway deployment, client discovery and actual
+execution were verified. See the [MCP workspace skill](../infinity-mcp-workspace/SKILL.md).
+
 ### `codex` — new Codex session in VS Code
 
 - Start by directing Codex to work in the **open repository/worktree**, inspect Git branch/HEAD/status, and read `AGENTS.md`, `AGENTS.local.md` if present, and relevant canonical docs/skills.
