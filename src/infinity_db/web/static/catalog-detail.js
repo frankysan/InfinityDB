@@ -530,7 +530,7 @@ function weaponVariants(variants, profileCitationsAvailable = null, weaponRules 
         propertiesRow.append(propertiesHeading, propertiesText);
         card.append(propertiesRow);
       }
-      if (catalog === "weapons" || (catalog === "equipment" && weaponSlug === "deactivator")) {
+      if (catalog === "weapons" || catalog === "equipment") {
         const footnotes = weaponFootnoteRow(profile, weaponRules, weaponSlug);
         if (footnotes) card.append(footnotes);
       }

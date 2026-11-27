@@ -118,18 +118,25 @@ publication/row/mode identifies the exact rule and that target is routable
 from the published API; otherwise show the legend category and leave the
 exact target unverified.
 
-The reviewed N5.3 chart subset covers E/M Carbine (p. 176), E/M CC
-Weapon (p. 177, combined N+E/M), Blitzen and Smoke/E/M/Eclipse Grenades
-(p. 178), Smoke/E/M Grenade Launchers (p. 179), seven named Mines
-and **Chest Mine CC Mode only** (p. 181), Deactivator Equipment (p. 186)
-and Sepsitor Plus (p. 187). The combined E/M CC marker links to E/M
-Ammunition, not an invented combined-Ammunition rule. Do not apply the
-Chest Mine CC mapping to its BS Mode, whose Army marker stays unlinked.
-Deactivator's `[***]` marker links to `equipment:deactivator`, never an
-inferred Weapon. Show Army and PDF markers separately on disagreement
-(SRC-013/014). Split combined labels such as `NON-LETHAL [**]` for display,
-retaining the raw source in the API and Developer Mode. Never infer
-missing gameplay Traits or agreement between publications.
+The N5.3 chart (pp. 176–188) has 46 marked profile rows. The complete
+Army metadata inventory reviewed on 2026-11-27 has 45 marked profiles;
+no marked Army identity is absent from the chart. The mapping in
+`src/infinity_db/web/static/weapon-footnotes.js` resolves 42 chart rows
+in the Weapon and Equipment catalogs using the legend and contextual
+rules, including both modes of Mixed Weapons, Drop Bears and D-Charges,
+Perimeter Weapons, and ammunition-specific profiles. The three
+Skill-only chart entries (Discover, Forward Observer and Suppressive
+Fire Mode Weapon) are represented by their canonical Skill rules,
+not separate published Weapons. Chest Mine BS Mode has matching Army
+and PDF notation but remains unlinked; its CC Mode alone links to the
+reviewed Chest Mine rule. The combined E/M CC marker links to E/M
+Ammunition, not an invented combined-Ammunition rule. Equipment markers
+link to their exact Equipment rules, never inferred Weapons.
+
+Show Army and PDF markers separately on disagreement (SRC-013/014).
+Split combined labels such as `NON-LETHAL [**]` for display, retaining
+the raw source in the API and Developer Mode. Never infer missing
+gameplay Traits or agreement between publications.
 
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
 variant, use a typed `term:` link to its Game term definition. The shared inline

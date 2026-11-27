@@ -375,9 +375,18 @@ def audit_traits_and_prose(
     if len(printed) != baseline["comparison"]["chartRowsLocated"]:
         raise WeaponChartAuditError("Trait evidence and existing chart row count disagree")
     review = _review_policy(review_path, _sha256(pdf))
+    properties = _weapon_properties(army_db)
     traits = compare_traits(
-        baseline["comparison"]["compared"], printed, _weapon_properties(army_db), review
+        baseline["comparison"]["compared"], printed, properties, review
     )
+    # Inventory Army markers independently of chart matching: metadata-only
+    # identities must not disappear from a source-notation review.
+    marker_pattern = re.compile(r"\[\*{1,3}\]")
+    army_marker_rows = [
+        {"name": name, "mode": mode, "markers": marker_pattern.findall(" ".join(tokens))}
+        for (name, mode), tokens in sorted(properties.items())
+        if marker_pattern.search(" ".join(tokens))
+    ]
     prose_coverage = prose_reference_coverage(sections, army_db, rules_db)
     reviewed_rows = {
         f"{row['page']}:{row['printedName']}" for row in baseline["comparison"]["compared"]
@@ -398,6 +407,7 @@ def audit_traits_and_prose(
         "reviewPolicySha256": _sha256(review_path),
         "traitDeferred": sum(row["status"].startswith("deferred") for row in traits),
         "traits": traits,
+        "armyMarkerRows": army_marker_rows,
         "specialWeaponSections": sections,
         "specialWeaponReferenceCoverage": prose_coverage,
         "limitations": [

@@ -99,7 +99,7 @@ def test_reviewed_weapon_footnotes_are_accessible_and_routable(
                 assert cc.locator(".weapon-source-footnotes").count() == 1
                 assert bs.locator(".weapon-source-footnotes a").count() == 0
                 bs_note = bs.locator(".weapon-source-footnotes").inner_text()
-                assert "Army: [*]" in bs_note
+                assert "Army and N5.3 chart p. 181: [*]" in bs_note
                 assert "exact target not verified" not in bs_note
             for width in (1440, 390, 320):
                 page.set_viewport_size({"width": width, "height": 900})
@@ -205,3 +205,45 @@ def test_deactivator_equipment_footnote_links_to_canonical_rule(
         assert touch_page.url.endswith("#rule-equipment-deactivator")
     finally:
         touch_context.close()
+
+def test_additional_reviewed_chart_footnotes_render_exact_mode_and_catalog_targets(
+    app: Any, browser: Any,
+) -> None:
+    context = browser.new_context(viewport={"width": 390, "height": 844})
+    page = context.new_page()
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    cases = (
+        ("weapons", "trench-hammer", "#rule-weapon-mixed-weapons", 2),
+        ("weapons", "drop-bears", "#rule-weapon-drop-bears", 2),
+        ("weapons", "d-charges", "#rule-weapon-d-charges", 2),
+        ("weapons", "eclipse-grenade-launcher", "/ammunition/eclipse", 1),
+        ("weapons", "zapper", "/ammunition/em", 1),
+        ("equipment", "fastpanda", "#rule-equipment-fastpanda", 1),
+        ("equipment", "gizmokit", "#rule-equipment-gizmokit", 1),
+        ("equipment", "medikit", "#rule-equipment-medikit", 1),
+    )
+    try:
+        for catalog, slug, href, count in cases:
+            page.goto(f"{ORIGIN}/{catalog}/{slug}", wait_until="domcontentloaded")
+            links = page.locator(f'.weapon-source-footnotes a[href="{href}"]')
+            links.first.wait_for(state="visible", timeout=30000)
+            assert links.count() == count, slug
+            assert page.locator(".weapon-source-footnotes").count() == count, slug
+            if href.startswith("#"):
+                assert page.locator(href).count() == 1, slug
+            for width in (390, 320):
+                page.set_viewport_size({"width": width, "height": 844})
+                for scheme in ("light", "dark"):
+                    page.evaluate(
+                        "(scheme) => document.documentElement.dataset.theme = scheme",
+                        scheme,
+                    )
+                    assert links.first.is_visible(), (slug, width, scheme)
+                    assert page.evaluate(
+                        "() => document.documentElement.scrollWidth <= innerWidth + 1"
+                    ), (slug, width, scheme)
+        assert not errors, errors
+    finally:
+        context.close()

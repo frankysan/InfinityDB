@@ -32,6 +32,8 @@ are not retroactively relabeled.
 - Improved spacing of placement ruler labels near scenario map edges.
 - ITS scenario pages include a collapsible Season Rules section for reviewed
   season-wide rules and context-specific event restrictions.
+- Weapon and Equipment profile footnotes link to the applicable reviewed rules
+  across the N5.3 chart; unresolved source markers remain visible.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
@@ -69,6 +71,9 @@ are not retroactively relabeled.
 
 ### Changed
 
+- **Data processing + Web frontend:** Completed the N5.3 Weapon Chart
+  footnote review, including exact mode and Equipment identity scope,
+  without modifying source-native Traits or concealing unresolved notation.
 - **Web frontend:** Unified source-evidence presentation across rules, reviewed
   interactions, FAQ clarifications and scenario source notes without changing
   gameplay content or assigning unverified update dates. Gameplay facts and

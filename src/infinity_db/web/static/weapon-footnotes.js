@@ -14,19 +14,57 @@ const CATEGORIES = {
 
 const SOURCE_MARKERS = /\[\*{1,3}\]/g;
 
-// This small, independently reviewed chart subset is intentionally not a
-// general weapon-name heuristic. Match the reviewed catalog slug and exact
-// mode (a mode-less review applies only to a mode-less source profile).
+// Source-scoped mappings, not a general weapon-name heuristic. The N5.3
+// chart legend (p. 176) identifies the section, and the reviewed rule text
+// identifies the target. Match the exact catalog slug and source mode.
+// Additional target evidence: Ammunition pp. 63-67; Mixed Weapons p. 68;
+// Perimeter Weapons p. 69; D-Charges p. 70; Drop Bears and Disco Baller p. 71;
+// Mine Dispenser p. 72; Pitcher and Sepsitor p. 73; WildParrot p. 74.
 const REVIEWED_CHART = {
   "blitzen": { marker: "[**]", page: 178, ruleId: "ammunition:em" },
   "e-m-carbine": { marker: "[**]", page: 176, ruleId: "ammunition:em" },
   "e-m-cc-weapon": { marker: "[**]", page: 177, ruleId: "ammunition:em" },
+  "trench-hammer": [
+    { marker: "[*]", page: 177, mode: "BS Mode", ruleId: "weapon:mixed-weapons" },
+    { marker: "[*]", page: 177, mode: "CC Mode", ruleId: "weapon:mixed-weapons" },
+  ],
+  "vorpal-cc-weapon": [
+    { marker: "[*]", page: 177, mode: "BS Mode", ruleId: "weapon:mixed-weapons" },
+    { marker: "[*]", page: 177, mode: "CC Mode", ruleId: "weapon:mixed-weapons" },
+  ],
   "smoke-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:smoke" },
   "e-m-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:em" },
   "eclipse-grenades": { marker: "[**]", page: 178, ruleId: "ammunition:eclipse" },
   "smoke-grenade-launcher": { marker: "[**]", page: 179, ruleId: "ammunition:smoke" },
   "e-m-grenade-launcher": { marker: "[**]", page: 179, ruleId: "ammunition:em" },
-  "chest-mine": { marker: "[*]", page: 181, mode: "CC Mode", ruleId: "weapon:chest-mine" },
+  "eclipse-grenade-launcher": { marker: "[**]", page: 179, ruleId: "ammunition:eclipse" },
+  "chest-mine": [
+    { marker: "[*]", page: 181, mode: "CC Mode", ruleId: "weapon:chest-mine" },
+    // Both sources contain this marker; its exact target remains unverified.
+    { marker: "[*]", page: 181, mode: "BS Mode", ruleId: null },
+  ],
+  "drop-bears": [
+    { marker: "[*]", page: 181, mode: "BS Mode", ruleId: "weapon:drop-bears" },
+    { marker: "[*]", page: 181, mode: "Deployable Mode", ruleId: "weapon:drop-bears" },
+  ],
+  "mine-dispenser": { marker: "[*]", page: 181, ruleId: "weapon:mine-dispenser" },
+  "wildparrot": { marker: "[*]", page: 181, ruleId: "weapon:wildparrot" },
+  "kobra-pistol": [
+    { marker: "[*]", page: 182, mode: "BS Mode", ruleId: "weapon:mixed-weapons" },
+    { marker: "[*]", page: 182, mode: "CC Mode", ruleId: "weapon:mixed-weapons" },
+  ],
+  "crazykoala": { marker: "[*]", page: 186, ruleId: "weapon:crazykoala" },
+  "d-charges": [
+    { marker: "[*]", page: 186, mode: "Demolition Mode", ruleId: "weapon:d-charges" },
+    { marker: "[*]", page: 186, mode: "CC Mode", ruleId: "weapon:d-charges" },
+  ],
+  "disco-baller": { marker: "[*]", page: 186, ruleId: "weapon:disco-baller" },
+  "e-marat": { marker: "[**]", page: 186, ruleId: "ammunition:em" },
+  "e-mitter": { marker: "[**]", page: 186, ruleId: "ammunition:em" },
+  "madtraps": { marker: "[*]", page: 187, ruleId: "weapon:madtraps" },
+  "pitcher": { marker: "[*]", page: 187, ruleId: "weapon:pitcher" },
+  "sepsitor": { marker: "[*]", page: 187, ruleId: "weapon:sepsitor" },
+  "zapper": { marker: "[**]", page: 188, ruleId: "ammunition:em" },
   "ap-mine": { marker: "[*]", page: 181, ruleId: "weapon:mines" },
   "e-m-mine": { marker: "[**]", page: 181, ruleId: "ammunition:em" },
   "monofilament-mine": { marker: "[*]", page: 181, ruleId: "weapon:mines" },
@@ -39,10 +77,14 @@ const REVIEWED_CHART = {
   },
 };
 
-// N5.3 p. 186; exact reviewed cell in weapon-trait-source-review.json.
-// This is the Equipment catalog identity, not a Weapon of the same name.
+// Equipment chart identities, not Weapons of the same name. The applicable
+// definitions are in Skills and Equipment (FastPanda p. 122, GizmoKit p. 123,
+// MediKit p. 124; Deactivator is reviewed in weapon-trait-source-review.json).
 const REVIEWED_EQUIPMENT_CHART = {
   "deactivator": { marker: "[***]", page: 186, ruleId: "equipment:deactivator" },
+  "fastpanda": { marker: "[***]", page: 186, ruleId: "equipment:fastpanda" },
+  "gizmokit": { marker: "[***]", page: 187, ruleId: "equipment:gizmokit" },
+  "medikit": { marker: "[***]", page: 187, ruleId: "equipment:medikit" },
 };
 
 export function weaponFootnoteMarkers(value) {
@@ -81,7 +123,7 @@ function href(reference) {
 }
 
 function reviewedTarget(review, profile, weaponRules) {
-  if (!review) return null;
+  if (!review?.ruleId) return null;
   const { ruleId } = review;
   if (ruleId.startsWith("weapon:") || ruleId.startsWith("equipment:")) {
     const rules = [...(profile.rules || []), ...weaponRules];
@@ -118,8 +160,10 @@ export function weaponFootnotesForProfile(
 ) {
   const review = catalog === "weapons" ? REVIEWED_CHART[weaponSlug]
     : catalog === "equipment" ? REVIEWED_EQUIPMENT_CHART[weaponSlug] : null;
-  const chart = review && (review.mode
-    ? profile.mode === review.mode : !profile.mode) ? review : null;
+  const candidates = Array.isArray(review) ? review : review ? [review] : [];
+  const chart = candidates.find((candidate) => (
+    (candidate.mode || "") === (profile.mode || "")
+  ));
   const chartTarget = reviewedTarget(chart, profile, weaponRules);
   const seen = new Set();
   const army = (profile.traits || [])

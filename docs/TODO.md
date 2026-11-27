@@ -22,7 +22,7 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](../data/README.md#army-snapshot-diff-reports).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
@@ -49,6 +49,9 @@ in the linked workstreams; retire this milestone summary when the release closes
 - **Web frontend + Web backend:** Faction palettes and the initial rules-content
   hierarchy and official Army deep links are implemented; representative
   [visual acceptance](testing.md#faction-palette-and-rules-content-visual-acceptance) passed.
+- **Data processing + Web frontend:** Completed the
+  [Weapon Chart footnote review](web-design-guidelines.md#curated-rules-text-hierarchy);
+  unresolved source issues remain in the clarification register.
 
 Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
 candidate acceptance remains in the release checklist.
@@ -58,9 +61,6 @@ Complete the selected development work before the existing
 
 ### Remaining v1.3.0 additions
 
-- [Weapon Chart footnote references](#source-notation-and-rule-references):
-  complete review of remaining rows and modes; preserve explicitly unresolved
-  source discrepancies without requiring a publisher response.
 - [SQLite immutable mode](#performance-storage-and-build-tooling): evaluate
   deployed snapshot replacement semantics and enable `immutable=1` only where
   safe and justified by measurement.
@@ -107,29 +107,6 @@ make v1.3.0 depend on them.
   are available for explicit edition/revision comparison; their portable
   member names were migrated into curated N5.3 after exact URL, heading,
   and source revision identity verification.
-
-### Source notation and rule references
-
-- [ ] **Data processing + Web frontend:** Give Weapon Chart footnote markers
-  (such as `[*]`, `[**]`, `[***]`) contextual, clickable rule references instead
-  of treating them as ordinary Traits. Use the published chart legend to identify
-  the section category (Weaponry, Ammunition, or Skills and Equipment), then
-  resolve the actual target by source publication, chart row/mode, and owning
-  rule section (e.g. Mines or Sepsitor), preserving any mismatched
-  notation from Army and the PDF. Consider tooltips or short explanations and
-  a direct Glossary/rules link; retain raw provenance and explicit unresolved
-  mappings.
-
-  Implemented subset: markers are separated from Traits without changing
-  Army data, including combined labels. Reviewed mappings cover seven named
-  Mines and Chest Mine CC Mode (p. 181); E/M Carbine (p. 176); E/M CC Weapon
-  (p. 177, combined N+E/M); Blitzen and Smoke/E/M/Eclipse Grenades (p. 178);
-  Smoke/E/M Grenade Launchers (p. 179); Deactivator Equipment (p. 186);
-  and Sepsitor Plus (p. 187). Exact mode/catalog scope is preserved,
-  including Chest Mine BS Mode's unresolved Army marker. SRC-013/014
-  differences remain visible. Chromium acceptance covers reviewed pages
-  at 1440/390/320 px, light/dark, keyboard and touch. Remaining: other
-  chart rows/modes and publisher clarification of unresolved mismatches.
 
 ### Source-family revision updates
 
