@@ -359,6 +359,13 @@ Mimetism 317.17/17.66 vs 2.27/1.62; Activate Console 326.21/18.99 vs
 Fresh application construction medians were 2.82–3.15 s; these are not
 browser timings or controlled startup comparisons.
 
+On Windows Chromium at `fcd6f2a2`, 30 live navigation search samples
+(1440/768/390 px, light/dark, five queries each) took 185.1–202.8 ms from
+the input event to the suggestions panel becoming visible, including
+the 180 ms debounce. The local WSGI browser transport excludes real
+network latency and concurrent server load. No additional search engine
+optimization is indicated by these measurements.
+
 ### Catalog materialization
 
 Rules v20 embeds all 249 raw Army catalog items (88 Skills, 28 Equipment,

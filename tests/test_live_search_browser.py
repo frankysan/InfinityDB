@@ -54,6 +54,15 @@ def test_live_search_navigation(app: Any, chrome: Any, width: int) -> None:
         options = panel.get_by_role("option")
         query.fill("m")
         assert not panel.is_visible()
+        query.fill("co")
+        panel.wait_for(state="visible")
+        assert options.count() == 9
+        footer = panel.locator(".global-search-option--all")
+        assert footer.evaluate("""node => {
+            const r = node.getBoundingClientRect();
+            const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+            return node.contains(hit);
+        }""")
         query.fill("mim")
         panel.wait_for(state="visible")
         assert query.get_attribute("aria-expanded") == "true"
@@ -76,7 +85,9 @@ def test_live_search_navigation(app: Any, chrome: Any, width: int) -> None:
         result.wait_for(state="visible")
         result.click()
         page.wait_for_url(f"{ORIGIN}/rules/saturation")
-        page.wait_for_function("() => document.activeElement === document.querySelector('main#main')")
+        page.wait_for_function(
+            "() => document.activeElement === document.querySelector('main#main')"
+        )
         assert not panel.is_visible()
         if toggle.is_visible():
             toggle.click()

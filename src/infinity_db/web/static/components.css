@@ -127,6 +127,7 @@ html:not([data-developer-mode="true"]) .id-column {
   inset: calc(100% + 6px) 0 auto;
   max-height: min(60dvh, 420px);
   overflow-y: auto;
+  scroll-padding-bottom: 2.5em;
   overscroll-behavior: contain;
   padding: 4px;
   border: 1px solid var(--color-nav-border);
@@ -170,6 +171,9 @@ html:not([data-developer-mode="true"]) .id-column {
 }
 
 .global-search-option--all {
+  position: sticky;
+  bottom: 0;
+  background: var(--color-nav-surface);
   border-top: 1px solid var(--color-nav-border);
   font-weight: 600;
 }
