@@ -32,6 +32,8 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
+  maintenance, separating source changes, effective reference changes and unresolved evidence.
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.
 - **Data processing + Web backend + Web frontend:** Embedded the reviewed N5
   Unit history projection in Army schema v35. Collapsed histories distinguish

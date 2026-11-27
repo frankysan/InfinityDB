@@ -23,7 +23,7 @@ when all contained work shares the same owner.
 Use these links to jump directly to a workstream:
 
 - **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Presentation and feedback](#reference-presentation-and-feedback), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
-- **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](#army-snapshot-maintenance).
+- **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](../data/README.md#army-snapshot-diff-reports).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
 ## v1.3.0 release plan
@@ -64,8 +64,6 @@ Complete the selected development work before the existing
   comparison components where appropriate.
 - **Web frontend + Web backend + Deployment:** Shared
   [bug/error reporting form](#reference-presentation-and-feedback).
-- **Data processing:** [Structured snapshot diff reports](#army-snapshot-maintenance),
-  preferably as a natural output of historical Army processing.
 
 ### Deferred beyond the committed scope
 
@@ -326,14 +324,6 @@ make v1.3.0 depend on them.
     contains unique evidence worth retaining. It is not a current matched
     runtime pair and must not be silently deleted; a separately reviewed
     disposition suffices without reopening the completed workspace cleanup.
-
-### Army snapshot maintenance
-
-The implemented artifact lifecycle is described in [data guidance](../data/README.md).
-
-- [ ] Let future snapshot-comparison tooling write structured generated diff
-  data/reports under manifest/report paths while curated snapshot notes remain
-  the human interpretation of those results.
 
 ### ITS, scenarios, and game tools
 

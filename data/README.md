@@ -885,7 +885,8 @@ its runtime publication**. This is part of normal Army integration, not a
 separate exhaustive review of every unchanged rule or profile.
 
 1. Pin the previously published and incoming ZIP/manifest pairs by archive
-   SHA-256 and source revisions. Compare the semantic contents of Army lists
+   SHA-256 and source revisions. Generate the [structured snapshot diff](#army-snapshot-diff-reports)
+   for these explicit endpoints and review the semantic contents of Army lists
    and shared metadata, ignoring JSON object-property ordering.
 2. Recheck Army-dependent entries in the
    [official source clarification register](../docs/official-source-clarifications.md)
@@ -913,6 +914,47 @@ Follow the [source-reconciliation workflow](../.agents/skills/infinity-source-re
 for evidence and interpretation. Keep substantive findings in their existing
 canonical owners; do not create a second discrepancy register or a recurring
 release audit diary.
+
+### Army snapshot diff reports
+
+Generate a private, deterministic, version-1 `InfinityDB Army snapshot diff`
+JSON report using the previously published and incoming Army ZIP/manifest pairs:
+
+```powershell
+.venv\Scripts\python.exe -m tools.data.compare_army_snapshots "local/data/raw/army/JSON OLD.zip" "local/data/raw/army/JSON NEW.zip" --before-manifest "local/data/manifests/snapshots/JSON OLD.json" --after-manifest "local/data/manifests/snapshots/JSON NEW.json"
+```
+
+The labels above are placeholders for explicit retained archives. The command
+verifies both manifests and archives offline, requires matching source languages,
+and writes under ignored `local/data/reports/army-snapshot-diffs/`. The default
+filename is the ordered pair of exact archive SHA-256 values. Use `--output`
+within that directory to retain another run; existing files are never overwritten.
+The console prints the report identity, counts and SHA-256.
+
+Reports retain both archive and logical content identities (when present), exact
+manifest and member hashes, source revisions and member coordinates. They reuse
+the historical comparison and effective reference projections:
+
+- `comparisons` retains observed source-field changes with typed before/after
+  values, classifications and record-key paths. Army documents are matched by
+  exact member name; member appearance or disappearance is not a canonical
+  Unit addition or removal.
+- `metadataChanges` preserves shared catalog record differences and unknown
+  fields without guessing weapon-mode identities. Shared reference metadata
+  findings and reference-shape issues retain uncertainty in Army contexts.
+- `effectiveReferences` compares changed reference fields across stable
+  single-profile groups and same-key loadouts; it distinguishes lost/gained
+  effective occurrences from equivalent occurrences and explicit review cases.
+  A profile-to-loadout move is not automatically neutral. Catalog definition
+  changes are separate, and ambiguous relationships, rekeys and unsupported
+  contexts are not promoted into confirmed gameplay changes.
+
+Reports compare the selected endpoint observations, not all intermediate source
+states or official publication dates. They are review evidence, not a curated
+changelog, and do not replace the remaining reconciliation steps. Curated
+[snapshot notes](curated/snapshot-notes/README.md) remain the human interpretation;
+neither reports nor notes become runtime inputs. No player-facing comparison
+interface is required to generate these reports.
 
 ### Cross-repository acquisition handoff (P5.3)
 
