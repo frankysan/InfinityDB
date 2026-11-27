@@ -56,6 +56,9 @@ are not retroactively relabeled.
   Tacball objectives, and visible structured Resilience Operations details.
 - **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
   maintenance, separating source changes, effective reference changes and unresolved evidence.
+- **Web frontend + Web backend:** Added a Developer-mode Army snapshot comparison
+  screen for locally opened two-endpoint JSON reports, including change filters,
+  exact values and recorded provenance without uploading private source evidence.
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.
 - **Data processing + Web backend + Web frontend:** Embedded the reviewed N5
   Unit history projection in Army schema v35. Collapsed histories distinguish

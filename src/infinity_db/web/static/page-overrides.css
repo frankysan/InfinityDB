@@ -1319,3 +1319,75 @@ svg.scenario-map .label {
 .rules-reference .detail-section[id] {
   scroll-margin-top: 6rem;
 }
+
+.snapshot-comparison .content-frame {
+  margin-bottom: 16px;
+}
+
+.snapshot-pair,
+.snapshot-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.snapshot-pair > div,
+.snapshot-filters > label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.snapshot-filters > label {
+  display: grid;
+  gap: 6px;
+}
+
+.snapshot-filters input,
+.snapshot-filters select,
+#snapshot-report {
+  max-width: 100%;
+  min-width: 0;
+}
+
+#snapshot-report {
+  display: block;
+  margin-block: 8px;
+}
+
+.snapshot-change {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border-default);
+  overflow-wrap: anywhere;
+}
+
+.snapshot-change summary,
+.snapshot-comparison details summary {
+  cursor: pointer;
+}
+
+.snapshot-change-meta {
+  display: block;
+  margin-top: 4px;
+}
+
+.snapshot-comparison pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 24rem;
+  overflow: auto;
+  font-size: var(--font-size-xs);
+  padding: 8px;
+}
+
+.snapshot-pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+  .snapshot-pair,
+  .snapshot-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

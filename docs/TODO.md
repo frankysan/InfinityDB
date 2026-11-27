@@ -58,6 +58,9 @@ in the linked workstreams; retire this milestone summary when the release closes
 - **Data processing + Project infrastructure:** Retired installed CLI paired-export
   and pair-health switches, requiring explicit source inspection. Retain independent
   legacy parity and release-test consumers; see the [data lifecycle](../data/README.md).
+- **Web frontend + Web backend:** Added the
+  [Army snapshot comparison screen](../data/README.md#army-snapshot-diff-reports)
+  for local inspection of generated two-endpoint reports.
 
 Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
 candidate acceptance remains in the release checklist.
@@ -65,11 +68,8 @@ candidate acceptance remains in the release checklist.
 Complete the selected development work before the existing
 [release checklist](releasing.md); no new release gates are introduced.
 
-### Remaining v1.3.0 additions
-
-- [Two-snapshot comparison screen](#user-owned-tools-and-portable-data):
-  expose the existing structured Army snapshot diff capability in a browser
-  review surface, preserving provenance and uncertainty.
+All selected v1.3.0 additions are implemented. Proceed with the existing
+release checklist.
 
 ### Deferred beyond the committed scope
 
@@ -423,5 +423,3 @@ remains authoritative for list legality.
   unresolved placeholders and raw-archive record provenance.
 - [ ] Extend archived snapshot browsing beyond the initial N5 Unit history
   where it becomes player-useful; existing ZIPs provide recovery.
-- [ ] Add a two-snapshot JSON comparison screen for added, removed and
-  updated records, reusing structured snapshot diff tooling where possible.

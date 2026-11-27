@@ -59,6 +59,7 @@ ASSETS = {
     "/static/view-components.js": ("view-components.js", "text/javascript; charset=utf-8"),
     "/static/unit.js": ("unit.js", "text/javascript; charset=utf-8"),
     "/static/unit-compare.js": ("unit-compare.js", "text/javascript; charset=utf-8"),
+    "/static/snapshot-compare.js": ("snapshot-compare.js", "text/javascript; charset=utf-8"),
     "/static/preferences.js": ("preferences.js", "text/javascript; charset=utf-8"),
     "/static/theme-startup.js": ("theme-startup.js", "text/javascript; charset=utf-8"),
     "/static/theme.js": ("theme.js", "text/javascript; charset=utf-8"),
@@ -379,6 +380,12 @@ _FIXED_PAGES = {
         "Scenario reference",
         "scenarios",
     ),
+    "/snapshot-compare": PageSpec(
+        "snapshot-compare.html",
+        (("InfinityDB", "/"), ("Army snapshot comparison", None)),
+        "Source review",
+        "snapshot-compare",
+    ),
     "/changes": PageSpec(
         "changes.html",
         (("InfinityDB", "/"), ("What's changed", None)),
@@ -644,6 +651,7 @@ def _render_page(
         "fireteams": "FIRETEAMS_CURRENT",
         "glossary": "GLOSSARY_CURRENT",
         "changes": "CHANGES_CURRENT",
+        "snapshot-compare": "SNAPSHOT_COMPARE_CURRENT",
         "about": "ABOUT_CURRENT",
     }
     for page, marker_name in navigation_markers.items():

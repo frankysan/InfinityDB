@@ -232,6 +232,7 @@
         "test_verify_rule_fragment_browser",
         "test_verify_scenario_faq_browser",
         "test_verify_sidebar_density_browser",
+        "test_snapshot_comparison_browser",
         "test_verify_turn_sequence_browser",
         "test_unit_filter_multiselection_browser",
         "test_verify_unit_skill_presentation_browser",

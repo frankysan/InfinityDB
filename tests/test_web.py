@@ -3812,6 +3812,7 @@ def test_representative_pages_share_theme_runtime_contract(app: Callable) -> Non
         "/fireteams",
         "/glossary",
         "/changes",
+        "/snapshot-compare",
         "/about",
     )
 
@@ -3855,6 +3856,7 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/hacking-programs/carbonite",
         "/fireteams",
         "/glossary",
+        "/snapshot-compare",
         "/about",
     )
     expected_csp = (

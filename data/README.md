@@ -953,8 +953,25 @@ Reports compare the selected endpoint observations, not all intermediate source
 states or official publication dates. They are review evidence, not a curated
 changelog, and do not replace the remaining reconciliation steps. Curated
 [snapshot notes](curated/snapshot-notes/README.md) remain the human interpretation;
-neither reports nor notes become runtime inputs. No player-facing comparison
-interface is required to generate these reports.
+neither reports nor notes become runtime inputs.
+
+To review a selected pair in the browser, enable Developer mode and open
+**Army snapshot comparison** (`/snapshot-compare`). Choose the generated
+version-1 JSON report using the local file picker. The screen shows both
+endpoint identities, recorded provenance, scope limitations, appeared,
+disappeared and updated source records, effective occurrence changes and
+unresolved reference evidence. Filter by source member, change kind,
+classification or source-coordinate text; expand an entry for exact before
+and after values (including missing versus null) and the original report
+record.
+
+The browser reads only the explicitly selected report (up to 64 MiB)
+in memory. It does not read the source ZIPs, access a server-side report
+directory, upload or persist report contents, or independently verify
+the source hashes. Report generation and verification remain the offline
+command above; the browser renders its existing semantics rather than
+implementing another comparison engine. Developer mode controls discoverability,
+not access to any private server-side data.
 
 ### Cross-repository acquisition handoff (P5.3)
 

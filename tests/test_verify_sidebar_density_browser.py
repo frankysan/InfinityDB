@@ -18,7 +18,7 @@ ORIGIN = "http://infinitydb-navigation-browser.test"
 DESTINATIONS = [
     "/armies", "/units", "/unit-compare", "/skills", "/orders-aros", "/equipment", "/weapons",
     "/ammunition", "/traits", "/labels", "/states", "/hacking-programs",
-    "/fireteams", "/rules", "/scenarios", "/glossary", "/changes", "/about",
+    "/fireteams", "/rules", "/scenarios", "/glossary", "/changes", "/snapshot-compare", "/about",
 ]
 
 
