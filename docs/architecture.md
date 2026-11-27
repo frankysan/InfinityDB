@@ -268,6 +268,16 @@ Retain it for the substantial first-access improvement; measure mixed-traffic
 memory during deployment capacity acceptance. The diagnostic opt-out is
 documented with the benchmark procedure.
 
+Retain SQLite's ordinary `mode=ro` connection semantics. The standard
+read-only Docker image has an immutable database lifecycle, but direct
+checkout serving and build/research readers do not have the same guarantee.
+The [paired SQLite benchmark](testing.md#sqlite-immutable-mode-pilot--2026-11-27)
+found only small repeated-request improvements on Linux; they do not justify
+a separate deployment-only connection policy and its propagation across
+runtime readers. Application-level immutable snapshot caches remain separate
+from SQLite's `immutable=1` flag. Reconsider only with a measured workload
+showing significant connection/locking overhead.
+
 Implementation priorities and remaining tasks belong to the
 [performance backlog](TODO.md#performance-storage-and-build-tooling).
 

@@ -38,6 +38,33 @@ Hosted CI and isolated Docker release acceptance remain independent gates.
 See [parallel validation](#parallel-windows-development-and-linux-validation)
 and [release validation](releasing.md#4-run-local-release-validation).
 
+## SQLite immutable mode pilot — 2026-11-27
+
+Compared ordinary `mode=ro` against `mode=ro&immutable=1` on the complete
+runtime set at `31984f479deeda52d6643a5edd6b62a6764f380f` (Windows run
+used the equivalent benchmark implementation before the loop-binding lint
+correction). The standalone benchmark intercepts only read-only SQLite
+connections to the selected four files; it rejects WAL mode and existing
+sidecars. Run against a stable set with no concurrent rebuild:
+
+```sh
+python -m tools.performance.benchmark_runtime data/generated/army.db --sqlite-immutable --cold-iterations 3 --warm-iterations 10
+```
+
+Each host completed three alternating pairs of application startups with
+index preload and 13 API routes, each with one first and ten repeated
+requests per app. All 858 responses per host were HTTP 200 and
+byte-identical by route across both modes. Windows (SQLite 3.50.4):
+startup 6219/5890 ms, first Explorer 277/232 ms, first Skill detail
+61/46 ms, repeat Search 1.81/1.57 ms (ordinary/immutable median).
+Linux-dev (SQLite 3.46.1): startup 9510/9312 ms, first Explorer
+277/305 ms, first Skill detail 53/50 ms, repeat Search 1.66/1.58 ms.
+Linux repeated-request differences ranged from a 4.5% reduction to
+a 1.1% increase; first-access results varied, including Glossary
+45/53 ms. These are single-threaded in-process WSGI measurements,
+not Docker throughput or concurrent load measurements. Retain ordinary
+read-only mode: see the [architecture decision](architecture.md#design-direction-build-time-materialization).
+
 ## Unit Explorer Peripheral attachment and option review — 2026-11-15
 
 The pinned `JSON 20260929-114335.zip` Army snapshot contains 58 Army

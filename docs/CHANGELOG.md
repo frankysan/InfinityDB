@@ -94,6 +94,9 @@ are not retroactively relabeled.
   Contextual matching and curated detail enrichment remain dynamic.
 - **Web backend + Deployment:** Preload the shared Unit graph and official Army
   links before worker forks to reduce redundant first-access initialization.
+- **Web backend + Deployment:** Evaluated SQLite immutable connection mode
+  against the complete runtime set; retained ordinary read-only connections
+  because measured Linux request gains did not justify a separate policy.
 
 ### Fixed
 

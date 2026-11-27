@@ -52,6 +52,9 @@ in the linked workstreams; retire this milestone summary when the release closes
 - **Data processing + Web frontend:** Completed the
   [Weapon Chart footnote review](web-design-guidelines.md#curated-rules-text-hierarchy);
   unresolved source issues remain in the clarification register.
+- **Web backend + Deployment:** Completed the
+  [SQLite immutable mode investigation](testing.md#sqlite-immutable-mode-pilot--2026-11-27);
+  retain ordinary read-only connections based on the measured tradeoff.
 
 Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
 candidate acceptance remains in the release checklist.
@@ -61,9 +64,6 @@ Complete the selected development work before the existing
 
 ### Remaining v1.3.0 additions
 
-- [SQLite immutable mode](#performance-storage-and-build-tooling): evaluate
-  deployed snapshot replacement semantics and enable `immutable=1` only where
-  safe and justified by measurement.
 - [Raw SQLite retirement](#performance-storage-and-build-tooling): review
   remaining opt-in interfaces and retire those without independent consumers;
   preserve unique evidence and useful compatibility contracts.
@@ -266,9 +266,6 @@ make v1.3.0 depend on them.
     needed; label host-only and missing-source skips explicitly.
   - [ ] Consider a pinned Playwright test container only after verifying a
     suitable Linux test container engine, separate from production Compose.
-
-- [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
-  the process never observes an in-place database replacement.
 
 - [ ] Compare otherwise equivalent deployment variants backed by SQLite and by
   `normalized.json`, with both variants exposing the same API and representative
