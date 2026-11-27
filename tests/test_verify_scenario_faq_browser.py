@@ -3799,6 +3799,52 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
         page.close()
 
 
+@pytest.mark.parametrize(("width", "theme"), [(1440, "light"), (390, "dark")])
+def test_scenario_season_rules_disclosure(
+    scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}');")
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for season, revision, skill_type, extra in (
+            ("its-18", "2026.09.11", "Basic Short Skill", "#rule-skill-team-ops"),
+            ("its-17", "0.2", "Short Movement Skill", "#rule-rule-resilience-operations"),
+        ):
+            page.goto(
+                f"{ORIGIN}/scenarios/evacuation?army_points=300"
+                f"&collection={season}&revision={revision}",
+                wait_until="domcontentloaded",
+            )
+            disclosure = page.locator("#scenario-season-rules")
+            disclosure.wait_for(state="visible", timeout=30000)
+            assert not disclosure.evaluate("node => node.open")
+            skill = disclosure.locator("#rule-skill-civevac")
+            assert not skill.is_visible()
+            disclosure.locator("summary").press("Enter")
+            skill.wait_for(state="visible", timeout=30000)
+            assert skill_type in skill.inner_text()
+            assert skill.locator(".rules-source-citations").is_visible()
+            assert disclosure.locator(extra).is_visible()
+            assert disclosure.locator("#rule-state-casevac a[href='#rule-skill-casevac']").count()
+            assert disclosure.locator("#rule-rule-tactical-support").count() == 0
+            if season == "its-18":
+                assert disclosure.locator("#rule-rule-resilience-operations").count() == 0
+            else:
+                assert page.locator("#scenario-tactical-support").is_visible()
+                assert disclosure.locator("#rule-skill-team-ops").count() == 0
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.goto(f"{ORIGIN}/scenarios/annihilation?army_points=300",
+                  wait_until="domcontentloaded")
+        page.locator("#scenario-content").wait_for(state="visible", timeout=30000)
+        assert page.locator("#scenario-season-rules").count() == 0
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", [1440, 390])
 def test_scenario_rule_cards_omit_only_redundant_subtitles(
     scenario_app: Callable[..., Any], chrome: Any, width: int,

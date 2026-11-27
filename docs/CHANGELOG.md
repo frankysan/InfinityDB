@@ -27,11 +27,16 @@ are not retroactively relabeled.
 - Clearer distinctions between rules, explanations, source examples, reviewed
   interpretations, FAQ clarifications and unresolved source issues.
 - Improved spacing of placement ruler labels near scenario map edges.
+- ITS scenario pages include a collapsible Season Rules section for reviewed
+  season-wide rules and context-specific event restrictions.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
 ### Added
 
+- **Web backend + Web frontend:** Present reviewed season-owned Rules, Skills,
+  States and event policies in a collapsed Season Rules section on ITS scenario
+  pages, with revision-specific citations and separately identified Extras.
 - **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
   maintenance, separating source changes, effective reference changes and unresolved evidence.
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.

@@ -46,6 +46,47 @@ def _get(app, path):
     return status, json.loads(content)
 
 
+def test_season_rules_use_exact_selected_publication():
+    selected_app = create_app(
+        GENERATED / "army.db", GENERATED / "rules_n5.db",
+        season_databases={
+            "its-17": GENERATED / "its_17.db",
+            "its-18": GENERATED / "its_18.db",
+        },
+    )
+    for season, revision, expected in (
+        ("its-18", "2026.09.11", {
+            "skill:civevac", "skill:casevac", "state:casevac",
+            "skill:team-ops", "skill:request-tacball",
+        }),
+        ("its-17", "0.2", {
+            "skill:civevac", "skill:casevac", "state:casevac",
+            "rule:resilience-operations",
+        }),
+    ):
+        status, item = _get(
+            selected_app, f"/api/scenarios/evacuation?collection={season}&army_points=300",
+        )
+        assert status == 200, item
+        cards = {record["id"]: record for record in item["season_rules"]}
+        assert set(cards) == expected
+        assert all(record["facts"]["applicability"]["revision"] == revision
+                   for record in cards.values())
+        assert all(citation["source_id"].startswith(f"its-season-{season[4:]}-")
+                   for record in cards.values() for citation in record["citations"])
+        assert cards["skill:civevac"]["skill_types"][0]["id"] == (
+            "basic-short-skill" if season == "its-18" else "short-movement-skill"
+        )
+        state = cards["state:casevac"]
+        assert state["facts"]["applicability"]["context"] == "season"
+        assert any(token.get("public_reference", {}).get("href") == "#rule-skill-casevac"
+                   for token in state["summary_tokens"] if token["type"] == "reference")
+        assert "rule:tactical-support" not in cards
+        assert "season_rules" not in _get(
+            selected_app, "/api/scenarios/annihilation?army_points=300",
+        )[1]
+
+
 @pytest.mark.parametrize("season", ["its-17", "its-18"])
 def test_mission_event_context(app, its17_app, season):
     common = {

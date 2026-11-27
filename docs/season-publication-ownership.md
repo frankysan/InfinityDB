@@ -156,6 +156,23 @@ owns the complete contract.
   `scenario_id` is given. Source dates, source selection, conflicts,
   supersession and source citations retain their existing constraints.
 
+## Season Rules on scenario pages
+
+ITS scenario detail responses include `season_rules`, a presentation projection
+of the selected season/revision's standalone Rules, Skills and States. The
+collapsed-by-default Season Rules disclosure uses the standard reference cards,
+retains their exact citations and resolves links between its local records
+within the selected season. General rules, optional Extra definitions and
+explicit tournament/Extra policies remain distinguishable; displaying them
+does not activate an Extra. Core N5 scenario details do not include this
+disclosure. Tactical Support remains a separate mission-dependent card.
+
+This is the currently reviewed coverage, not a complete event rulebook. ITS 17
+includes CivEvac, Casevac, Casevac State and the Resilience Operations Extra.
+ITS 18 includes CivEvac, Casevac, Casevac State, Team-Ops, Request a Tacball
+and its three existing event policies. New reviewed season-owned records can
+use the same projection without duplicating definitions per mission.
+
 ## Stable selection and identity contract
 
 - **Core default:** No season selection continues to mean the N5 core

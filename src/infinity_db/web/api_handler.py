@@ -609,6 +609,60 @@ class ApiHandler:
                 database, rules_database, self.fireteam_rules_reference
             )
 
+    @instance_lru_cache(maxsize=8)
+    def _season_rule_cards(self, season: str, revision: str) -> list[dict[str, Any]]:
+        """Project reviewed standalone records for this exact season, not the core catalog."""
+        registry = self.scenario_catalog.publication_registry
+        if registry is None or not registry.has_season(season, revision):
+            return []
+        entries = [
+            entry
+            for records in (
+                registry.season_rule_entries(),
+                registry.season_skill_entries(),
+                registry.season_state_entries(),
+            )
+            for entry in records
+            if entry["collection"] == season and entry["revision"] == revision
+        ]
+        cards = []
+        for entry in entries:
+            record = entry["record"]
+            context = record["facts"]["applicability"]["context"]
+            # Mission-specific support has its own complete contextual card.
+            if context == "tactical-support":
+                continue
+            card = {**record, "citations": entry["citations"]}
+            if record["kind"] == "skill":
+                slug = record["id"].removeprefix("skill:")
+                for route in (f"{season}-{slug}", slug):
+                    skill = self.scenario_catalog.get_scenario_skill(route)
+                    if skill is None or not any(
+                        use["collection"] == season and use["revision"] == revision
+                        for use in skill.get("seasons", [])
+                    ):
+                        continue
+                    rule = skill["rules"][0]
+                    card.update(
+                        skill_types=rule.get("skill_types", []),
+                        labels=rule.get("labels", []),
+                    )
+                    break
+            cards.append(card)
+        # Bind references to the actual season-local cards, including previews.
+        # Unqualified catalog routes may combine or prefer a different season.
+        local = {card["id"]: card for card in cards}
+        result = enrich_maintained_text_references(
+            self.database, self.rules_database, {"items": cards},
+            local_rule_ids=frozenset(local), additional_records=local,
+        )
+        return sorted(
+            result["items"], key=lambda card: (
+                card["facts"]["applicability"]["context"], card["name"].casefold(),
+                card["id"],
+            ),
+        )
+
     def _present_unit(
         self, unit: dict[str, Any], *,
         optional_filters: dict[str, bool], requested_army: str | None = None,
@@ -1521,6 +1575,11 @@ class ApiHandler:
                             self.rules_database,
                             payload,
                         )
+                        publication = payload["publication"]
+                        if publication["collection_id"].startswith("its-"):
+                            payload["season_rules"] = self._season_rule_cards(
+                                publication["collection_id"], publication["revision"],
+                            )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read scenario")
                 status = HTTPStatus.SERVICE_UNAVAILABLE

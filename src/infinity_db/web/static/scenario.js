@@ -729,6 +729,47 @@ function seasonPolicySection(item, controller) {
   return wrapper;
 }
 
+function seasonRulesSection(item, controller) {
+  const publication = item.publication;
+  if (!publication?.collection_id?.startsWith("its-")) return null;
+  const disclosure = document.createElement("details");
+  disclosure.id = "scenario-season-rules";
+  disclosure.className = "surface surface--subtle surface--clipped scenario-section season-rules";
+  const summary = document.createElement("summary");
+  const title = document.createElement("h2");
+  title.textContent = "Season Rules";
+  summary.append(title);
+  disclosure.append(summary);
+  const body = document.createElement("div");
+  body.className = "surface-body rules-card-stack";
+  const note = document.createElement("p");
+  note.className = "detail-copy";
+  note.textContent = "Reviewed rules for this season and revision. Mission-specific rules still apply. Tournament restrictions and optional Extras apply only in their stated contexts.";
+  body.append(note);
+  const contexts = new Map();
+  for (const rule of item.season_rules || []) {
+    const context = rule.facts.applicability.context;
+    if (!contexts.has(context)) contexts.set(context, []);
+    contexts.get(context).push(rule);
+  }
+  for (const [context, rules] of contexts) {
+    const label = context === "season" ? "General season rules"
+      : context === "team-ops-extra" ? "TEAM-OPS Extra"
+      : context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    const group = document.createElement("section");
+    group.className = "rules-card-stack";
+    const heading = document.createElement("h3");
+    heading.className = "detail-heading";
+    heading.textContent = label;
+    group.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
+    body.append(group);
+  }
+  const policies = seasonPolicySection(item, controller);
+  if (policies) body.append(policies);
+  disclosure.append(body);
+  return disclosure;
+}
+
 function render(item, faqItems, controller) {
   updateDocumentIdentity(item);
   const placement = document.createElement("div");
@@ -739,7 +780,7 @@ function render(item, faqItems, controller) {
     tacticalSupportSection(item),
     objectivesSection(item),
     rulesSection(item),
-    seasonPolicySection(item, controller),
+    seasonRulesSection(item, controller),
     faqRulingsSection(faqItems),
     endSection(item),
     issuesSection(item),

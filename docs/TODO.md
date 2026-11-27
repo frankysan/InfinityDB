@@ -359,13 +359,16 @@ Season 16 Part II remains later scope.
     and renderer contracts; consider season-wide rules and FAQ coverage
     after the scenario baseline.
 
-- [ ] **Web frontend + Web backend:** Add a collapsed-by-default Season Rules
-  section to ITS scenario pages, using the selected season's canonical
-  season-wide Rules, Skills, States and event policies. Reuse existing
-  reference cards and citations; distinguish generally applicable rules
-  from optional Extras and retain their applicability. Identify and curate
-  any missing common rule coverage rather than duplicating rules per mission
-  or mixing seasons/revisions.
+- [ ] **Data processing + Web frontend + Web backend:** Complete the reviewed
+  Season Rules coverage for ITS 17 and ITS 18. The
+  [collapsed Season Rules disclosure](season-publication-ownership.md#season-rules-on-scenario-pages)
+  already presents published season-scoped Rules, Skills, States and policies.
+  Review and curate missing gameplay-relevant common rules (including Civilians,
+  Designated Targets, Classified Objectives/HVTs and tournament Army List
+  selection), and applicable optional Extras (including ITS 18 Resilience
+  Operations). Review exact bilingual season sources; distinguish event-only
+  rules from normal mission rules and avoid duplicating existing mission-specific
+  facts or core definitions.
 
 - [ ] **Data processing + Web frontend:** Extend the shared scenario geometry
   model and SVG renderer only when later seasonal content or the scenario
