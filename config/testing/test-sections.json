@@ -215,6 +215,7 @@
       "modules": [
         "test_cross_browser_compatibility",
         "test_verify_accessible_navigation_browser",
+        "test_live_search_browser",
         "test_verify_ammunition_publication_browser",
         "test_verify_aro_deployment_browser",
         "test_verify_movement_browser",

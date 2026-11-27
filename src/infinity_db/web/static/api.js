@@ -89,8 +89,10 @@ export function getVersion(signal) {
   return getJson("/api/version", signal);
 }
 
-export function getSearchResults(query, signal) {
-  return getJson(`/api/search?${new URLSearchParams({ q: query })}`, signal);
+export function getSearchResults(query, signal, { limit } = {}) {
+  const params = new URLSearchParams({ q: query });
+  if (limit !== undefined) params.set("limit", String(limit));
+  return getJson(`/api/search?${params}`, signal);
 }
 
 export function getGlossary(signal) {

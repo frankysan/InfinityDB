@@ -6091,6 +6091,20 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     assert json.loads(body)["error"] == "Provide q exactly once"
 
 
+def test_global_search_limit_preserves_ranked_results(app: Callable) -> None:
+    status, _, body = request(app, "/api/search", query="q=a")
+    assert status == 200
+    items = json.loads(body)["items"]
+    assert len(items) > 1
+    status, _, body = request(app, "/api/search", query="q=a&limit=1")
+    assert status == 200
+    assert json.loads(body) == {"items": items[:1]}
+    for limit in ("", "0", "51", "-1", "1.5", "x", "1&limit=2", "999999999"):
+        status, _, body = request(app, "/api/search", query=f"q=a&limit={limit}")
+        assert status == 400
+        assert "limit" in json.loads(body)["error"]
+
+
 def test_game_modes_recommended_setup_is_public_and_searchable(
     app: Callable, tmp_path: Path,
 ) -> None:

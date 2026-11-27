@@ -90,7 +90,8 @@ its application metrics.
   All twenty Season 18 and sixteen Season 17 missions are represented;
   earlier revisions remain preserved as research evidence, and known source
   discrepancies are disclosed on the relevant scenario pages.
-- Includes global search and a federated Glossary across player-facing reference domains, with
+- Includes global search with live navigation suggestions and a full results page, plus a
+  federated Glossary across player-facing reference domains, with
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
   canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.

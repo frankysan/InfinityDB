@@ -13,6 +13,7 @@ are not retroactively relabeled.
 ### Player summary
 
 - Faster global search through a compact prebuilt search index.
+- Live search suggestions in the navigation, with direct links and access to all results.
 - Faster resolution of inline rules references and their previews.
 - Faster initial Glossary loading and Orders/AROs reference requests.
 - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
@@ -39,6 +40,8 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web frontend + Web backend:** Added debounced global search suggestions with
+  keyboard navigation and bounded API results, preserving full search and ranking.
 - **Web frontend + Web backend + Deployment:** Added a shared anonymous error
   report form with inspectable optional page context, bounded submission
   limits and configurable email delivery without an application report store.

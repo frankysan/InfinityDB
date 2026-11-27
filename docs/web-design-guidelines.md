@@ -28,6 +28,16 @@ Recurring UI behavior should be represented by shared primitives with explicit s
 
 Page-specific CSS and markup remain appropriate for genuinely unique content, but they should not redefine common concepts such as surfaces, table geometry, badges, headers, controls, spacing, responsive behavior, or developer-only presentation.
 
+### Global search suggestions
+
+The navigation search offers a bounded list of live suggestions from the same
+ranked cross-domain search used by the full results page. Typing does not change
+page or history state. Show names and domain labels, preserve the full search
+action, and support pointer, touch, arrow keys, Enter and Escape. Keep keyboard
+focus in the search field during suggestion selection; close the panel when
+leaving search or navigating. Debounce requests and ignore superseded responses.
+Use theme tokens and keep the panel within narrow viewports.
+
 ### Card spacing
 
 **Give every content card an explicit inset.** The `.surface` class supplies

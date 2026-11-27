@@ -106,6 +106,7 @@ ASSETS = {
     "/static/weapon-footnotes.js": ("weapon-footnotes.js", "text/javascript; charset=utf-8"),
     "/static/faq-rulings.js": ("faq-rulings.js", "text/javascript; charset=utf-8"),
     "/static/search.js": ("search.js", "text/javascript; charset=utf-8"),
+    "/static/live-search.js": ("live-search.js", "text/javascript; charset=utf-8"),
     "/static/scenarios.js": ("scenarios.js", "text/javascript; charset=utf-8"),
     "/static/scenario.js": ("scenario.js", "text/javascript; charset=utf-8"),
     "/static/glossary.js": ("glossary.js", "text/javascript; charset=utf-8"),

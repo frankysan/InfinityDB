@@ -983,7 +983,7 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 params = parse_qs(query_string, keep_blank_values=True)
-                unknown = sorted(set(params) - {"q", "cache_bust"})
+                unknown = sorted(set(params) - {"q", "limit", "cache_bust"})
                 if unknown:
                     raise ValueError(f"Unknown query parameter: {unknown[0]}")
                 if len(params.get("q", [])) != 1:
@@ -995,13 +995,25 @@ class ApiHandler:
                     raise ValueError("q must be at most 200 characters")
                 if len(params.get("cache_bust", [])) > 1:
                     raise ValueError("Provide cache_bust only once")
+                limit_values = params.get("limit", [])
+                limit = None
+                if limit_values:
+                    if (
+                        len(limit_values) != 1
+                        or not limit_values[0].isascii()
+                        or not limit_values[0].isdigit()
+                        or len(limit_values[0]) > 2
+                        or not 1 <= int(limit_values[0]) <= 50
+                    ):
+                        raise ValueError("limit must be an integer from 1 to 50")
+                    limit = int(limit_values[0])
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
                     cache_control=cache_control,
                 )
             try:
-                payload = {"items": self.search_catalog.search(query)}
+                payload = {"items": self.search_catalog.search(query)[:limit]}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not search the database")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
