@@ -97,6 +97,11 @@ are not retroactively relabeled.
 - **Web backend + Deployment:** Evaluated SQLite immutable connection mode
   against the complete runtime set; retained ordinary read-only connections
   because measured Linux request gains did not justify a separate policy.
+- **Data processing + Project infrastructure:** Retired installed CLI
+  `export --with-raw` and `database-health --require-raw`; use verified
+  normalized source health instead. Source-row inspection requires explicit
+  input selection. Preserve independent legacy release-audit and determinism
+  parity consumers and prior private audit files.
 
 ### Fixed
 

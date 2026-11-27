@@ -55,6 +55,9 @@ in the linked workstreams; retire this milestone summary when the release closes
 - **Web backend + Deployment:** Completed the
   [SQLite immutable mode investigation](testing.md#sqlite-immutable-mode-pilot--2026-11-27);
   retain ordinary read-only connections based on the measured tradeoff.
+- **Data processing + Project infrastructure:** Retired installed CLI paired-export
+  and pair-health switches, requiring explicit source inspection. Retain independent
+  legacy parity and release-test consumers; see the [data lifecycle](../data/README.md).
 
 Implemented outcomes are recorded in the [changelog](CHANGELOG.md); final
 candidate acceptance remains in the release checklist.
@@ -64,9 +67,6 @@ Complete the selected development work before the existing
 
 ### Remaining v1.3.0 additions
 
-- [Raw SQLite retirement](#performance-storage-and-build-tooling): review
-  remaining opt-in interfaces and retire those without independent consumers;
-  preserve unique evidence and useful compatibility contracts.
 - [Two-snapshot comparison screen](#user-owned-tools-and-portable-data):
   expose the existing structured Army snapshot diff capability in a browser
   review surface, preserving provenance and uncertainty.
@@ -275,23 +275,14 @@ make v1.3.0 depend on them.
   performance and deployment portability/multi-platform suitability before
   deciding whether a storage/query abstraction is justified.
 
-- [ ] **Retire the remaining explicit raw-SQLite interfaces** once independent
-  research and source-audit consumers no longer need them. Complete runtime
-  builds and default standalone exports already omit `army.raw.db`; verified
-  normalized input replaces the legacy sibling for maintained source audits.
-  Rawless v2 determinism and the independent native-platform checks are
-  documented in [CI](ci.md#cross-platform-deterministic-outputs) and the
-  [data lifecycle](../data/README.md).
-  - [ ] Review the remaining opt-in paired-export, pair-health, source-row
-    inspection and programmatic `include_raw=True` contracts. Retire only
-    those without independent consumers, preserving source-only row fidelity,
-    absent-versus-null values, exact occurrence/Extra relationships and
-    fail-closed provenance. Keep useful compatibility/parity paths until
-    focused replacement tests and complete-set build checks pass.
-  - [ ] Decide whether any legacy ignored `data/generated/army.raw.db`
-    contains unique evidence worth retaining. It is not a current matched
-    runtime pair and must not be silently deleted; a separately reviewed
-    disposition suffices without reopening the completed workspace cleanup.
+- [ ] Retire legacy programmatic raw-SQLite readers and exporters when their
+  remaining source-backed release-test and v1 determinism parity consumers have
+  been replaced. The v1.3.0 CLI retirement is complete; the independent audit
+  fixture and historical comparison paths remain intentional.
+  Prefer verified normalized sources for new audits. Preserve source-only
+  row fidelity, absent-versus-null values, exact occurrence/Extra relationships
+  and fail-closed provenance. See the [data lifecycle](../data/README.md).
+  This further migration is not a v1.3.0 release requirement.
 
 ### ITS, scenarios, and game tools
 

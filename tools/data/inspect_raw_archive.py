@@ -1,8 +1,8 @@
 """Inspect exact Infinity Army source rows from a verified development input.
 
-By default use the legacy lossless raw sibling, with its validated export
-pair. Explicit --normalized selects a complete normalized JSON document bound
-to the application export generation; neither route mutates its inputs.
+Select a complete normalized JSON document bound to the application export
+generation, or explicitly select a legacy raw archive with its validated pair.
+Neither route mutates its inputs.
 """
 
 from __future__ import annotations
@@ -153,16 +153,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--application", type=Path, default=DEFAULT_APPLICATION,
-        help="application army.db; its paired raw sibling is selected by default",
+        help="application army.db to verify against the selected source",
     )
-    source = parser.add_mutually_exclusive_group()
+    source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--raw", type=Path, help="explicit paired raw archive")
     source.add_argument(
         "--normalized", type=Path,
         help="explicit normalized.json verified against the Army export generation",
     )
     actions = parser.add_subparsers(dest="action", required=True)
-    actions.add_parser("verify", help="validate shared raw/application metadata")
+    actions.add_parser("verify", help="validate source/application export generation")
     actions.add_parser("tables", help="list normalized source tables with exact row counts")
     row = actions.add_parser("row", help="read one raw JSON row by normalized position")
     row.add_argument("table")

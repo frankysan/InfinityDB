@@ -366,8 +366,9 @@ the stable candidate. Re-run affected gates if the candidate changes.
   legacy raw SQLite archive, run `python -m tools.testing.prepare_source_audit`
   from the checkout root before the suite. It uses the pinned Army ZIP and
   complete runtime build provenance, verifies the published export generation,
-  and writes only ignored local audit artifacts. An ordinary standalone
-  normalization/export is not a matched release pair.
+  and writes only ignored local audit artifacts. A prior audit directory
+  with a different or unverifiable generation is retained separately.
+  An ordinary standalone normalization/export is not a matched release pair.
 
   Follow the [validation host policy](testing.md#validation-host-selection):
   Linux is the default for complete release suites; Windows supplies focused

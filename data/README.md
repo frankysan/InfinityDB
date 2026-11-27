@@ -424,9 +424,8 @@ four-file set into its image. The cache revision hashes sorted active filenames 
 their exact file hashes.
 
 `infinity-army build --output-dir PATH` retains the source JSON pipeline;
-`infinity-db export NORMALIZED.json OUTPUT.db` creates an Army database;
-`--with-raw` optionally creates the matched raw sibling. Their work outputs
-are not complete serving sets.
+`infinity-db export NORMALIZED.json OUTPUT.db` creates only an Army database.
+Their work outputs are not complete serving sets.
 `build-rules` retains a narrow standalone v10 export in ignored
 `local/work/build/rules-standalone.db`, without runtime assembly or promotion.
 Research tools receive an explicit raw archive path; normal serving never opens it.
@@ -528,8 +527,8 @@ Each extended schema's checksum includes its published relational rows.
 This alone does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
-database argument or `--require-raw`. The existing individual Army/raw health
-command remains available. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
+database argument or `--normalized`. Individual Army health can verify the
+complete normalized source generation. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
 owns the embedded build-provenance fields.
 The P2.6 filename, default selection and shared serving-directory contract
 are implemented. Current file placement follows the
@@ -554,21 +553,23 @@ validates the entire normalized source and its relational staging database,
 publishes only a temporary application database, and uses the deterministic
 `export_pair_sha256` generation fingerprint to bind source-only rows and
 shared metadata to its subsequent Army overlays and Rules publication.
-It creates no `army.raw.db`. Only the three selected runtime databases are
+It creates no `army.raw.db`. Only the four selected runtime databases are
 installed into the target directory, after complete-set validation.
 
-The standalone `infinity-db export` command now defaults to **application-only**
+The standalone `infinity-db export` command publishes **application-only**
 SQLite output, matching the complete-build pipeline. The export retains full
 normalized input checks, source-to-canonical staging validation, deterministic
 finalization and the complete `export_pair_sha256` source-generation fingerprint.
-Use `--with-raw` only when a standalone research or compatibility consumer
-explicitly needs the lossless, queryable `army.raw.db` sibling. Paired output
-still validates both siblings and produces byte-identical `army.db` output
-from the same source. The former `--no-raw` switch remains accepted as a
-deprecated alias for the default mode. The Python
-`infinity_db.database.export_database(...)` API also defaults to
-application-only output. Direct research callers requiring legacy paired
-SQLite evidence must select `include_raw=True` explicitly.
+The former `--with-raw` and `database-health --require-raw` options are retired;
+`--no-raw` remains an accepted hidden compatibility alias. Use verified
+normalized JSON for current source inspection and health checks.
+The Python `infinity_db.database.export_database(..., include_raw=True)`
+and programmatic pair-health interfaces remain for independent legacy
+source-audit and determinism parity consumers. Paired output still validates
+both siblings and produces byte-identical `army.db` output from the same source.
+`tools.testing.prepare_source_audit` prepares the release-matched legacy
+test inputs in `local/work/build/army/`; these are not runtime artifacts.
+Retain existing private audit copies; do not silently delete them.
 The `tools.audit_source_variant_inputs` CLI expects an optional paired archive
 at `local/work/build/army/army.raw.db` unless `--raw` or `--normalized` is
 supplied. This path is a local research input, not a publication artifact;
@@ -584,8 +585,8 @@ evidence. Select an isolated destination instead. For example:
 ```
 
 The example paths must identify a destination without a raw sibling and the
-**exact same normalized source generation**. `--normalized` is mutually
-exclusive with `--require-raw` and unavailable for `database-health --db-dir`,
+**exact same normalized source generation**. `--normalized` is unavailable
+for `database-health --db-dir`,
 which validates only the published runtime set. Explicit normalized health
 verifies all source rows and metadata against the selected application's
 export-generation fingerprint; it fails on changed/missing source data even
@@ -645,8 +646,8 @@ matrix reported a separate stale tracked runtime-database input. A
 fully green hosted run remains a separate acceptance gate.
 
 The two legacy paired destination files cannot be replaced as one filesystem
-transaction, so explicit `--with-raw` export retains its established commit
-order and recovery policy:
+transaction, so the retained explicit programmatic paired export uses its
+established commit order and recovery policy:
 
 1. replace `army.raw.db` first;
 2. replace `army.db` last; the application replacement is the commit point.
@@ -663,9 +664,10 @@ both destination siblings already belong to the new generation.
 
 Older pairs created before `export_pair_sha256` remain acceptable when their full
 shared metadata dictionaries match. New exports always carry the stronger pair
-fingerprint. `infinity-db database-health data/generated/army.db --require-raw` is the
-operator-facing validation command for this pair contract; omitting `--require-raw` validates only
-the published application database.
+fingerprint. Verify an existing legacy pair with
+`python -m tools.data.inspect_raw_archive --application PATH --raw PATH verify`.
+The installed health command validates the application and optionally its
+normalized source, not a raw sibling.
 
 For local source inspection, `tools.data.inspect_raw_archive` supports either
 an explicit `--normalized` source JSON file verified against the application's
@@ -683,11 +685,9 @@ From the repository root, for a matched local Army export:
 ```
 
 The `local/data/build/` paths above are illustrative: select the actual
-verified outputs of the same source generation. The legacy command still
-accepts `--application` and `--raw`, and defaults to the sibling
-`army.raw.db` when `--normalized` is omitted; standalone export creates
-that pair, but complete runtime builds do not. A stale or mismatched pair
-fails closed. Bounded listings accept at most 100 entries. This tool is
+verified outputs of the same source generation. The inspection CLI requires
+an explicit `--normalized` or `--raw` selection; it no longer automatically
+opens the sibling. A stale or mismatched pair fails closed. Bounded listings accept at most 100 entries. This tool is
 read-only, does not change imported, curated or published data, and is not
 part of the runtime API.
 

@@ -130,15 +130,13 @@ def _build_army(
 
 
 def cmd_export(args: argparse.Namespace) -> int:
-    _export(args.input, args.output, include_raw=args.with_raw)
+    _export(args.input, args.output)
     return 0
 
 
 
 def cmd_database_health(args: argparse.Namespace) -> int:
     if args.database is None:
-        if args.require_raw:
-            raise ValueError("--require-raw applies to an Army database, not --db-dir")
         if args.normalized is not None:
             raise ValueError("--normalized applies to an Army database, not --db-dir")
         report = database_set_health_report(args.db_dir or DEFAULT_DATABASE_DIRECTORY)
@@ -159,14 +157,13 @@ def cmd_database_health(args: argparse.Namespace) -> int:
         return 0 if report["status"] == "healthy" else 1
 
     report = database_health_report(
-        args.database, require_raw=args.require_raw, normalized=args.normalized,
+        args.database, normalized=args.normalized,
     )
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0 if report["status"] == "healthy" else 1
 
     application = report["application"]
-    raw_archive = report["rawArchive"]
     normalized_source = report.get("normalizedSource")
     print(f"Database health: {report['status']}")
     print(f"Application database: {application['path']}")
@@ -187,22 +184,6 @@ def cmd_database_health(args: argparse.Namespace) -> int:
     )
     if error := application.get("error"):
         print(f"Application error: {error}")
-    if args.require_raw:
-        print(f"Raw archive: {raw_archive['path']}")
-        if raw_archive["bytes"] is not None:
-            print(f"Raw archive size: {raw_archive['bytes']:,} bytes")
-        print(
-            f"Raw pair validation: {raw_archive['status']} "
-            f"({raw_archive['validationMs']:.3f} ms)"
-        )
-        if pair_sha256 := raw_archive.get("pairSha256"):
-            print(f"Export pair SHA-256: {pair_sha256}")
-        elif raw_archive["status"] == "valid":
-            print("Export pair: legacy metadata match (no pair fingerprint)")
-        if error := raw_archive.get("error"):
-            print(f"Raw archive error: {error}")
-    else:
-        print("Raw archive: not checked (use --require-raw to validate the sibling pair)")
     if args.normalized is not None:
         assert normalized_source is not None
         print(f"Normalized source: {normalized_source['path']}")
@@ -393,15 +374,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_export = sub.add_parser("export", help="Import validated normalized JSON into SQLite")
     p_export.add_argument("input", type=Path, help="normalized.json input")
     p_export.add_argument("output", type=Path, help="Explicit development output SQLite file")
-    export_mode = p_export.add_mutually_exclusive_group()
-    export_mode.add_argument(
-        "--with-raw", action="store_true",
-        help="Legacy paired export: also publish and validate the lossless raw SQLite sibling",
-    )
-    export_mode.add_argument(
-        "--no-raw", action="store_true",
-        help="Deprecated compatibility alias; application-only export is now the default",
-    )
+    p_export.add_argument("--no-raw", action="store_true", help=argparse.SUPPRESS)
     p_export.set_defaults(func=cmd_export)
 
     p_health = sub.add_parser(
@@ -414,13 +387,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--db-dir", type=Path,
         help="Validate one complete runtime directory without fallback",
     )
-    source_health = p_health.add_mutually_exclusive_group()
-    source_health.add_argument(
-        "--require-raw",
-        action="store_true",
-        help="Require and validate the release-matched raw database sibling",
-    )
-    source_health.add_argument(
+    p_health.add_argument(
         "--normalized", type=Path,
         help="Verify full normalized.json against the selected Army export generation",
     )

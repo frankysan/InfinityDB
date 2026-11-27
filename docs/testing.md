@@ -38,6 +38,24 @@ Hosted CI and isolated Docker release acceptance remain independent gates.
 See [parallel validation](#parallel-windows-development-and-linux-validation)
 and [release validation](releasing.md#4-run-local-release-validation).
 
+## Raw SQLite CLI retirement — 2026-11-27
+
+The pinned complete Army/Rules/ITS rebuild passed all 73 normalization
+checks and deployment asset verification (809/809 published SVGs).
+The release-matched audit preparation now verifies the full normalized
+source generation and copies the final published Army database rather
+than replaying historical overlays. Only the compatibility revision and
+published-content checksum of the newly generated raw fixture are
+reconciled; other metadata differences fail closed. A mismatched prior
+audit directory is retained.
+
+The Windows source inspection cohort passed 14/14, including exact ordered
+JSON row parity for all 61 normalized tables against the prepared legacy
+archive. The paired audit connection cohort passed 10/10, including
+normalized-only relationship audit parity and provenance rejection.
+CLI (30), database-set (26), builder (30) and determinism tooling (24)
+focused tests passed. The complete release suite remains a separate gate.
+
 ## SQLite immutable mode pilot — 2026-11-27
 
 Compared ordinary `mode=ro` against `mode=ro&immutable=1` on the complete
@@ -7724,16 +7742,17 @@ each result instead of copying timing numbers into this file.
 The installed application also exposes a lightweight database health/validation timing command:
 
 ```powershell
-infinity-db database-health data/generated/infinity.db
-infinity-db database-health data/generated/infinity.db --require-raw
-infinity-db database-health data/generated/infinity.db --require-raw --json
+infinity-db database-health data/generated/army.db
+infinity-db database-health data/generated/army.db --normalized local/work/build/army/normalized.json
+infinity-db database-health data/generated/army.db --normalized local/work/build/army/normalized.json --json
 ```
 
 It always runs the application-database integrity validation and reports actual/expected SQLite
-schema and application compatibility revisions. `--require-raw` additionally requires the expected
-`infinity.raw.db` sibling and verifies that both files belong to one export generation. Validation
-time and file sizes are included as lightweight operational evidence; use the dedicated benchmark
-tools below for representative query-performance comparisons.
+schema and application compatibility revisions. `--normalized` verifies the exact source
+generation against the selected Army export. For legacy-pair verification use the explicit
+[source inspection tool](../data/README.md). Validation time and file sizes are included as
+lightweight operational evidence; use the dedicated benchmark tools below for representative
+query-performance comparisons.
 
 Available benchmark and capacity tools include:
 

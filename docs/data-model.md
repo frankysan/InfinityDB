@@ -39,7 +39,7 @@ flowchart TD
     master --> normalized
     normalized --> export
     export --> runtime
-    export -.->|explicit --with-raw| archive
+    export -.->|legacy programmatic audit only| archive
 ```
 
 Curated rules data follows a separate path:

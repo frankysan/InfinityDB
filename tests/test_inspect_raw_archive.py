@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from infinity_db.database import export_database, raw_database_path
+from infinity_db.database.normalized_source import verified_normalized_document
 from infinity_db.database.schema import METADATA_TABLE, RAW_ROWS_TABLE, ROW_JSON, TABLES
 from tests.test_database import _normalized_fixture_data
 from tools.data.inspect_raw_archive import inspect_raw_archive, main
@@ -108,11 +109,17 @@ def test_raw_inspection_fails_closed_on_unpaired_generation(tmp_path: Path) -> N
 def test_raw_inspection_cli_read_only(
     tmp_path: Path, capsys: pytest.CaptureFixture[str],
 ) -> None:
-    app, _raw = _paired_fixture(tmp_path)
-    assert main(["--application", str(app), "row", "skills", "0"]) == 0
+    app, raw = _paired_fixture(tmp_path)
+    with pytest.raises(SystemExit) as exc:
+        main(["--application", str(app), "row", "skills", "0"])
+    assert exc.value.code == 2
+    capsys.readouterr()
+    assert main(["--application", str(app), "--raw", str(raw), "row", "skills", "0"]) == 0
     row = json.loads(capsys.readouterr().out)
     assert row["row"] == {"source": "skills", "position": 0}
-    assert main(["--application", str(app), "rows", "skills", "--limit", "101"]) == 1
+    assert main([
+        "--application", str(app), "--raw", str(raw), "rows", "skills", "--limit", "101",
+    ]) == 1
     assert "page size" in capsys.readouterr().err
 
 
@@ -201,3 +208,29 @@ def test_pinned_real_raw_archive_has_same_export_pair() -> None:
     }
     sample = inspect_raw_archive(app, raw, command="row", table="skills", position=0)
     assert isinstance(sample["row"], dict)
+
+
+@pytest.mark.usefixtures("requires_pinned_raw_army_archive")
+def test_pinned_normalized_source_has_full_legacy_row_parity(require_source_files) -> None:
+    root = Path(__file__).resolve().parents[1]
+    app = root / "data/generated/army.db"
+    directory = root / "local/work/build/army"
+    normalized, raw = directory / "normalized.json", directory / "army.raw.db"
+    require_source_files(normalized)
+    document, _, _, generation = verified_normalized_document(app, normalized)
+    assert inspect_raw_archive(app, raw, command="verify")["pairSha256"] == generation
+    with sqlite3.connect(raw.resolve().as_uri() + "?mode=ro", uri=True) as db:
+        imported = json.loads(db.execute(
+            f'SELECT value FROM "{METADATA_TABLE}" WHERE key = ?',
+            ("imported_tables",),
+        ).fetchone()[0])
+        assert set(imported) == set(document["tables"])
+        for name, expected in document["tables"].items():
+            actual = [
+                (position, json.loads(payload))
+                for position, payload in db.execute(
+                    f'SELECT row_position, "{ROW_JSON}" FROM "{RAW_ROWS_TABLE}" '
+                    "WHERE table_name = ? ORDER BY row_position", (name,),
+                )
+            ]
+            assert actual == list(enumerate(expected)), name

@@ -246,5 +246,9 @@ def test_directory_selection_conflicts_with_individual_database_or_raw_inspectio
         build_parser().parse_args(["database-health", "custom.db", "--db-dir", "selected"])
     assert exc.value.code == 2
     capsys.readouterr()
-    assert main(["database-health", "--db-dir", str(runtime_set), "--require-raw"]) == 1
-    assert "--require-raw applies to an Army database" in capsys.readouterr().err
+    with pytest.raises(SystemExit) as exc:
+        build_parser().parse_args([
+            "database-health", "--db-dir", str(runtime_set), "--require-raw",
+        ])
+    assert exc.value.code == 2
+    assert "unrecognized arguments: --require-raw" in capsys.readouterr().err
