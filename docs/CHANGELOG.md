@@ -39,7 +39,10 @@ are not retroactively relabeled.
   pages, with revision-specific citations and separately identified Extras.
 - **Data processing:** Expanded ITS 17 and 18 Season Rules with bilingual
   Civilian, Designated Target, Classified Objective, HVT and tournament Army
-  List references, plus Long Service and Treasure Hunters for ITS 17.
+  List references, plus Long Service for both seasons and Treasure Hunters for
+  ITS 17. Added tournament format, scoring, pairings and bye references,
+  season-specific Extras including ITS 18 Resilience Operations and Team-Ops
+  Tacball objectives, and visible structured Resilience Operations details.
 - **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
   maintenance, separating source changes, effective reference changes and unresolved evidence.
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.

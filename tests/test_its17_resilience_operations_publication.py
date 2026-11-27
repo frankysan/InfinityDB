@@ -44,7 +44,7 @@ def test_extra_is_bilingually_cited_and_not_a_seventeenth_scenario() -> None:
     assert all("resilience" not in member["scenarioId"]
                for member in document["scenarioCollection"]["members"])
     assert len([r for r in document["records"]
-                if r.get("facts", {}).get("category") == "optional-extra"]) == 1
+                if r.get("facts", {}).get("category") == "optional-extra"]) == 7
     assert extra["kind"] == "rule"
     assert extra["facts"]["category"] == "optional-extra"
     assert extra["composition"] == {"role": "definition"}
@@ -123,13 +123,16 @@ def test_tactical_elements_and_glossary_preserve_key_details_and_source_disputes
         assert mismatch in notes
 
 
-def test_optional_extra_is_stored_only_in_its17_sqlite(
+def test_optional_extra_is_stored_with_exact_its17_ownership(
     tmp_path: Path,
 ) -> None:
     output = tmp_path / "its_17.db"
     report = build_its_database(SEASON, output, shared_library=SHARED)
     assert [item["id"] for item in report["scenarios"]] == list(EXPECTED_ITS17_SCENARIO_IDS)
-    assert [item["id"] for item in report["extras"]] == [ID]
+    assert {item["id"] for item in report["extras"]} == {
+        ID, "rule:escalation-tournament", "rule:free-game", "rule:soldiers-of-fortune",
+        "rule:direct-action", "rule:reinforcements-extra", "rule:spec-ops-extra",
+    }
     assert inspect_its_database(
         output, source=SEASON, shared_library=SHARED, require_current_builder=True,
     ) == report
@@ -145,13 +148,40 @@ def test_optional_extra_is_stored_only_in_its17_sqlite(
     assert select_its_scenario(
         output, season_id="its-17", revision="0.2", scenario_id="scenario:resilience-operations",
     ) is None
-    assert ID not in {record["id"] for record in load_curated_document(ITS18)["records"]}
-    # The new historical Rule must never enter the serving databases.
-    for serving in (TRACKED_CORE, TRACKED_ITS18):
-        with sqlite3.connect(serving) as con:
-            assert con.execute(
-                "SELECT COUNT(*) FROM records WHERE id=?", (ID,)
-            ).fetchone()[0] == 0
+    # Core must not acquire a season-owned Rule.
+    with sqlite3.connect(TRACKED_CORE) as con:
+        assert con.execute(
+            "SELECT COUNT(*) FROM records WHERE id=?", (ID,)
+        ).fetchone()[0] == 0
+
+
+def test_current_its18_resilience_extra_has_its_own_source_and_geometry(tmp_path: Path) -> None:
+    source = next(r for r in load_curated_document(ITS18)["records"] if r["id"] == ID)
+    facts = source["facts"]
+    assert source["scope"] == {"game": "N5", "seasons": ["its-18"]}
+    assert facts["applicability"] == {
+        "context": "resilience-operations-extra", "revision": "2026.09.11",
+    }
+    assert facts["tacticalObjectives"] == resilience_record()["facts"]["tacticalObjectives"]
+    assert facts["gameSizes"] == resilience_record()["facts"]["gameSizes"]
+    elements = {row["id"]: row for row in facts["tacticalElements"]}
+    assert "Placement is unresolved" in elements["objectives"]["placement"]
+    assert "EN lists a CC Weapon, ES lists none" in elements["hvts"]["rules"][2]
+    assert {pin["sourceId"] for pin in source["citations"]} == {
+        "its-season-18-en-pdf", "its-season-18-es-pdf",
+    }
+    output = tmp_path / "its_18.db"
+    report = build_its_database(ITS18, output)
+    assert len(report["scenarios"]) == 20
+    assert ID in {item["id"] for item in report["extras"]}
+    with sqlite3.connect(output) as con:
+        assert json.loads(con.execute(
+            "SELECT payload_json FROM records WHERE id=?", (ID,),
+        ).fetchone()[0]) == source
+    assert select_its_scenario(
+        output, season_id="its-18", revision="2026.09.11",
+        scenario_id="scenario:resilience-operations",
+    ) is None
 
 
 @pytest.mark.parametrize(("change", "message"), [

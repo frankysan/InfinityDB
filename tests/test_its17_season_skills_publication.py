@@ -37,6 +37,10 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
         "rule:civilians", "rule:designated-target", "rule:classified-objectives",
         "rule:high-value-target", "rule:tournament-army-lists",
         "rule:long-service", "rule:treasure-hunters",
+        "rule:tournament-format", "rule:tournament-scoring", "rule:tournament-pairings",
+        "rule:escalation-tournament", "rule:free-game", "rule:soldiers-of-fortune",
+        "rule:direct-action", "rule:reinforcements-extra",
+        "rule:spec-ops-extra",
     }
     assert "short-movement-skill" in {
         item["id"] for item in document["skillTypes"]
@@ -46,7 +50,7 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
 def test_original_casevac_and_civevac_types_have_bilingual_citations() -> None:
     records = historical_records()
     # Season Skills, State, Extra, Tactical Support and general/event Rules.
-    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 12
+    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 21
     expected = {
         "skill:civevac": [(EN, 17), (EN, 18), (ES, 18), (ES, 19)],
         "skill:casevac": [(EN, 19), (EN, 20), (ES, 20), (ES, 21)],
@@ -136,6 +140,26 @@ def test_common_season_rule_validation(tmp_path: Path, change: str, message: str
     modified = tmp_path / "bad.json"
     modified.write_text(json.dumps(document, ensure_ascii=False) + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match=message):
+        build_its_database(modified, tmp_path / "bad.db", shared_library=SHARED)
+
+
+@pytest.mark.parametrize(("identifier", "field", "value"), [
+    ("rule:free-game", "category", "basic-rule"),
+    ("rule:free-game", "context", "season"),
+    ("rule:spec-ops-extra", "context", "team-ops-extra"),
+])
+def test_optional_extra_cannot_acquire_general_or_other_extra_context(
+    tmp_path: Path, identifier: str, field: str, value: str,
+) -> None:
+    document = json.loads(SEASON17.read_text(encoding="utf-8"))
+    record = next(r for r in document["records"] if r["id"] == identifier)
+    if field == "context":
+        record["facts"]["applicability"][field] = value
+    else:
+        record["facts"][field] = value
+    modified = tmp_path / "bad.json"
+    modified.write_text(json.dumps(document, ensure_ascii=False) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="exact season-local reviewed applicability"):
         build_its_database(modified, tmp_path / "bad.db", shared_library=SHARED)
 
 

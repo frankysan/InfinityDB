@@ -359,18 +359,6 @@ Season 16 Part II remains later scope.
     and renderer contracts; consider season-wide rules and FAQ coverage
     after the scenario baseline.
 
-- [ ] **Data processing + Web frontend + Web backend:** Complete the reviewed
-  Season Rules coverage for ITS 17 and ITS 18. The
-  [collapsed Season Rules disclosure](season-publication-ownership.md#season-rules-on-scenario-pages)
-  already presents published season-scoped Rules, Skills, States and policies.
-  Civilians, Designated Targets, Classified Objectives/INTELCOM, HVTs and
-  tournament Army List selection are curated for both seasons; ITS 17 also
-  includes Long Service and Treasure Hunters. Review remaining gameplay-relevant
-  common rules, including tournament format/scoring and applicable optional
-  Extras (including ITS 18 Resilience Operations). Review exact bilingual
-  season sources; distinguish event-only rules from normal mission rules and
-  avoid duplicating existing mission-specific facts or core definitions.
-
 - [ ] **Data processing + Web frontend:** Extend the shared scenario geometry
   model and SVG renderer only when later seasonal content or the scenario
   editor requires unsupported, source-backed geometry. Preserve source

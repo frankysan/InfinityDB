@@ -3840,9 +3840,21 @@ def test_scenario_season_rules_disclosure(
             )
             assert disclosure.locator("#rule-state-casevac a[href='#rule-skill-casevac']").count()
             assert disclosure.locator("#rule-rule-tactical-support").count() == 0
+            resilience = disclosure.locator("#rule-rule-resilience-operations")
+            assert resilience.is_visible()
+            assert "Tactical Objective scoring" in resilience.inner_text()
+            assert "F-13 Defensive Turrets" in resilience.inner_text()
+            assert resilience.locator("[data-resilience-size]").count() == 6
+            assert disclosure.locator("#rule-rule-tournament-scoring").is_visible()
+            assert disclosure.locator("#rule-rule-free-game").is_visible()
+            assert disclosure.locator("#rule-rule-long-service").is_visible()
             if season == "its-18":
-                assert disclosure.locator("#rule-rule-resilience-operations").count() == 0
+                assert "Placement is unresolved" in resilience.inner_text()
+                assert disclosure.locator("#rule-rule-team-ops-extra").is_visible()
+                assert disclosure.locator("#rule-rule-spec-ops-extra").count() == 0
             else:
+                assert disclosure.locator("#rule-rule-spec-ops-extra").is_visible()
+                assert disclosure.locator("#rule-rule-team-ops-extra").count() == 0
                 assert page.locator("#scenario-tactical-support").is_visible()
                 assert disclosure.locator("#rule-skill-team-ops").count() == 0
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")

@@ -298,14 +298,25 @@ def _validate_season_reference_rule(
     )
     facts = record.get("facts")
     required = {"category", "applicability", "effects", "restrictions"}
+    extra_ids = {
+        "rule:escalation-tournament", "rule:free-game", "rule:soldiers-of-fortune",
+        "rule:direct-action", "rule:reinforcements-extra",
+    }
+    if season_id == "its-17":
+        extra_ids.add("rule:spec-ops-extra")
+    if season_id == "its-18":
+        extra_ids.add("rule:team-ops-extra")
+    identifier = record["id"]
+    is_extra = identifier in extra_ids
+    extra_context = identifier.removeprefix("rule:").removesuffix("-extra") + "-extra"
+    contexts = (extra_context,) if is_extra else ("season", "official-tournament")
     if (
         not isinstance(facts, dict) or required - set(facts)
         or set(facts) - (required | {"requirements", "clarifications", "sourceNotes"})
-        or facts["category"] != "basic-rule"
-        or facts["applicability"] not in (
-            {"context": "season", "revision": revision},
-            {"context": "official-tournament", "revision": revision},
-        )
+        or facts["category"] != ("optional-extra" if is_extra else "basic-rule")
+        or facts["applicability"] not in [
+            {"context": context, "revision": revision} for context in contexts
+        ]
         or record["scope"] != {"game": "N5", "seasons": [season_id]}
         or record["composition"] != {"role": "definition"}
         or record.get("armyLinks")

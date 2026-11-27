@@ -167,18 +167,28 @@ explicit tournament/Extra policies remain distinguishable; displaying them
 does not activate an Extra. Core N5 scenario details do not include this
 disclosure. Tactical Support remains a separate mission-dependent card.
 
-This is the currently reviewed coverage, not a complete event rulebook. Both
-seasons include Civilians, Designated Target, Classified Objectives (including
-INTELCOM), HVTs (including Secure HVT), official-tournament Army List selection,
-CivEvac, Casevac and Casevac State. ITS 17 additionally includes Long Service,
-Treasure Hunters (including Open Treasure and its chart) and the Resilience
-Operations Extra. ITS 18 additionally includes Team-Ops, Request a Tacball and
-its three existing event policies. New reviewed season-owned records use the
-same projection without duplicating definitions per mission. The general
-reference rules retain exact revision applicability and bilingual source
-notes; mission-dependent rules are not enabled merely by displaying a card.
-Direct Action uses neither Classified Objectives nor HVTs. The ITS 18
-Civilian VITA profile discrepancy remains explicitly unresolved.
+The reviewed gameplay and event-format references cover Civilians, Designated
+Target, Classified Objectives (including INTELCOM), HVTs (including Secure HVT),
+CivEvac, Casevac and Casevac State, and Long Service for both seasons.
+Official-tournament references cover Army List selection, format, scoring,
+pairings and byes. The optional Extras cover Escalation Tournament, Free Game,
+Soldiers of Fortune, Direct Action, Reinforcements and Resilience Operations in
+both seasons, plus Spec-Ops and Treasure Hunters (a general season rule) in
+ITS 17 and Team-Ops/Tacball in ITS 18. The existing ITS 18 event policies remain
+separate. General rules appear before tournament and Extra references.
+Resilience Operations exposes its typed scoring, game sizes, Tactical Elements
+and glossary using the standard card. Its ITS 18 Objective placement and HVT
+profile conflicts remain unresolved; neither is converted into a definitive
+geometry/profile. Each record retains exact revision applicability and
+bilingual source notes; displaying it does not activate the Extra. Direct
+Action uses neither Classified Objectives nor HVTs. The ITS 18 Civilian VITA
+profile discrepancy also remains explicitly unresolved.
+
+This is not a complete event handbook: organizational advice, rankings,
+external card-deck contents and the Team-Ops/Tacball customization charts
+not printed in the pinned ITS PDFs are outside this reference coverage.
+Existing scenario setup, marker dimensions and Specialist Troop definitions
+remain authoritative for those facts.
 
 ## Stable selection and identity contract
 

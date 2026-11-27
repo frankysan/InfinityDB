@@ -23,7 +23,7 @@ def test_historical_facts_are_preserved_exactly_without_separate_authored_file()
     assert sum(record["kind"] == "scenario" for record in current["records"]) == 20
     assert sum(record["kind"] == "skill" for record in current["records"]) == 4
     assert current["collection"]["id"] == "its-season-18-2026.09.11"
-    assert sum(record["kind"] == "rule" for record in current["records"]) == 5
+    assert sum(record["kind"] == "rule" for record in current["records"]) == 16
     assert not any(record["kind"] == "rule" for record in historical["records"])
     assert [entry["id"] for entry in historical["records"] if entry["kind"] == "scenario"] == [
         "scenario:battleground"

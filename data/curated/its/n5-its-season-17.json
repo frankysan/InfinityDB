@@ -1154,6 +1154,481 @@
   "seasonPolicies": [],
   "records": [
     {
+      "id": "rule:tournament-format",
+      "kind": "rule",
+      "name": "Tournament Format",
+      "summary": "Official ITS events follow the season tournament rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "0.2"
+        },
+        "effects": [
+          "At least four players compete in one-on-one games across at least three Tournament Rounds. Recommended round counts: 4–8 players, 3 rounds; 9–16 players, 4 rounds; 17 or more players, 5 rounds.",
+          "Each player records their name, ITS PIN, Army or Sectorial, round scores and Private Information on the Tournament Control Sheet so the opponent or referee can validate it when needed.",
+          "The organizer announces the points limit, tournament tier, scenarios and any Extras with the event. Use a different official ITS Scenario in each round; the organizer may add at most one personalized scenario.",
+          "Tiers: 150 points / 3 SWC or 200 / 4; 250 / 5 or 300 / 6; 350 / 7 or 400 / 8."
+        ],
+        "restrictions": [
+          "These rules take precedence over the ITS Basic Rules where they conflict. An announced Extra can change the format, including the number of rounds."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 8,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 9,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 13,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 23,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 9,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 13,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 14,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 24,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:tournament-scoring",
+      "kind": "rule",
+      "name": "Tournament Scoring",
+      "summary": "Rank players by Tournament Points, then the stated tie-breakers.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "0.2"
+        },
+        "effects": [
+          "Victory: 4 Tournament Points; tie: 2; defeat: 0, determined by comparing Objective Points. Add 1 offensive bonus for scoring at least 5 Objective Points, and 1 defensive bonus when losing by 2 or fewer Objective Points. Both bonuses may apply.",
+          "For a round tie in Tournament Points, compare Objective Points and then Victory Points (surviving Army Points).",
+          "Final standings use accumulated Tournament Points, then accumulated Objective Points, then accumulated Victory Points, then the total Objective Points earned by that player's opponents."
+        ],
+        "restrictions": []
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 9,
+          "section": "Tournament Scoring"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 10,
+          "section": "Tournament Scoring"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 11,
+          "section": "Tournament Scoring"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 10,
+          "section": "Clasificación durante el torneo / Clasificación final"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 11,
+          "section": "Clasificación durante el torneo / Clasificación final"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 12,
+          "section": "Clasificación durante el torneo / Clasificación final"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:tournament-pairings",
+      "kind": "rule",
+      "name": "Tournament Pairings and Byes",
+      "summary": "Random first-round pairings followed by Swiss pairings.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "0.2"
+        },
+        "effects": [
+          "First-round pairings are random. Later rounds rank players by accumulated Tournament Points, Objective Points, Victory Points and previous opponents' total Objective Points, then pair first with second, third with fourth, and so on.",
+          "With an odd number of players, one player receives a bye: 4 Tournament Points, 0 Objective Points and 0 Victory Points for that round. Select the first bye randomly; later give it to the lowest-ranked player who has not already had one. Record the bye on the Tournament Control Sheet.",
+          "At the end of the event, adjust a bye recipient's total Objective Points: multiply points earned by total tournament rounds, divide by rounds actually played and round up. Apply the same adjustment to Victory Points if needed for a tie."
+        ],
+        "restrictions": [
+          "A player must never receive more than one bye in the same tournament."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 11,
+          "section": "Tournament Pairings and Byes"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 12,
+          "section": "Tournament Pairings and Byes"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 12,
+          "section": "Emparejamientos / Jugadores impares"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 13,
+          "section": "Emparejamientos / Jugadores impares"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:escalation-tournament",
+      "kind": "rule",
+      "name": "Escalation Tournament",
+      "summary": "Three rounds at increasing tournament tiers.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "escalation-tournament-extra",
+          "revision": "0.2"
+        },
+        "effects": [
+          "Play exactly three rounds regardless of player count: 150 or 200 points, then 250 or 300 points, then 350 or 400 points. The organizer specifies the points when announcing the event; use each tier's K factor.",
+          "Each player submits three Army Lists, one for each tier."
+        ],
+        "restrictions": [
+          "Only applies when the organizer announces this Extra."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 23,
+          "section": "Escalation Tournament"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 24,
+          "section": "Torneo de escalada"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:free-game",
+      "kind": "rule",
+      "name": "Free Game",
+      "summary": "Remove the normal 15-Trooper Army List limit.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "free-game-extra",
+          "revision": "0.2"
+        },
+        "effects": [
+          "Army Lists may contain more than 15 Troopers."
+        ],
+        "restrictions": [
+          "Only applies when the organizer announces this Extra."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 23,
+          "section": "Free Game"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 24,
+          "section": "Partida libre"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:soldiers-of-fortune",
+      "kind": "rule",
+      "name": "Soldiers of Fortune",
+      "summary": "Allow up to 85 points of Mercenary Troopers.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "soldiers-of-fortune-extra",
+          "revision": "0.2"
+        },
+        "effects": [
+          "A player may include up to 85 Army Points of Mercenary Troopers, respecting Unit Profile AVA but not the Army or Sectorial availability restriction. Mercenaries can differ between the player's two lists.",
+          "Using this permission costs 1 SWC in the Army List."
+        ],
+        "restrictions": [
+          "This Extra does not permit duplicate Characters."
+        ],
+        "sourceNotes": [
+          "English explicitly permits different Mercenary selections in the two lists; Spanish omits this sentence."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 24,
+          "section": "Soldiers of Fortune"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 25,
+          "section": "Soldados de Fortuna"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:direct-action",
+      "kind": "rule",
+      "name": "Direct Action",
+      "summary": "Use the dedicated Direct Action mission variants rather than the full ITS mechanics.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "direct-action-extra",
+          "revision": "0.2"
+        },
+        "effects": [
+          "The dedicated scenario set does not use the Classified Deck, HVTs or terrain rules. Objectives and scoring may differ from standard missions with the same name."
+        ],
+        "restrictions": [
+          "Use the published Direct Action scenario variants, not standard missions with the Classified count removed."
+        ],
+        "sourceNotes": [
+          "The English overview says four scenarios and the Spanish overview says five. Use the actual published scenario inventory rather than the overview count."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 24,
+          "section": "Direct Action"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 25,
+          "section": "Direct Action"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:reinforcements-extra",
+      "kind": "rule",
+      "name": "Reinforcements",
+      "summary": "Enable the Reinforcements rules for the tournament.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "reinforcements-extra",
+          "revision": "0.2"
+        },
+        "effects": [
+          "All players must use the Reinforcements rules when this Extra is selected. Refer to the Reinforcements Annex."
+        ],
+        "restrictions": [
+          "Check each mission's Reinforcements suitability; the Extra is not active by default."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 24,
+          "section": "Reinforcements"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 26,
+          "section": "Refuerzos"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:spec-ops-extra",
+      "kind": "rule",
+      "name": "Spec-Ops",
+      "summary": "Permit customized Spec-Ops in ITS 17 only.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-17"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "spec-ops-extra",
+          "revision": "0.2"
+        },
+        "effects": [
+          "Players may field a Spec-Ops customized with 12 Experience Points under the Daedalus' Fall rules. Each submitted list can have a different customization, recorded in writing with that list.",
+          "Spec-Ops have Specialist Operative and qualify as Specialist Troops for mission rules."
+        ],
+        "restrictions": [
+          "No customization changes or further Experience Points during the event."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-17-v0.2-en-pdf",
+          "page": 23,
+          "section": "Spec-Ops"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 24,
+          "section": "Spec-Ops"
+        },
+        {
+          "sourceId": "its-season-17-v0.2-es-pdf",
+          "page": 25,
+          "section": "Spec-Ops"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
       "id": "rule:civilians",
       "kind": "rule",
       "name": "Civilians in Infinity",

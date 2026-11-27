@@ -112,6 +112,10 @@ function refreshScenarioDistances() {
     const height = Number(table.dataset.heightInches);
     table.textContent = `${scenarioDistance(width)} × ${scenarioDistance(height)}`;
   }
+  for (const li of elements.content.querySelectorAll("[data-resilience-size]")) {
+    const size = JSON.parse(li.dataset.resilienceSize);
+    li.textContent = `${size.armyPoints} Army Points / ${size.swc} SWC: ${scenarioDistance(size.tableWidthIn)} × ${scenarioDistance(size.tableHeightIn)}; Deployment Zone depth ${scenarioDistance(size.deploymentDepthIn)}.`;
+  }
   const image = elements.content.querySelector("img.scenario-map");
   if (!image) return;
   const url = new URL(image.src);
@@ -729,6 +733,56 @@ function seasonPolicySection(item, controller) {
   return wrapper;
 }
 
+function resilienceReferenceDetails(rule) {
+  if (rule.id !== "rule:resilience-operations") return [];
+  const facts = rule.facts;
+  const groups = [];
+  function group(title, entries) {
+    const node = document.createElement("div");
+    node.className = "detail-fact-group";
+    const heading = document.createElement("h4");
+    heading.className = "detail-fact-heading";
+    heading.textContent = title;
+    const list = document.createElement("ul");
+    list.className = "detail-list";
+    for (const entry of entries) {
+      const li = document.createElement("li");
+      li.textContent = entry;
+      list.append(li);
+    }
+    node.append(heading, list);
+    groups.push(node);
+  }
+  const objectives = facts.tacticalObjectives;
+  group("Tactical Objective scoring", [
+    `Each card awards at most ${objectives.maxPointsPerCard} Objective Points, once per game.`,
+    `A card counts as completed with at least ${objectives.completionMinimum} Objective Point.`,
+    `Award ${objectives.moreCompletedBonus} extra Objective Point for completing more cards than the opponent.`,
+  ]);
+  const sizes = facts.gameSizes.map((size) => (
+    `${size.armyPoints} Army Points / ${size.swc} SWC: ${scenarioDistance(size.tableWidthIn)} × ${scenarioDistance(size.tableHeightIn)}; Deployment Zone depth ${scenarioDistance(size.deploymentDepthIn)}.`
+  ));
+  group("Game sizes", sizes);
+  const sizeList = groups.at(-1).querySelector("ul");
+  for (const [index, size] of facts.gameSizes.entries()) {
+    const li = sizeList.children[index];
+    li.dataset.resilienceSize = JSON.stringify(size);
+  }
+  const names = {
+    beacons: "Beacons", hvts: "HVTs", beepers: "Beepers",
+    objectives: "Objectives", "f13-defensive-turrets": "F-13 Defensive Turrets",
+  };
+  for (const element of facts.tacticalElements) {
+    group(names[element.id] || element.id, [
+      element.quantity, element.placement, ...element.rules,
+    ]);
+  }
+  group("Resilience Operations glossary", facts.glossary.map(
+    (entry) => `${entry.id.replaceAll("-", " ")}: ${entry.text}`,
+  ));
+  return groups;
+}
+
 function seasonRulesSection(item, controller) {
   const publication = item.publication;
   if (!publication?.collection_id?.startsWith("its-")) return null;
@@ -752,7 +806,12 @@ function seasonRulesSection(item, controller) {
     if (!contexts.has(context)) contexts.set(context, []);
     contexts.get(context).push(rule);
   }
-  for (const [context, rules] of contexts) {
+  const contextOrder = ["season", "official-tournament"];
+  const orderedContexts = [...contexts].sort(([a], [b]) => (
+    (contextOrder.includes(a) ? contextOrder.indexOf(a) : contextOrder.length)
+    - (contextOrder.includes(b) ? contextOrder.indexOf(b) : contextOrder.length)
+  ));
+  for (const [context, rules] of orderedContexts) {
     const label = context === "season" ? "General season rules"
       : context === "team-ops-extra" ? "TEAM-OPS Extra"
       : context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -761,7 +820,9 @@ function seasonRulesSection(item, controller) {
     const heading = document.createElement("h3");
     heading.className = "detail-heading";
     heading.textContent = label;
-    group.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule)));
+    group.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule, {
+      beforeRelations: resilienceReferenceDetails(rule),
+    })));
     body.append(group);
   }
   const policies = seasonPolicySection(item, controller);

@@ -825,9 +825,18 @@ This Extra is a **Rule**, not a `scenario`, in the existing
 season-local optional Extra records and their source revision, typed deck
 selection, Tactical Elements, glossary, game sizes, and citation integrity.
 No new SQLite schema or separate Extra-specific web route is introduced.
-The ITS 18 database retains the existing report shape when no Extra
-is present. Cross-season component/Skill equivalence, complete physical
-deck card acquisition and earlier source revisions remain under review.
+ITS 18 now publishes its independently reviewed Resilience Operations Rule
+(EN pp. 38–48, ES pp. 39–51, plus the Extra overview and token charts) in
+the same typed model. It retains its distinct source notes, notably the
+different Objective-placement reference lines, neutral HVT MOV/S values and
+hostile HVT melee weapon. Both seasons also publish the remaining Extra
+overviews as season-local optional-extra Rules, with explicit contexts, and
+general tournament references as basic-rule records. The inspection report
+separates `extras` from `seasonRules` by category. Both seasons retain their
+unchanged scenario membership counts. The
+[scenario page reference](season-publication-ownership.md#season-rules-on-scenario-pages)
+describes the browser coverage. Complete physical deck card acquisition and
+earlier source revisions remain separate research.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array

@@ -57,11 +57,11 @@ def test_season_rules_use_exact_selected_publication():
     for season, revision, expected in (
         ("its-18", "2026.09.11", {
             "skill:civevac", "skill:casevac", "state:casevac",
-            "skill:team-ops", "skill:request-tacball",
+            "skill:team-ops", "skill:request-tacball", "rule:team-ops-extra",
         }),
         ("its-17", "0.2", {
             "skill:civevac", "skill:casevac", "state:casevac",
-            "rule:resilience-operations",
+            "rule:treasure-hunters", "rule:spec-ops-extra",
         }),
     ):
         status, item = _get(
@@ -71,10 +71,11 @@ def test_season_rules_use_exact_selected_publication():
         cards = {record["id"]: record for record in item["season_rules"]}
         common = {
             "rule:civilians", "rule:designated-target", "rule:classified-objectives",
-            "rule:high-value-target", "rule:tournament-army-lists",
+            "rule:high-value-target", "rule:tournament-army-lists", "rule:long-service",
+            "rule:tournament-format", "rule:tournament-scoring", "rule:tournament-pairings",
+            "rule:escalation-tournament", "rule:free-game", "rule:soldiers-of-fortune",
+            "rule:direct-action", "rule:reinforcements-extra", "rule:resilience-operations",
         }
-        if season == "its-17":
-            common.update({"rule:long-service", "rule:treasure-hunters"})
         assert set(cards) == expected | common
         assert cards["rule:tournament-army-lists"]["facts"]["applicability"]["context"] == (
             "official-tournament"
