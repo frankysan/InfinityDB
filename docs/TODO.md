@@ -317,17 +317,6 @@ make v1.3.0 depend on them.
 
 ### Performance, storage, and build tooling
 
-- [ ] **Web backend + Deployment (v1.3.0):** Measure aggregate application
-  memory and deployed first-access/warmed median and p95 under representative
-  concurrent traffic for Unit Explorer, Unit details, Skills, Equipment and
-  Weapons using the [capacity procedure](deployment.md#repeatable-http-capacity-scenario).
-  The [build-time materialization](architecture.md#design-direction-build-time-materialization)
-  experiments and [cross-route Docker comparison](testing.md#pre-fork-runtime-index-initialization-pilot)
-  are complete; selective pre-fork initialization is retained with its measured
-  route-dependent memory tradeoff. Investigate first-visit, exact-variant and
-  asynchronous rendering costs, and retire additional caches, only where
-  measured benefit justifies it.
-
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.
   The current set includes 17 normalized deployed objects (one unresolved

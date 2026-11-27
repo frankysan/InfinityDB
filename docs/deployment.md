@@ -637,6 +637,55 @@ After the experiment, restore the ordinary isolated 2x4 stack simply by redeploy
 sh scripts/deploy-local-test.sh 8080
 ```
 
+#### Full-stack v1.3.0 development capacity (2026-11-27)
+
+The Linux-dev disposable Compose preview at `e8f7035e` used the tracked
+Caddy, Gunicorn (2 workers × 4 threads) and metrics-history services. The
+snapshot was `3457c90e15f84b17ce2cf44e8402726f8fa1fb71ab0b39a507024c21c3efb37b`;
+the development package reported 1.2.2. The host exposed 16 logical CPUs and
+approximately 31.3 GiB RAM, without explicit Docker CPU or memory limits.
+The two workloads ran sequentially in fresh isolated stacks with discovery
+and warmup before the 60-second concurrency-8 steady phase and 10-second
+concurrency-32 burst.
+
+| Workload | Steady req/s | Steady p50/p95/p99 (ms) | Burst req/s | Burst p50/p95/p99 (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| General (18 cases) | 495.7 | 10.5/48.3/74.6 | 487.1 | 59.8/114.9/139.1 |
+| Unit Explorer (15 cases) | 103.4 | 75.3/178.7/257.4 | 106.2 | 255.3/558.4/620.1 |
+
+Both runs had zero HTTP errors, restarts or OOM events, exited 0, and removed
+their temporary containers, volumes, networks and image tags. The sampled
+resource results were:
+
+| Workload | App peak MiB | Caddy peak MiB | Metrics peak MiB | Sum of peaks MiB | Host CPU avg/max | Host memory peak |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| General | 205.4 | 25.4 | 21.5 | 252.3 | 28.9%/34.2% | 6.7% |
+| Unit Explorer | 332.3 | 22.6 | 21.1 | 375.9 | 15.7%/19.1% | 7.0% |
+
+The sum of individual sampled container peaks is an upper bound on their
+simultaneous sampled total, not a simultaneous peak measurement. App memory
+is container usage across workers, not summed process RSS. The app averaged
+305.3% CPU during general traffic and 200.0% during Explorer traffic.
+
+General steady API p50/p95 (ms): Unit detail 24.5/40.6, Skill detail
+35.2/56.0, Equipment detail 49.6/84.7, Weapon detail 35.5/58.2, search
+9.9/18.4 and Unit list 10.0/15.4. These use discovered identities rather
+than the fixed high-usage catalog detail cases. Explorer steady p50/p95:
+initial 114.8/155.1, Extended 152.9/283.6, Extended next 137.8/250.9,
+profile/loadout/Unit matching 62.3/92.6, 75.0/103.9 and 76.4/105.2.
+Explorer burst p95 was 619.0 ms for Extended and 573.4 ms for Extended next.
+
+HTTP and resource receipts are retained under
+`local/performance/http-capacity/20261127-e8f7035e/` on Linux-dev.
+The earlier [fixed-route first-access measurements](testing.md#pre-fork-runtime-index-initialization-pilot)
+were app-only, while these full-stack workloads measure warmed representative
+HTTP traffic. They are complementary, not a paired Caddy overhead experiment.
+The older baseline differs in revision, snapshot and/or resource boundary.
+These results support retaining the default 2x4 configuration and closing
+the development capacity investigation. They do not establish a production
+SLO, measure browser rendering or validate production traffic; revisit
+first-visit, exact-variant or asynchronous costs when new evidence warrants it.
+
 #### Unit Explorer app-only 2x4 measurement (2026-11-25)
 
 The disposable Docker preview on the Linux development worker ran the
