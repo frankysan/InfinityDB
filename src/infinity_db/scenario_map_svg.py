@@ -381,6 +381,23 @@ def _render_ruler(
         # An in-map guide below its measured objects must not put the
         # distance text back over the marker or its surrounding region.
         label_y = (y1 + y2) / 2 + 1.05 * text_scale
+    label_transform = ""
+    if (
+        abs(x2 - x1) < 0.000001
+        and min(x1, geometry.table.width - x1) < 4 * text_scale
+    ):
+        # Follow the ruler near a table edge: a long metric caption should
+        # neither straddle the ruler nor extend across the table boundary.
+        # Prefer the original caption side, falling back to the inward side
+        # when that lane is too narrow. Only the caption moves.
+        right = nx < 0
+        if right and geometry.table.width - x1 < 1.8 * text_scale:
+            right = False
+        elif not right and x1 < 1.8 * text_scale:
+            right = True
+        label_x = x1 + (1.35 if right else -.55) * text_scale
+        label_y = (y1 + y2) / 2
+        label_transform = f' transform="rotate(-90 {_number(label_x)} {_number(label_y)})"'
     ruler_id = escape(ruler.id, quote=True)
     display_distance = round(length, 3)
     return (
@@ -391,7 +408,7 @@ def _render_ruler(
         f'{_render_endcap(x1 - tick * nx, y1 - tick * ny, x1 + tick * nx, y1 + tick * ny)}'
         f'{_render_endcap(x2 - tick * nx, y2 - tick * ny, x2 + tick * nx, y2 + tick * ny)}'
         f'<text class="dimension-label" x="{_number(label_x)}" '
-        f'y="{_number(label_y)}" text-anchor="middle" '
+        f'y="{_number(label_y)}" text-anchor="middle"{label_transform} '
         f'data-distance-inches="{_number(display_distance)}">'
         f'{_measurement_text(display_distance, distance_unit)}</text></g>'
     )

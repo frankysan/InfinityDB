@@ -26,6 +26,7 @@ are not retroactively relabeled.
   Auto, Light or Dark mode. Saved scenario maps retain the selected appearance.
 - Clearer distinctions between rules, explanations, source examples, reviewed
   interpretations, FAQ clarifications and unresolved source issues.
+- Improved spacing of placement ruler labels near scenario map edges.
 
 - Faster initial Extended Unit Explorer results and new pages or availability selections.
 
@@ -72,6 +73,8 @@ are not retroactively relabeled.
 - **Data processing:** Include Unit history in normal runtime builds and require
   an explicit opt-out for history-free development builds.
 - **Project infrastructure:** Corrected identical-tree CI reuse when GitHub's newer API omits PR merge identity.
+- **Web backend:** Align vertical placement-ruler captions near map edges
+  with their rulers, keeping the measured geometry unchanged.
 
 ## [1.2.2] - 2026-11-26
 

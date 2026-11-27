@@ -75,13 +75,29 @@ after checking byte equality with the published scenario API response. All 16
 combinations of light/dark and inches/centimeters at 630 px, plus four dark
 metric maps at 360 px, preserved theme colors, patterns, labels and measurements.
 Contrasting endcaps remained distinguishable at zone overlaps and table edges.
-Minor metric label spacing is deferred; the labels remain readable. Playwright
-Firefox was unavailable on Windows, so this acceptance covers standalone
-Chromium, not every external SVG viewer.
+Minor metric label spacing was refined in the subsequent v1.3.0
+renderer change. Playwright Firefox was unavailable on Windows, so this
+acceptance covers standalone Chromium, not every external SVG viewer.
 
 Reproduce with `python -m tools.research.render_its_map_previews --standalone
 --theme dark --distance-unit cm --width-px 360`. Previews are retained under
 `local/work/its/map-previews/`.
+
+### Edge-adjacent placement ruler labels — 2026-11-27
+
+The shared renderer rotates captions parallel to vertical placement rulers
+near table edges, retaining their preferred side when space permits and
+otherwise using the inward lane. Ruler endpoints, lengths, endcaps,
+source geometry and unit conversion are unchanged. Critical Intervention
+(ITS 17 and 18), Double Bind, and a synthetic narrow-lane case cover the
+label placement and unchanged measurements; all 183 focused SVG, ITS
+mission, marker/ruler and publication-registry tests passed in 16.45 s.
+Six standalone Chromium previews of Critical Intervention and Double Bind
+in ITS 18 verified metric captions across the three table sizes: 150 points
+at 300 px dark, 200–250 points at 480 px light, and 300–400 points at
+630 px light. Their bytes matched the published API; the captions stayed
+clear of the map edge, rulers and adjacent marker regions. No additional
+browser engines were exercised.
 
 ## v1.2.2 player-facing acceptance — 2026-11-26
 

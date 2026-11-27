@@ -66,8 +66,6 @@ Complete the selected development work before the existing
   [bug/error reporting form](#reference-presentation-and-feedback).
 - **Data processing:** [Structured snapshot diff reports](#army-snapshot-maintenance),
   preferably as a natural output of historical Army processing.
-- **Web backend:** Opportunistic
-  [scenario ruler label polish](#its-scenarios-and-game-tools).
 
 ### Deferred beyond the committed scope
 
@@ -345,11 +343,6 @@ diagram and focused browser acceptance. All 36 season-mission definitions
 See [release browser acceptance](its-season-database.md#release-browser-acceptance).
 Final-candidate acceptance is governed by [the release checklist](releasing.md).
 Season 16 Part II remains later scope.
-
-- [ ] **Web backend:** Refine metric placement-ruler label spacing near table edges
-  (e.g. Critical Intervention and Double Bind) without changing ruler geometry.
-  Labels remain readable in the v1.2.2 standalone visual acceptance; this is
-  deferred visual polish.
 
 - [ ] Extend the versioned ITS reference library to remaining archived seasons
   and historical revision browsing as appropriate. ITS 17 V0.2 and ITS 18
