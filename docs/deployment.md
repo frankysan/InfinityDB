@@ -506,6 +506,27 @@ The general scenario remains the default; do not compare aggregate throughput
 across the two workloads. This is a warmed, repeatedly sampled HTTP workload,
 not a measurement of cold worker initialization or browser rendering.
 
+For first-access diagnostics, restart the **isolated** application workers
+before each invocation, wait for health only, and send no other application
+traffic. Select one fixed API case rather than discovering identities:
+
+```bash
+.venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --first-access-case unit-detail --steady-seconds 10 --burst-seconds 5 --output local/performance/http-capacity/RUN_ID/unit-detail.json
+```
+
+The initial batch sends one request per steady-concurrency slot (default 8)
+before any discovery or warm-up; the subsequent steady and burst phases use
+the same route after normal warm-up. A failed initial batch is reported
+without proceeding to the warmed phases. Use `--help` for the fixed Explorer,
+Unit, catalog/detail and Search cases. Repeat on independently restarted
+workers for each case and retain separate receipts. This measures deployment
+first-access latency, not per-worker cache misses or cold filesystem caches:
+HTTP dispatch does not establish worker identity, and simultaneous requests
+can share initialization work. Small initial batches have limited percentile
+resolution. Compare repeated fresh starts with warmed per-route p50/p95 and
+record the resource configuration. Do not run this diagnostic against live
+production traffic or infer browser rendering time from the HTTP samples.
+
 On the Linux development checkout, use the isolated test stack and collect a
 fresh resource and capacity report with the normal 2x4 worker configuration:
 

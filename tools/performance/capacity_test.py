@@ -225,6 +225,27 @@ def _identifier(item: Mapping[str, Any], context: str) -> str:
     raise ValueError(f"{context} has no usable public identifier")
 
 
+def _target_identity(
+    base_url: str, fetch_json: Callable[[str, str], Mapping[str, Any]],
+) -> dict[str, str]:
+    version_payload = fetch_json(base_url, "/api/version")
+    version = version_payload.get("version")
+    snapshot_revision = version_payload.get("snapshot_revision")
+    static_revision = version_payload.get("static_revision")
+    if not isinstance(version, str) or not version:
+        raise ValueError("/api/version did not identify an InfinityDB deployment")
+    if not isinstance(snapshot_revision, str) or not snapshot_revision:
+        raise ValueError("/api/version did not identify an InfinityDB deployment")
+    if not isinstance(static_revision, str) or not static_revision:
+        raise ValueError("/api/version did not identify an InfinityDB deployment")
+
+    return {
+        "version": version,
+        "snapshotRevision": snapshot_revision,
+        "staticRevision": static_revision,
+    }
+
+
 def discover_scenario(
     base_url: str,
     *,
@@ -237,22 +258,7 @@ def discover_scenario(
     if fetch_json is None:
         fetch_json = partial(_fetch_json, timeout=timeout)
 
-    version_payload = fetch_json(base_url, "/api/version")
-    version = version_payload.get("version")
-    snapshot_revision = version_payload.get("snapshot_revision")
-    static_revision = version_payload.get("static_revision")
-    if not isinstance(version, str) or not version:
-        raise ValueError("/api/version did not identify an InfinityDB deployment")
-    if not isinstance(snapshot_revision, str) or not snapshot_revision:
-        raise ValueError("/api/version did not identify an InfinityDB deployment")
-    if not isinstance(static_revision, str) or not static_revision:
-        raise ValueError("/api/version did not identify an InfinityDB deployment")
-
-    target = {
-        "version": version,
-        "snapshotRevision": snapshot_revision,
-        "staticRevision": static_revision,
-    }
+    target = _target_identity(base_url, fetch_json)
     if scenario == "unit-explorer":
         return target, discover_unit_explorer_cases(base_url, fetch_json)
     if scenario != "general":
@@ -291,20 +297,40 @@ def discover_scenario(
     return target, cases
 
 
-def discover_unit_explorer_cases(
-    base_url: str,
-    fetch_json: Callable[[str, str], Mapping[str, Any]],
-) -> list[ScenarioCase]:
-    """Exercise the actual Explorer API, including scoped counts and Extended pages."""
+def _explorer_path(**changes: str) -> str:
     base = {
         "limit": "50", "offset": "0", "counts": "prospective",
         "matching_scope": "profile",
         "and_filters": "skill,equipment,weapon,troop_type,classification,characteristic",
         "mercs": "1", "specops": "1", "teamops": "1", "reinforcement": "1",
     }
+    return "/api/units?" + urllib.parse.urlencode({**base, **changes})
 
+
+FIRST_ACCESS_CASES = {
+    case.name: case
+    for case in (
+        ScenarioCase("explorer-initial", _explorer_path(), "api"),
+        ScenarioCase("explorer-extended", _explorer_path(extended="1"), "api"),
+        ScenarioCase("unit-detail", "/api/units/minutemen", "api"),
+        ScenarioCase("skill-catalog", "/api/skills", "api"),
+        ScenarioCase("skill-detail", "/api/skills/mimetism", "api"),
+        ScenarioCase("equipment-catalog", "/api/equipment", "api"),
+        ScenarioCase("equipment-detail", "/api/equipment/medikit", "api"),
+        ScenarioCase("weapon-catalog", "/api/weapons", "api"),
+        ScenarioCase("weapon-detail", "/api/weapons/combi-rifle", "api"),
+        ScenarioCase("search", "/api/search?q=mimetism", "api"),
+    )
+}
+
+
+def discover_unit_explorer_cases(
+    base_url: str,
+    fetch_json: Callable[[str, str], Mapping[str, Any]],
+) -> list[ScenarioCase]:
+    """Exercise the actual Explorer API, including scoped counts and Extended pages."""
     def units(**changes: str) -> str:
-        return "/api/units?" + urllib.parse.urlencode({**base, **changes})
+        return _explorer_path(**changes)
 
     initial = fetch_json(base_url, units())
     unit = _first_item(initial, "Unit Explorer")
@@ -433,40 +459,77 @@ def capacity_test(
     burst_seconds: float,
     burst_concurrency: int,
     scenario: str = "general",
+    first_access_case: str | None = None,
 ) -> dict[str, Any]:
-    target, cases = discover_scenario(base_url, timeout=timeout, scenario=scenario)
-    warmup_results = _warm_scenario(
-        base_url,
-        cases,
-        passes=warmup_passes,
-        timeout=timeout,
-    )
-    warmup_errors = [result for result in warmup_results if not result.successful]
-    if warmup_errors:
-        first = warmup_errors[0]
-        raise ValueError(
-            f"Warm-up failed for {first.case.name} ({first.case.path}): "
-            f"{first.error or first.status}"
+    started_at = datetime.now(UTC).isoformat()
+    phases: list[dict[str, Any]] = []
+    first_access_failed = False
+    if first_access_case is None:
+        target, cases = discover_scenario(base_url, timeout=timeout, scenario=scenario)
+    else:
+        if scenario != "general":
+            raise ValueError("First-access mode cannot be combined with another scenario")
+        if first_access_case not in FIRST_ACCESS_CASES:
+            raise ValueError(f"Unknown first-access case: {first_access_case}")
+        scenario = "first-access"
+        cases = [FIRST_ACCESS_CASES[first_access_case]]
+        # No target discovery or warm-up before this bounded initial batch.
+        results, elapsed = run_phase(
+            base_url, cases, concurrency=steady_concurrency, duration_seconds=0,
+            timeout=timeout, request_limit=steady_concurrency,
         )
+        phase = summarize_phase(
+            results, name="first-access", concurrency=steady_concurrency,
+            requested_seconds=0, elapsed_seconds=elapsed,
+        )
+        phase["requestedRequests"] = steady_concurrency
+        phases.append(phase)
+        first_access_failed = bool(phase["errors"])
+        target = _target_identity(base_url, partial(_fetch_json, timeout=timeout))
 
-    steady_results, steady_elapsed = run_phase(
-        base_url,
-        cases,
-        concurrency=steady_concurrency,
-        duration_seconds=steady_seconds,
-        timeout=timeout,
-    )
-    burst_results, burst_elapsed = run_phase(
-        base_url,
-        cases,
-        concurrency=burst_concurrency,
-        duration_seconds=burst_seconds,
-        timeout=timeout,
-    )
+    if not first_access_failed:
+        warmup_results = _warm_scenario(
+            base_url,
+            cases,
+            passes=warmup_passes,
+            timeout=timeout,
+        )
+        warmup_errors = [result for result in warmup_results if not result.successful]
+        if warmup_errors:
+            first = warmup_errors[0]
+            raise ValueError(
+                f"Warm-up failed for {first.case.name} ({first.case.path}): "
+                f"{first.error or first.status}"
+            )
+
+        steady_results, steady_elapsed = run_phase(
+            base_url,
+            cases,
+            concurrency=steady_concurrency,
+            duration_seconds=steady_seconds,
+            timeout=timeout,
+        )
+        burst_results, burst_elapsed = run_phase(
+            base_url,
+            cases,
+            concurrency=burst_concurrency,
+            duration_seconds=burst_seconds,
+            timeout=timeout,
+        )
+        phases.extend([
+            summarize_phase(
+                steady_results, name="steady", concurrency=steady_concurrency,
+                requested_seconds=steady_seconds, elapsed_seconds=steady_elapsed,
+            ),
+            summarize_phase(
+                burst_results, name="burst", concurrency=burst_concurrency,
+                requested_seconds=burst_seconds, elapsed_seconds=burst_elapsed,
+            ),
+        ])
     return {
         "format": FORMAT,
         "formatVersion": FORMAT_VERSION,
-        "startedAt": datetime.now(UTC).isoformat(),
+        "startedAt": started_at,
         "client": {
             "python": platform.python_version(),
             "platform": platform.platform(),
@@ -477,7 +540,7 @@ def capacity_test(
         },
         "scenario": {
             "name": scenario,
-            "warmupPasses": warmup_passes,
+            "warmupPasses": 0 if first_access_failed else warmup_passes,
             "cases": [
                 {
                     "name": case.name,
@@ -487,22 +550,7 @@ def capacity_test(
                 for case in cases
             ],
         },
-        "phases": [
-            summarize_phase(
-                steady_results,
-                name="steady",
-                concurrency=steady_concurrency,
-                requested_seconds=steady_seconds,
-                elapsed_seconds=steady_elapsed,
-            ),
-            summarize_phase(
-                burst_results,
-                name="burst",
-                concurrency=burst_concurrency,
-                requested_seconds=burst_seconds,
-                elapsed_seconds=burst_elapsed,
-            ),
-        ],
+        "phases": phases,
     }
 
 
@@ -524,6 +572,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--scenario", choices=("general", "unit-explorer"), default="general",
         help="Select general site traffic or the scoped Unit Explorer workload.",
     )
+    parser.add_argument(
+        "--first-access-case", choices=tuple(FIRST_ACCESS_CASES),
+        help="Measure one fixed API route before discovery on a fresh isolated deployment.",
+    )
     parser.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--warmup-passes", type=int, default=DEFAULT_WARMUP_PASSES)
     parser.add_argument("--steady-seconds", type=float, default=DEFAULT_STEADY_SECONDS)
@@ -536,6 +588,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _validate_args(args: argparse.Namespace) -> None:
+    if args.first_access_case is not None and args.scenario != "general":
+        raise SystemExit("--first-access-case cannot be combined with --scenario unit-explorer")
     if args.timeout <= 0:
         raise SystemExit("--timeout must be greater than zero")
     if args.warmup_passes < 1:
@@ -569,7 +623,7 @@ def _render_summary(report: Mapping[str, Any]) -> str:
             f"{phase['requestsPerSecond']:.1f} req/s | "
             f"{phase['errorRate'] * 100:.2f}% errors | {latency_text}"
         )
-        if report["scenario"].get("name") == "unit-explorer":
+        if report["scenario"].get("name") in {"unit-explorer", "first-access"}:
             for case in phase.get("cases", []):
                 timing = case["latency"]
                 detail = (
@@ -601,6 +655,7 @@ def main(argv: list[str] | None = None) -> int:
             burst_seconds=args.burst_seconds,
             burst_concurrency=args.burst_concurrency,
             scenario=args.scenario,
+            first_access_case=args.first_access_case,
         )
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

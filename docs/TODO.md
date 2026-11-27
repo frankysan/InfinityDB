@@ -324,9 +324,12 @@ make v1.3.0 depend on them.
   declarations are materialized; published catalog details bypass redundant
   LRU caches. The [cross-platform baseline](testing.md#cross-platform-materialization-baseline--2026-11-26)
   records Windows/Linux measurements and focused parity.
-  - [ ] Measure aggregate worker memory and deployed concurrent request
-    performance on the representative runtime configuration at release validation.
-    Retire additional caches only where measured benefit justifies it.
+  - [ ] Measure aggregate worker memory and deployed first-access/warmed
+    median and p95 under representative concurrent traffic for Unit Explorer,
+    Unit details, Skills, Equipment and Weapons using the
+    [capacity procedure](deployment.md#repeatable-http-capacity-scenario).
+    Investigate first-visit, exact-variant and asynchronous rendering costs,
+    and retire additional caches, only where measured benefit justifies it.
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.
@@ -350,12 +353,6 @@ make v1.3.0 depend on them.
     needed; label host-only and missing-source skips explicitly.
   - [ ] Consider a pinned Playwright test container only after verifying a
     suitable Linux test container engine, separate from production Compose.
-
-- [ ] Extend the existing [performance baseline](testing.md#cross-platform-materialization-baseline--2026-11-26)
-  with deployed-worker cold/warm median and p95 measurements under representative
-  concurrent traffic for Unit Explorer, Unit details, Skills, Equipment and
-  Weapons. Investigate remaining first-visit, exact-variant and asynchronous
-  rendering costs only where measured latency warrants further work.
 
 - [ ] Evaluate SQLite `immutable=1` for deployed snapshots. Enable it only when
   the process never observes an in-place database replacement.

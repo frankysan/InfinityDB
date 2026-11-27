@@ -12,6 +12,7 @@ from tools.performance.capacity_test import (
     ScenarioCase,
     _base_url,
     _report_path,
+    capacity_test,
     discover_scenario,
     main,
     run_phase,
@@ -182,6 +183,56 @@ def test_run_phase_supports_deterministic_request_limit() -> None:
         "page",
     ]
     assert elapsed > 0
+
+
+@pytest.mark.parametrize("first_error", [False, True])
+def test_first_access_precedes_discovery_and_warmup(
+    monkeypatch: pytest.MonkeyPatch, first_error: bool,
+) -> None:
+    calls: list[str] = []
+
+    def phase(_url, cases, *, concurrency, duration_seconds, timeout, request_limit=None):
+        assert len(cases) == 1
+        case = cases[0]
+        assert case.path == "/api/units/minutemen"
+        calls.append("first" if request_limit is not None else "load")
+        if request_limit is not None:
+            assert request_limit == concurrency == 3
+            assert duration_seconds == 0
+        error = first_error and request_limit is not None
+        return [
+            RequestResult(case, 0.01, 503 if error else 200, 10, "http-503" if error else None)
+        ] * concurrency, 0.1
+
+    def fetch(_url, path, *, timeout):
+        calls.append("identity")
+        assert path == "/api/version"
+        return {"version": "test", "snapshot_revision": "snapshot", "static_revision": "static"}
+
+    def warm(_url, cases, *, passes, timeout):
+        calls.append("warm")
+        return [RequestResult(cases[0], 0.01, 200, 10)] * passes
+
+    module = "tools.performance.capacity_test"
+    monkeypatch.setattr(f"{module}.run_phase", phase)
+    monkeypatch.setattr(f"{module}._fetch_json", fetch)
+    monkeypatch.setattr(f"{module}._warm_scenario", warm)
+    report = capacity_test(
+        "http://example.invalid", timeout=1, warmup_passes=2, steady_seconds=1,
+        steady_concurrency=3, burst_seconds=1, burst_concurrency=4,
+        first_access_case="unit-detail",
+    )
+    assert calls == (
+        ["first", "identity"] if first_error else ["first", "identity", "warm", "load", "load"]
+    )
+    assert report["scenario"]["name"] == "first-access"
+    assert report["scenario"]["warmupPasses"] == (0 if first_error else 2)
+    assert [p["name"] for p in report["phases"]] == (
+        ["first-access"] if first_error else ["first-access", "steady", "burst"]
+    )
+    first = report["phases"][0]
+    assert first["requestedRequests"] == first["requests"] == 3
+    assert first["errors"] == (3 if first_error else 0)
 
 
 def test_base_url_rejects_credentials_query_and_non_http_scheme() -> None:
