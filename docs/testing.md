@@ -490,8 +490,39 @@ The focused catalog projection, database-set, database-set builder and real
 ITS17 publication suites passed all 89 tests in 501.13 s, including v23 fallback
 and repeated fixture-build determinism.
 Deployment database and reference-publication verification passed with
-`python -m tools.verify_deployment_assets --skip-svg`. Docker latency, throughput
-and aggregate memory comparison remain outstanding.
+`python -m tools.verify_deployment_assets --skip-svg`.
+
+Linux-dev at `fe22fa55`, snapshot
+`3457c90e15f84b17ce2cf44e8402726f8fa1fb71ab0b39a507024c21c3efb37b`.
+The three catalog cases ran sequentially using fresh disposable app-only
+containers under the same workload and server configuration as the baseline
+above. HTTP and resource receipts are retained under
+`local/performance/http-capacity/20261127-fe22fa55/` on Linux-dev.
+
+| Case | First p50/p95 (ms) | Steady p50/p95 (ms) | Burst p50/p95 (ms) | Steady req/s | Peak app MiB |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Mimetism | 362.4/437.9 | 134.2/235.5 | 499.5/831.2 | 57.6 | 188 |
+| MediKit | 247.7/364.2 | 70.1/119.2 | 233.9/520.3 | 109.5 | 165 |
+| Combi Rifle | 336.8/390.7 | 80.8/135.5 | 331.3/493.3 | 96.8 | 171 |
+
+All three runs exited 0 without HTTP errors, restarts or OOM events. Relative
+to the original baseline, first-access p95 fell 87–89%, steady p95 fell
+79–87%, steady throughput rose 3.16–5.47 times, and peak sampled container
+memory fell approximately 23–30%. Retain the shared presentation projection:
+its 1.1 MiB additional Rules storage is justified by the measured savings.
+The earlier history-enabled build took 232.07 s, but the two builds are not a
+controlled before/after timing comparison. Do not attribute their difference
+to this projection alone. These short fixed-route samples are not a mixed
+traffic capacity claim. Further serialized-response materialization is not
+currently justified; revisit only if later profiling identifies a meaningful
+residual cost.
+
+The additional Minutemen control on the same revision and snapshot used the
+same workload and completed with exit 0, no HTTP errors, restarts or OOM
+events. First-access p50/p95 was 3313.3/3327.4 ms; steady 28.7/52.6 ms,
+burst 102.8/232.6 ms, steady throughput 264.0 req/s, peak app memory 247 MiB.
+The Unit-detail first-access cost persists despite the catalog improvement;
+use this control for the separate pre-fork initialization experiment.
 
 ### Normalized source verification reuse
 

@@ -327,18 +327,16 @@ make v1.3.0 depend on them.
   The [Docker baseline](testing.md#docker-first-access-and-catalog-detail-baseline--2026-11-27)
   identifies repeated catalog-detail enrichment and first-access initialization
   as the next optimization targets.
-  - [ ] Prioritize catalog details: extend the existing shared Unit usage
-    projection with presentation enrichment, avoiding repeated expanded Unit
-    objects. The [Rules v24 pilot](testing.md#catalog-presentation-materialization-pilot--2026-11-27)
-    defers expansion until after catalog-specific enrichment. Confirm response
-    parity and storage/memory tradeoffs before adoption; evaluate compact
-    serialized responses only if significant runtime costs remain.
+  The [Rules v24 catalog presentation projection](testing.md#catalog-presentation-materialization-pilot--2026-11-27)
+  is retained after parity and Docker comparison; further serialized-response
+  materialization is not currently justified.
   - [ ] Investigate preloading expensive immutable indexes before Gunicorn
     forks to avoid redundant initialization across concurrent requests.
     Measure startup, first-access latency and aggregate memory before adoption.
-  - [ ] Rebenchmark both changes against the Docker baseline: compare latency
-    (first-access and warmed p50/p95), throughput, generated database size and
-    aggregate application-container memory under equivalent workloads.
+  - [ ] Rebenchmark initialization changes against the original and catalog-
+    optimized Docker baselines: compare latency (first-access and warmed
+    p50/p95), throughput, generated database size and aggregate application-
+    container memory under equivalent workloads.
   - [ ] Measure aggregate worker memory and deployed first-access/warmed
     median and p95 under representative concurrent traffic for Unit Explorer,
     Unit details, Skills, Equipment and Weapons using the

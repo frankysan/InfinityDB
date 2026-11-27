@@ -216,7 +216,10 @@ payloads. Rules v24 additionally publishes presentation-enriched shared Unit
 usage records, bound to the embedded Army symbol publication. The catalog API
 retains Unit IDs until after catalog-specific enrichment and expands the prepared
 records only for the final response. Raw repository reads remain unchanged;
-curated detail enrichment and contextual filter counts remain dynamic.
+curated detail enrichment and contextual filter counts remain dynamic. Retain
+this projection based on the [Docker comparison](testing.md#catalog-presentation-materialization-pilot--2026-11-27):
+latency, throughput and peak container memory improved across all three catalog
+cases. Additional serialized-response materialization is not currently justified.
 Army v34 publishes the canonical source-owned filter contexts with shared
 property sets and exact occurrence coordinates. The same runtime matcher
 selects eligible occurrences and evaluates prospective counts. The Unit graph
