@@ -26,9 +26,16 @@ Use these documents when deciding how the project works now:
 - `../data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.
 - `../data/curated/README.md` — authored/curated data schemas and review contracts.
-- `testing.md` — local validation commands, test selectors, worker and asset
-  policies, plus explicitly dated development and release-candidate evidence.
-  Historical runs validate their recorded revisions, not a later release.
+- [testing.md](testing.md) — local validation workflow, check runner, test
+  selection, host and asset policies, and index/preflight checks.
+- [testing-data.md](testing-data.md) — runtime database and source validation,
+  publication audits, and the release-tracked FAQ parity procedure.
+- [testing-browser.md](testing-browser.md) — focused browser verification,
+  manual visual and accessibility checks, and served-candidate acceptance.
+- [testing-performance.md](testing-performance.md) — runtime benchmarks,
+  test concurrency and host-capacity measurements supporting current decisions.
+  Historical results validate only their recorded revisions; superseded runs
+  remain in [Git history](testing.md#historical-validation-evidence).
 - [multi-agent-workspaces.md](multi-agent-workspaces.md) — legacy optional coordination
   contract, currently branch-pinned to `dev/v1.0.0` in its implementing tools.
   It must be adapted before use on the current branch; ordinary work does not

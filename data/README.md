@@ -1060,10 +1060,10 @@ The current producer contracts are:
   summary and receipt evidence independently, but cannot establish
   visual equivalence without rerendering. External text-to-path conversion
   and render-validated compression now provide immutable canonical ZIPs,
-  reports and receipts. The [matched-input processor comparison](../docs/testing.md#p57-matched-input-symbol-processor-parity)
+  reports and receipts. The [matched-input processor comparison](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-matched-input-symbol-processor-parity)
   passed; [candidate preparation](#external-processed-symbol-publication-candidates)
   consumes that handoff without running graphical processors. The
-  [accepted cutover](../docs/testing.md#p57-accepted-symbol-publication-cutover)
+  [accepted cutover](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-accepted-symbol-publication-cutover)
   completed artwork, browser and hosting review.
 
 The *format* and verification contract stay owned by InfinityDB's
@@ -1187,7 +1187,7 @@ reviewer annotations, not established causes. The review does not accept
 artwork, verify all unchanged/added asset bytes or approve semantic mappings;
 use the candidate, compatibility and publication checks separately.
 Retain the comparison, page, decision export and selected evidence for the
-review's lifetime. The [P5 classification evidence](../docs/testing.md#p57-override-provenance-classification)
+review's lifetime. The [P5 classification evidence](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-override-provenance-classification)
 describes the older, legacy-input-specific audit and its limitations.
 
 ### Accepted external symbol publication promotion
@@ -1243,7 +1243,7 @@ Promotion replaces graphical publication only. Rebuild the **complete four-file*
 Army/Rules/ITS set using the accepted manifest, validate embedded hashes/mappings
 and deployment assets, then resume serving. Do not patch only the Army SQLite
 rows or serve a mixed database/publication set. The
-[P5 cutover evidence](../docs/testing.md#p57-accepted-symbol-publication-cutover)
+[P5 cutover evidence](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-accepted-symbol-publication-cutover)
 records the dated acceptance; hosted/release gates remain separate.
 Acquisition, overrides, font conversion, duplicate detection and compression
 are producer-owned; InfinityDB retains source planning, independent handoff

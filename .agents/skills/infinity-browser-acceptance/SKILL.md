@@ -48,6 +48,7 @@ then use the tracked browser harness for reproducible regression coverage.
 ## References
 
 - [Web design guidelines](../../../docs/web-design-guidelines.md)
+- [Browser acceptance](../../../docs/testing-browser.md)
 - [Development checks](../../../docs/testing.md)
 - [Application domains](../../../docs/application-domains.md)
 - [Project domains](../../../docs/project-domains.md)

@@ -520,7 +520,9 @@ source-evidence auditor (optional `source_layout` API keyword) and
 The latter applies the selected layout to both historical annex PDFs and its
 current Core/ITS reference PDFs, preserving the same applicability report.
 `tools.research.report_reference_baseline` and `tools.research.audit_pdf_revision_deltas` also
-accept `--source-layout legacy|local` for PDF evidence. The reporter keeps
+accept `--source-layout legacy|local` for PDF evidence. All three CLI
+commands default to `local`; the low-level pinned resolver's default remains
+`legacy` for programmatic compatibility. The reporter keeps
 its existing legacy-status semantics; when `local` is explicitly selected,
 its canonical PDF groups require one valid published SHA-256, reject conflicting
 or altered bytes, and mark absent selected PDFs missing rather than falling

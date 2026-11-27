@@ -713,7 +713,7 @@ Explorer burst p95 was 619.0 ms for Extended and 573.4 ms for Extended next.
 
 HTTP and resource receipts are retained under
 `local/performance/http-capacity/20261127-e8f7035e/` on Linux-dev.
-The earlier [fixed-route first-access measurements](testing.md#pre-fork-runtime-index-initialization-pilot)
+The earlier [fixed-route first-access measurements](testing-performance.md#pre-fork-runtime-index-initialization-pilot)
 were app-only, while these full-stack workloads measure warmed representative
 HTTP traffic. They are complementary, not a paired Caddy overhead experiment.
 The older baseline differs in revision, snapshot and/or resource boundary.

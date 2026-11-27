@@ -944,7 +944,7 @@ Its version-3 report distinguishes verified historical bytes, missing ignored
 files and unresolved N5 authority. A mismatch fails rather than assigning the
 reviewed edition to changed bytes. This verifies availability/identity only;
 it neither refreshes official online authority nor adopts N4 procedures in N5.
-Publication dates remain unestablished. See [validation](testing.md#10-source-evidence-baseline).
+Publication dates remain unestablished. See [validation](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#10-source-evidence-baseline).
 
 **ITS Season 18 applicability check, 2026-10-28:** The locally archived official
 `data/pdf/its/its-18-rules-v2026.09.01-en.pdf` identifies itself as version

@@ -217,7 +217,7 @@ usage records, bound to the embedded Army symbol publication. The catalog API
 retains Unit IDs until after catalog-specific enrichment and expands the prepared
 records only for the final response. Raw repository reads remain unchanged;
 curated detail enrichment and contextual filter counts remain dynamic. Retain
-this projection based on the [Docker comparison](testing.md#catalog-presentation-materialization-pilot--2026-11-27):
+this projection based on the [Docker comparison](testing-performance.md#catalog-presentation-materialization-pilot--2026-11-27):
 latency, throughput and peak container memory improved across all three catalog
 cases. Additional serialized-response materialization is not currently justified.
 Army v34 publishes the canonical source-owned filter contexts with shared
@@ -260,7 +260,7 @@ The production WSGI entry point warms the shared Unit graph and official Army
 link index before Gunicorn forks, using the existing snapshot caches. The
 loaders close all read-only SQLite connections; contextual and request-specific
 results remain lazy. The direct application factory stays lazy. This is a
-runtime-only choice supported by the [paired Docker comparison](testing.md#pre-fork-runtime-index-initialization-pilot);
+runtime-only choice supported by the [paired Docker comparison](testing-performance.md#pre-fork-runtime-index-initialization-pilot);
 no generated database content changes. The cross-route comparison shows a
 route-dependent memory tradeoff: the warmup reduces Unit-detail memory but
 increases Explorer and catalog peak memory relative to lazy initialization.
@@ -271,7 +271,7 @@ documented with the benchmark procedure.
 Retain SQLite's ordinary `mode=ro` connection semantics. The standard
 read-only Docker image has an immutable database lifecycle, but direct
 checkout serving and build/research readers do not have the same guarantee.
-The [paired SQLite benchmark](testing.md#sqlite-immutable-mode-pilot--2026-11-27)
+The [paired SQLite benchmark](testing-performance.md#sqlite-immutable-mode-pilot--2026-11-27)
 found only small repeated-request improvements on Linux; they do not justify
 a separate deployment-only connection policy and its propagation across
 runtime readers. Application-level immutable snapshot caches remain separate

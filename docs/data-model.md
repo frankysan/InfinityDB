@@ -2426,7 +2426,7 @@ drift via `tests/test_audit_source_variant_inputs.py` **when the
 paired, Git-ignored raw Army archive is available**. This source-only
 provenance suite explicitly skips in clean CI; ordinary CI success
 does not revalidate these occurrence counts. See
-[the raw-archive test contract](testing.md#full-army-source-archive-provenance-tests)
+[the raw-archive test contract](testing-data.md#full-army-source-archive-provenance-tests)
 and [CI policy](ci.md#source-checks). This is a
 snapshot-characterization gate, not a source completeness,
 historical correctness or usage-index claim. Further parameter
@@ -2903,7 +2903,7 @@ results, permanent Unit-profile changes or an executable effects engine.
 Source/version, PDF pages, exact Wiki revisions and historical FAQ comparison
 belong to [the reviewed chart provenance](n5-source-history.md#reviewed-10-structured-skill-chart-provenance).
 Repeatable API/browser verification belongs to
-[testing](testing.md#10-martial-arts-booty-and-metachemistry-structured-chart-parity).
+[testing](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#10-martial-arts-booty-and-metachemistry-structured-chart-parity).
 
 ### Reviewed Restrictions Chart projection
 
@@ -2934,7 +2934,7 @@ Lieutenant skills. An absent source-negative relation does **not**
 establish permission; neither this reference nor existing broad
 `restricts-use-of` edges evaluate live action legality.
 Source/manifest/PDF checks, static byte parity and browser acceptance
-are documented in [testing](testing.md#n53-restrictions-chart-source-and-browser-reference).
+are documented in [testing](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#n53-restrictions-chart-source-and-browser-reference).
 The maintained typed condition model is implemented separately from the
 generic relation graph. Irregular Training occurrence ownership has
 also been verified: source Order types live at specific Army loadout/
@@ -3880,7 +3880,7 @@ note matches the option carrying Skill 251, distinct from its two FTO options.
 The Varuna Div names match Army-local ORC/Machinist loadouts; Triad/Triada terms
 retain their chart context, including Reinforcement-only source rows. These
 descriptive correspondences do not add generic eligibility relations or a rules
-engine. See [annotation validation](testing.md#fireteam-annotation-applicability).
+engine. See [annotation validation](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#fireteam-annotation-applicability).
 
 `parent_charts` retains each Reinforcement Section's source-backed parent Army
 reference, selected chart source and independent type-limit projection. A
@@ -4617,7 +4617,7 @@ source discrepancies disclosed. See the [season database acceptance](its-season-
 Classified Deck and general tournament tooling remain outside this scope.
 Browser selection state uses the common versioned share-state token; legacy
 explicit `army_points` input remains readable. The
-[Core scenario browser acceptance](testing.md#frozen-pair-four-scenario-interactions-v1s-045)
+[Core scenario browser acceptance](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#frozen-pair-four-scenario-interactions-v1s-045)
 is recorded separately from the [release checklist](releasing.md#development-freeze-and-release-only-handoff);
 known source discrepancies retain their disclosed scope.
 

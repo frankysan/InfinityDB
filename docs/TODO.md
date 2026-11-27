@@ -48,12 +48,12 @@ in the linked workstreams; retire this milestone summary when the release closes
   [extend history](#per-reference-change-history) when new source states are available.
 - **Web frontend + Web backend:** Faction palettes and the initial rules-content
   hierarchy and official Army deep links are implemented; representative
-  [visual acceptance](testing.md#faction-palette-and-rules-content-visual-acceptance) passed.
+  [visual acceptance](testing-browser.md#faction-palette-and-rules-content-visual-acceptance) passed.
 - **Data processing + Web frontend:** Completed the
   [Weapon Chart footnote review](web-design-guidelines.md#curated-rules-text-hierarchy);
   unresolved source issues remain in the clarification register.
 - **Web backend + Deployment:** Completed the
-  [SQLite immutable mode investigation](testing.md#sqlite-immutable-mode-pilot--2026-11-27);
+  [SQLite immutable mode investigation](testing-performance.md#sqlite-immutable-mode-pilot--2026-11-27);
   retain ordinary read-only connections based on the measured tradeoff.
 - **Data processing + Project infrastructure:** Retired installed CLI paired-export
   and pair-health switches, requiring explicit source inspection. Retain independent
@@ -255,7 +255,7 @@ make v1.3.0 depend on them.
 ### Performance, storage, and build tooling
 
 - [ ] **Deferred browser test-performance investigation:** Use the existing
-  [Chromium benchmarks](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
+  [Chromium benchmarks](testing-performance.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)
   and failure-only API/DOM diagnostics. Linux four-slot and Windows two-slot
   settings remain unchanged unless repeated evidence supports a change.
   - [ ] Reproduce intermittent full-load Windows Glossary/Spec-Ops

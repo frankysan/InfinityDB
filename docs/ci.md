@@ -328,7 +328,7 @@ jobs were skipped. The baseline and release-browser checks calculated only
 the database pair, while the runtime also fingerprints its Weapon-profile
 publication. The failures reproduced locally on Windows at `9e7d9f92` before
 repair. The shared identity repair passed its
-[28-test Windows batch](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
+[28-test Windows batch](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
 at `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`. Replacement revision
 `0c5b4dc1a05626d1003f78bcfacf6cd32f922314` passed
 [Source run 42325818212](https://github.com/frankysan/InfinityDB/actions/runs/42325818212),
@@ -352,7 +352,7 @@ and [deployment run 42358423951](https://github.com/frankysan/InfinityDB/actions
 passed, but the Ubuntu/Python 3.14 leg of
 [Source run 42358423894](https://github.com/frankysan/InfinityDB/actions/runs/42358423894)
 reported 15 failures in stale record-evidence fingerprints and test expectations.
-The [117-test focused consumer repair](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
+The [117-test focused consumer repair](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on Windows, retaining the evidence guards and previously tested rules
 artifacts. Replacement-SHA hosted Source/deterministic acceptance remains open;
 the earlier focused passes do not certify the full suite or final candidate.

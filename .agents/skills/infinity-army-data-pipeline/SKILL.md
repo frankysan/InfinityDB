@@ -56,4 +56,5 @@ For source meaning or rules conflicts, first establish the evidence with
 - [Data model](../../../docs/data-model.md)
 - [Data lifecycle](../../../data/README.md)
 - [Curated data contracts](../../../data/curated/README.md)
+- [Data and source validation](../../../docs/testing-data.md)
 - [Development checks](../../../docs/testing.md)

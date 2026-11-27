@@ -386,7 +386,7 @@ the stable candidate. Re-run affected gates if the candidate changes.
   .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 8 --test-dist browserlanes --report
   ```
 
-- [ ] Run the tracked-database FAQ parity gate in [testing](testing.md)
+- [ ] Run the [tracked-database FAQ parity gate](testing-data.md#release-tracked-faq-parity)
   after rebuilding the matched release databases. Set
   `INFINITYDB_RELEASE_FAQ_PARITY=1` for the 17 opt-in API/browser cases;
   the ordinary full suite skips them.

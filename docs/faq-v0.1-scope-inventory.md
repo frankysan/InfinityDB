@@ -402,7 +402,7 @@ rules-database SHA-256. This is intentional release integrity
 enforcement, not a FAQ selector failure. Regenerate and check that
 dependent publication before rerunning the opt-in tracked-database
 FAQ Chromium gates; final 1.0 candidate/browser acceptance is still
-open. See the [repeatable candidate check](testing.md#10-four-core-scenario-browser-acceptance).
+open. See the [repeatable candidate check](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#10-four-core-scenario-browser-acceptance).
 
 **Comparative review, 2026-10-28:** the two Core Killing passages
 and bilingual FAQ were checked as above. The source supports considering
