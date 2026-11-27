@@ -18,7 +18,7 @@ from infinity_db.rules_database import RulesDatabase
 from infinity_db.scenario_catalog import ScenarioCatalog
 from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
-from infinity_db.web import create_app_from_database_set
+from infinity_db.web import create_app, create_app_from_database_set
 from infinity_db.web.api_handler import _enrich_scenario_api_item
 from tools.browser_wsgi_transport import wsgi_response
 
@@ -141,6 +141,13 @@ def verify_pilot(
         ] if status == 200 else []
         if selected_items != expected_items:
             raise ValueError("ITS HTTP scenario list differs from independent publication")
+        # Use the independently compiled season, not the serving registry,
+        # to project season-wide reference cards.
+        independent_app = create_app(
+            database_set / "army.db", database_set / "rules_n5.db",
+            season_databases={SEASON: output},
+        )
+        expected_season_rules = independent_app.api._season_rule_cards(SEASON, REVISION)
         geometry_count = 0
         svg_count = 0
         for points in POINTS:
@@ -157,6 +164,7 @@ def verify_pilot(
             enriched_candidate = _enrich_scenario_api_item(
                 army_database, rules_database, candidate_detail,
             )
+            enriched_candidate["season_rules"] = expected_season_rules
             if status != 200 or json.loads(body) != enriched_candidate:
                 raise ValueError(f"ITS HTTP JSON differs for {points} points")
             geometry_count += 1

@@ -69,7 +69,23 @@ def test_season_rules_use_exact_selected_publication():
         )
         assert status == 200, item
         cards = {record["id"]: record for record in item["season_rules"]}
-        assert set(cards) == expected
+        common = {
+            "rule:civilians", "rule:designated-target", "rule:classified-objectives",
+            "rule:high-value-target", "rule:tournament-army-lists",
+        }
+        if season == "its-17":
+            common.update({"rule:long-service", "rule:treasure-hunters"})
+        assert set(cards) == expected | common
+        assert cards["rule:tournament-army-lists"]["facts"]["applicability"]["context"] == (
+            "official-tournament"
+        )
+        civilian = cards["rule:civilians"]
+        assert bool(civilian["facts"].get("sourceNotes")) == (season == "its-18")
+        assert any(
+            token.get("public_reference", {}).get("href") == "#rule-skill-civevac"
+            for row in civilian["fact_tokens"]["restrictions"] for token in row
+            if token["type"] == "reference"
+        )
         assert all(record["facts"]["applicability"]["revision"] == revision
                    for record in cards.values())
         assert all(citation["source_id"].startswith(f"its-season-{season[4:]}-")

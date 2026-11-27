@@ -36,3 +36,14 @@ def test_its_pilot_detects_authored_mission_drift(tmp_path: Path) -> None:
     ):
         verify_pilot(source=changed)
     assert serving_artifact.read_bytes() == before_serving
+
+
+def test_its_pilot_detects_authored_season_rule_drift(tmp_path: Path) -> None:
+    document = load_curated_document(SOURCE)
+    next(row for row in document["records"] if row["id"] == "rule:civilians")[
+        "summary"
+    ] = "An altered civilian rule"
+    changed = tmp_path / "changed-season-rule.json"
+    changed.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+    with pytest.raises(ValueError, match="ITS HTTP JSON differs"):
+        verify_pilot(source=changed)

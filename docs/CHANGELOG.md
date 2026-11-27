@@ -37,6 +37,9 @@ are not retroactively relabeled.
 - **Web backend + Web frontend:** Present reviewed season-owned Rules, Skills,
   States and event policies in a collapsed Season Rules section on ITS scenario
   pages, with revision-specific citations and separately identified Extras.
+- **Data processing:** Expanded ITS 17 and 18 Season Rules with bilingual
+  Civilian, Designated Target, Classified Objective, HVT and tournament Army
+  List references, plus Long Service and Treasure Hunters for ITS 17.
 - **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
   maintenance, separating source changes, effective reference changes and unresolved evidence.
 - **Deployment:** Added a public Host-header override for direct Caddy release verification.

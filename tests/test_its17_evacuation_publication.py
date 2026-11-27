@@ -34,6 +34,9 @@ def test_reviewed_its17_evacuation_source_and_definition_scope() -> None:
     assert {record["id"] for record in source["records"]} == {
         "skill:civevac", "skill:casevac", "state:casevac",
         "rule:resilience-operations", "rule:tactical-support",
+        "rule:civilians", "rule:designated-target", "rule:classified-objectives",
+        "rule:high-value-target", "rule:tournament-army-lists",
+        "rule:long-service", "rule:treasure-hunters",
     }  # Scenario facts remain owned by the shared library.
     assert source["sharedScenarioLibrary"]["sha256"] == hashlib.sha256(
         SHARED.read_bytes(),

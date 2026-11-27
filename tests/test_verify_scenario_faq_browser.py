@@ -3828,6 +3828,16 @@ def test_scenario_season_rules_disclosure(
             assert skill_type in skill.inner_text()
             assert skill.locator(".rules-source-citations").is_visible()
             assert disclosure.locator(extra).is_visible()
+            civilian = disclosure.locator("#rule-rule-civilians")
+            assert civilian.is_visible()
+            assert civilian.locator("a[href='#rule-skill-civevac']").count()
+            assert civilian.locator(".rules-source-citations").is_visible()
+            assert disclosure.locator("#rule-rule-classified-objectives").is_visible()
+            assert disclosure.locator("#rule-rule-high-value-target").is_visible()
+            assert disclosure.locator("#rule-rule-tournament-army-lists").is_visible()
+            assert disclosure.locator("#rule-rule-treasure-hunters").count() == (
+                1 if season == "its-17" else 0
+            )
             assert disclosure.locator("#rule-state-casevac a[href='#rule-skill-casevac']").count()
             assert disclosure.locator("#rule-rule-tactical-support").count() == 0
             if season == "its-18":

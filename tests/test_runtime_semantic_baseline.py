@@ -250,8 +250,16 @@ def test_v130_unit_detail_preserves_v122_current_semantics() -> None:
     old_rows = {row["path"]: row for row in earlier["probes"]}
     new_rows = {row["path"]: row for row in current["probes"]}
     assert old_rows.keys() == new_rows.keys()
-    assert {key for key in old_rows if old_rows[key] != new_rows[key]} == {path}
+    scenario_path = "/api/scenarios/battleground?army_points=300&collection=its-18"
+    scenario = _json(app, scenario_path)
+    scenario_digest = _digest(semantic_payload(scenario))
+    assert scenario.pop("season_rules")
+    assert _digest(semantic_payload(scenario)) == old_rows[scenario_path]["semanticSha256"]
     assert observed == new_rows[path]["semanticSha256"]
+    assert scenario_digest == new_rows[scenario_path]["semanticSha256"]
+    assert {key for key in old_rows if old_rows[key] != new_rows[key]} == {
+        path, scenario_path,
+    }
 
 
 def test_released_data_matches_pinned_current_its_semantic_baseline() -> None:

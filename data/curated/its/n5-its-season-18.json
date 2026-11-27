@@ -273,6 +273,21 @@
     ],
     "factRevisions": {
       "records": {
+        "rule:civilians": [
+          "2026.09.11"
+        ],
+        "rule:designated-target": [
+          "2026.09.11"
+        ],
+        "rule:classified-objectives": [
+          "2026.09.11"
+        ],
+        "rule:high-value-target": [
+          "2026.09.11"
+        ],
+        "rule:tournament-army-lists": [
+          "2026.09.11"
+        ],
         "scenario:crossing-lines": [
           "2026.09.11"
         ],
@@ -19298,6 +19313,330 @@
       "review": {
         "status": "reviewed",
         "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "rule:civilians",
+      "kind": "rule",
+      "name": "Civilians in Infinity",
+      "summary": "Neutral, noncombatant game elements that may be involved in mission objectives.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "A Civilian has a Unit Profile but belongs to neither Army List; it contributes no Orders and cannot join a Combat Group.",
+          "Unless a rule changes its status, it is neutral. It neither obstructs Line of Fire nor grants Close Combat modifiers; contact alone does not cause Engaged State.",
+          "Ignore damage and effects from Attacks and other harmful sources. Civilians do not trigger Deployable Weapons or Equipment or generate AROs. A Template remains valid when it covers a Civilian, but does not affect that Civilian.",
+          "The ordinary profile has CC 6, BS 5, PH 10, WIP 11 and S 2, with no MOV, ARM, BTS, AVA or Weapons."
+        ],
+        "restrictions": [
+          "Scenario rules, Skills, Equipment or objectives may change the default treatment. See [[skill:civevac|CivEvac]] for moving a Civilian."
+        ],
+        "sourceNotes": [
+          "English p. 22 prints no VITA value; Spanish p. 23 prints VITA 1, despite the Spanish effects text on p. 22 stating that Civilians lack Wounds. The profile discrepancy is unresolved; ordinary immunity is stated in both texts."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 21,
+          "section": "Civilians in Infinity"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 22,
+          "section": "Civilians in Infinity"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 22,
+          "section": "Civiles en Infinity"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 23,
+          "section": "Civiles en Infinity"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:designated-target",
+      "kind": "rule",
+      "name": "Designated Target",
+      "summary": "An enemy HVT can become an attackable, reactive Trooper when the mission specifies it.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Treat the opposing HVT as a hostile enemy Trooper rather than a neutral Civilian; it can be attacked and reacts as an enemy Trooper.",
+          "Designated Target profile: MOV [[distance:4:inch]]–[[distance:4:inch]], CC 6, BS 8, PH 11, WIP 11, ARM 1, BTS 0, VITA 1, S 2; Stun Pistol and PARA CC Weapon."
+        ],
+        "restrictions": [
+          "Use this profile only for HVTs designated as targets by the scenario."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 24,
+          "section": "Designated Target"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 25,
+          "section": "Designated Target"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 25,
+          "section": "Objetivo Designado"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 26,
+          "section": "Objetivo Designado"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:classified-objectives",
+      "kind": "rule",
+      "name": "Classified Objectives",
+      "summary": "Additional objectives drawn from the Classified Deck, with points and quantity determined by the mission.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Normally a completed Classified Objective earns 1 Objective Point, but the scenario may specify a different value. Each objective scores only once.",
+          "Select Classified Objectives after learning the mission and opponent's faction, before choosing the Army List. Shuffle your own deck in front of the opponent, draw two cards per objective and discard one before drawing the next pair.",
+          "Keep the selected cards private until completed; retain them and show completed cards to the opponent on request.",
+          "If the mission permits INTELCOM, decide after drawing and before play whether to use the card as the objective or INTELCOM (Support and Control or Interference). Both players roll a die; the higher result announces the choice first. Card contents stay private. Use INTELCOM at the mission-specified time, in Initiative order."
+        ],
+        "restrictions": [
+          "Follow the selected mission's Classified Objective count and special selection/scoring procedures; Direct Action does not use the Classified Deck. A card used for INTELCOM cannot be exchanged for Secure HVT."
+        ],
+        "sourceNotes": [
+          "The Spanish INTELCOM text specifies use during scoring (p. 36); the English text refers to the timing specified by the mission (p. 35). Follow the mission's explicit timing."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 34,
+          "section": "Classified Objectives"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 35,
+          "section": "Classified Objectives"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 36,
+          "section": "Classified Objectives"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 35,
+          "section": "Objetivos Clasificados"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 36,
+          "section": "Objetivos Clasificados"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 37,
+          "section": "Objetivos Clasificados"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Direct Action"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 29,
+          "section": "Direct Action"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:high-value-target",
+      "kind": "rule",
+      "name": "High Value Target (HVT)",
+      "summary": "A neutral Civilian used for Classified Objectives, unless the mission specifies otherwise.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "In missions using HVTs, each player places one at the start of their Deployment Phase, at least [[distance:4:inch]] outside every Deployment Zone, in an accessible location and neither inside nor on scenery or buildings.",
+          "An HVT is neutral to both players unless the mission modifies its status. Use an Infinity or Infinity Bootleg miniature, preferably a Civilian or HVT.",
+          "Secure HVT: at game end, have a non-Null allied Trooper within the enemy HVT's Zone of Control and no non-Null enemy Trooper within your own HVT's Zone of Control. This replaces one drawn Classified Objective for the same Objective Points."
+        ],
+        "restrictions": [
+          "The scenario determines whether HVTs and Classified Objectives are used; Direct Action uses neither. An INTELCOM card cannot be replaced with Secure HVT."
+        ],
+        "sourceNotes": [
+          "English describes replacing the Classified Objective at game end (p. 37); Spanish describes choosing Secure HVT during play (p. 38). The scoring condition is evaluated at game end in both."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 36,
+          "section": "High Value Target (HVT)"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 37,
+          "section": "High Value Target (HVT)"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 37,
+          "section": "Miniatura HVT / Asegurar HVT"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 38,
+          "section": "Miniatura HVT / Asegurar HVT"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Direct Action"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 29,
+          "section": "Direct Action"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:tournament-army-lists",
+      "kind": "rule",
+      "name": "Tournament Army Lists",
+      "summary": "Submit eligible lists before an official ITS event and choose a list for each round.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Submit one or two legal Army Lists from the same Generic or Sectorial Army to the event management system. Infinity Army is the officially sanctioned list-building tool.",
+          "Bring two printed copies of each Complete Army List and give one to the organizer before the first round. Bring a printed Courtesy List for each list; show it on request only after Deployment.",
+          "At the start of a round, choose the list after learning the opponent, their faction, the table and the Classified Objectives, if used.",
+          "The organizer may request lists in advance to check legality."
+        ],
+        "restrictions": [
+          "Applies to official tournaments. An announced Extra may alter the list-submission requirements."
+        ],
+        "sourceNotes": [
+          "English p. 16 names the Online Tournament Manager (OTM), while Spanish p. 17 names CorvuSphere. Both require event submission; use the organizer's event instructions."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 16,
+          "section": "Tournament Army Lists"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 17,
+          "section": "Tournament Army Lists"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 17,
+          "section": "Listas de Ejército / Elección de la Lista de Ejército"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 18,
+          "section": "Listas de Ejército / Elección de la Lista de Ejército"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
       }
     },
     {

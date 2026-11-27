@@ -245,8 +245,11 @@ def _validate_season_state(
 def _validate_season_rule(
     record: dict[str, Any], *, season_id: str, revision: str,
 ) -> None:
-    if record["id"] != "rule:tactical-support":
+    if record["id"] == "rule:resilience-operations":
         _validate_season_extra(record, season_id=season_id, revision=revision)
+        return
+    if record["id"] != "rule:tactical-support":
+        _validate_season_reference_rule(record, season_id=season_id, revision=revision)
         return
     facts = record.get("facts")
     if (
@@ -282,6 +285,40 @@ def _validate_season_rule(
         ):
             raise ValueError("Invalid Tactical Support option")
         names.add(option["name"])
+
+
+def _validate_season_reference_rule(
+    record: dict[str, Any], *, season_id: str, revision: str,
+) -> None:
+    """Validate standalone prose rules without admitting core or scenario definitions."""
+    from .domain_slugs import validate_typed_domain_id
+
+    validate_typed_domain_id(
+        record["id"], expected_domain="rule", context="ITS season Rule",
+    )
+    facts = record.get("facts")
+    required = {"category", "applicability", "effects", "restrictions"}
+    if (
+        not isinstance(facts, dict) or required - set(facts)
+        or set(facts) - (required | {"requirements", "clarifications", "sourceNotes"})
+        or facts["category"] != "basic-rule"
+        or facts["applicability"] not in (
+            {"context": "season", "revision": revision},
+            {"context": "official-tournament", "revision": revision},
+        )
+        or record["scope"] != {"game": "N5", "seasons": [season_id]}
+        or record["composition"] != {"role": "definition"}
+        or record.get("armyLinks")
+        or not record.get("citations")
+        or record.get("review", {}).get("status") != "reviewed"
+    ):
+        raise ValueError("ITS season Rule requires exact season-local reviewed applicability")
+    for key in ("requirements", "effects", "restrictions", "clarifications", "sourceNotes"):
+        values = facts.get(key, [])
+        if (not isinstance(values, list) or (key == "effects" and not values)
+                or any(not isinstance(v, str) or not v.strip() or v.strip() != v
+                       for v in values)):
+            raise ValueError(f"ITS season Rule has invalid {key}")
 
 
 def _validate_season_extra(
@@ -877,8 +914,14 @@ def inspect_its_database(
             "policies": policies,
         }
         for key, rows in (
-            ("extras", [row for row in extra_rows if row["id"] != "rule:tactical-support"]),
-            ("seasonRules", [row for row in extra_rows if row["id"] == "rule:tactical-support"]),
+            ("extras", [
+                row for row in extra_rows
+                if json.loads(row["payload_json"])["facts"]["category"] == "optional-extra"
+            ]),
+            ("seasonRules", [
+                row for row in extra_rows
+                if json.loads(row["payload_json"])["facts"]["category"] == "basic-rule"
+            ]),
         ):
             if rows:
                 report[key] = [

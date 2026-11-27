@@ -105,7 +105,7 @@
     {
       "kind": "json",
       "path": "/api/scenarios/battleground?army_points=300&collection=its-18",
-      "semanticSha256": "b5dc5baa20f4a9449a5c27ebe74e48e28d8740b7d6a136c98d67b0bfa218f879"
+      "semanticSha256": "bcbbc318c517acd11beec53a44d84946d47df154d53ae5a03e4417533836d941"
     },
     {
       "kind": "json",

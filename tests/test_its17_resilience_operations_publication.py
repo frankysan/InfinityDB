@@ -43,7 +43,8 @@ def test_extra_is_bilingually_cited_and_not_a_seventeenth_scenario() -> None:
     )
     assert all("resilience" not in member["scenarioId"]
                for member in document["scenarioCollection"]["members"])
-    assert len(document["records"]) == 5
+    assert len([r for r in document["records"]
+                if r.get("facts", {}).get("category") == "optional-extra"]) == 1
     assert extra["kind"] == "rule"
     assert extra["facts"]["category"] == "optional-extra"
     assert extra["composition"] == {"role": "definition"}

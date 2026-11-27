@@ -86,7 +86,15 @@ def test_isolated_its_database_is_deterministic_and_matches_existing_publication
         ).fetchone()[0] == 60
         assert connection.execute("SELECT count(*) FROM season_policies").fetchone()[0] == 3
         assert connection.execute("SELECT count(*) FROM season_policy_citations").fetchone()[0] == 3
-        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 25
+        assert connection.execute("SELECT count(*) FROM records").fetchone()[0] == 30
+        assert connection.execute(
+            "SELECT count(*) FROM records WHERE kind='rule'"
+        ).fetchone()[0] == 5
+        assert {row["id"] for row in report["seasonRules"]} == {
+            "rule:civilians", "rule:designated-target", "rule:classified-objectives",
+            "rule:high-value-target", "rule:tournament-army-lists",
+        }
+        assert "extras" not in report
         assert connection.execute(
             "SELECT count(*) FROM records WHERE kind='state'"
         ).fetchone()[0] == 1

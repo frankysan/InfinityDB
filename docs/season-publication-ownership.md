@@ -167,11 +167,18 @@ explicit tournament/Extra policies remain distinguishable; displaying them
 does not activate an Extra. Core N5 scenario details do not include this
 disclosure. Tactical Support remains a separate mission-dependent card.
 
-This is the currently reviewed coverage, not a complete event rulebook. ITS 17
-includes CivEvac, Casevac, Casevac State and the Resilience Operations Extra.
-ITS 18 includes CivEvac, Casevac, Casevac State, Team-Ops, Request a Tacball
-and its three existing event policies. New reviewed season-owned records can
-use the same projection without duplicating definitions per mission.
+This is the currently reviewed coverage, not a complete event rulebook. Both
+seasons include Civilians, Designated Target, Classified Objectives (including
+INTELCOM), HVTs (including Secure HVT), official-tournament Army List selection,
+CivEvac, Casevac and Casevac State. ITS 17 additionally includes Long Service,
+Treasure Hunters (including Open Treasure and its chart) and the Resilience
+Operations Extra. ITS 18 additionally includes Team-Ops, Request a Tacball and
+its three existing event policies. New reviewed season-owned records use the
+same projection without duplicating definitions per mission. The general
+reference rules retain exact revision applicability and bilingual source
+notes; mission-dependent rules are not enabled merely by displaying a card.
+Direct Action uses neither Classified Objectives nor HVTs. The ITS 18
+Civilian VITA profile discrepancy remains explicitly unresolved.
 
 ## Stable selection and identity contract
 

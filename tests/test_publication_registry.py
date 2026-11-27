@@ -420,8 +420,13 @@ def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
         path = f"http://registry.test/api/scenarios/battleground?{selector}"
         status, _, body = wsgi_response(registered, path)
         assert status == 200
+        detail = json.loads(body)
+        season_rules = detail.pop("season_rules")
+        assert {rule["id"] for rule in season_rules} >= {
+            "rule:civilians", "rule:classified-objectives", "rule:high-value-target",
+        }
         canonical = json.dumps(
-            json.loads(body), ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+            detail, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
         ).encode("utf-8")
         combined.update(len(canonical).to_bytes(8, "big"))
         combined.update(canonical)
@@ -438,8 +443,8 @@ def test_registered_its_matches_current_reviewed_json_and_svg_bytes(
                 combined.update(body)
     # v1.2.2 resolves standalone SVG colors and adds contrasting ruler endcaps.
     # Battleground's curated mission and measurement coordinates are unchanged.
-    # Length-prefixed six canonical JSON payloads and 24 SVG byte streams;
-    # compare this digest after any intentional public contract change.
+    # Preserve the reviewed mission JSON and 24 SVG byte streams independently
+    # of the additive season rules, which have separate publication parity tests.
     assert combined.hexdigest() == (
         "9ffc0a08405e825348a6e58389b373d8e"
         "92c2b4fc20c7496a75df6c4cdcf5821"
