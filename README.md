@@ -55,6 +55,9 @@ its application metrics.
 
 - Imports validated Infinity Army snapshots into a local SQLite database and
   serves a read-only reference browser and HTTP API.
+- Offers live navigation search suggestions alongside the full search page.
+- Shows reviewed N5 Unit history in General-profile and Army-specific sections,
+  with incomplete historical coverage explicitly disclosed.
 - Accepts voluntary error reports through a shared anonymous form.
 - Browses Units across Armies with name search, pagination, six categorical
   multi-select filters, independent AND/OR choices, and a matching scope:
@@ -173,22 +176,9 @@ Engineering changes are classified by the six ownership areas defined in
 
 ## Release progression
 
-InfinityDB **1.0.0** is the N5.3 current-reference release, following the
-0.6–0.10 series. It includes current-source rules citations, four core
-scenarios, reviewed FAQ and deployed objects, and exact-variant usage
-references. See the [changelog](docs/CHANGELOG.md) for the complete version
-history and the [active backlog](docs/TODO.md#active-development)
-for unfinished development work.
-
-Version **1.0.1** delivered improved scenario maps, reference-page spacing,
-version-specific release notes and safer local-build/deployment workflows.
-Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
-Version **1.1.0** extends Unit Explorer discovery with searchable multi-selection,
-AND/OR combinations, three matching scopes, and prospective option counts;
-adds reviewed KISS! (Repeater) loadout equipment, ITS Season 18 play-context
-selection, a matched Army/Rules/ITS runtime set, and consolidated developer
-tooling and local workspace organization. The [backlog](docs/TODO.md) tracks future work;
-the [changelog](docs/CHANGELOG.md#110---2026-11-15) documents upgrade implications.
+See the [changelog](docs/CHANGELOG.md) for released versions and the pending
+release, and the [active backlog](docs/TODO.md) for unfinished development.
+The feature list describes this checkout, which may include unreleased changes.
 
 ## Requirements and setup
 
@@ -288,7 +278,7 @@ and promotes accepted artwork with compatibility aliases and recoverable backups
 [publication lifecycle](data/README.md#accepted-external-symbol-publication-promotion).
 
 An external processed-SVG handoff is prepared as an isolated semantic
-publication candidate using `python -m tools.prepare_symbol_publication`.
+publication candidate using `python -m tools.symbols.prepare_symbol_publication`.
 That offline command verifies the source/stage evidence and needs no graphical
 processing tools. It leaves the tracked publication unchanged; see the
 [candidate inputs and review boundary](data/README.md#external-processed-symbol-publication-candidates).
@@ -320,9 +310,9 @@ immutable Army ZIP you intend to process.
 
 ```powershell
 # Run individual source-development stages into ignored work files
-infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/work/build/master.json --compact
-infinity-db normalize data/work/build/master.json data/work/build/normalized.json --compact
-infinity-db export data/work/build/normalized.json data/work/build/army.db
+infinity-db merge "local/data/raw/army/JSON YYYYMMDD-HHMMSS.zip" local/work/build/army/master.json --compact
+infinity-db normalize local/work/build/army/master.json local/work/build/army/normalized.json --compact
+infinity-db export local/work/build/army/normalized.json local/work/build/army/army.db
 
 # Build and serve a complete alternate set
 infinity-db build --db-dir local/alternate-dbs --compact
@@ -331,8 +321,8 @@ infinity-db serve --db-dir local/alternate-dbs --port 8001
 # Validate the complete serving set without raw inputs
 infinity-db database-health --db-dir data/generated --json
 
-# Inspect a development Army export and its raw sibling
-infinity-db database-health data/work/build/army.db --require-raw
+# Verify a development Army export against its normalized source
+infinity-db database-health local/work/build/army/army.db --normalized local/work/build/army/normalized.json --json
 
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
@@ -340,9 +330,10 @@ infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
 `infinity-army` and `python -m infinity_army_data` retain the JSON source
 pipeline with explicit `--output-dir` support; their default is ignored
-`data/work/build/`. `infinity-db export` requires an explicit output path for
-narrow Army development. Normal complete builds discard their intermediate
-JSON and raw archive after validation. Source archives remain untouched.
+`local/work/build/army/`. `infinity-db export` requires an explicit output path for
+narrow Army development and produces application-only SQLite. Normal complete
+builds discard intermediate work files after validation. Source archives remain untouched.
+See the [data lifecycle](data/README.md#current-paths-and-behavior) for source inspection.
 
 ## Linux deployment
 
@@ -364,7 +355,6 @@ artifacts before activation. For prerequisites, rollback, the special
 
 ```text
 docs/                       # Tracked project documentation
-local/                      # Private untracked workspace, excluded from Docker builds
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
@@ -375,7 +365,7 @@ data/
   curated/                  # Tracked reviewed rules, identities and annotations
   manifests/                # Tracked symbol publication manifest
   generated/                # Tracked Army, Rules and ITS runtime databases
-local/                      # Ignored source, build, research and archive workspace
+local/                      # Private ignored workspace, excluded from Docker builds
   data/                     # Local Army, Wiki, PDFs and symbol-source evidence
   work/                     # Replaceable build outputs
   audits/                   # Run-scoped audit evidence

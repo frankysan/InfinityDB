@@ -160,8 +160,8 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/curated/` contains human-reviewed source-derived knowledge and rules-reference content.
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
-- `data/generated/` contains the three tracked runtime databases: `army.db`,
-  `rules_n5.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
+- `data/generated/` contains the four tracked runtime databases: `army.db`,
+  `rules_n5.db`, `its_17.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
   SVG/CSS/JS remain ordinary static files. Development intermediates and raw
   exports belong under ignored `local/work/build/`.
 
@@ -385,9 +385,9 @@ copies/overlays, not mutate authoritative source publications or `rules_n5.db`.
 Its serialization follows the stateless-sharing direction below and its custom
 rule semantics follow `docs/data-model.md`.
 The implemented deterministic SVG projection covers all four N5.3 Core
-scenarios and the separately published ITS Season 18 Battleground pilot.
-Only the Core maps are required for the 1.0 completeness gate; the shared
-geometry schema and renderer can also handle this reviewed ITS sector layout.
+scenarios and the published ITS Season 17/18 missions. See the
+[ITS database](its-season-database.md#release-diagram-acceptance) for reviewed
+season geometry and acceptance.
 Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
@@ -414,10 +414,10 @@ Semantic style and marker identities are open at the geometry boundary rather th
 SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
 project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple
 Deployment Zone regions without encoding a one-zone-per-side rule.
-Reviewed ITS variation constrains the extension points. Battleground already
-uses the shared model; additional unsupported ITS geometry, the full mission
-library and an interactive map editor remain post-1.0. Existing catalog
-entities are referenced by typed identity rather than duplicated locally.
+Reviewed ITS variation constrains the extension points. Published missions use
+the shared model; unsupported geometry for future seasons and an interactive
+map editor remain backlog work. Existing catalog entities are referenced by
+typed identity rather than duplicated locally.
 Core and ITS scenarios share this boundary; tournament pairing, rankings
 and mutable match state remain outside it.
 
@@ -504,16 +504,17 @@ The detailed snapshot/archive contract is owned by `data/README.md`.
 
 ## Generated database boundary
 
-InfinityDB serves three tracked runtime databases:
+InfinityDB serves four tracked runtime databases:
 
 - `data/generated/army.db` — canonical application data derived from Army snapshots and reviewed
   source relationships;
 - `data/generated/rules_n5.db` — curated N5 rules/reference semantics;
-- `data/generated/its_18.db` — ITS Season 18 scenario publications and scoped policies.
+- `data/generated/its_17.db` and `data/generated/its_18.db` — independently selected
+  ITS scenario publications and scoped policies.
 
-`army.raw.db` remains an optional **legacy paired-export** research format,
-available only on explicit request. Neither complete runtime builds nor the
-default standalone export creates it. Runtime repositories query application
+`army.raw.db` remains an optional **legacy paired-export** research format
+for programmatic parity and release-audit consumers only. The installed CLI
+no longer creates it; see the [data lifecycle](../data/README.md#current-paths-and-behavior). Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
 The complete serving contract requires Army v34/v35, Rules v24 and ITS v2,

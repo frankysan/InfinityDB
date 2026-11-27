@@ -405,8 +405,9 @@ export generation. The receipt is neither persisted nor accepted as a CLI
 input; standalone source verification and export retain full validation.
 No raw SQLite sibling is required. The General-profile projection composes
 General profiles from the v31 Army and temporary core Rules model, before
-final Rules publications bind the resulting Army bytes. The standalone
-export and raw-pair inspection interfaces remain supported.
+final Rules publications bind the resulting Army bytes. The standalone CLI
+exports application-only SQLite; legacy paired inspection remains a research
+interface with explicit inputs.
 The builder validates all
 four runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
@@ -487,9 +488,11 @@ another directory. The semantic-baseline tool's `--db-dir` exercises this factor
 
 The current four-file runtime layout embeds Army Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
-Army overview text, legacy identities, symbol mappings/hashes, General profiles and Unit history,
-plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
-and Ammunition publications. P2.4 materialization is complete for the normal runtime.
+Army overview text, legacy identities, symbol mappings/hashes, General profiles,
+Unit history, and the Rules projections described above. See the
+[data model](../docs/data-model.md) for the current schemas and projection contracts.
+The following schema milestones describe transitional compatibility, not the
+required current serving versions.
 Older v10–v16 Rules layouts
 remain transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
@@ -520,7 +523,7 @@ v33 General-profile payloads and the 16-mask selection matrix are generated
 during the complete build and validated by the Army content checksum.
 Extended Explorer and Unit details consume the same stored rows, with
 runtime composition for requested-Army selections that add excluded occurrences.
-export metadata. In complete runtime builds, Army v27–v31 overlays instead
+In complete runtime builds, Army v27–v31 overlays
 recheck the complete normalized source model against the pinned base export
 generation; the complete builder does not create a raw SQLite sibling.
 Each extended schema's checksum includes its published relational rows.
@@ -570,7 +573,7 @@ both siblings and produces byte-identical `army.db` output from the same source.
 `tools.testing.prepare_source_audit` prepares the release-matched legacy
 test inputs in `local/work/build/army/`; these are not runtime artifacts.
 Retain existing private audit copies; do not silently delete them.
-The `tools.audit_source_variant_inputs` CLI expects an optional paired archive
+The `tools.data.audit_source_variant_inputs` CLI expects an optional paired archive
 at `local/work/build/army/army.raw.db` unless `--raw` or `--normalized` is
 supplied. This path is a local research input, not a publication artifact;
 the application's source generation must match the selected raw archive.
@@ -597,7 +600,7 @@ health reports remain unchanged; an explicit normalized check adds
 The cross-platform determinism manifest now defaults to **format v2**:
 it hashes the application-only export plus the same normalized, Rules/ITS,
 archive, symbol and reviewed-citation artifacts as before. Explicit
-`tools.build_determinism_manifest --legacy-paired` recreates **format v1**
+`tools.ci.build_determinism_manifest --legacy-paired` recreates **format v1**
 with an additional temporary `army.raw.db` hash. Each manifest version
 can be compared across machines, but the comparison tool intentionally
 rejects mixed v1/v2 inputs rather than silently dropping old evidence.
@@ -611,8 +614,8 @@ working Linux engine. From either checkout (the commands below work in
 PowerShell as well as Linux shells):
 
 ```powershell
-python -m tools.run_pinned_determinism --probe
-python -m tools.run_pinned_determinism --output local/reports/determinism-v2-container.json
+python -m tools.ci.run_pinned_determinism --probe
+python -m tools.ci.run_pinned_determinism --output local/reports/determinism-v2-container.json
 ```
 
 Use the selected project virtual environment on each host.
@@ -627,7 +630,7 @@ The probe pulls and prints the exact pinned image digest and toolchain
 versions. Compare the Windows and Linux manifest files with:
 
 ```powershell
-python -m tools.compare_determinism_manifests local/reports/determinism-v2-windows.json local/reports/determinism-v2-linux.json
+python -m tools.ci.compare_determinism_manifests local/reports/determinism-v2-windows.json local/reports/determinism-v2-linux.json
 ```
 
 A v2 comparison across the two development hosts at the same commit
@@ -691,8 +694,8 @@ opens the sibling. A stale or mismatched pair fails closed. Bounded listings acc
 read-only, does not change imported, curated or published data, and is not
 part of the runtime API.
 
-The optional `tools.audit_normalization_links`,
-`tools.audit_peripheral_semantics` and `tools.audit_relationship_semantics`
+The optional `tools.data.audit_normalization_links`,
+`tools.data.audit_peripheral_semantics` and `tools.data.audit_relationship_semantics`
 commands also accept `--normalized PATH` with the selected application
 database. They verify the complete normalized document against the Army
 export-generation fingerprint, then materialize only the required missing
@@ -702,13 +705,13 @@ validated raw-sibling behavior remains the default; an explicit normalized
 path never silently falls back to a sibling archive. For example:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_relationship_semantics local/data/build/army.db --normalized local/data/build/normalized.json --current-only
+.venv\Scripts\python.exe -m tools.data.audit_relationship_semantics local/data/build/army.db --normalized local/data/build/normalized.json --current-only
 ```
 
 The example paths identify a matched local source generation, not a
 persistent runtime artifact.
 
-The read-only `tools.audit_source_variant_inputs` CLI likewise accepts an
+The read-only `tools.data.audit_source_variant_inputs` CLI likewise accepts an
 explicit `--normalized PATH` bound to the selected Army application database.
 It inventories exact Skill and Equipment source occurrences, ordered Extra
 signatures and the optional `--owner-extra-id` context without a raw SQLite
@@ -719,7 +722,7 @@ single-source research, without claiming it matches an application database.
 For a matched local generation:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_source_variant_inputs --application local/data/build/army.db --normalized local/data/build/normalized.json --rules data/generated/rules_n5.db --catalog skills --source-id 11
+.venv\Scripts\python.exe -m tools.data.audit_source_variant_inputs --application local/data/build/army.db --normalized local/data/build/normalized.json --rules data/generated/rules_n5.db --catalog skills --source-id 11
 ```
 
 The selected Rules database supplies reviewed semantics independently; choose
@@ -727,8 +730,8 @@ the applicable Rules revision when interpreting the source rows. Raw and
 normalized inputs are mutually exclusive, and an explicit normalized source
 never falls back to an available raw archive.
 
-The read-only `tools.audit_army_faction_semantics` and
-`tools.audit_source_presentation` commands also support explicit
+The read-only `tools.data.audit_army_faction_semantics` and
+`tools.data.audit_source_presentation` commands also support explicit
 `--normalized PATH` to audit a matched Army application database without
 retaining raw SQLite. The faction audit still re-derives application Army
 identities from independent source relationships and fails on disagreement.
@@ -739,15 +742,15 @@ JSON key is retained for report compatibility even when that evidence
 originates from verified normalized JSON. For example:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_army_faction_semantics local/data/build/army.db --normalized local/data/build/normalized.json
-.venv\Scripts\python.exe -m tools.audit_source_presentation local/data/build/army.db --normalized local/data/build/normalized.json --require-no-occupied-gaps
+.venv\Scripts\python.exe -m tools.data.audit_army_faction_semantics local/data/build/army.db --normalized local/data/build/normalized.json
+.venv\Scripts\python.exe -m tools.data.audit_source_presentation local/data/build/army.db --normalized local/data/build/normalized.json --require-no-occupied-gaps
 ```
 
 As above, these are example paths for a matched source generation. Omitting
 `--normalized` retains the existing matched raw-sibling behavior; a
 supplied but mismatched normalized source is rejected rather than falling back.
 
-The read-only `tools.report_reference_baseline` source-ZIP audit can
+The read-only `tools.research.report_reference_baseline` source-ZIP audit can
 verify a pinned Army archive with either a matching standalone
 `army.raw.db` sibling (legacy default), or an explicit `--normalized PATH`
 file. The normalized route requires `--army-archive` and a matching Army
@@ -759,18 +762,17 @@ relationships. It will not silently fall back to a raw sibling. For example,
 using **the same source generation** for all inputs:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --army-db local/data/build/army.db --rules-db local/data/build/rules_n5.db --army-archive local/data/snapshots/army-source.zip --normalized local/data/build/normalized.json --json-output local/reports/reference-baseline.json
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --army-db local/data/build/army.db --rules-db local/data/build/rules_n5.db --army-archive local/data/snapshots/army-source.zip --normalized local/data/build/normalized.json --json-output local/reports/reference-baseline.json
 ```
 
 These paths are illustrative, not implicit build inputs. The selected Rules
 database must itself match the reviewed Army publication for the independent
 Weapon citation check; source verification is not a substitute for that gate.
 
-`tools.build_determinism_manifest` separately hashes a **temporary**
-`army.raw.db` produced by the standalone paired-export command. That entry
-tests cross-platform determinism of the standalone format; it neither makes
-a raw database a runtime artifact nor requires retaining any previously
-generated raw sibling in `data/generated/`.
+The legacy format v1 determinism comparison explicitly generates a temporary
+`army.raw.db` through the programmatic paired-export interface. See the
+[format v2 contract above](#current-paths-and-behavior); the normal current
+manifest and runtime set do not require or retain a raw sibling.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
@@ -1021,7 +1023,7 @@ The current producer contracts are:
   semantic/browser identity mappings, final static asset placement
   and `symbol-publication.json`. Browser UI font packaging
   (`prepare_web_fonts.py`) is separate from SVG font substitution.
-  As preparation, `tools.export_symbol_source_plan` can explicitly
+  As preparation, `tools.symbols.export_symbol_source_plan` can explicitly
   generate a **read-only** v1 request plan from a verified Army ZIP,
   the pinned static declarations and legacy identity configuration.
   It records only sorted approved URLs, selected archive paths and
@@ -1033,16 +1035,16 @@ The current producer contracts are:
   snapshot provenance and a separate `.raw-report.json` of acquired
   and HTTP-404-unavailable source URLs. The request plan is **not**
   snapshot provenance and does not confer source authority by itself.
-  Use `tools.verify_raw_symbol_handoff` in InfinityDB to verify the
+  Use `tools.symbols.verify_raw_symbol_handoff` in InfinityDB to verify the
   complete external ZIP/manifest/report against the pinned Army ZIP
   and source plan. The former in-tree acquisition, override and processing
   commands have been retired. Normal database builds do not acquire assets.
-  For separate override processing, `tools.export_symbol_override_lookups`
+  For separate override processing, `tools.symbols.export_symbol_override_lookups`
   generates a SHA-pinned URL-to-override-path plan. The standalone
   `infinity-symbol-overrides` command can then create an intermediate
   `EFFECTIVE-SYMBOLS ...zip`, its v3 Army-bound provenance and a
   version-1 effective report recording raw/upstream, override and
-  effective SVG identities. `tools.verify_effective_symbol_handoff`
+  effective SVG identities. `tools.symbols.verify_effective_symbol_handoff`
   checks that chain independently, optionally against local reviewed
   override files. The standalone `infinity-symbol-preflight` and
   `infinity-symbol-font-audit` commands now produce matching legacy
@@ -1054,7 +1056,7 @@ The current producer contracts are:
   exact/visual duplicate CSVs and a hash-pinned stage receipt
   containing renderer/version/settings. Render failures remain
   visible and fail the receipt instead of claiming visual coverage.
-  `tools.verify_symbol_duplicate_handoff` verifies its byte, path,
+  `tools.symbols.verify_symbol_duplicate_handoff` verifies its byte, path,
   summary and receipt evidence independently, but cannot establish
   visual equivalence without rerendering. External text-to-path conversion
   and render-validated compression now provide immutable canonical ZIPs,
@@ -1084,7 +1086,7 @@ Implementation details remain in the symbol tooling, and unfinished lifecycle wo
 
 **Project domain:** Data processing
 
-`python -m tools.prepare_symbol_publication` prepares an offline candidate from
+`python -m tools.symbols.prepare_symbol_publication` prepares an offline candidate from
 the external producer's v1 processing handoff. It uses InfinityDB's semantic mapper,
 rederiving authoritative Army references and approved
 source/override lookups from the selected Army snapshot and maintained inputs.
@@ -1092,7 +1094,7 @@ It requires neither the external Python package nor installed renderers,
 converters or fonts.
 
 ```powershell
-python -m tools.prepare_symbol_publication --source-plan SOURCE_PLAN.json --override-lookups LOOKUPS.json --army "JSON YYYYMMDD-HHMMSS.zip" --army-manifest ARMY_MANIFEST.json --raw-archive "SYMBOLS YYYYMMDD-HHMMSS.zip" --effective-archive "EFFECTIVE-SYMBOLS YYYYMMDD-HHMMSS.zip" --stage-reports STAGE_REPORTS --processed-root PROCESSED_OUTPUT --font-aliases font-aliases.json --output local/symbol-candidate
+python -m tools.symbols.prepare_symbol_publication --source-plan SOURCE_PLAN.json --override-lookups LOOKUPS.json --army "JSON YYYYMMDD-HHMMSS.zip" --army-manifest ARMY_MANIFEST.json --raw-archive "SYMBOLS YYYYMMDD-HHMMSS.zip" --effective-archive "EFFECTIVE-SYMBOLS YYYYMMDD-HHMMSS.zip" --stage-reports STAGE_REPORTS --processed-root PROCESSED_OUTPUT --font-aliases font-aliases.json --output local/symbol-candidate
 ```
 
 Select actual immutable paths. Each raw/effective ZIP's same-directory `.json`
@@ -1106,7 +1108,7 @@ pinned by the producer, even when another JSON file has equivalent content.
 For a standalone check of the processed handoff, select its seven actual files:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_processed_symbol_handoff `
+.\.venv\Scripts\python.exe -m tools.symbols.verify_processed_symbol_handoff `
   --canonical-archive CANONICAL.zip --conversion-receipt CONVERSION-STATE.json `
   --compressed-archive COMPRESSED.zip --compression-receipt COMPRESSION-STATE.json `
   --compression-report COMPRESSION-REPORT.csv --candidates-report CANDIDATES.csv `
@@ -1140,7 +1142,7 @@ The normal build/serve/Docker path continues using the tracked publication.
 
 **Project domains:** Data processing, Project infrastructure
 
-`tools.build_symbol_artwork_review` compares explicitly selected current and
+`tools.symbols.build_symbol_artwork_review` compares explicitly selected current and
 candidate publications without processing or promoting assets. First record
 the expected SHA-256 values of the two selected v2 manifests from trusted
 evidence. Computing a hash alone does not establish approval or provenance.
@@ -1148,12 +1150,12 @@ Replace the placeholders below with the selected paths and hashes; use a fresh
 run directory under ignored `local/`:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review --write-comparison `
+.\.venv\Scripts\python.exe -m tools.symbols.build_symbol_artwork_review --write-comparison `
   --comparison local\validation\symbols\publication\RUN-ID\comparison.json `
   --current-manifest CURRENT-MANIFEST.json --manifest CANDIDATE-MANIFEST.json `
   --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
 
-.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review `
+.\.venv\Scripts\python.exe -m tools.symbols.build_symbol_artwork_review `
   --comparison local\validation\symbols\publication\RUN-ID\comparison.json `
   --current CURRENT-STATIC --current-manifest CURRENT-MANIFEST.json `
   --candidate CANDIDATE-STATIC --manifest CANDIDATE-MANIFEST.json `
@@ -1192,7 +1194,7 @@ describes the older, legacy-input-specific audit and its limitations.
 
 **Project domains:** Data processing, Project infrastructure
 
-`python -m tools.promote_symbol_publication` consumes an explicitly accepted
+`python -m tools.symbols.promote_symbol_publication` consumes an explicitly accepted
 candidate and the same `SymbolPublicationHandoff` file selections used to prepare
 it. The promotion input JSON uses
 `format: "InfinityDB symbol publication promotion inputs"`, `formatVersion: 1`,
@@ -1231,7 +1233,7 @@ evidence, not a runtime input. A completed transaction is not an implicit rollba
 request.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.promote_symbol_publication `
+.\.venv\Scripts\python.exe -m tools.symbols.promote_symbol_publication `
   --candidate CANDIDATE-DIRECTORY --inputs PROMOTION-INPUTS.json `
   --transaction local\operations\symbols\RUN-ID `
   --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256

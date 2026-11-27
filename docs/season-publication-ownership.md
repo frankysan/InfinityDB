@@ -197,13 +197,13 @@ remain authoritative for those facts.
   from the current date.
 - **Explicit season:** Resolve using the tuple
   `(scenario_collection_id, collection_revision, scenario_id)`, for example
-  `(its-18, 2026.09.01, scenario:battleground)`. Preserve the associated
+  `(its-18, 2026.09.11, scenario:battleground)`. Preserve the associated
   authored `publication_collection_id` and content digest, not merely
   `scenario:battleground` or route slug `battleground`.
 - **Cross-domain references:** Conceptually reference an owning domain and
   typed ID: `(rules-n5, skill:...)`,
   `(rules-n5, faq-ruling:...)`, or
-  `(its-18, 2026.09.01, scenario:...)`. Expose stable typed references in
+  `(its-18, 2026.09.11, scenario:...)`. Expose stable typed references in
   the backend registry; physical database paths and SQLite `ATTACH`
   mechanics must not leak into UI or HTTP contracts.
 - **Compatibility:** ITS data declares its supported N5 rules/source
@@ -225,8 +225,8 @@ remain authoritative for those facts.
 
 Additional actual ITS seasons require independently reviewed source
 publications, an explicit registry entry and matched build/package inputs.
-Season 18 is the current content priority; Seasons 16 and 17 remain future
-coverage, not a precondition for the existing runtime contract. The
-synthetic multi-season test proves isolation only, not the correctness
-of any uncurated season. See the [ITS database](its-season-database.md)
+Seasons 17 and 18 are already published; Season 16 Part II and other archived
+seasons remain future coverage, not a precondition for the existing runtime
+contract. The synthetic multi-season test proves isolation only, not the
+correctness of any uncurated season. See the [ITS database](its-season-database.md)
 for the maintained storage and selection contract.

@@ -14,7 +14,7 @@ Use these documents when deciding how the project works now:
   runtime/browser/deployment architecture, and accepted design direction.
 - `data-model.md` — current source/application identities, semantic provenance, persistence,
   query semantics, and generated-database contracts.
-- [its-season-database.md](its-season-database.md) — ITS Season 18 schema,
+- [its-season-database.md](its-season-database.md) — ITS Season 17/18 schema,
   season-source binding, builder and selected publication contract.
 - [season-publication-ownership.md](season-publication-ownership.md) — current
   N5/FAQ/ITS authority boundary, cross-domain references and version selection.
@@ -23,9 +23,9 @@ Use these documents when deciding how the project works now:
   surfaces, tables, controls, responsive behavior, typography, accessibility, and theming. It states
   requirements and design direction rather than claiming every current surface already complies.
 - `project-domains.md` — engineering ownership labels used by planning and release notes.
-- `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
+- `../data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.
-- `data/curated/README.md` — authored/curated data schemas and review contracts.
+- `../data/curated/README.md` — authored/curated data schemas and review contracts.
 - `testing.md` — local validation commands, test selectors, worker and asset
   policies, plus explicitly dated development and release-candidate evidence.
   Historical runs validate their recorded revisions, not a later release.

@@ -516,10 +516,10 @@ become verified merely because an alternative root contains a matching file.
 
 Integrated readers include `verify_reinforcements_inputs` in the
 source-evidence auditor (optional `source_layout` API keyword) and
-`tools.audit_reinforcements_applicability` (`--source-layout legacy|local`).
+`tools.research.audit_reinforcements_applicability` (`--source-layout legacy|local`).
 The latter applies the selected layout to both historical annex PDFs and its
 current Core/ITS reference PDFs, preserving the same applicability report.
-`tools.report_reference_baseline` and `tools.audit_pdf_revision_deltas` also
+`tools.research.report_reference_baseline` and `tools.research.audit_pdf_revision_deltas` also
 accept `--source-layout legacy|local` for PDF evidence. The reporter keeps
 its existing legacy-status semantics; when `local` is explicitly selected,
 its canonical PDF groups require one valid published SHA-256, reject conflicting

@@ -12,9 +12,7 @@ architecture mirror, release diary, or backlog. Before substantial work, use the
 - curated schemas/review policy: `data/curated/README.md`;
 - data/provenance lifecycle: `data/README.md`;
 - checks/CI: `docs/testing.md`, `docs/ci.md`;
-- deferred test obligations: `docs/validation-queue.md` (only concrete
-  unrun checks, no numeric drain; focused tests may run during implementation;
-  independent Windows work is allowed during isolated focused/full Linux runs);
+- deferred test obligations: `docs/validation-queue.md`;
 - unfinished implementation work: `docs/TODO.md`;
 - upstream rules/Army/Wiki/FAQ inconsistencies and publisher ruling questions:
   `docs/official-source-clarifications.md` (stable SRC IDs);
@@ -73,12 +71,11 @@ release/audit narrative belongs in the changelog and Git history.
   footprints, source-defined edge/center measurement references and
   physical mm diameters affect placement; displayed inches/centimeters
   and annotations derive from the geometry. Unknown marker styles fail
-  closed. A reviewed ITS Season 18 Battleground map already uses this
-  shared geometry; a full ITS map library and interactive editor remain
-  post-1.0 and are not part of the mandatory Core-scenario gate.
+  closed. Core and published ITS 17/18 maps use the shared geometry;
+  see `docs/its-season-database.md` for season-specific coverage.
 - Scenario authoring composes exact shared Rules/Skills and typed components
-  into self-contained `rules_n5.db` output. Scoped records do not leak into
-  core rules or acquire Army links. Browser and API use the selected
+  into independently selected N5 and ITS publications. Scoped records do not
+  leak into core rules or acquire Army links. Browser and API use the selected
   versioned scenario identity; backend detail requires explicit Army
   Points, while an unshared browser visit defaults to 300 via the common
   `s=` codec. Source disagreements remain explicit: Domination's
@@ -146,23 +143,10 @@ release/audit narrative belongs in the changelog and Git history.
 
 ## Runtime artifacts
 
-- `data/generated/army.db`: tracked Army-derived application runtime database.
-- `data/generated/rules_n5.db`: tracked curated-rules runtime database.
-- `data/generated/its_17.db` and `its_18.db`: current published revisions of the two ITS seasons.
-- Army v35 (including Unit history) and Rules v24 embed exact variants, reviewed Weapon citations,
-  deployed objects, maintained reference facts, symbol mappings/hashes and
-  shared General-profile projections and the scope-bound global search, catalog, Specialist candidate and maintained-text target and reference page projections.
-- Build-only raw Army exports and intermediate JSON belong in ignored
-  `local/work/build/`. Research tools take explicit raw paths.
-- `data/manifests/symbol-publication.json`: tracked processed-SVG build/release
-  contract and Army source binding; normal serving uses embedded mappings/hashes.
-- Raw Army/wiki/PDF/source-symbol archives and detailed build state remain local.
-
-One complete offline `infinity-db build --compact` produces all four tracked databases.
-`serve --db-dir` selects an alternate set; `INFINITY_DB_DB_DIR` precedes the
-default working-directory-relative `data/generated/`. WSGI requires that
-environment setting. Docker copies the same set directly. See
-[data lifecycle](../data/README.md) for the canonical contract.
+Use the [data lifecycle](../data/README.md#current-paths-and-behavior) for
+current database filenames, schema versions, build and serving commands,
+source locations and compatibility. Runtime consumes the complete validated
+set, not ignored source archives or working-tree curation.
 
 ## Army/application identity invariants
 
@@ -253,10 +237,9 @@ because the source does not attach them to a profile group.
   record lookup remains separate. Maintained-text references still fail closed when
   no published owner/destination exists.
 
-`src/infinity_db/application_domains.py` is the canonical capability registry. Published top-level
-application domains are Armies, Units, Skills, Equipment, Weapons, Ammunition, Traits, States,
-Hacking Programs, Fireteams, Labels, General Rules, and Scenarios. Embedded vocabularies are Attributes,
-Game terms and Weapon Properties.
+`src/infinity_db/application_domains.py` is the canonical capability registry;
+see [application domains](application-domains.md#current-top-level-domain-set)
+for the published domain and embedded-vocabulary contracts.
 
 Browser state rules:
 
@@ -273,10 +256,9 @@ Browser state rules:
 - URL-owned state wins for the current view and must not overwrite persistent local Settings.
 - `static/preferences.js` owns preference values/persistence; `static/settings.js` alone binds the
   shared Settings controls. Page modules consume state instead of initializing shell controls.
-- Theme preference defaults to System and resolves before first paint through the synchronous
-  `theme-startup.js` bootstrap. Theme persistence remains owned by `preferences.js`; Settings owns
-  user selection. Do not move theme resolution back into page modules or defer initial resolution
-  until after stylesheet paint.
+- Theme palette and mode resolve before first paint; see the
+  [browser theming architecture](architecture.md#browser-theming) for defaults,
+  persistence, bootstrap and CSS ownership.
 - Soft-navigation page code must dispose transient listeners/requests when content is replaced.
 - Browser display should use backend-provided canonical references/relationship labels instead of
   inventing semantic mappings in JavaScript.
@@ -290,10 +272,8 @@ Browser visual/layout and copy implementation must follow `docs/web-design-guide
 especially semantic table columns, bounded overflow, progressive disclosure, Developer-mode
 additive columns, reusable surfaces, player-facing language, and separation of theme tokens from
 component geometry.
-CSS source ownership is `foundation.css` (font and theme-neutral tokens), one semantic palette file
-per explicit theme under `themes/`, `components.css` (shared layout/components), and
-`page-overrides.css` (late page-specific exceptions). `/static/styles.css` is a server-composed
-stable entry point; do not add a CSS build step or link the source parts directly from page templates.
+CSS source ownership and the stable composed stylesheet are defined in
+[architecture](architecture.md#browser-theming).
 
 ## Snapshot and symbol invariants
 
@@ -325,22 +305,9 @@ stable entry point; do not add a CSS build step or link the source parts directl
 - Database exporters explicitly begin schema/data write transactions after deterministic connection
   configuration. A SQLite connection context manager alone does not group schema DDL; rules-schema
   `executescript` must begin inside its script. Preserve validation, finalization and atomic publication.
-- `tools/run_checks.py` is the canonical local orchestrator. Focused tests
-  may run during implementation; [VD/VR](validation-queue.md#queue-rules) records
-  only genuinely deferred work. Mandatory CI and release checks have separate
-  owners.
-- Required hosted CI covers source/build checks, cross-platform deterministic outputs, installed
-  wheel behavior, and deployment smoke. See `docs/ci.md` for current workflow/ruleset details.
-- A release requires documentation review proportionate to changed behavior,
-  release-matched runtime artifacts, required hosted checks on the exact release
-  commit, an immutable version tag, and relevant post-deployment smoke where deployed.
-  Four-browser matrices are optional from v1.1 onward; v1.0.x retains its historical gate.
-- Hosted release evidence is retained without mutating the validated release commit: prepare the
-  exact-commit workflow evidence after CI is green, then create an annotated `v<version>` tag whose
-  message records the required GitHub Actions run identities/URLs. Lightweight release tags do not
-  satisfy the release-evidence contract.
-- `scripts/install-or-update.sh` hands off to the installer from the target release before checkout.
-  Historical upgrade exceptions and operator commands are owned by `docs/deployment.md`.
+- Use [testing](testing.md), [CI](ci.md), [release gates](releasing.md) and
+  [deployment](deployment.md) for the current validation and publication
+  contracts. Do not infer release acceptance from development results.
 
 ## Change discipline
 

@@ -4084,14 +4084,11 @@ derive historical supersession from recency. The same stable FAQ ID
 may carry distinct reviewed historical contributions; duplicate
 current definitions are not an acceptable replay mechanism.
 
-This decision does not close the remaining 1.0 **current** FAQ
-source/errata coverage, source-conflict disclosure or final
-source-to-browser acceptance. Full ITS season-revision coverage and
-historical mission libraries are outside the 1.0 completeness gate.
-The separately published Season 18 Battleground pilot does not make
-the remaining ITS catalog a requirement. The generic supplement
-mechanism must not auto-attach a ruling to a core topic by name or
-by a newer collection date.
+The historical 1.0 current-reference acceptance is recorded in
+[releasing](releasing.md#version-10-data-completeness-gate). ITS 17 and 18
+are now independently published; historical mission replay remains separate.
+The generic supplement mechanism must not auto-attach a ruling to a core
+topic by name or by a newer collection date.
 
 ### Domain ownership
 

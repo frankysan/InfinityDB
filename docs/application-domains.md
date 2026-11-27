@@ -136,15 +136,14 @@ catalog/detail domain owning `scenario:*` records. It participates in primary
 navigation and the landing page; global search and Glossary participation
 are deliberately disabled for the directly discoverable collections.
 The catalog defaults to the four N5.3 Core missions and can explicitly
-select the published ITS Season 18 Battleground pilot through
-`its-18@2026.09.01`; this is not the full ITS mission library or a 1.0
-completion requirement. Scenario slug
-normalization remains the typed `scenario:<slug>` contract used by the maintained scenario layer.
-Rules export keeps stable scenario collection identity, collection revision, ordered membership,
-source publication revision, and deterministic content identity separate. `RulesDatabase` owns central
-selection: default reads consider only `current` publications, historical revisions require an explicit
-collection/revision pair, and unsupported selections never fall back silently. `ScenarioCatalog`
-composes current publication list/detail read models in maintained collection order. Detail reads
+select the independently published ITS Season 17 V0.2 and Season 18 2026.09.11
+mission collections. Scenario slug normalization remains the typed
+`scenario:<slug>` contract. The publication registry resolves exact collection,
+revision and scenario identity across Rules and ITS databases; unsupported
+selections never fall back silently. See the
+[season publication ownership](season-publication-ownership.md#stable-selection-and-identity-contract)
+for the canonical selection contract. `ScenarioCatalog` composes selected
+publication list/detail read models. Detail reads
 require an explicit supported Army Points value and project setup, geometry, scoring, special
 Rules/Skills, end conditions, source issues, and publication provenance for that selection.
 

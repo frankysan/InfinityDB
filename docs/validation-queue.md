@@ -77,9 +77,7 @@ selectors or required evidence, missing prerequisite, execution trigger,
 and final outcome. Retire only after verification of the intended state.
 Failed, skipped or incomplete checks remain open.
 
-No pending deferred execution entries. VR-0148 was closed after the tracked
-runtime set was refreshed and the full source-freshness/deployment-asset verifier
-passed on 2026-11-12; see [testing evidence](testing.md#p58-source-freshness-closeout-and-p61-provenance-boundary).
+No pending deferred execution entries.
 
 ## Next unused IDs
 
@@ -88,9 +86,7 @@ passed on 2026-11-12; see [testing evidence](testing.md#p58-source-freshness-clo
 
 Increment the relevant next-unused ID when adding a task, even if that
 task is later removed. Previous completed records remain in Git history.
-The 2026-11-02 cumulative local suite evidence is summarized in
-[testing.md](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark);
-mandatory CI and final release acceptance remain separate.
+Mandatory CI and final release acceptance remain separate.
 
 ## Recording template
 
