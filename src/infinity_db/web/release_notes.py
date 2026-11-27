@@ -25,6 +25,7 @@ class ReleaseNoteSection:
 
     heading: str
     items: tuple[str, ...]
+    children: tuple[tuple[str, ...], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,10 +63,11 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
     current_sections: list[ReleaseNoteSection] = []
     current_heading: str | None = None
     current_items: list[str] = []
+    current_children: list[list[str]] = []
     started = False
 
     def flush_section() -> None:
-        nonlocal current_heading, current_items
+        nonlocal current_heading, current_items, current_children
         if current_heading is None:
             return
         if not current_items:
@@ -74,9 +76,17 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
             raise ReleaseNotesError(
                 f"Release-note section {current_heading!r} contains duplicate items"
             )
-        current_sections.append(ReleaseNoteSection(current_heading, tuple(current_items)))
+        if any(len(set(children)) != len(children) for children in current_children):
+            raise ReleaseNotesError(
+                f"Release-note section {current_heading!r} contains duplicate items"
+            )
+        children = (
+            tuple(tuple(items) for items in current_children) if any(current_children) else ()
+        )
+        current_sections.append(ReleaseNoteSection(current_heading, tuple(current_items), children))
         current_heading = None
         current_items = []
+        current_children = []
 
     def flush_release() -> None:
         nonlocal current_heading, current_sections
@@ -155,10 +165,19 @@ def parse_release_notes(markdown: str) -> tuple[ReleaseNote, ...]:
                     f"Release-note item has no section on changelog line {line_number}"
                 )
             current_items.append(line.removeprefix("- ").strip())
+            current_children.append([])
             continue
-        if line.startswith("  ") and current_items:
-            current_items[-1] = f"{current_items[-1]} {line.strip()}"
+        if line.startswith("  - ") and current_items:
+            current_children[-1].append(line.removeprefix("  - ").strip())
             continue
+        if line.startswith("  ") and current_items and not line.lstrip().startswith("- "):
+            if current_children[-1] and line.startswith("    "):
+                children = current_children[-1]
+                children[-1] = f"{children[-1]} {line.strip()}"
+                continue
+            if not current_children[-1]:
+                current_items[-1] = f"{current_items[-1]} {line.strip()}"
+                continue
         raise ReleaseNotesError(f"Unsupported changelog structure on line {line_number}: {line!r}")
 
     flush_release()
@@ -185,6 +204,19 @@ def _render_inline(text: str) -> str:
             rendered.append(f"<strong>{escape(match.group('strong'))}</strong>")
         offset = match.end()
     rendered.append(escape(text[offset:]))
+    return "".join(rendered)
+
+
+def _render_section_items(section: ReleaseNoteSection) -> str:
+    rendered: list[str] = []
+    for index, item in enumerate(section.items):
+        children = section.children[index] if section.children else ()
+        nested = ""
+        if children:
+            nested = "<ul>" + "".join(
+                f"<li>{_render_inline(child)}</li>" for child in children
+            ) + "</ul>"
+        rendered.append(f"<li>{_render_inline(item)}{nested}</li>")
     return "".join(rendered)
 
 
@@ -215,12 +247,10 @@ def render_release_notes_html(releases: tuple[ReleaseNote, ...]) -> str:
                 f'datetime="{release.released_on.isoformat()}">{escape(date_text)}</time>'
             )
 
-        summary_items = "".join(
-            f"<li>{_render_inline(item)}</li>" for item in release.player_summary
-        )
+        summary_items = _render_section_items(release.sections[0])
         detail_sections = []
         for section in release.detail_sections:
-            items = "".join(f"<li>{_render_inline(item)}</li>" for item in section.items)
+            items = _render_section_items(section)
             detail_sections.append(
                 '<section class="changes-category">'
                 f"<h3>{escape(section.heading)}</h3>"

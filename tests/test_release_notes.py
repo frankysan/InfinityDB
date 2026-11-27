@@ -245,6 +245,57 @@ def test_release_notes_renderer_escapes_text_and_preserves_supported_inline_mark
     assert 'datetime="2026-10-05">October 5, 2026</time>' in rendered
 
 
+def test_release_notes_support_one_level_of_nested_bullets() -> None:
+    releases = parse_release_notes(
+        "# Changelog\n\n## [Unreleased]\n\n"
+        "### Player summary\n\n"
+        "- New feature.\n"
+        "- **Performance improvements:**\n"
+        "  - Faster search.\n"
+        "  - Faster `catalog` loading.\n"
+        "    Escaped <detail>.\n"
+        "- Fixed a bug.\n\n"
+        "### Changed\n\n"
+        "- **Performance improvements:**\n"
+        "  - **Web backend:** Prebuilt indexes.\n"
+    )
+    summary = releases[0].sections[0]
+    assert summary.items == ("New feature.", "**Performance improvements:**", "Fixed a bug.")
+    assert summary.children == (
+        (), ("Faster search.", "Faster `catalog` loading. Escaped <detail>."), (),
+    )
+    rendered = render_release_notes_html(releases)
+    assert (
+        "<li><strong>Performance improvements:</strong><ul>"
+        "<li>Faster search.</li>"
+        "<li>Faster <code>catalog</code> loading. Escaped &lt;detail&gt;.</li>"
+        "</ul></li><li>Fixed a bug.</li>"
+    ) in rendered
+    assert (
+        "<li><strong>Performance improvements:</strong><ul>"
+        "<li><strong>Web backend:</strong> Prebuilt indexes.</li></ul></li>"
+    ) in rendered
+
+
+@pytest.mark.parametrize("items", [
+    "  - Orphaned child.",
+    "- Parent.\n  - Child.\n    - Unsupported deeper list.",
+])
+def test_release_notes_parser_rejects_unsupported_nested_bullets(items: str) -> None:
+    with pytest.raises(ReleaseNotesError, match="Unsupported changelog structure"):
+        parse_release_notes(
+            f"# Changelog\n\n## [Unreleased]\n\n### Player summary\n\n{items}\n"
+        )
+
+
+def test_release_notes_parser_rejects_duplicate_nested_bullets() -> None:
+    with pytest.raises(ReleaseNotesError, match="contains duplicate items"):
+        parse_release_notes(
+            "# Changelog\n\n## [Unreleased]\n\n### Player summary\n\n"
+            "- Parent.\n  - Same child.\n  - Same child.\n"
+        )
+
+
 def test_release_notes_parser_requires_player_summary_first() -> None:
     with pytest.raises(ReleaseNotesError, match="must begin with a Player summary"):
         parse_release_notes(

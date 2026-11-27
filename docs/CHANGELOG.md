@@ -12,13 +12,7 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- Faster global search through a compact prebuilt search index.
 - Live search suggestions in the navigation, with direct links and access to all results.
-- Faster resolution of inline rules references and their previews.
-- Faster initial Glossary loading and Orders/AROs reference requests.
-- Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
-- Faster initial Unit Explorer filter-context initialization and Specialist Troops filtering.
-- Faster first access to Unit details and Explorer after application startup.
 - Correct Equipment filter counts on repeated matching queries.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
@@ -35,8 +29,14 @@ are not retroactively relabeled.
   season-wide rules and context-specific event restrictions.
 - Weapon and Equipment profile footnotes link to the applicable reviewed rules
   across the N5.3 chart; unresolved source markers remain visible.
-
-- Faster initial Extended Unit Explorer results and new pages or availability selections.
+- **Performance improvements:**
+  - Faster global search through a compact prebuilt search index.
+  - Faster resolution of inline rules references and their previews.
+  - Faster initial Glossary loading and Orders/AROs reference requests.
+  - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
+  - Faster Unit Explorer initialization and Specialist Troops filtering.
+  - Faster Extended Unit Explorer results, pagination and availability selections.
+  - Faster first access to Unit details and Explorer after application startup.
 
 ### Added
 
@@ -84,22 +84,21 @@ are not retroactively relabeled.
   interactions, FAQ clarifications and scenario source notes without changing
   gameplay content or assigning unverified update dates. Gameplay facts and
   explanation/FAQ prose use the primary text role in every palette.
-- **Data processing + Web backend:** Materialized deduplicated General-profile
-  selections during database generation; Extended Explorer and Unit details
-  share them while preserving public profile and availability semantics.
-- **Data processing + Web backend:** Materialized composed current N5 Rules
-  records during database generation for faster reference and catalog lookups,
-  preserving scoped contributions, reverse relations and citations.
-
-- **Data processing + Web backend:** Materialize global search identities and
-  normalized search terms across Army, Rules and ITS; preserve matching,
-  ranking and public routes.
-
-- **Data processing + Web backend:** Materialized catalog summaries, filter
-  identities and canonical Army detail usage with shared Unit display records.
-  Contextual matching and curated detail enrichment remain dynamic.
-- **Web backend + Deployment:** Preload the shared Unit graph and official Army
-  links before worker forks to reduce redundant first-access initialization.
+- **Performance improvements:**
+  - **Data processing + Web backend:** Materialized deduplicated General-profile
+    selections during database generation; Extended Explorer and Unit details
+    share them while preserving public profile and availability semantics.
+  - **Data processing + Web backend:** Materialized composed current N5 Rules
+    records during database generation for faster reference and catalog lookups,
+    preserving scoped contributions, reverse relations and citations.
+  - **Data processing + Web backend:** Materialized global search identities and
+    normalized search terms across Army, Rules and ITS; preserved matching,
+    ranking and public routes.
+  - **Data processing + Web backend:** Materialized catalog summaries, filter
+    identities and canonical Army detail usage with shared Unit display records.
+    Contextual matching and curated detail enrichment remain dynamic.
+  - **Web backend + Deployment:** Preloaded the shared Unit graph and official Army
+    links before worker forks to reduce redundant first-access initialization.
 - **Web backend + Deployment:** Evaluated SQLite immutable connection mode
   against the complete runtime set; retained ordinary read-only connections
   because measured Linux request gains did not justify a separate policy.
