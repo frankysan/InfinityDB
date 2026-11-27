@@ -482,6 +482,97 @@ def benchmark_unit_explorer(
         print(f"{name:<24} p50 {summary['medianMs']:8.1f} ms  p95 {summary['p95Ms']:8.1f} ms")
 
 
+def benchmark_sqlite_immutable(path: Path, iterations: int, repeats: int) -> None:
+    """Compare identical full-set WSGI workloads with only SQLite URI mode changed.
+
+    This single-threaded offline benchmark temporarily intercepts only read-only
+    connections to the four selected files. Do not rebuild that set during a run.
+    """
+    from collections import Counter
+    from contextlib import closing
+    from unittest.mock import patch
+
+    from infinity_db.database_set import SEASON_DATABASE_SOURCES
+    from infinity_db.web.app import create_app_from_database_set
+    from tools.browser_wsgi_transport import wsgi_response
+    from tools.performance.capacity_test import FIRST_ACCESS_CASES
+
+    directory = path.resolve().parent
+    if path.name != "army.db":
+        raise ValueError("Immutable benchmark requires a complete Army database set")
+    paths = [path.resolve(), directory / "rules_n5.db", *(
+        directory / filename for filename, _ in SEASON_DATABASE_SOURCES.values()
+    )]
+    uris = {p.as_uri() + "?mode=ro" for p in paths}
+    connect = sqlite3.connect
+    for p in paths:
+        if any(p.with_name(p.name + suffix).exists() for suffix in ("-wal", "-journal", "-shm")):
+            raise ValueError(f"Unexpected SQLite sidecar for {p.name}")
+        with closing(connect(p.as_uri() + "?mode=ro", uri=True)) as db:
+            if db.execute("PRAGMA journal_mode").fetchone()[0] == "wal":
+                raise ValueError(f"WAL mode is unsuitable for this benchmark: {p.name}")
+
+    routes = {name: case.path for name, case in FIRST_ACCESS_CASES.items()}
+    routes.update({
+        "glossary": "/api/glossary",
+        "orders-aros": "/api/orders-aros",
+        "its18": "/api/scenarios?collection=its-18",
+    })
+    samples: dict[tuple[bool, str], list[float]] = {}
+    counts: Counter[tuple[bool, str]] = Counter()
+    expected: dict[str, bytes] = {}
+
+    def measure(mode: bool, name: str, action: Callable[[], Any]) -> Any:
+        def selected_connect(database: Any, *args: Any, **kwargs: Any) -> sqlite3.Connection:
+            if isinstance(database, str) and database in uris and kwargs.get("uri"):
+                counts[mode, name] += 1
+                if mode:
+                    database += "&immutable=1"
+            return connect(database, *args, **kwargs)
+
+        with patch("sqlite3.connect", new=selected_connect):
+            start = time.perf_counter()
+            result = action()
+            samples.setdefault((mode, name), []).append(time.perf_counter() - start)
+            return result
+
+    print(f"SQLite {sqlite3.sqlite_version}; {iterations} paired startups; "
+          f"{repeats} repeat sweeps per startup; {len(routes)} API routes", flush=True)
+    for iteration in range(iterations):
+        modes = (False, True) if iteration % 2 == 0 else (True, False)
+        apps = {}
+        for mode in modes:
+            def start_app():
+                app = create_app_from_database_set(directory)
+                app.preload_runtime_indexes()
+                return app
+
+            apps[mode] = measure(mode, "startup + preload", start_app)
+        for sweep in range(repeats + 1):
+            for name, route in routes.items():
+                for mode in modes if sweep % 2 == 0 else reversed(modes):
+                    phase = "first" if sweep == 0 else "repeat"
+                    status, _, body = measure(
+                        mode, f"{phase} {name}",
+                        lambda app=apps[mode], target=route: wsgi_response(
+                            app, "http://localhost" + target,
+                        ),
+                    )
+                    if status != 200 or expected.setdefault(name, body) != body:
+                        raise ValueError(f"Unexpected response or parity failure: {name}, {status}")
+        print(f"Completed pair {iteration + 1}/{iterations}", flush=True)
+    for mode, name in samples:
+        if mode:
+            continue
+        baseline, immutable = _summary(samples[False, name]), _summary(samples[True, name])
+        ratio = immutable["medianMs"] / baseline["medianMs"]
+        print(f"{name:30} ro {baseline['medianMs']:8.3f} ms / "
+              f"immutable {immutable['medianMs']:8.3f} ms "
+              f"({(ratio-1)*100:+6.1f}%); "
+              f"connections {counts[False, name]}/{counts[True, name]}", flush=True)
+    print("All API response bodies identical.", flush=True)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path, help="Path to a built army.db snapshot.")
@@ -495,6 +586,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--with-seasons", action="store_true",
         help="Register both ITS databases beside the Army snapshot for browser benchmarks.",
     )
+    parser.add_argument("--sqlite-immutable", action="store_true",
+                        help="Compare SQLite read-only and immutable full-set WSGI reads.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -504,6 +597,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
     try:
+        if args.sqlite_immutable:
+            if args.browser or args.pages or args.profile or args.case or args.json:
+                raise ValueError("--sqlite-immutable is a standalone benchmark")
+            benchmark_sqlite_immutable(args.database, args.cold_iterations, args.warm_iterations)
+            return 0
         if args.with_seasons and not (args.browser or args.pages):
             raise ValueError("--with-seasons requires --browser or --pages")
         if args.browser or args.pages:
