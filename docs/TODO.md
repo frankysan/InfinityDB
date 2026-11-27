@@ -22,7 +22,7 @@ when all contained work shares the same owner.
 
 Use these links to jump directly to a workstream:
 
-- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Presentation and feedback](#reference-presentation-and-feedback), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
+- **Reference and UI:** [Sources](#external-source-clarifications), [Rule references](#source-notation-and-rule-references), [Source updates](#source-family-revision-updates), [History](#per-reference-change-history), [Lists](#list-and-session-configuration), [Sharing](#routing-and-long-term-compatibility).
 - **Engineering:** [Backlog policy](README.md#backlog-completion-and-retirement), [Agent coordination](#concurrent-agent-development-safety), [Performance/build](#performance-storage-and-build-tooling), [Army snapshots](../data/README.md#army-snapshot-diff-reports).
 - **Expansion:** [ITS/scenarios](#its-scenarios-and-game-tools), [Native applications](#native-applications), [Portable tools](#user-owned-tools-and-portable-data).
 
@@ -190,12 +190,6 @@ make v1.3.0 depend on them.
     Keep unknown reasons/dates explicit and historical facts separate from
     the current reference.
 
-### Reference presentation and feedback
-
-- [ ] **Web frontend + Web backend:** Consider independent sectorial palettes
-  only with representative sectorial visual references; do not infer them
-  solely from their parent faction.
-
 ### List and session configuration
 
 - [ ] **Data processing + Web backend + Web frontend:** Model Spec-Ops/Team-Ops
@@ -203,6 +197,8 @@ make v1.3.0 depend on them.
   between a Unit's base reference profile, a player's selected upgrades, and later
   in-game profile transitions. Do not attach selected choices to the replaceable Army
   snapshot or present the complete chart as immutable Unit detail.
+  **Deferred:** Implement only when needed by future Army-list or live game tracking
+  features.
   **Source boundary:** Infinity Spec-Ops and Request SpecBall are already
   defined in N5.3 core rules p. 98 and represented by the current reference.
   ITS Season 18 p. 26 prohibits ordinary Spec-Ops in official tournaments;

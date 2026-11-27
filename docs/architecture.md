@@ -666,8 +666,8 @@ retains its original preference key and stored `system` value for compatibility.
 the ordered palette registry on the page root. The synchronous `static/theme-startup.js` bootstrap
 resolves both `data-theme` and `data-theme-palette` before first paint, without an API request.
 `static/preferences.js` owns persistence; `static/settings.js` owns both selectors and live
-Auto-mode updates. Separate sectorial palettes require representative sectorial visual
-references; do not infer them solely from their parent faction.
+Auto-mode updates. Theme palettes are faction-based; separate sectorial palettes
+are not planned.
 
 Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
 least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use
