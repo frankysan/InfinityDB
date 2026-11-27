@@ -256,6 +256,14 @@ retaining it in the repository LRU caches. Keep legacy composition caches
 and small catalog summary caches. The Glossary cache retains runtime-enriched
 tokens, and the shared maintained-text target cache avoids repeated decoding.
 
+The production WSGI entry point warms the shared Unit graph and official Army
+link index before Gunicorn forks, using the existing snapshot caches. The
+loaders close all read-only SQLite connections; contextual and request-specific
+results remain lazy. The direct application factory stays lazy. This is a
+runtime-only choice supported by the [paired Docker comparison](testing.md#pre-fork-runtime-index-initialization-pilot);
+no generated database content changes. The diagnostic opt-out is documented
+with the benchmark procedure.
+
 Implementation priorities and remaining tasks belong to the
 [performance backlog](TODO.md#performance-storage-and-build-tooling).
 

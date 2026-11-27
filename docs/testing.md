@@ -536,19 +536,41 @@ The WSGI pilot warms those existing snapshot caches after complete-set
 validation. Both loaders close their read-only connections before returning.
 The direct development application factory stays lazy; request-specific
 results remain lazy everywhere. Gunicorn already uses `--preload`.
-The seven focused Windows tests passed in 19.03 s (reference response parity,
-WSGI startup and opt-out, cache reuse without opening SQLite, and preview
-lifecycle); Ruff, Pyright and documentation checks passed. The orchestration
-belongs in the web application rather than the fingerprinted database
-repository; it does not change generated content.
+The seven focused Windows tests passed in 20.42 s on the corrected
+implementation (reference response parity, WSGI startup and opt-out, cache
+reuse without opening SQLite, and preview lifecycle); Ruff, Pyright and
+documentation checks passed. The orchestration belongs in the web application
+rather than the fingerprinted database repository; it does not change generated
+content. The original `078c1df7` deployment provenance check failed because
+it modified a build input. The correction restored that source and passed
+`tools.verify_deployment_assets --skip-svg` and hosted deployment smoke.
 
 For a controlled comparison, use `tools.preview_runtime_image` with the
-same capacity case and distinct receipts/tags, first with `--lazy-indexes`
-(sets `INFINITY_DB_PRELOAD_INDEXES=0` in the disposable container), then
-without it. Both runs print elapsed Docker launch-to-health readiness,
-including container setup and the coarse health polling interval.
-Compare readiness, first-access/warmed latency, throughput and sampled
-container memory. Adoption remains subject to these measurements.
+same capacity case and distinct receipts/tags, with and without `--lazy-indexes`
+(sets `INFINITY_DB_PRELOAD_INDEXES=0` in the disposable container).
+Both runs print elapsed Docker launch-to-health readiness, including container
+setup and the coarse health polling interval.
+
+Linux-dev at `e04535d0`, snapshot
+`3457c90e15f84b17ce2cf44e8402726f8fa1fb71ab0b39a507024c21c3efb37b`,
+Minutemen, sequential fresh containers with the same application image and
+baseline workload. Receipts: `local/performance/http-capacity/20261127-e04535d0/`.
+
+| Index mode | Readiness (s) | First p50/p95 (ms) | Steady p50/p95 (ms) | Burst p50/p95 (ms) | Steady req/s | Peak app MiB |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Lazy | 11.884 | 3348.7/3384.6 | 29.1/54.6 | 121.5/221.7 | 258.0 | 257 |
+| Preloaded | 11.756 | 184.1/209.9 | 28.9/54.8 | 120.0/200.6 | 257.7 | 176 |
+
+Both runs exited 0 without HTTP errors, restarts or OOM events. First-access
+p95 fell 93.8% in the paired comparison, 94.1% versus the original baseline
+and 93.7% versus the catalog-optimized control. Peak sampled container memory
+fell about 32% in the paired comparison; warmed throughput was equivalent
+within the short samples. Readiness showed no discernible penalty at this
+polling granularity. An additional lazy control at `078c1df7` gave readiness
+11.800 s and first-access p95 3381.6 ms. The database snapshot and storage
+are unchanged by the warmup. Retain the selective pre-fork initialization;
+complete the cross-route regression comparison before closing the overall
+performance follow-up.
 
 ### Normalized source verification reuse
 

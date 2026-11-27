@@ -330,13 +330,13 @@ make v1.3.0 depend on them.
   The [Rules v24 catalog presentation projection](testing.md#catalog-presentation-materialization-pilot--2026-11-27)
   is retained after parity and Docker comparison; further serialized-response
   materialization is not currently justified.
-  - [ ] Investigate preloading expensive immutable indexes before Gunicorn
-    forks to avoid redundant initialization across concurrent requests.
-    Measure startup, first-access latency and aggregate memory before adoption.
-  - [ ] Rebenchmark initialization changes against the original and catalog-
-    optimized Docker baselines: compare latency (first-access and warmed
-    p50/p95), throughput, generated database size and aggregate application-
-    container memory under equivalent workloads.
+  The [pre-fork Unit graph and Army link warmup](testing.md#pre-fork-runtime-index-initialization-pilot)
+  is retained after a same-image Minutemen comparison; generated databases
+  are unchanged.
+  - [ ] Complete the cross-route initialization regression comparison for
+    Explorer initial and the three catalog details against the original and
+    catalog-optimized Docker baselines: compare first-access and warmed
+    p50/p95, throughput and aggregate application-container memory.
   - [ ] Measure aggregate worker memory and deployed first-access/warmed
     median and p95 under representative concurrent traffic for Unit Explorer,
     Unit details, Skills, Equipment and Weapons using the
