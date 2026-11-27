@@ -548,8 +548,14 @@ runtime image preview also supports `--capacity-output`:
 It builds the normal Dockerfile, starts a read-only preview with an ephemeral
 IPv4 loopback port, waits for health, runs the same Unit Explorer workload,
 retains the JSON receipt and removes the owned container/image. This mode
-does not run semantic parity checks, Caddy, or the Compose resource sampler;
-use the full isolated stack for deployment-level resource evidence.
+does not run semantic parity checks or Caddy. Select another workload with
+`--capacity-case general` or a fixed first-access case, and on Linux add
+`--capacity-resources` with a separate new JSON path to sample the host and
+the owned app container during the same run. Each invocation starts a new
+container, without application traffic before the selected workload. The
+default 60/10-second phases are configurable with `--steady-seconds` and
+`--burst-seconds`. App-only evidence excludes Caddy; use the full isolated
+stack for deployment-level resource evidence.
 
 The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:

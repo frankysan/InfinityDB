@@ -108,6 +108,33 @@ def test_preview_capacity_uses_loopback_and_retains_report(
     assert len(seen) == 1
 
 
+def test_preview_first_access_reuses_resource_sampler(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import preview_runtime_image as preview
+
+    output = tmp_path / "capacity.json"
+    resources = tmp_path / "resources.json"
+    summary = {"memory": {"maxUsedBytes": 123}}
+    monkeypatch.setattr(preview.subprocess, "check_output", lambda *a, **kw: "127.0.0.1:12345")
+    monkeypatch.setattr(preview, "capacity_test", lambda *a, **kw: pytest.fail("Use sampler"))
+
+    def capture(_root, **kwargs):
+        assert kwargs["container_ids"] == ["preview-test"]
+        command = kwargs["command"]
+        assert command[command.index("--first-access-case") + 1] == "unit-detail"
+        assert command[command.index("--steady-seconds") + 1] == "5"
+        assert command[command.index("--output") + 1] == str(output)
+        return {"containers": {"preview-test": summary}}, 0
+
+    monkeypatch.setattr(preview, "capture_resources", capture)
+    preview._measure_capacity(
+        "preview-test", output, case="unit-detail", resources=resources,
+        steady_seconds=5, burst_seconds=2,
+    )
+    assert json.loads(resources.read_text()) == {"containers": {"preview-test": summary}}
+
+
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
     compose = _read("compose.yaml")
     assert "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-80}:80" in compose
