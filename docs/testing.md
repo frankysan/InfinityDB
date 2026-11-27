@@ -568,9 +568,41 @@ fell about 32% in the paired comparison; warmed throughput was equivalent
 within the short samples. Readiness showed no discernible penalty at this
 polling granularity. An additional lazy control at `078c1df7` gave readiness
 11.800 s and first-access p95 3381.6 ms. The database snapshot and storage
-are unchanged by the warmup. Retain the selective pre-fork initialization;
-complete the cross-route regression comparison before closing the overall
-performance follow-up.
+are unchanged by the warmup.
+
+The remaining cross-route comparison used the same pinned revision, snapshot,
+application image and workload, with sequential fresh containers. Explorer
+also received a same-image lazy-index control because there was no separate
+catalog-optimized Explorer baseline. Receipts are in the same directory.
+
+| Case | Readiness (s) | First p50/p95 (ms) | Steady p50/p95 (ms) | Burst p50/p95 (ms) | Steady req/s | Peak app MiB |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Explorer lazy | 11.925 | 3627.3/3714.9 | 14.2/191.1 | 15.0/836.2 | 110.1 | 357 |
+| Explorer preloaded | 11.936 | 2172.6/2251.1 | 12.7/190.0 | 36.3/800.5 | 118.6 | 397 |
+| Mimetism preloaded | 11.899 | 382.4/415.0 | 132.7/255.4 | 581.6/733.2 | 56.6 | 214 |
+| MediKit preloaded | 11.908 | 233.1/269.7 | 70.3/125.9 | 280.0/499.3 | 108.5 | 190 |
+| Combi Rifle preloaded | 11.913 | 229.5/277.8 | 79.5/151.4 | 336.5/455.7 | 94.6 | 191 |
+
+All five additional runs exited 0 with no HTTP errors, restarts or OOM events.
+Explorer first-access p95 fell 39.4% versus the paired lazy control, with
+comparable steady throughput and an approximately 11% increase in peak sampled
+container memory. Its burst p95 improved against the paired control but was
+higher than the original baseline. The catalog cases retain the materialization
+gains: first-access p95 is 88–92% below the original baseline, and steady
+throughput is approximately 3.1–5.3 times the original. Compared with the
+catalog-optimized controls, first-access p95 fell a further 5–29%, steady
+throughput was within 3%, steady p95 was 6–12% higher, and sampled peak memory
+increased approximately 12–15%, while remaining below the original catalog
+baseline. The short samples do not establish statistical significance for
+small timing differences. No readiness penalty was discernible.
+
+Retain selective pre-fork initialization: the substantial Unit-detail and
+Explorer first-access improvements justify the measured route-dependent memory
+tradeoff. Do not infer a general reduction in memory from the Unit-detail
+result or add serialized catalog caches without a new measured need. The
+build-time materialization and initialization experiments are complete.
+Representative mixed traffic through the deployment stack, including
+aggregate container memory, remains a separate capacity acceptance task.
 
 ### Normalized source verification reuse
 

@@ -261,8 +261,12 @@ link index before Gunicorn forks, using the existing snapshot caches. The
 loaders close all read-only SQLite connections; contextual and request-specific
 results remain lazy. The direct application factory stays lazy. This is a
 runtime-only choice supported by the [paired Docker comparison](testing.md#pre-fork-runtime-index-initialization-pilot);
-no generated database content changes. The diagnostic opt-out is documented
-with the benchmark procedure.
+no generated database content changes. The cross-route comparison shows a
+route-dependent memory tradeoff: the warmup reduces Unit-detail memory but
+increases Explorer and catalog peak memory relative to lazy initialization.
+Retain it for the substantial first-access improvement; measure mixed-traffic
+memory during deployment capacity acceptance. The diagnostic opt-out is
+documented with the benchmark procedure.
 
 Implementation priorities and remaining tasks belong to the
 [performance backlog](TODO.md#performance-storage-and-build-tooling).

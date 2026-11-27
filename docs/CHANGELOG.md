@@ -17,6 +17,7 @@ are not retroactively relabeled.
 - Faster initial Glossary loading and Orders/AROs reference requests.
 - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
 - Faster initial Unit Explorer filter-context initialization and Specialist Troops filtering.
+- Faster first access to Unit details and Explorer after application startup.
 - Correct Equipment filter counts on repeated matching queries.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
@@ -63,6 +64,8 @@ are not retroactively relabeled.
 - **Data processing + Web backend:** Materialized catalog summaries, filter
   identities and canonical Army detail usage with shared Unit display records.
   Contextual matching and curated detail enrichment remain dynamic.
+- **Web backend + Deployment:** Preload the shared Unit graph and official Army
+  links before worker forks to reduce redundant first-access initialization.
 
 ### Fixed
 

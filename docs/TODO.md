@@ -317,32 +317,16 @@ make v1.3.0 depend on them.
 
 ### Performance, storage, and build tooling
 
-- [ ] **Data processing + Web backend (v1.3.0):** Complete the remaining
-  [build-time materialization](architecture.md#design-direction-build-time-materialization)
-  follow-up. General profiles, Rules, search, catalog summaries/usage, scoped
-  Unit filter inputs, Specialist candidates, reference targets, Glossary and
-  declarations are materialized; published catalog details bypass redundant
-  LRU caches. The [cross-platform baseline](testing.md#cross-platform-materialization-baseline--2026-11-26)
-  records Windows/Linux measurements and focused parity.
-  The [Docker baseline](testing.md#docker-first-access-and-catalog-detail-baseline--2026-11-27)
-  identifies repeated catalog-detail enrichment and first-access initialization
-  as the next optimization targets.
-  The [Rules v24 catalog presentation projection](testing.md#catalog-presentation-materialization-pilot--2026-11-27)
-  is retained after parity and Docker comparison; further serialized-response
-  materialization is not currently justified.
-  The [pre-fork Unit graph and Army link warmup](testing.md#pre-fork-runtime-index-initialization-pilot)
-  is retained after a same-image Minutemen comparison; generated databases
-  are unchanged.
-  - [ ] Complete the cross-route initialization regression comparison for
-    Explorer initial and the three catalog details against the original and
-    catalog-optimized Docker baselines: compare first-access and warmed
-    p50/p95, throughput and aggregate application-container memory.
-  - [ ] Measure aggregate worker memory and deployed first-access/warmed
-    median and p95 under representative concurrent traffic for Unit Explorer,
-    Unit details, Skills, Equipment and Weapons using the
-    [capacity procedure](deployment.md#repeatable-http-capacity-scenario).
-    Investigate first-visit, exact-variant and asynchronous rendering costs,
-    and retire additional caches, only where measured benefit justifies it.
+- [ ] **Web backend + Deployment (v1.3.0):** Measure aggregate application
+  memory and deployed first-access/warmed median and p95 under representative
+  concurrent traffic for Unit Explorer, Unit details, Skills, Equipment and
+  Weapons using the [capacity procedure](deployment.md#repeatable-http-capacity-scenario).
+  The [build-time materialization](architecture.md#design-direction-build-time-materialization)
+  experiments and [cross-route Docker comparison](testing.md#pre-fork-runtime-index-initialization-pilot)
+  are complete; selective pre-fork initialization is retained with its measured
+  route-dependent memory tradeoff. Investigate first-visit, exact-variant and
+  asynchronous rendering costs, and retire additional caches, only where
+  measured benefit justifies it.
 
 - [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
   v10 Rules set receives the applicable release-candidate acceptance.
