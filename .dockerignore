@@ -10,6 +10,7 @@ data/wiki/
 **/*.zip
 **/*.patch
 .infinity-db-deploy.env
+.env
 AGENTS.local.md
 .venv/
 .pytest_cache/

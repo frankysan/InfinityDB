@@ -56,11 +56,6 @@ candidate acceptance remains in the release checklist.
 Complete the selected development work before the existing
 [release checklist](releasing.md); no new release gates are introduced.
 
-### Optional additions (not release-blocking)
-
-- **Web frontend + Web backend + Deployment:** Shared
-  [bug/error reporting form](#reference-presentation-and-feedback).
-
 ### Deferred beyond the committed scope
 
 Historical FAQ replay and comprehensive Rules history; ITS 16 Part II;
@@ -200,14 +195,6 @@ make v1.3.0 depend on them.
 - [ ] **Web frontend + Web backend:** Consider independent sectorial palettes
   only with representative sectorial visual references; do not infer them
   solely from their parent faction.
-- [ ] **Web frontend + Web backend + Deployment:** Add a shared, minimal
-  bug/error reporting form with lightweight spam/bot protection. Include
-  the current page and relevant entity context by default, let the reporter
-  inspect the submitted context, and omit personal details and private
-  URL/query/share data. Require no account, name or email. Choose a simple
-  report-delivery mechanism and retention policy before implementation;
-  avoid a separate issue-management system or personal-content store.
-  Keep the component consistent wherever displayed.
 
 ### List and session configuration
 

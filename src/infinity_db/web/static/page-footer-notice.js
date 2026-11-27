@@ -1,3 +1,5 @@
+import { initFeedback } from "./feedback.js";
+
 /** Session-scoped disclosure state for the floating accuracy notice.
  * The shared navigation stays mounted while soft navigation replaces <main>.
  * New browsing sessions start expanded; storage is optional.
@@ -22,5 +24,10 @@ function initAccuracyNotice() {
   });
 }
 
-initAccuracyNotice();
-document.addEventListener("infinity:navigation", initAccuracyNotice);
+function initPageFooter() {
+  initAccuracyNotice();
+  initFeedback();
+}
+
+initPageFooter();
+document.addEventListener("infinity:navigation", initPageFooter);

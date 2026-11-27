@@ -729,6 +729,29 @@ and operator commands.
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.
 
+Voluntary error reports are a separate, explicit communication channel, not
+analytics or a personal-content store. The shared form posts bounded JSON to
+`/api/feedback` with an inspectable, optional reference page path (including its
+public entity identifier when present), category and message. The handler
+accepts only recognized page routes, excludes URL queries and fragments, and
+adds the running version. Requests omit preference cookies and the referrer
+path; no visitor identifiers, request headers or source IPs enter the report.
+Same-origin checks, a honeypot field, a 16 KiB body limit, a 2,000-character
+message limit and a process-local six-report sliding-minute cap bound casual
+abuse without tracking individual visitors. The cap is shared by threads of
+each worker, not across workers; it is not a distributed anti-spam service.
+
+The app sends a plain-text email through a configured SMTP relay using
+certificate-validated TLS (STARTTLS or implicit TLS). Sender and recipient
+are fixed operator configuration, never reporter-supplied headers. An
+unconfigured relay disables reporting; delivery errors are reported without
+logging content, credentials or addresses. At most one mail delivery runs
+per worker at a time, and the rate limit counts delivery attempts. The server
+holds no report store or retry queue; successful submission means the SMTP
+relay accepted the message, not confirmed inbox delivery.
+The [deployment policy](deployment.md#voluntary-error-reports) owns
+configuration and mailbox retention.
+
 Capacity/resource evidence follows the same boundary. Retained host/container reports may contain
 bounded CPU, memory/swap, filesystem/inode, disk-I/O, network, container utilization, and
 restart/OOM state, but not hostnames, IP addresses, request URLs/query values, arbitrary Docker

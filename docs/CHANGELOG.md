@@ -24,6 +24,7 @@ are not retroactively relabeled.
 - Open matching Unit entries directly in official Infinity Army from their Army profile cards.
 - Compare two current Army profiles and loadouts side by side, with differences-only
   display and shareable selections.
+- Report incorrect information or website problems from any page without an account.
 - Choose InfinityDB or one of eleven Army-inspired themes, independently of
   Auto, Light or Dark mode. Saved scenario maps retain the selected appearance.
 - Clearer distinctions between rules, explanations, source examples, reviewed
@@ -36,6 +37,9 @@ are not retroactively relabeled.
 
 ### Added
 
+- **Web frontend + Web backend + Deployment:** Added a shared anonymous error
+  report form with inspectable optional page context, bounded submission
+  limits and configurable email delivery without an application report store.
 - **Web frontend + Web backend:** Added Unit comparison using current Army profile
   and loadout source entries, preserving group-local selections and URL-owned
   state without additional database or API contracts.

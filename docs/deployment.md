@@ -297,6 +297,42 @@ container itself remains unpublished. Deployment tooling rejects wildcard metric
 metrics are process-lifetime operational state and intentionally reset when the application
 container restarts.
 
+### Voluntary error reports
+
+The shared form sends reports to a fixed maintainer email address using
+an authenticated or otherwise authorized SMTP relay. Reporting is disabled
+by default, without affecting reference browsing. Set these values in the
+deployment checkout's private, Git-ignored `.env` file (mode 600):
+
+```dotenv
+INFINITYDB_FEEDBACK_SMTP_HOST=smtp.example.invalid
+INFINITYDB_FEEDBACK_SMTP_PORT=587
+INFINITYDB_FEEDBACK_SMTP_SECURITY=starttls
+INFINITYDB_FEEDBACK_SMTP_FROM=sender@example.invalid
+INFINITYDB_FEEDBACK_SMTP_TO=maintainer@example.invalid
+INFINITYDB_FEEDBACK_SMTP_USERNAME=sender@example.invalid
+INFINITYDB_FEEDBACK_SMTP_PASSWORD='replace-with-mail-app-password'
+```
+
+Use the relay's authorized sender address and the intended maintainer
+recipient. For implicit TLS use `ssl` and port 465; the port defaults
+to 587 for STARTTLS and 465 for SSL. Username and password may both be
+omitted for a relay that authorizes the application without credentials.
+Plaintext SMTP is not supported. The installer preserves the separate
+`.env` file across updates; Compose passes the values only to the app.
+Keep credentials private and do not include them in diagnostics or Git.
+
+The app does not retain report bodies or retry failed deliveries. Review
+email in the configured mailbox, retain it only as needed to resolve the
+issue, and transfer only actionable non-personal findings to the normal
+project issue/backlog workflow. SMTP acceptance is not a guarantee of
+inbox delivery. An actual submission after configuring the relay is part of
+operator acceptance. The isolated local-test deployment explicitly disables
+mail delivery to avoid accidental real submissions.
+
+The [architecture privacy contract](architecture.md#privacy-preserving-observability)
+describes the submitted fields and abuse limits.
+
 ### Retained metrics history
 
 Retained history does not make the web-facing application container writable. The implemented

@@ -23,6 +23,7 @@ from infinity_db.unit_history import load_unit_history
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.api_handler import ApiHandler
+from infinity_db.web.feedback import FeedbackHandler, MailDelivery
 from infinity_db.web.metrics import RequestMetrics
 from infinity_db.web.presentation import ASSETS, PresentationHandler, static_asset_revision
 from infinity_db.web.response import WebResponse
@@ -181,6 +182,7 @@ class Application:
         self.symbol_catalog = self.api.symbol_catalog
         self.fireteam_rules_reference = self.api.fireteam_rules_reference
         self.request_metrics = RequestMetrics()
+        self.feedback = FeedbackHandler(MailDelivery.from_environment())
 
     def preload_runtime_indexes(self) -> None:
         """Warm shared snapshot indexes before accepting concurrent requests.
@@ -303,7 +305,10 @@ class Application:
         method = environ.get("REQUEST_METHOD", "GET")
         path = environ.get("PATH_INFO", "/")
         query = environ.get("QUERY_STRING", "")
-        response = self._dispatch(method, path, query)
+        response = (
+            self.feedback.handle(environ) if path == "/api/feedback"
+            else self._dispatch(method, path, query)
+        )
 
         etag = (
             self._snapshot_etag(path, query)

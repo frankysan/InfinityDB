@@ -473,9 +473,12 @@ choice persists only in the current tab's session storage, including soft
 navigation and reload; it is not a cookie, permanent dismissal, or consent
 control. When session storage is disabled, the native disclosure still works.
 Keep visible focus and accessible expanded/collapsed state, avoid obscuring
-mobile navigation or other fixed controls, and do not invent a feedback
-collection destination. Dedicated assistive-technology testing remains part
-of final accessibility acceptance.
+mobile navigation or other fixed controls. Both the ordinary footer and the
+expanded notice offer the same error-reporting dialog with an optional page
+context preview, no personal/contact fields and explicit submission. Preserve
+native modal keyboard/focus behavior and communicate submission success or
+failure without navigating away. Dedicated assistive-technology testing
+remains part of final accessibility acceptance.
 
 ### Write player-facing copy for players
 

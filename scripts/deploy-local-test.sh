@@ -48,6 +48,7 @@ METRICS_PORT="$metrics_port" \
 IMAGE_TAG="$image_tag" \
 RETAIN_APP_IMAGES=1 \
 PRUNE_APP_IMAGES=0 \
+INFINITYDB_FEEDBACK_SMTP_HOST= \
   sh ./scripts/deploy.sh
 
 printf 'Local test deployment ready: http://localhost:%s\n' "$port"

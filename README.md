@@ -39,6 +39,11 @@ identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
   bookmarkable or shareable may be encoded in the URL, so it can also appear in your
   browser history or in a link you choose to share. InfinityDB does not retain those
   query/search values in its aggregate metrics.
+- **Error reports are voluntary.** The shared form sends only the chosen category,
+  your message, the optional visible page path (without query or fragment), and
+  the running version. No account or contact details are requested. Do not
+  include personal information. Reports are emailed to the maintainer rather
+  than stored by InfinityDB; email is retained only as needed to resolve the issue.
 
 This policy describes InfinityDB's application-level collection and retention. Hosting
 and network infrastructure necessarily processes connection metadata to deliver HTTP
@@ -49,7 +54,8 @@ its application metrics.
 ## Current features
 
 - Imports validated Infinity Army snapshots into a local SQLite database and
-  serves a read-only browser and HTTP API.
+  serves a read-only reference browser and HTTP API.
+- Accepts voluntary error reports through a shared anonymous form.
 - Browses Units across Armies with name search, pagination, six categorical
   multi-select filters, independent AND/OR choices, and a matching scope:
   **Same profile**, **Same loadout** or **Anywhere in Unit**. Prospective

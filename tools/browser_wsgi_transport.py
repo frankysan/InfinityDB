@@ -14,6 +14,7 @@ def wsgi_response(
     url: str,
     method: str = "GET",
     headers: dict[str, str] | None = None,
+    request_body: bytes = b"",
 ) -> tuple[int, list[tuple[str, str]], bytes]:
     parts = urlsplit(url)
     environ: dict[str, Any] = {}
@@ -24,7 +25,10 @@ def wsgi_response(
     environ["SERVER_NAME"] = parts.hostname or "localhost"
     environ["SERVER_PORT"] = str(parts.port or 80)
     environ["wsgi.url_scheme"] = parts.scheme
-    environ["wsgi.input"] = BytesIO()
+    environ["HTTP_HOST"] = parts.netloc
+    environ["wsgi.input"] = BytesIO(request_body)
+    if request_body:
+        environ["CONTENT_LENGTH"] = str(len(request_body))
     for key, value in (headers or {}).items():
         name = key.upper().replace("-", "_")
         environ[name if name in {"CONTENT_TYPE", "CONTENT_LENGTH"} else f"HTTP_{name}"] = value
@@ -53,7 +57,10 @@ def route_browser_page(page: Any, app: Callable[..., Any], origin: str) -> None:
         if urlsplit(request.url).netloc != host:
             route.continue_()
             return
-        status, headers, body = wsgi_response(app, request.url, request.method, request.headers)
+        status, headers, body = wsgi_response(
+            app, request.url, request.method, request.headers,
+            request.post_data_buffer or b"",
+        )
         route.fulfill(status=status, headers=dict(headers), body=body)
 
     page.route("**/*", respond)
