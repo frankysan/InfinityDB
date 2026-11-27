@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -11,6 +12,7 @@ import tempfile
 import time
 import uuid
 from pathlib import Path
+from urllib.request import urlopen
 
 from infinity_db.database_set import COMPLETE_RUNTIME_FILES, validate_database_set
 from tools.operations.deployment_resources import ResourceCaptureError, capture_resources
@@ -70,18 +72,23 @@ def _copy_build_context(context: Path, selected: Path) -> None:
         shutil.copyfile(selected / name, output / name)
 
 
-def _measure_capacity(
-    container: str, output: Path, *, case: str = "unit-explorer",
-    resources: Path | None = None, steady_seconds: int = 60, burst_seconds: int = 10,
-) -> None:
-    """Run the existing capacity workload through the private published port."""
+def _loopback_url(container: str, container_port: int) -> str:
     binding = subprocess.check_output(
-        ["docker", "port", container, "8000/tcp"], text=True,
+        ["docker", "port", container, f"{container_port}/tcp"], text=True,
     ).strip()
     host, separator, port = binding.rpartition(":")
     if host != "127.0.0.1" or not separator or not port.isdecimal():
         raise ValueError("Preview capacity port is not bound to IPv4 loopback")
-    base_url = f"http://127.0.0.1:{port}"
+    return f"http://127.0.0.1:{port}"
+
+
+def _measure_capacity(
+    container: str, output: Path, *, case: str = "unit-explorer",
+    resources: Path | None = None, steady_seconds: int = 60, burst_seconds: int = 10,
+    container_port: int = 8000, container_ids: list[str] | None = None,
+) -> None:
+    """Run the existing capacity workload through the private published port."""
+    base_url = _loopback_url(container, container_port)
     print(f"Running {case} workload ({steady_seconds}s steady, {burst_seconds}s burst)", flush=True)
     first_access = case if case in FIRST_ACCESS_CASES else None
     scenario = "general" if first_access is not None else case
@@ -97,14 +104,21 @@ def _measure_capacity(
             command.extend(("--scenario", scenario))
         resource_report, exit_code = capture_resources(
             ROOT, duration_seconds=steady_seconds + burst_seconds, interval_seconds=2,
-            container_ids=[container], command=command,
+            container_ids=container_ids or [container], command=command,
         )
         write_new_json_receipt(resources, resource_report)
         print(f"Resource report: {resources}")
-        summary = resource_report["containers"][container]
-        print(f"App container resources: {json.dumps(summary, sort_keys=True)}")
+        for name, summary in resource_report["containers"].items():
+            print(f"Container {name} resources: {json.dumps(summary, sort_keys=True)}")
         if exit_code:
             raise ValueError("Preview capacity workload failed")
+        if container_ids is not None:
+            print(f"Host resources: {json.dumps(resource_report['host'], sort_keys=True)}")
+            if case == "general":
+                report = json.loads(output.read_text(encoding="utf-8"))
+                for phase in report["phases"]:
+                    for item in phase.get("cases", []):
+                        print(f"{phase['name']} {item['name']}: {json.dumps(item['latency'])}")
         return
     report = capacity_test(
         base_url, timeout=10, warmup_passes=2, steady_seconds=steady_seconds,
@@ -118,15 +132,72 @@ def _measure_capacity(
         raise ValueError("Preview capacity workload reported HTTP errors")
 
 
+def _compose_capacity(
+    context: Path, output: Path, resources: Path, *,
+    case: str, steady_seconds: int, burst_seconds: int,
+) -> None:
+    """Run the tracked Compose stack in a disposable, loopback-only project."""
+    project = "infinitydb-preview-" + uuid.uuid4().hex[:12]
+    environment = {
+        key: value for key, value in os.environ.items() if not key.startswith("COMPOSE_")
+    }
+    environment.update(
+        DOMAIN="127.0.0.1", BIND_ADDRESS="127.0.0.1", HTTP_PORT="0",
+        METRICS_BIND_ADDRESS="127.0.0.1", METRICS_PORT="0",
+        IMAGE_TAG=project, METRICS_HISTORY_IMAGE_TAG=project,
+    )
+    compose = [
+        "docker", "compose", "--project-name", project,
+        "--project-directory", str(context), "--file", str(context / "compose.yaml"),
+    ]
+
+    def service_id(service: str) -> str:
+        ids = subprocess.check_output(
+            [*compose, "ps", "-q", service], env=environment, text=True,
+        ).splitlines()
+        if len(ids) != 1 or not ids[0]:
+            raise ValueError(f"Expected one running preview service: {service}")
+        return ids[0]
+
+    try:
+        subprocess.run(
+            [*compose, "up", "-d", "--build", "--wait", "--wait-timeout", "120"],
+            env=environment, check=True,
+        )
+        app, caddy, metrics = (service_id(s) for s in ("app", "caddy", "metrics-history"))
+        health_url = _loopback_url(caddy, 9090) + "/health"
+        for _ in range(30):
+            try:
+                with urlopen(health_url, timeout=2) as response:
+                    if response.status == 200:
+                        break
+            except OSError:
+                pass
+            time.sleep(1)
+        else:
+            raise ValueError("Compose preview did not become healthy through Caddy")
+        _measure_capacity(
+            caddy, output, case=case, resources=resources,
+            steady_seconds=steady_seconds, burst_seconds=burst_seconds,
+            container_port=80, container_ids=[app, caddy, metrics],
+        )
+    finally:
+        subprocess.run([*compose, "down", "--volumes"], env=environment, check=True)
+        for image in ("infinity-db", "infinity-db-metrics-history"):
+            subprocess.run(["docker", "image", "rm", f"{image}:{project}"], check=False)
+
+
 def preview_image(
     selected: Path, tag: str, baseline: Path = CURRENT_BASELINE,
     *, capacity_output: Path | None = None, capacity_case: str = "unit-explorer",
     capacity_resources: Path | None = None, steady_seconds: int = 60, burst_seconds: int = 10,
-    lazy_indexes: bool = False,
+    lazy_indexes: bool = False, compose_capacity: bool = False,
 ) -> None:
     """Build/start/check/remove a private preview; never modify the serving directory."""
     if not shutil.which("docker"):
         raise ValueError("Docker CLI is unavailable")
+    if compose_capacity and (capacity_output is None or capacity_resources is None or lazy_indexes):
+        raise ValueError("Compose capacity requires HTTP and resource outputs with normal indexes")
     if capacity_resources is not None:
         if capacity_output is None or capacity_resources.resolve() == capacity_output.resolve():
             raise ValueError("Resource capture requires a separate capacity output")
@@ -147,6 +218,15 @@ def preview_image(
         context = Path(directory).resolve()
         assert context.is_relative_to(local.resolve())
         _copy_build_context(context, selected)
+        if compose_capacity:
+            assert capacity_output is not None and capacity_resources is not None
+            _compose_capacity(
+                context, capacity_output, capacity_resources, case=capacity_case,
+                steady_seconds=steady_seconds, burst_seconds=burst_seconds,
+            )
+            if validate_database_set(selected, require_complete=True)["sha256"] != before:
+                raise ValueError("Selected database files changed during preview")
+            return
         try:
             subprocess.run(["docker", "build", "--tag", tag, str(context)], check=True)
             built = True
@@ -245,6 +325,10 @@ def main(argv: list[str] | None = None) -> int:
         "--lazy-indexes", action="store_true",
         help="Disable WSGI index warmup for an otherwise identical comparison.",
     )
+    parser.add_argument(
+        "--compose-capacity", action="store_true",
+        help="Measure the disposable full Compose stack through Caddy (Linux resources required).",
+    )
     args = parser.parse_args(argv)
     if args.steady_seconds < 1 or args.burst_seconds < 1:
         parser.error("Capacity phase durations must be positive")
@@ -255,7 +339,7 @@ def main(argv: list[str] | None = None) -> int:
             args.source_dir, args.tag, args.baseline, capacity_output=args.capacity_output,
             capacity_case=args.capacity_case, capacity_resources=args.capacity_resources,
             steady_seconds=args.steady_seconds, burst_seconds=args.burst_seconds,
-            lazy_indexes=args.lazy_indexes,
+            lazy_indexes=args.lazy_indexes, compose_capacity=args.compose_capacity,
         )
     except (OSError, ResourceCaptureError, ValueError, subprocess.SubprocessError) as exc:
         print(f"ERROR: {exc}")

@@ -557,6 +557,20 @@ default 60/10-second phases are configurable with `--steady-seconds` and
 `--burst-seconds`. App-only evidence excludes Caddy; use the full isolated
 stack for deployment-level resource evidence.
 
+The same preview tool can run the complete disposable Compose stack on Linux
+without disturbing an existing deployment. For example:
+
+```bash
+.venv/bin/python -m tools.preview_runtime_image --compose-capacity --capacity-case general --capacity-output local/performance/http-capacity/RUN_ID/general.json --capacity-resources local/performance/http-capacity/RUN_ID/general-resources.json
+```
+
+Compose mode uses a unique project, ephemeral IPv4 loopback ports, the tracked
+Caddy configuration, and separate temporary metrics-history storage. It
+requires both receipt paths and collects resources from all three services.
+Each invocation starts fresh and removes its own containers, volumes and
+image tags afterward. Use `--capacity-case unit-explorer` for the separate
+Explorer workload; fixed first-access cases are also supported.
+
 The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
 
