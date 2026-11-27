@@ -524,6 +524,30 @@ burst 102.8/232.6 ms, steady throughput 264.0 req/s, peak app memory 247 MiB.
 The Unit-detail first-access cost persists despite the catalog improvement;
 use this control for the separate pre-fork initialization experiment.
 
+### Pre-fork runtime index initialization pilot
+
+A Linux-dev cold repository profile at `fe22fa55` (Python 3.14, numeric
+Unit detail selected by `tools.performance.benchmark_runtime --profile`)
+took 247 ms, including 189 ms in the Unit graph and 46 ms in the official
+Army link index. These are the measured warmup candidates, not a profile
+of the concurrent Docker workload.
+
+The WSGI pilot warms those existing snapshot caches after complete-set
+validation. Both loaders close their read-only connections before returning.
+The direct development application factory stays lazy; request-specific
+results remain lazy everywhere. Gunicorn already uses `--preload`.
+The seven focused Windows tests passed in 19.03 s (reference response parity,
+WSGI startup and opt-out, cache reuse without opening SQLite, and preview
+lifecycle); Ruff, Pyright and documentation checks passed.
+
+For a controlled comparison, use `tools.preview_runtime_image` with the
+same capacity case and distinct receipts/tags, first with `--lazy-indexes`
+(sets `INFINITY_DB_PRELOAD_INDEXES=0` in the disposable container), then
+without it. Both runs print elapsed Docker launch-to-health readiness,
+including container setup and the coarse health polling interval.
+Compare readiness, first-access/warmed latency, throughput and sampled
+container memory. Adoption remains subject to these measurements.
+
 ### Normalized source verification reuse
 
 Run the following read-only benchmark against a matched standalone Army export

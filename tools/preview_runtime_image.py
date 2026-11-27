@@ -122,6 +122,7 @@ def preview_image(
     selected: Path, tag: str, baseline: Path = CURRENT_BASELINE,
     *, capacity_output: Path | None = None, capacity_case: str = "unit-explorer",
     capacity_resources: Path | None = None, steady_seconds: int = 60, burst_seconds: int = 10,
+    lazy_indexes: bool = False,
 ) -> None:
     """Build/start/check/remove a private preview; never modify the serving directory."""
     if not shutil.which("docker"):
@@ -154,9 +155,12 @@ def preview_image(
                     "docker", "run", "--rm", "--entrypoint", "python", tag, "-c", _IMAGE_VERIFY,
                 ], check=True)
             publish = ["--publish", "127.0.0.1::8000"] if capacity_output is not None else []
+            environment = ["--env", "INFINITY_DB_PRELOAD_INDEXES=0"] if lazy_indexes else []
+            started = time.perf_counter()
             subprocess.run([
                 "docker", "run", "-d", "--rm", "--read-only", "--tmpfs", "/tmp",
-                "--security-opt", "no-new-privileges", *publish, "--name", container, tag,
+                "--security-opt", "no-new-privileges", *publish, *environment,
+                "--name", container, tag,
             ], check=True)
             running = True
             for _ in range(30):
@@ -170,6 +174,7 @@ def preview_image(
                 subprocess.run(["docker", "logs", container], check=False)
                 raise ValueError("Preview did not become healthy")
 
+            print(f"Preview health readiness: {time.perf_counter() - started:.3f} s", flush=True)
             if capacity_output is not None:
                 _measure_capacity(
                     container, capacity_output, case=capacity_case, resources=capacity_resources,
@@ -236,6 +241,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--capacity-resources", type=Path, help="Capture Linux app/host resources.")
     parser.add_argument("--steady-seconds", type=int, default=60)
     parser.add_argument("--burst-seconds", type=int, default=10)
+    parser.add_argument(
+        "--lazy-indexes", action="store_true",
+        help="Disable WSGI index warmup for an otherwise identical comparison.",
+    )
     args = parser.parse_args(argv)
     if args.steady_seconds < 1 or args.burst_seconds < 1:
         parser.error("Capacity phase durations must be positive")
@@ -246,6 +255,7 @@ def main(argv: list[str] | None = None) -> int:
             args.source_dir, args.tag, args.baseline, capacity_output=args.capacity_output,
             capacity_case=args.capacity_case, capacity_resources=args.capacity_resources,
             steady_seconds=args.steady_seconds, burst_seconds=args.burst_seconds,
+            lazy_indexes=args.lazy_indexes,
         )
     except (OSError, ResourceCaptureError, ValueError, subprocess.SubprocessError) as exc:
         print(f"ERROR: {exc}")

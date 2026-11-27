@@ -8264,15 +8264,51 @@ def test_local_app_without_rules_database_keeps_army_data_available(
     assert json.loads(body)["items"] == []
 
 
-def test_wsgi_uses_explicit_complete_directory_from_environment(monkeypatch) -> None:
+@pytest.mark.parametrize("lazy_indexes", [False, True])
+def test_wsgi_uses_explicit_complete_directory_from_environment(
+    monkeypatch, lazy_indexes: bool,
+) -> None:
     directory = Path(__file__).parents[1] / "data/generated"
     monkeypatch.delenv("INFINITY_DB_DATABASE", raising=False)
     monkeypatch.delenv("INFINITY_DB_RULES_DATABASE", raising=False)
     monkeypatch.setenv("INFINITY_DB_DB_DIR", str(directory))
+    monkeypatch.delenv("INFINITY_DB_PRELOAD_INDEXES", raising=False)
+    if lazy_indexes:
+        monkeypatch.setenv("INFINITY_DB_PRELOAD_INDEXES", "0")
     sys.modules.pop("infinity_db.web.wsgi", None)
-    module = importlib.import_module("infinity_db.web.wsgi")
+    with patch.object(
+        Database, "preload_runtime_indexes", autospec=True,
+        side_effect=Database.preload_runtime_indexes,
+    ) as preload:
+        module = importlib.import_module("infinity_db.web.wsgi")
     assert module.app.database.path == directory / "army.db"
     assert module.app.rules_database.path == directory / "rules_n5.db"
+    if lazy_indexes:
+        preload.assert_not_called()
+    else:
+        preload.assert_called_once_with(module.app.database)
+        with patch.object(
+            module.app.database, "_connect",
+            side_effect=AssertionError("Preloaded indexes must not reopen SQLite"),
+        ):
+            assert module.app.database._unit_graph()["groups"]
+            assert module.app.database._official_army_unit_links()
+
+
+def test_preloaded_runtime_indexes_preserve_reference_responses() -> None:
+    directory = Path(__file__).parents[1] / "data/generated"
+    lazy = create_app_from_database_set(directory)
+    warm = create_app_from_database_set(directory)
+    warm.database.preload_runtime_indexes()
+    for path in (
+        "/api/units/minutemen",
+        "/api/units?limit=50&matching_scope=profile&counts=prospective",
+        "/api/skills/mimetism",
+    ):
+        expected = request(lazy, path)
+        assert expected[0] == 200
+        assert request(warm, path) == expected
+        assert request(warm, path) == expected
 
 
 def test_wsgi_rejects_retired_individual_database_environment(monkeypatch) -> None:

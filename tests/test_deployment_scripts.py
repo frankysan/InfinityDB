@@ -38,8 +38,9 @@ def test_preview_rejects_unavailable_engine_before_staging(
         preview.preview_image(tmp_path, "infinity-db:preview-test")
 
 
+@pytest.mark.parametrize("lazy_indexes", [False, True])
 def test_preview_waits_for_health_and_cleans_only_owned_resources(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, lazy_indexes: bool,
 ) -> None:
     from types import SimpleNamespace
 
@@ -71,8 +72,9 @@ def test_preview_waits_for_health_and_cleans_only_owned_resources(
     monkeypatch.setattr(preview.time, "sleep", lambda _: None)
     monkeypatch.setattr(preview, "capture", lambda *a, **kw: {})
     monkeypatch.setattr(preview, "check", lambda *a: 41)
-    preview.preview_image(tmp_path, "infinity-db:preview-test")
+    preview.preview_image(tmp_path, "infinity-db:preview-test", lazy_indexes=lazy_indexes)
     start = next(c for c in calls if c[:3] == ("docker", "run", "-d"))
+    assert ("INFINITY_DB_PRELOAD_INDEXES=0" in start) == lazy_indexes
     assert "--read-only" in start
     assert "-p" not in start and "--publish" not in start
     assert probes == 3
