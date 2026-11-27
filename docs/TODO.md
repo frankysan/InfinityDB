@@ -324,6 +324,19 @@ make v1.3.0 depend on them.
   declarations are materialized; published catalog details bypass redundant
   LRU caches. The [cross-platform baseline](testing.md#cross-platform-materialization-baseline--2026-11-26)
   records Windows/Linux measurements and focused parity.
+  The [Docker baseline](testing.md#docker-first-access-and-catalog-detail-baseline--2026-11-27)
+  identifies repeated catalog-detail enrichment and first-access initialization
+  as the next optimization targets.
+  - [ ] Prioritize catalog details: extend the existing shared Unit usage
+    projection with presentation enrichment, avoiding repeated expanded Unit
+    objects. Evaluate compact serialized responses only if significant runtime
+    costs remain; preserve response parity and measure storage/memory tradeoffs.
+  - [ ] Investigate preloading expensive immutable indexes before Gunicorn
+    forks to avoid redundant initialization across concurrent requests.
+    Measure startup, first-access latency and aggregate memory before adoption.
+  - [ ] Rebenchmark both changes against the Docker baseline: compare latency
+    (first-access and warmed p50/p95), throughput, generated database size and
+    aggregate application-container memory under equivalent workloads.
   - [ ] Measure aggregate worker memory and deployed first-access/warmed
     median and p95 under representative concurrent traffic for Unit Explorer,
     Unit details, Skills, Equipment and Weapons using the
