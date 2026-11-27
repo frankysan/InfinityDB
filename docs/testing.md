@@ -601,8 +601,17 @@ Explorer first-access improvements justify the measured route-dependent memory
 tradeoff. Do not infer a general reduction in memory from the Unit-detail
 result or add serialized catalog caches without a new measured need. The
 build-time materialization and initialization experiments are complete.
-Representative mixed traffic through the deployment stack, including
-aggregate container memory, remains a separate capacity acceptance task.
+The [full-stack capacity investigation](deployment.md#full-stack-v130-development-capacity-2026-11-27)
+subsequently completed on Linux-dev.
+
+Hosted Source run [46026487536](https://github.com/frankysan/InfinityDB/actions/runs/46026487536)
+at `b9bfcb83` failed nine runtime-surface audit tests because the web-layer
+warmup introduced two direct database calls absent from the probe inventory.
+The audit now explicitly probes cold Unit graph and official Army link
+initialization, bringing the fixture to 53 surfaces with unchanged table and
+field coverage (83 tables, 396 fields). The focused Windows runtime-surface,
+database-separation and embedded Army reference tests passed 22 tests in
+25.03 s. This is a local regression fix, not a passed replacement hosted run.
 
 ### Normalized source verification reuse
 

@@ -35,13 +35,13 @@ in the linked workstreams; retire this milestone summary when the release closes
 
 ### Committed scope and remaining work
 
-- **Project infrastructure:** Identical-tree CI reuse, authoritative PR metadata
-  and direct Caddy Host-header probing are implemented. Retain normal
-  [release verification](releasing.md) and the remaining
-  [release-tooling follow-up](#release-and-deployment-robustness).
-- **Data processing + Web backend:** General profiles, composed Rules, search,
-  catalog usage, scoped filter inputs and reference projections are implemented.
-  Finish the remaining [performance and build work](#performance-storage-and-build-tooling).
+- **Project infrastructure:** Identical-tree CI reuse, authoritative PR metadata,
+  direct Caddy Host-header probing and release-tooling regression coverage are
+  implemented. Retain normal [release verification](releasing.md).
+- **Data processing + Web backend:** Materialized profiles, Rules, search, catalog
+  usage, scoped filter inputs and reference projections, plus pre-fork
+  initialization, are implemented. The [development capacity investigation](deployment.md#full-stack-v130-development-capacity-2026-11-27)
+  is complete.
 - **Data processing + Web backend + Web frontend:** Initial N5 Unit history is
   embedded in the normal build and includes the latest available direct snapshot.
   Initial history disclosures are implemented; retain coverage limits and
@@ -66,9 +66,8 @@ Complete the selected development work before the existing
   [bug/error reporting form](#reference-presentation-and-feedback).
 - **Data processing:** [Structured snapshot diff reports](#army-snapshot-maintenance),
   preferably as a natural output of historical Army processing.
-- **Web backend + Data processing:** Opportunistic
-  [scenario ruler label polish](#its-scenarios-and-game-tools) and
-  [retirement of superseded build helpers](#performance-storage-and-build-tooling).
+- **Web backend:** Opportunistic
+  [scenario ruler label polish](#its-scenarios-and-game-tools).
 
 ### Deferred beyond the committed scope
 
@@ -106,21 +105,6 @@ make v1.3.0 depend on them.
   are available for explicit edition/revision comparison; their portable
   member names were migrated into curated N5.3 after exact URL, heading,
   and source revision identity verification.
-
-- [ ] **Acquisition + Data processing:** Retire the September/October 2026
-  Wiki ZIPs and their snapshot manifests once this migration is accepted.
-  - Completed: Repinned 109 current-page citations (unchanged MediaWiki revision
-    IDs and headings) and verified 116 curated `oldid` references. Migrated
-    active research readers, pinned tests and current documentation; rebuilt
-    the runtime database set. Retirement comparison found **zero missing**
-    older current-page/historical revision IDs or history page-name conflicts
-    in either language; the November 16 archives are revision-level supersets.
-  - Remaining: Final focused validation and a deliberate local cleanup of the
-    four old ZIPs, corresponding old manifests, and the superseded English
-    extracted history mirror. Preserve dated reports
-    as historical evidence; never silently delete or re-label their source
-    provenance. Future captures use the parameterized migration and retirement
-    comparison tools without introducing new hard-coded source-version logic.
 
 ### Source notation and rule references
 
@@ -301,31 +285,7 @@ make v1.3.0 depend on them.
   - [ ] Surface read-only workspace/claim/integration status in the monitor
     and verify real Linux refusal/race behavior before unattended use.
 
-### Release and deployment robustness
-
-**Project domain:** Project infrastructure
-
-- [ ] Confirm remaining release-tooling regression coverage for the
-  [CI/evidence contract](ci.md) and [deployment procedure](deployment.md):
-  verify that the collector's expected matrix is tested against the maintained
-  workflow job definitions, including required build/reuse steps; add coverage
-  if missing. Verify Linux reference-aware image pruning behavior if not
-  already covered by recorded acceptance.
-  Tag-derived display identity, nonfatal pruning, shared deployment probes and
-  pre-merge evidence/freeze procedures are implemented. Normal tagged-image,
-  hosted and production acceptance stays in the [release checklist](releasing.md).
-
 ### Performance, storage, and build tooling
-
-- [ ] **Retire superseded v9 rules-data promotion helpers** after the tracked
-  v10 Rules set receives the applicable release-candidate acceptance.
-  The current set includes 17 normalized deployed objects (one unresolved
-  delivery), 151 exact-variant groups and 62 reviewed Weapon citations.
-  [Releasing](releasing.md) owns exact-SHA Source, Wheel, Deployment and
-  matched four-file image evidence; [cross-browser checks](ci.md#cross-browser-release-compatibility-gate)
-  are opt-in for v1.1+ when browser risk warrants them.
-  Preserve independent v8/v9 compatibility consumers, and keep immutable
-  images free of live replacement locks or in-container regeneration.
 
 - [ ] **Deferred browser test-performance investigation:** Use the existing
   [Chromium benchmarks](testing.md#controlled-chromium-concurrency-and-browser-reuse-benchmark)

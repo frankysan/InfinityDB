@@ -1444,8 +1444,15 @@ with corresponding headings and MediaWiki revision IDs verified. Another 116
 URL-backed `oldid` references resolve to the exact historical payloads in
 the new archives. These captures do not establish a single publication date.
 
-Older archives are still available for migration validation; the remaining
-database publication and dependent-test updates must pass before retirement.
+The September/October Wiki archive retirement is complete in the Windows
+development checkout: the old ZIPs, manifests and extracted history mirror
+were already absent on 2026-11-27. The earlier retirement comparison found
+zero missing revision IDs or history page-name conflicts. A new read-only
+bilingual source audit verified all 109 current references and 116 historical
+references against the retained November captures; the focused source-reader
+and archive tests passed without skips. Preserve dated reports and their
+original source identities; future replacements use the parameterized
+migration/retirement comparison tools.
 Acquisition manifests and detailed inventories are ignored under
 `local/data/manifests/snapshots/`; curated rules retain the exact selected
 source identities.

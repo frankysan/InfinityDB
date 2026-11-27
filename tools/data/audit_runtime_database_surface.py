@@ -410,6 +410,8 @@ TABLE_POLICY["units"] = _policy(
 # helpers. validate() is intentionally excluded from the audited serving surface.
 EXCLUDED_DIRECT_METHODS = {"validate"}
 PROBED_DIRECT_METHODS = {
+    "_official_army_unit_links",
+    "_unit_graph",
     "general_profiles",
     "unit_history",
     "symbol_publication",
@@ -661,6 +663,8 @@ def _probe_actions(path: Path) -> list[tuple[str, Callable[[Database], object]]]
                 limit=500,
             ),
         ),
+        ("preload-unit-graph", lambda db: db._unit_graph()),
+        ("preload-army-links", lambda db: db._official_army_unit_links()),
         ("unit-detail", lambda db: db.get_unit(unit_id)),
         (
             "visible-unit-ids",

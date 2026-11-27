@@ -556,6 +556,14 @@ overlay served by the current application.
 uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
 older successful run therefore cannot hide a later failed rerun for the same candidate.
 It checks actual Source matrix and installed-wheel/Docker smoke job execution.
+The maintained `tests/test_release_ci_evidence.py` verifies the Source and
+cross-browser job matrices against the workflow definitions and checks the
+wheel/Docker build, smoke and merge-reuse steps. The 2026-11-27 focused Windows
+batch (including release-scope and Wiki source tests) passed 126 tests with
+no skips. The Linux POSIX pruning regression passed separately at `e8f7035e`,
+using a simulated Docker CLI to verify stopped-container references and
+nonfatal removal failures without touching real images. Normal exact-SHA
+release acceptance remains separate.
 With `--candidate`, it separately verifies the approved candidate and final
 merge tree; the final release SHA is still the tag target.
 
