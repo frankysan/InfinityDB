@@ -2728,12 +2728,14 @@ def test_browser_json_access_is_routed_through_api_and_transport_modules(app: Ca
     assert b"preferences.js" not in api
     assert b"fetch(" not in api
     assert b"visibleUnitIds(optionalFilters, signal)" in api
+    assert b"observeVisibleUnitIds(getFilters, signal, onChange)" in api
+    assert b"visibleUnitIds(getFilters(), signal)" in api
 
     for asset in ("catalog-detail.js", "skill.js"):
         status, _, body = request(app, f"/static/{asset}")
         assert status == 200
         assert b"optionalUnitFilters" in body
-        assert b"visibleUnitIds(optionalUnitFilters(), pageController.signal)" in body
+        assert b"observeVisibleUnitIds(optionalUnitFilters, pageController.signal," in body
 
     status, _, transport = request(app, "/static/api-transport.js")
     assert status == 200
