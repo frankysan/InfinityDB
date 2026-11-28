@@ -433,6 +433,35 @@ def benchmark_unit_explorer(
                         f"{selected_route} {phase}: {elapsed*1000:.1f} ms {resources}",
                         flush=True,
                     )
+                    if selected_route.startswith("/units/"):
+                        history = page.evaluate("""async () => {
+                            const histories = [...document.querySelectorAll('details.unit-history')]
+                                .filter(node => !node.querySelector(':scope > section'));
+                            const rows = () =>
+                                document.querySelectorAll('.unit-history-change').length;
+                            const initialRows = rows();
+                            const first = histories.find(node =>
+                                !node.classList.contains('unit-history--empty'));
+                            const expand = node => new Promise(resolve => {
+                                if (node.open) return resolve();
+                                node.addEventListener('toggle', resolve, {once: true});
+                                node.open = true;
+                            });
+                            let firstOpenMs = null;
+                            if (first) {
+                                const start = performance.now();
+                                await expand(first);
+                                firstOpenMs = performance.now() - start;
+                            }
+                            await Promise.all(histories.map(expand));
+                            return {initialRows, expandedRows: rows(), firstOpenMs};
+                        }""")
+                        print(f"{selected_route} {phase} history: {history}", flush=True)
+                        if history["firstOpenMs"] is not None:
+                            name = f"{selected_route} {phase} first history"
+                            samples.setdefault(name, []).append(
+                                history["firstOpenMs"] / 1000,
+                            )
                 if errors:
                     raise ValueError(f"Browser errors: {errors}")
                 return

@@ -270,7 +270,9 @@ incomplete history and the revision-date convention in every disclosure. The
 owns attribution, observation windows and unresolved evidence.
 Use the shared Skill distance and MOV formatters for historical typed values,
 honoring the cm/in preference without converting unrelated numbers. Keep open
-disclosures open when that preference changes.
+disclosures open when that preference changes. Construct history bodies on first
+expansion, retaining headings and counts immediately; browser Find cannot match
+unopened history bodies until they have been rendered.
 
 ### Official Army links
 

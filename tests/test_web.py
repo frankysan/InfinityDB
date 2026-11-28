@@ -1978,6 +1978,8 @@ def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_
                 assert general.get_attribute("open") is None
                 assert page.locator(".army-profile .unit-history").count() == 2
                 assert page.locator(".unit-history[open]").count() == 0
+                assert page.locator(".unit-history-change").count() == 0
+                assert page.locator(".unit-history > div.unit-history-body").count() == 0
                 page.evaluate("(theme) => document.documentElement.dataset.theme = theme", theme)
                 assert general.locator(":scope > summary").inner_text() == (
                     "History · 2 updates · 4 changes"
@@ -1994,9 +1996,9 @@ def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_
                 }""")
                 empty_summary.focus()
                 empty_summary.press("Enter")
-                assert empty.get_by_text(
+                empty.get_by_text(
                     "No changes have been confirmed in the available history for this Army."
-                ).is_visible()
+                ).wait_for(state="visible")
                 empty_summary.press("Enter")
                 assert empty.get_attribute("open") is None
 
@@ -2015,11 +2017,30 @@ def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_
                 assert other.locator("section > .unit-history > summary").all_inner_texts() == [
                     "History · 1 update · 3 changes", "History · 1 update · 1 change",
                 ]
+                former = other.locator("section > .unit-history").first
+                former.locator(":scope > summary").click()
+                former.locator(".unit-history-change").first.wait_for(state="visible")
                 general.locator(":scope > summary").click()
+                general.locator(".unit-history-date").first.wait_for(state="visible")
                 assert general.locator(".unit-history-date").count() == 2
                 assert general.locator(".unit-history-change").count() == 4
                 assert general.get_by_text("BS: 11 → 12").first.is_visible()
                 assert general.get_by_text("2025-10-15").is_visible()
+                assert page.locator(".unit-history-change").count() == 7
+                general.locator(":scope > summary").click()
+                general.locator(":scope > summary").click()
+                assert general.locator(".unit-history-change").count() == 4
+                page.evaluate("""() => {
+                    const toggle = document.querySelector('#distance-unit-toggle');
+                    toggle.checked = !toggle.checked;
+                    toggle.dispatchEvent(new Event('change', {bubbles: true}));
+                }""")
+                general.locator(".unit-history-change").first.wait_for(state="visible")
+                former.locator(".unit-history-change").first.wait_for(state="visible")
+                assert page.locator(".unit-history[open]").count() == 3
+                assert page.locator(".unit-history-change").count() == 7
+                assert army_history.locator(".unit-history-body").count() == 0
+                assert empty.locator(".unit-history-body").count() == 0
                 assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
                 page.close()
         finally:
@@ -2082,6 +2103,7 @@ def test_published_go_pod_history_distances():
                     toggle.dispatchEvent(new Event('change', {bubbles: true}));
                 }""", inches)
                 for label in expected:
+                    history.filter(has_text=label).first.wait_for(state="visible")
                     assert any(label in value for value in history.all_inner_texts()), label
                     assert history.filter(has_text=label).first.is_visible()
         finally:

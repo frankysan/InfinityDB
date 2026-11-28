@@ -33,11 +33,13 @@ entries.
   Combi Rifle 232/338 ms), with decoded detail payloads of 490/277 KB.
   Hardlock fetched four season-policy responses before Season Rules opened.
   Policy requests now start on first expansion; focused Node and desktop/mobile
-  Chromium regressions passed. First-open latency and broader capacity effects
-  have not yet been measured.
-- **Remaining action:** Measure first-open versus eager history DOM construction,
-  then defer work in collapsed sections where beneficial. Benchmark first-open
-  season policy latency separately.
+  Chromium regressions passed. Unit history bodies now render on first opening;
+  fixture and published Go-Pod Chromium checks passed. Three Windows Chrome
+  cold/repeat Minutemen samples showed zero initial history rows versus 22
+  after expansion, and first-open DOM construction took 0.2–0.5 ms (including
+  toggle dispatch, excluding paint). No reliable end-to-end latency improvement
+  established. The Dragoes comparison had no confirmed change rows.
+- **Remaining action:** Benchmark first-open season policy latency separately.
   Profile Explorer interaction overhead separately from intentional debounce
   and automation waits; investigate parallel visible-Unit lookup or targeted
   catalog updates without changing availability semantics. Measure broad

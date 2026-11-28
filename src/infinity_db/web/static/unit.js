@@ -1358,6 +1358,16 @@ function historyDisclosure(changes, general = false) {
   const disclosure = document.createElement("details");
   disclosure.className = "unit-history";
   appendHistorySummary(disclosure, "History", [changes]);
+  const populate = () => {
+    if (!disclosure.open) return;
+    disclosure.append(historyBody(changes, general));
+    disclosure.removeEventListener("toggle", populate);
+  };
+  disclosure.addEventListener("toggle", populate);
+  return disclosure;
+}
+
+function historyBody(changes, general) {
   const body = document.createElement("div");
   body.className = "unit-history-body";
   const note = document.createElement("p");
@@ -1429,8 +1439,7 @@ function historyDisclosure(changes, general = false) {
     }
     body.append(article);
   }
-  disclosure.append(body);
-  return disclosure;
+  return body;
 }
 
 function renderArmyProfile(army, generalByIdentity, expanded) {
