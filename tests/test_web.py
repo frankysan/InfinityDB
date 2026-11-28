@@ -702,10 +702,13 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'matching_scope: "profile"' in script
     assert b"and_filters: UNIT_EXPLORER_DEFAULT_AND_FILTERS" in script
     assert b"army.overview_group" in script
-    assert b"reinforcementRelationships(army, visibleArmies)" in script
-    assert b"army.parent_armies" in script
-    assert b"army.reinforcement_sections" in script
-    assert b'link.href = `#army-${armyValue(target)}`;' in script
+    assert b"reinforcementRelationships" not in script
+    assert b'article.dataset.armyKind = army.legacy ? "legacy" : army.out_of_catalog' in script
+    assert (
+        b'? "out-of-catalog" : army.role === "reinforcement" ? "reinforcement" : "default"'
+        in script
+    )
+    assert b'filters.reinforcement = "1"' in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
     assert b'identity.className = "army-overview-card-identity"' in script
@@ -714,6 +717,9 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
+    for kind in ("reinforcement", "out-of-catalog", "legacy"):
+        assert f'.army-overview-card[data-army-kind="{kind}"]'.encode() in styles
+
     assert_css_rule(styles, ".army-overview", {"width": "min(1040px, 100%)"})
     assert_css_rule(
         styles,
@@ -6556,7 +6562,12 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert status == 200
     assert b'from "./share-state.js"' in glossary_script
     assert b'readShareState("glossary").params.get("q")' in glossary_script
-    assert b'shareStateHref("/glossary", "glossary"' in glossary_script
+    assert (
+        b'writeShareState("glossary", query ? { q: query } : {}, { replace: true })'
+        in glossary_script
+    )
+    assert b"setTimeout(applySearch, 150)" in glossary_script
+    assert b"if (items) render();" in glossary_script
 
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
