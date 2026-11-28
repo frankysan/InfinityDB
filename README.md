@@ -5,8 +5,8 @@ Equipment, Skills, Weapons, Core and ITS Scenarios, and relationships across Arm
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.2.2** (2026-11-26). See the
-[release notes](docs/CHANGELOG.md#122---2026-11-26)
+Current release: **1.3.0** (2026-11-28). See the
+[release notes](docs/CHANGELOG.md#130---2026-11-28)
 for changes and upgrade considerations, and the
 [deployment guide](docs/deployment.md) for updates.
 

@@ -8,7 +8,7 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
-## [1.3.0] - Unreleased
+## [1.3.0] - 2026-11-28
 
 ### Player summary
 

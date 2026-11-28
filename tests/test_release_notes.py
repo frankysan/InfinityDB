@@ -16,11 +16,21 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     all_releases = load_release_notes()
     releases = tuple(release for release in all_releases if release.released_on is not None)
 
-    assert releases[0].version == "1.2.2"
-    assert releases[0].released_on == date(2026, 11, 26)
+    assert releases[0].version == "1.3.0"
+    assert releases[0].released_on == date(2026, 11, 28)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("General profiles" in item for item in releases[0].player_summary)
+    assert any(
+        "side-by-side Unit comparison" in item
+        for group in releases[0].sections[0].children for item in group
+    )
     assert [section.heading for section in releases[0].detail_sections] == [
+        "Added", "Changed", "Fixed", "Upgrade notes",
+    ]
+
+    release_122 = next(release for release in releases if release.version == "1.2.2")
+    assert release_122.released_on == date(2026, 11, 26)
+    assert any("General profiles" in item for item in release_122.player_summary)
+    assert [section.heading for section in release_122.detail_sections] == [
         "Added", "Changed", "Fixed",
     ]
 
