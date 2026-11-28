@@ -77,9 +77,28 @@ median request time fell from 6.73 to 4.98 ms. The history-rich cohort
 fell from 3,233,141 to 3,024,118 bytes (zlib: 62,572 to 56,049),
 with a 58.73 to 54.98 ms median. Compression is an offline estimate, not
 measured HTTP transfer. This justifies the small history opt-out but
-does not measure browser or concurrent request latency. Large current-only
-responses remain (up to 814,771 bytes in the history-rich sample); measure
-a comparison-specific response shape separately before adopting one.
+does not measure browser or concurrent request latency.
+
+The compact comparison view was then measured against the history-free
+detail response at base `5d6437be` with the transport projection applied:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_unit_detail_inputs --compact --samples 50
+```
+
+The same cohorts and paired request procedure yielded:
+
+- Systematic: 3,908,388 to 1,073,921 decoded bytes (72.5% reduction);
+  zlib 168,023 to 58,641 bytes; median 4.86 to 4.65 ms.
+- History-rich: 3,024,118 to 944,855 decoded bytes (68.8% reduction);
+  zlib 56,049 to 18,850 bytes; median 53.00 to 51.10 ms.
+
+All 550 paired iterations matched the projected response; a Chromium
+comparison of Sforza and Anaconda produced identical rendered tables,
+selectors and links in both distance preferences with either response.
+Retain the compact transport shape; there is no evidence here requiring
+an additional build-time projection. Full composition remains the main
+server-side cost. Browser timing and memory savings are not measured.
 
 ## Chromium concurrency under pytest-xdist
 

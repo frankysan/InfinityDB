@@ -16,12 +16,15 @@ from infinity_db.catalog_slugs import enrich_nested_catalog_slugs
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.unit_slugs import attach_public_unit_slug
 from infinity_db.web.app import create_app_from_database_set
+from infinity_db.web.unit_comparison import comparison_unit
 from tools.browser_wsgi_transport import wsgi_response
 
 
-def benchmark_comparison(db_dir: Path, samples: int) -> None:
-    """Compare history-inclusive and current-only detail requests, not new projections."""
+def benchmark_comparison(db_dir: Path, samples: int, *, compact: bool = False) -> None:
+    """Compare current-only or compact requests against their preceding response shape."""
     app = create_app_from_database_set(db_dir)
+    baseline_query = "?history=0" if compact else ""
+    candidate_query = "?view=comparison&history=0" if compact else "?history=0"
     with closing(sqlite3.connect(db_dir / "army.db")) as db:
         rows = db.execute(
             "SELECT unit_id, length(body) FROM unit_history_payloads ORDER BY unit_id"
@@ -34,14 +37,17 @@ def benchmark_comparison(db_dir: Path, samples: int) -> None:
         full_times, current_times = [], []
         for unit_id in cohort:
             url = f"http://localhost/api/units/{unit_id}"
-            status, _, body = wsgi_response(app, url)
+            status, _, body = wsgi_response(app, url + baseline_query)
             assert status == 200, unit_id
             expected = json.loads(body)
-            expected.pop("historical_contexts", None)
-            for section in ("general_profiles", "armies"):
-                for card in expected[section]:
-                    card.pop("history", None)
-            status, _, current = wsgi_response(app, url + "?history=0")
+            if compact:
+                expected = comparison_unit(expected)
+            else:
+                expected.pop("historical_contexts", None)
+                for section in ("general_profiles", "armies"):
+                    for card in expected[section]:
+                        card.pop("history", None)
+            status, _, current = wsgi_response(app, url + candidate_query)
             assert status == 200 and json.loads(current) == expected, unit_id
             full_sizes.append(len(body))
             current_sizes.append(len(current))
@@ -50,7 +56,8 @@ def benchmark_comparison(db_dir: Path, samples: int) -> None:
             for iteration in range(10):
                 for omit in (False, True) if iteration % 2 == 0 else (True, False):
                     start = perf_counter()
-                    status, _, actual = wsgi_response(app, url + ("?history=0" if omit else ""))
+                    query = candidate_query if omit else baseline_query
+                    status, _, actual = wsgi_response(app, url + query)
                     (current_times if omit else full_times).append(perf_counter() - start)
                     assert status == 200 and actual == (current if omit else body), unit_id
             if name == "history-rich":
@@ -63,7 +70,7 @@ def benchmark_comparison(db_dir: Path, samples: int) -> None:
             f"{sum(full_sizes):,} -> {sum(current_sizes):,}; "
             f"zlib bytes {sum(full_compressed):,} -> {sum(current_compressed):,}; "
             f"warm WSGI median {median(full_times)*1000:.2f} -> "
-            f"{median(current_times)*1000:.2f} ms; exact response parity apart from history",
+            f"{median(current_times)*1000:.2f} ms; expected response parity",
             flush=True,
         )
 
@@ -73,11 +80,12 @@ def main() -> None:
     parser.add_argument("--db-dir", type=Path, default=Path("data/generated"))
     parser.add_argument("--samples", type=int, default=50)
     parser.add_argument("--comparison", action="store_true", help="Compare Unit history omission.")
+    parser.add_argument("--compact", action="store_true", help="Compare compact Unit responses.")
     args = parser.parse_args()
     if args.samples < 1:
         parser.error("--samples must be positive")
-    if args.comparison:
-        benchmark_comparison(args.db_dir, args.samples)
+    if args.comparison or args.compact:
+        benchmark_comparison(args.db_dir, args.samples, compact=args.compact)
         return
     app = create_app_from_database_set(args.db_dir)
     api = app.api

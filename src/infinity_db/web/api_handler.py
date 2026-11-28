@@ -86,6 +86,7 @@ from infinity_db.web.routes import (
     UNIT_API_PATH,
     WEAPON_API_PATH,
 )
+from infinity_db.web.unit_comparison import comparison_unit
 
 LOGGER = logging.getLogger(__name__)
 API_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=600"
@@ -389,18 +390,26 @@ def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str
     return params
 
 
-def _unit_detail_presentation_query(query: str) -> tuple[dict[str, bool], str | None, bool]:
+def _unit_detail_presentation_query(
+    query: str,
+) -> tuple[dict[str, bool], str | None, bool, bool]:
     params = _validated_query_params(
-        query, {"army_id", "cache_bust", "history", *OPTIONAL_AVAILABILITY_FLAGS}
+        query, {"army_id", "cache_bust", "history", "view", *OPTIONAL_AVAILABILITY_FLAGS}
     )
     optional_filters = {
         flag: (_flag(params, flag) if flag in params else True)
         for flag in OPTIONAL_AVAILABILITY_FLAGS
     }
     requested_army = _domain_filter_identifier(params, "army_id")
-    include_history = _flag(params, "history") if "history" in params else True
+    view = params.get("view", ["detail"])[0]
+    if view not in {"detail", "comparison"}:
+        raise ValueError("view must be detail or comparison")
+    comparison = view == "comparison"
+    include_history = _flag(params, "history") if "history" in params else not comparison
+    if comparison and include_history:
+        raise ValueError("History is unavailable in the comparison view")
     army_id = None if requested_army is None else str(requested_army)
-    return optional_filters, army_id, include_history
+    return optional_filters, army_id, include_history, comparison
 
 
 def _unit_query(query: str) -> dict:
@@ -1845,8 +1854,8 @@ class ApiHandler:
         elif match := UNIT_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL if self.unit_histories is None else "no-store"
             try:
-                optional_filters, requested_army, include_history = _unit_detail_presentation_query(
-                    query_string
+                optional_filters, requested_army, include_history, comparison = (
+                    _unit_detail_presentation_query(query_string)
                 )
             except ValueError as exc:
                 return WebResponse.json(
@@ -1873,6 +1882,8 @@ class ApiHandler:
                         attach_unit_history(payload, self.unit_histories)
                     elif (history := self.database.unit_history(payload["id"])) is not None:
                         attach_unit_history(payload, {str(payload["id"]): history})
+                if payload is not None and comparison:
+                    payload = comparison_unit(payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

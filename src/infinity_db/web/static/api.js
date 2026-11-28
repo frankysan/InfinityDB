@@ -154,7 +154,7 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, specialis
 
 export function getUnit(
   unitIdentifier,
-  { optionalFilters = {}, armyId = "", includeHistory = true } = {},
+  { optionalFilters = {}, armyId = "", includeHistory = true, view = "detail" } = {},
   signal,
 ) {
   const params = new URLSearchParams();
@@ -163,6 +163,7 @@ export function getUnit(
   }
   if (armyId) params.set("army_id", armyId);
   if (!includeHistory) params.set("history", "0");
+  if (view !== "detail") params.set("view", view);
   const query = params.toString();
   return getJson(`/api/units/${encodeURIComponent(unitIdentifier)}${query ? `?${query}` : ""}`, signal);
 }

@@ -231,9 +231,13 @@ navigation, the landing page and Unit details. Two independently selected Units
 may be identical. Each side selects an actual Army context and profile, with an
 optional loadout from the same source profile group. The comparison uses the
 existing Unit list and detail API rather than a new database projection or
-independent gameplay model. Its detail requests set `history=0` to omit
-historical fields and avoid reading the history projection. The Unit detail
-API defaults to including history; explicit `history=1` retains that behavior.
+independent gameplay model. Its detail requests use `view=comparison&history=0`:
+the comparison view retains current occurrence identities, availability, source
+Attributes, capabilities, attached-model references and formatting inputs, omitting
+unconsumed presentation metadata and history. It filters the existing composed
+response without changing the source-layer semantics. `view=comparison` implies
+history omission and rejects `history=1`. The default detail view retains its
+existing response, including history unless explicitly disabled.
 
 The table compares source-layer Attributes, AVA, type, classification,
 characteristics, Points, SWC, Skills, Equipment, Weapons and attached-model

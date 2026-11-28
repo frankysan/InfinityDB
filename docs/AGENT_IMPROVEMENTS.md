@@ -46,10 +46,9 @@ entries.
   [live-search prefix benchmark](testing-performance.md#bounded-live-search-prefix-benchmark)
   found no material benefit from early limiting; retain the existing ranking.
   The [Unit comparison benchmark](testing-performance.md#unit-comparison-detail-inputs)
-  confirms history omission reduces request work; comparison now requests
-  current-only details. History-rich Units still have 462–815 KB decoded
-  current-only responses. Assess the benefit of a narrow comparison response
-  shape against these larger payloads before adding another projection.
+  supports history omission and the compact transport view now in use.
+  Decoded payloads fell 69–73% against history-free details; server
+  latency improved modestly. No additional database projection is justified.
   Extend benchmark
   coverage for these new journeys and repeat the pinned full-stack workload
   before interpreting capacity regressions.
