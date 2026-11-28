@@ -3616,6 +3616,13 @@ tbody tr:last-child>* {
   background: var(--color-surface-translucent);
 }
 
+@media screen {
+  .unit-extended-profile {
+    content-visibility: auto;
+    contain-intrinsic-block-size: auto 160px;
+  }
+}
+
 .unit-extended-profile-heading {
   display: flex;
   align-items: baseline;

@@ -368,6 +368,7 @@ def benchmark_unit_explorer(
             cdp = context.new_cdp_session(page)
             cdp.send("Performance.enable")
             page.add_init_script("""(() => {
+                performance.setResourceTimingBufferSize(5000);
                 let current;
                 window.explorerTiming = null;
                 window.beginExplorerTiming = () => {

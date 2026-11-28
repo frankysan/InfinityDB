@@ -583,6 +583,12 @@ def test_extended_profiles_show_plain_text_capabilities(
             )
         assert page.locator("#extended-results").is_checked()
         capabilities = profile.locator(".unit-extended-capability-section")
+        # Off-screen content remains in the DOM but innerText requires layout.
+        capabilities.scroll_into_view_if_needed()
+        page.wait_for_function(
+            "node => node.checkVisibility({contentVisibilityAuto: true})",
+            arg=capabilities.element_handle(),
+        )
         assert capabilities.is_visible()
         assert "Weapons:" in capabilities.inner_text()
         assert "Shared by all variants of this profile" in capabilities.inner_text()
@@ -596,6 +602,45 @@ def test_extended_profiles_show_plain_text_capabilities(
         assert capabilities.locator("a").count() == 0
         assert not errors, errors
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize("width", [1440, 390])
+def test_extended_profiles_render_when_scrolled_into_view(
+    app: Any, origin: str, browser: Any, width: int,
+) -> None:
+    page = browser.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{origin}/units?extended=1", wait_until="domcontentloaded")
+        profiles = page.locator(".unit-extended-profile")
+        profiles.first.wait_for(state="attached")
+        count = profiles.count()
+        assert count >= 50
+        assert profiles.last.evaluate("node => getComputedStyle(node).contentVisibility") == "auto"
+        headings = profiles.locator(".unit-extended-profile-heading > strong")
+        expected = headings.all_text_contents()
+        for index in (0, count // 2, count - 1, 0):
+            profile = profiles.nth(index)
+            heading = headings.nth(index)
+            heading.scroll_into_view_if_needed()
+            assert heading.text_content() == expected[index]
+            assert heading.evaluate(
+                "node => node.checkVisibility({contentVisibilityAuto: true})"
+            )
+            assert profile.locator(".unit-extended-statline dd").count() == 9
+            assert profile.locator(".unit-extended-capability-section").is_visible()
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
+        assert headings.all_text_contents() == expected
+        assert profiles.count() == count
+        page.emulate_media(media="print")
+        assert profiles.last.evaluate(
+            "node => getComputedStyle(node).contentVisibility"
+        ) == "visible"
+        assert not errors, errors
     finally:
         page.close()
 

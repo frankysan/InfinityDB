@@ -56,8 +56,19 @@ On Windows Chrome (2026-11-28, base `2c27cc2`, three fresh-app journeys):
 - Search (fusiliers): event-to-DOM 277 ms, event-to-request 254 ms
   (including 250 ms debounce), API resource 16 ms, response-to-DOM 7 ms.
 
-Extended layout and the larger API response (277 KB versus 87 KB on
-the first page) merit investigation before micro-optimizing filter controls.
+Extended layout deferral was tested at `d3d17228` using the same three
+journeys. Screen-only `content-visibility: auto` on profile cards, with
+a remembered intrinsic block size and a 160 px fallback, reduced median
+layout work from 71.4 to 32.1 ms on activation, 20.7 to 8.7 ms on next
+page and 22.9 to 5.8 ms on previous page. Decoded API sizes were unchanged.
+Input-to-DOM medians were 136/128/77 ms versus 140/111/66 ms;
+overall latency is mixed and some work is deferred until scrolling.
+Desktop and mobile tests confirmed rendered content after scrolling,
+entry preservation, horizontal overflow checks and eager print media.
+Off-screen Chromium `innerText` can be empty until layout; tests inspect
+rendered text after scrolling. Browser Find, assistive technology and
+non-Chromium behavior were not independently verified.
+The larger Extended response (277 KB versus 87 KB) remains a potential optimization.
 Keep the deliberate search debounce. This is not a production capacity test.
 
 Use the current `tools/performance/benchmark_*.py` modules for a measured

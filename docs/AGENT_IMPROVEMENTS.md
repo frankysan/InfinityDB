@@ -42,9 +42,11 @@ entries.
 - **Remaining action:** Benchmark first-open season policy latency separately.
   The [Explorer interaction profile](testing-performance.md#unit-explorer-interaction-phases)
   separates actual input, API resource, DOM and browser work. Search is
-  debounce-dominated; Extended activation has 71 ms median layout work
-  versus 8 ms script. Assess Extended layout before further control-loop
-  optimization. The
+  debounce-dominated; Extended screen-only layout deferral reduces median
+  activation layout work from 71 to 32 ms, with mixed overall latency.
+  Desktop/mobile scroll and print-media checks passed; Find and assistive
+  technology remain unverified. Assess the larger Extended API payload
+  before considering further control-loop optimization. The
   [catalog visibility benchmark](testing-performance.md#catalog-detail-visibility-and-initial-rendering)
   rejected concurrent requests after unpreloaded cold regressions; sequential
   requests now render filtered content once rather than twice, with
