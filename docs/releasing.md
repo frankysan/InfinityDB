@@ -59,6 +59,10 @@ affected acceptance before the merge.
   `infinitydb-test` Docker Compose stack, not just a built-image verifier.
   Confirm health, version/runtime identity, representative changed routes,
   Caddy and metrics-history behavior, and no interaction with production.
+- [ ] **Feedback delivery (when applicable):** When introducing or materially
+  changing feedback delivery or its production mail configuration, pass the
+  [end-to-end feedback acceptance](deployment.md#end-to-end-feedback-acceptance)
+  on an isolated test deployment on the intended production host.
 - [ ] **Browser and accessibility acceptance:** Exercise materially changed
   player journeys in ordinary mode, including relevant desktop/mobile,
   keyboard, touch, loading/error and shared-link behavior. Record manual

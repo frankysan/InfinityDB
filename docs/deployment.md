@@ -327,9 +327,31 @@ The app does not retain report bodies or retry failed deliveries. Review
 email in the configured mailbox, retain it only as needed to resolve the
 issue, and transfer only actionable non-personal findings to the normal
 project issue/backlog workflow. SMTP acceptance is not a guarantee of
-inbox delivery. An actual submission after configuring the relay is part of
-operator acceptance. The isolated local-test deployment explicitly disables
-mail delivery to avoid accidental real submissions.
+inbox delivery.
+
+#### End-to-end feedback acceptance
+
+Ordinary isolated test deployments disable mail delivery. When introducing or
+materially changing feedback delivery or its production mail configuration,
+test the complete browser-to-mailbox path on the intended production host
+before release. Use a separate checkout of the exact candidate with its own
+private `.env` containing the intended SMTP settings. Do not change the running
+production checkout or expose the test listener publicly.
+
+```sh
+INFINITYDB_TEST_ENABLE_FEEDBACK=1 sh ./scripts/deploy-local-test.sh
+```
+
+The opt-in permits the configured SMTP relay; it does not change the isolated
+Compose project, loopback bindings or image-pruning policy. Access the test
+site through the SSH tunnel described above. Check that reporting is available,
+submit a clearly labeled test report from a reference page and confirm the
+success message and actual inbox receipt. Verify category, message, version
+and optional page path, without query strings or fragments. Submit another
+test with page inclusion unchecked and verify that the path is absent.
+Do not include personal data or credentials in reports or acceptance records.
+Stop the test stack afterward, or redeploy it without the opt-in to restore
+the default disabled-mail behavior. Keep production unchanged throughout.
 
 The [architecture privacy contract](architecture.md#privacy-preserving-observability)
 describes the submitted fields and abuse limits.

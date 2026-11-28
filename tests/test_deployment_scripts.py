@@ -533,6 +533,10 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     assert 'METRICS_PORT="$metrics_port"' in script
     assert "DOMAIN=localhost" in script
     assert "PRUNE_APP_IMAGES=0" in script
+    assert 'METRICS_HISTORY_IMAGE_TAG="$image_tag"' in script
+    assert 'case "${INFINITYDB_TEST_ENABLE_FEEDBACK:-0}" in' in script
+    assert "export INFINITYDB_FEEDBACK_SMTP_HOST=" in script
+    assert '1) echo "Feedback email delivery explicitly enabled' in script
     assert "sh ./scripts/deploy.sh" in script
     assert "isolated infinitydb-test volume" in script
 

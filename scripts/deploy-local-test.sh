@@ -27,6 +27,15 @@ if [ "$metrics_port" -gt 65535 ]; then
   fail "metrics test port must be an integer between 1 and 65535."
 fi
 
+case "${INFINITYDB_TEST_ENABLE_FEEDBACK:-0}" in
+  0)
+    # Override even a configured .env file for ordinary test deployments.
+    export INFINITYDB_FEEDBACK_SMTP_HOST=
+    ;;
+  1) echo "Feedback email delivery explicitly enabled for isolated testing." ;;
+  *) fail "INFINITYDB_TEST_ENABLE_FEEDBACK must be 0 or 1." ;;
+esac
+
 short_commit="$(git rev-parse --short=12 HEAD)"
 image_tag="app-test-$short_commit"
 
@@ -46,9 +55,9 @@ HTTP_PORT="$port" \
 METRICS_BIND_ADDRESS=127.0.0.1 \
 METRICS_PORT="$metrics_port" \
 IMAGE_TAG="$image_tag" \
+METRICS_HISTORY_IMAGE_TAG="$image_tag" \
 RETAIN_APP_IMAGES=1 \
 PRUNE_APP_IMAGES=0 \
-INFINITYDB_FEEDBACK_SMTP_HOST= \
   sh ./scripts/deploy.sh
 
 printf 'Local test deployment ready: http://localhost:%s\n' "$port"
