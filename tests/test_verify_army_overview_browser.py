@@ -247,7 +247,7 @@ def test_army_links_and_filtered_availability_counts(
         disclosure.locator("summary").click()
         assert breakdown.is_visible()
         role_labels = {
-            "main": "Main armies", "sectorial": "Sectorials",
+            "main": "Generic Armies", "sectorial": "Sectorials",
             "non_aligned": "Non-Aligned Armies", "reinforcement": "Reinforcements",
         }
         expected = dict.fromkeys(role_labels.values(), 0)

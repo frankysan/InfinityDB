@@ -675,8 +675,8 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"Army lists" in body
-    assert b"Main armies and Sectorials" in body
-    assert b"Generic Army Lists" in body
+    assert b"Generic Armies and Sectorials" in body
+    assert b"<strong>Vanilla</strong>" in body
     assert b'richer <a href="/fireteams">Fireteam</a> charts' in body
     assert b"see which forces are out of catalog" in body
     assert b"Loading Army information." in body
@@ -692,7 +692,7 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'from "./unit-symbols.js"' in script
     assert b"getArmies" in script
     assert b"army.overview_description" in script
-    assert b'if (army.role === "main") return "Main army";' in script
+    assert b'if (army.role === "main") return "Generic Army";' in script
     assert b"staticSymbolPath(army.symbol_path)" in script
     assert b"article.id = `army-${armyValue(army)}`;" in script
     assert b"requestAnimationFrame(revealHashTarget);" in script
@@ -3226,6 +3226,12 @@ def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
         assert png[:8] == b"\x89PNG\r\n\x1a\n"
         assert int.from_bytes(png[16:20], "big") == size
         assert int.from_bytes(png[20:24], "big") == size
+
+    status, headers, fallback = request(app, "/favicon.ico")
+    assert status == 200
+    assert headers["content-type"] == "image/png"
+    assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+    assert fallback == request(app, "/static/favicon-32.png")[2]
 
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:

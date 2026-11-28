@@ -517,7 +517,7 @@ function populateArmies(armies) {
 
 function renderArmyCounts(counts) {
   const roles = new Map([
-    ["main", { label: "Main armies", count: 0 }],
+    ["main", { label: "Generic Armies", count: 0 }],
     ["sectorial", { label: "Sectorials", count: 0 }],
     ["non_aligned", { label: "Non-Aligned Armies", count: 0 }],
     ["reinforcement", { label: "Reinforcements", count: 0 }],

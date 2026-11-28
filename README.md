@@ -71,11 +71,12 @@ its application metrics.
 - Shows a consolidated **General profile** alongside faction- and army-specific
   profiles, loadouts, availability, skills, equipment, and weapons.
 - Compares two current Army profiles and optional loadouts side by side, including
-  variants of the same Unit, with differences-only display and shareable selections.
+  variants of the same Unit, with live Unit lookups, differences-only display and
+  shareable selections.
 - Groups equivalent standard, reinforcement, and optional-mercenary source
   records into coherent unit views while preserving their distinct availability
   and army contexts.
-- Includes an Army overview with symbols, concise role/context summaries, catalog-status labels,
+- Includes a Generic Army and Sectorial overview with symbols, concise role/context summaries, catalog-status labels,
   legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
@@ -93,8 +94,8 @@ its application metrics.
   All twenty Season 18 and sixteen Season 17 missions are represented;
   earlier revisions remain preserved as research evidence, and known source
   discrepancies are disclosed on the relevant scenario pages.
-- Includes global search with live navigation suggestions and a full results page, plus a
-  federated Glossary across player-facing reference domains, with
+- Includes global search with live navigation suggestions and live full results, plus a
+  live-filtering federated Glossary across player-facing reference domains, with
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
   canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.

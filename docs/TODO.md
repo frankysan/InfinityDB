@@ -68,8 +68,27 @@ candidate acceptance remains in the release checklist.
 Complete the selected development work before the existing
 [release checklist](releasing.md); no new release gates are introduced.
 
-All selected v1.3.0 additions are implemented. Proceed with the existing
-release checklist.
+All selected v1.3.0 additions are implemented. Address the manual verification
+findings below before final release acceptance.
+
+### Manual verification fixes and improvements
+
+Accumulate actionable findings from the manual browser pass here and resolve
+them in coherent batches. Retire completed entries after focused validation.
+
+- [ ] **Web backend:** Confirm the implemented `/favicon.ico` fallback in clean
+  Firefox. The existing branded PNG and cache contract pass the regression test.
+- [ ] **Project infrastructure:** Advance both package version declarations from
+  1.2.2 to 1.3.0 and verify the development footer displays `1.3.0+dev`.
+  Combine with the next vocabulary database rebuild because both version
+  declarations participate in the build input fingerprint.
+- [ ] **Data processing + Web backend + Web frontend:** Make reviewed official,
+  historical and community vocabulary discoverable in the Glossary and global
+  search (including live suggestions). Reuse canonical embedded terms and
+  existing definitions, including Generic Army, Vanilla and Linkable; preserve provenance
+  and contextual links. Review other official and community terms and phrases
+  for missing entries, including existing Fireteam terminology, without treating
+  shorthand or historical mechanics as current official rules.
 
 ### Deferred beyond the committed scope
 

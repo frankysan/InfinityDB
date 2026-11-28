@@ -38,6 +38,13 @@ focus in the search field during suggestion selection; close the panel when
 leaving search or navigating. Debounce requests and ignore superseded responses.
 Use theme tokens and keep the panel within narrow viewports.
 
+Page-local search inputs also update live where the existing results can be
+filtered or fetched efficiently. Reuse loaded Glossary and catalog data;
+debounce API-backed full search and Unit comparison lookups. Keep explicit
+submit actions available, preserve keyboard focus and shareable filter state,
+and cancel obsolete work on input changes or navigation. Searching for a Unit
+to compare must not silently change an existing selection.
+
 ### Card spacing
 
 **Give every content card an explicit inset.** The `.surface` class supplies

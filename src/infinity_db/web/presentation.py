@@ -191,7 +191,10 @@ STYLESHEET_PARTS = (
 _STATIC_REVISION_FILES = tuple(sorted(
     filename for filename, _ in ASSETS.values() if not filename.endswith(".json")
 ))
-_LEGACY_STATIC_ASSET_ALIASES = {"/static/app.js": "/static/units.js"}
+_LEGACY_STATIC_ASSET_ALIASES = {
+    "/static/app.js": "/static/units.js",
+    "/favicon.ico": "/static/favicon-32.png",
+}
 
 
 @dataclass(frozen=True, slots=True)

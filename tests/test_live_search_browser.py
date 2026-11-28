@@ -126,3 +126,31 @@ def test_live_search_latest_input_and_keyboard(app: Any, chrome: Any) -> None:
         assert not panel.is_visible()
     finally:
         page.close()
+
+
+def test_live_full_search_results(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/search")
+        query = page.locator("#search-query")
+        query.fill("Mimetism")
+        query.fill("Saturation")
+        result = page.locator('#search-list a[href="/rules/saturation"]')
+        result.wait_for(state="visible")
+        assert page.locator('#search-list a[href="/skills/mimetism"]').count() == 0
+        assert query.evaluate("node => document.activeElement === node")
+        assert "?s=v1.s." in page.url
+        saved = page.url
+        page.reload()
+        result.wait_for(state="visible")
+        assert query.input_value() == "Saturation"
+        assert page.url == saved
+        query.fill("no-such-result-987654")
+        page.locator("#search-empty").wait_for(state="visible")
+        assert page.locator("#search-count").inner_text() == "0 results"
+        query.fill("")
+        page.locator("#search-prompt").wait_for(state="visible")
+        assert page.url == f"{ORIGIN}/search"
+    finally:
+        page.close()

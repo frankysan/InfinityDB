@@ -13,6 +13,8 @@ are not retroactively relabeled.
 ### Player summary
 
 - Live search suggestions in the navigation, with direct links and access to all results.
+- Live filtering in the Glossary, full search results and both Unit comparison selectors.
+- Generic Army terminology replaces Main Army, with Vanilla explained as community shorthand.
 - Correct Equipment filter counts on repeated matching queries.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
@@ -42,6 +44,11 @@ are not retroactively relabeled.
 
 - **Web frontend + Web backend:** Added debounced global search suggestions with
   keyboard navigation and bounded API results, preserving full search and ranking.
+- **Web frontend:** Update Glossary matches, full search results and Unit comparison
+  search options while typing. Preserve shareable state and explicit comparison selections.
+- **Web frontend:** Use Generic Army in Army overview labels and Unit Explorer summaries;
+  explain Vanilla without changing source role identifiers.
+- **Web backend:** Serve the existing branded PNG for conventional favicon requests.
 - **Web frontend + Web backend + Deployment:** Added a shared anonymous error
   report form with inspectable optional page context, bounded submission
   limits and configurable email delivery without an application report store.

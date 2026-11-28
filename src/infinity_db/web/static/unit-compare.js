@@ -83,6 +83,8 @@ function slot(side, title) {
   const matches = node("select");
   const matchField = field("Search results", matches, side + "-matches");
   matchField.hidden = true;
+  const searchMessage = node("p", "", "detail-copy");
+  searchMessage.setAttribute("role", "status");
   const message = node("p", "", "detail-copy");
   message.setAttribute("role", "status");
   const unitLink = node("a");
@@ -93,7 +95,7 @@ function slot(side, title) {
   const armySelect = node("select");
   const profileSelect = node("select");
   const loadoutSelect = node("select");
-  body.append(form, matchField, message, unitLink, clear,
+  body.append(form, matchField, searchMessage, message, unitLink, clear,
     field("Army", armySelect, side + "-army"),
     field("Profile", profileSelect, side + "-profile"),
     field("Loadout (optional)", loadoutSelect, side + "-loadout"));
@@ -104,6 +106,17 @@ function slot(side, title) {
     profileId: params.get(side + "_profile") || "", loadoutId: params.get(side + "_loadout") || "",
     army: null, profile: null, loadout: null, loading: false, request: 0, searchRequest: 0,
   };
+  let searchTimer;
+  let searchController;
+  function cancelSearch() {
+    clearTimeout(searchTimer);
+    searchController?.abort();
+    ++state.searchRequest;
+    matchField.hidden = true;
+    matches.replaceChildren();
+    searchMessage.textContent = "";
+  }
+  signal.addEventListener("abort", cancelSearch, { once: true });
   function populate({ chooseDefaults = false } = {}) {
     const armies = (state.unit?.armies || []).filter((army) => army.presentation_visible !== false);
     if (chooseDefaults && !state.armyId) {
@@ -166,32 +179,42 @@ function slot(side, title) {
     }
   }
 
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  async function findUnits() {
+    cancelSearch();
     const query = search.value.trim();
-    if (!query) return;
-    const request = ++state.searchRequest;
-    matchField.hidden = true;
-    message.textContent = "Searching…";
+    if (!query || signal.aborted) return;
+    const request = state.searchRequest;
+    searchController = new AbortController();
+    searchMessage.textContent = "Searching…";
     try {
-      const data = await getUnits({ search: query, limit: 30, offset: 0, ...allAvailability }, signal);
+      const data = await getUnits({ search: query, limit: 30, offset: 0, ...allAvailability },
+        searchController.signal);
       if (signal.aborted || request !== state.searchRequest) return;
       fillOptions(matches, data.items, unitKey, (unit) => unit.name, "", "Select a Unit");
       matchField.hidden = false;
-      message.textContent = data.total > 30
+      searchMessage.textContent = data.total > 30
         ? "Showing the first 30 matches. Refine your search for more specific results."
         : data.items.length ? "" : "No matching Units.";
     } catch (error) {
-      if (!signal.aborted && request === state.searchRequest) {
-        message.textContent = collectionLoadMessage(error, "Units");
+      if (!signal.aborted && request === state.searchRequest && error.name !== "AbortError") {
+        searchMessage.textContent = collectionLoadMessage(error, "Units");
       }
     }
+  }
+  function scheduleSearch(event) {
+    cancelSearch();
+    if (!event.isComposing && search.value.trim()) searchTimer = setTimeout(findUnits, 180);
+  }
+  search.addEventListener("input", scheduleSearch);
+  search.addEventListener("compositionend", scheduleSearch);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    findUnits();
   });
   matches.addEventListener("change", () => { if (matches.value) load(matches.value); });
   clear.addEventListener("click", () => {
-    ++state.searchRequest;
+    cancelSearch();
     search.value = "";
-    matchField.hidden = true;
     load("");
   });
   armySelect.addEventListener("change", () => {
