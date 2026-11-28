@@ -741,6 +741,9 @@ def test_skill_faq_card_padding_and_developer_occurrence_geometry(
         )
         card = group.locator(".faq-dated-clarification").first
         card.wait_for(state="visible", timeout=30000)
+        assert card.locator("h3").evaluate(
+            "node => getComputedStyle(node).backgroundColor === 'rgba(0, 0, 0, 0)'"
+        )
         card_box = card.bounding_box()
         assert card_box
         for selector in ("h3", ".detail-copy", ".faq-publication-source"):
@@ -3855,9 +3858,29 @@ def test_scenario_season_rules_disclosure(
             else:
                 assert disclosure.locator("#rule-rule-spec-ops-extra").is_visible()
                 assert disclosure.locator("#rule-rule-team-ops-extra").count() == 0
-                assert page.locator("#scenario-tactical-support").is_visible()
+                support = page.locator("#scenario-tactical-support")
+                assert support.is_visible()
+                assert support.locator(".surface-body > p").first.evaluate(
+                    "node => getComputedStyle(node).marginBlockEnd === '0px'"
+                )
+                assert support.locator(".surface-body > ul").evaluate(
+                    "node => getComputedStyle(node).marginBlockStart === '0px'"
+                )
                 assert disclosure.locator("#rule-skill-team-ops").count() == 0
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.goto(
+            f"{ORIGIN}/scenarios/b-pong?army_points=300&collection=its-17&revision=0.2",
+            wait_until="domcontentloaded",
+        )
+        support = page.locator("#scenario-tactical-support")
+        support.wait_for(state="visible", timeout=30000)
+        assert support.locator(".surface-body > p").first.evaluate(
+            "node => getComputedStyle(node).marginBlockEnd === '0px'"
+        )
+        assert support.locator(".surface-body > ul").evaluate(
+            "node => getComputedStyle(node).marginBlockStart === '0px'"
+        )
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
         page.goto(f"{ORIGIN}/scenarios/annihilation?army_points=300",
                   wait_until="domcontentloaded")
         page.locator("#scenario-content").wait_for(state="visible", timeout=30000)
@@ -3989,6 +4012,33 @@ def test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
         root.wait_for(state="visible", timeout=30000)
         cards = root.locator(".faq-ruling")
         assert cards.count() == 3  # two general Fireteam and one bonus ruling
+
+        # Verify the FAQ surface against its containing card in both modes.
+        assert root.evaluate("""node => {
+            const html = document.documentElement;
+            const original = html.dataset.theme;
+            const outer = node.closest('.fireteam-explorer');
+            try {
+                for (const mode of ['light', 'dark']) {
+                    html.dataset.theme = mode;
+                    const bounds = node.getBoundingClientRect();
+                    const container = outer.getBoundingClientRect();
+                    if (bounds.left - container.left < 8
+                        || container.right - bounds.right < 8) return false;
+                    for (const card of node.querySelectorAll('.faq-ruling')) {
+                        const heading = card.querySelector('h3');
+                        if (getComputedStyle(heading).backgroundColor !== 'rgba(0, 0, 0, 0)')
+                            return false;
+                        const warning = card.querySelector('.faq-source-discrepancy');
+                        if (warning && getComputedStyle(warning).backgroundColor
+                            === getComputedStyle(card).backgroundColor) return false;
+                    }
+                }
+                return true;
+            } finally {
+                html.dataset.theme = original;
+            }
+        }""")
 
         def ruling_card(identifier: str) -> Any:
             question = records[identifier]["facts"]["question"]

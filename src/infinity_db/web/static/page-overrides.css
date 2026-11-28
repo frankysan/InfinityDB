@@ -43,6 +43,22 @@
   scroll-margin-block: var(--space-4);
 }
 
+.army-overview-card[data-army-kind="reinforcement"] {
+  background: color-mix(in srgb, var(--color-surface-default) 50%, var(--color-availability-reinforcement-surface));
+}
+
+.army-overview-card[data-army-kind="out-of-catalog"] {
+  background: color-mix(in srgb, var(--color-surface-default) 50%, var(--color-status-warning-surface));
+}
+
+.army-overview-card[data-army-kind="legacy"] {
+  background: var(--color-surface-page);
+}
+
+.army-overview-card[data-army-kind="legacy"] .detail-source {
+  color: var(--color-text-secondary);
+}
+
 .army-overview-card:target {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 3px;
@@ -88,11 +104,6 @@
 .army-overview-description {
   flex: 1 1 auto;
   margin: 14px 0 16px;
-}
-
-.army-overview-relationships {
-  margin: 0 0 16px;
-  overflow-wrap: anywhere;
 }
 
 .army-overview-card-footer {
@@ -690,6 +701,11 @@ html:not([data-developer-mode="true"])
   gap: var(--space-2);
 }
 
+/* Fireteam FAQ is directly inside an otherwise unpadded surface. */
+.fireteam-faq {
+  padding-inline: var(--space-2);
+}
+
 /* Dated FAQ clarifications are source publications, not generic "new" rules. */
 .faq-dated-clarification {
   display: grid;
@@ -699,6 +715,7 @@ html:not([data-developer-mode="true"])
 
 .faq-dated-clarification > .surface-titlebar {
   padding: 0;
+  background: transparent;
 }
 
 .faq-dated-clarification > p {
@@ -997,6 +1014,18 @@ html:not([data-developer-mode="true"])
 
 .scenario-source-issue[id] {
   scroll-margin-top: 100px;
+}
+
+#scenario-tactical-support .surface-body {
+  gap: var(--space-2);
+}
+
+#scenario-tactical-support .surface-body > :is(p, ul) {
+  margin-block: 0;
+}
+
+#scenario-tactical-support .rules-source-note {
+  margin-block-start: var(--space-1);
 }
 
 .scenario-map-card {

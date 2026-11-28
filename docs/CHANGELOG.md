@@ -123,6 +123,10 @@ are not retroactively relabeled.
 
 ### Fixed
 
+- **Web frontend:** Distinguish Army overview card types through theme-aware shading,
+  clarify Matched configuration interaction, unify FAQ card backgrounds and insets,
+  tighten Tactical Support spacing, and darken Nomads sidebar chrome.
+
 - **Data processing:** Include Unit history in normal runtime builds and require
   an explicit opt-out for history-free development builds.
 - **Project infrastructure:** Corrected identical-tree CI reuse when GitHub's newer API omits PR merge identity.

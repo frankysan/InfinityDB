@@ -55,36 +55,11 @@ function armyStatuses(army) {
   return statuses;
 }
 
-function reinforcementRelationships(army, visibleArmies) {
-  if (army.legacy || army.playable === false) return null;
-  const references = army.role === "reinforcement"
-    ? army.parent_armies
-    : army.reinforcement_sections;
-  const targets = (references || [])
-    .map((reference) => visibleArmies.get(reference.id))
-    .filter((target) => target && target.playable !== false && !target.legacy);
-  if (!targets.length) return null;
-
-  const paragraph = document.createElement("p");
-  paragraph.className = "detail-copy army-overview-relationships";
-  const label = document.createElement("strong");
-  label.textContent = army.role === "reinforcement"
-    ? "Used by:"
-    : targets.length === 1 ? "Reinforcement Section:" : "Reinforcement Sections:";
-  paragraph.append(label, " ");
-  targets.forEach((target, index) => {
-    if (index) paragraph.append(", ");
-    const link = document.createElement("a");
-    link.href = `#army-${armyValue(target)}`;
-    link.textContent = target.name;
-    paragraph.append(link);
-  });
-  return paragraph;
-}
-
-function renderArmy(army, visibleArmies) {
+function renderArmy(army) {
   const article = document.createElement("article");
   article.className = "surface surface--subtle surface--raised army-overview-card";
+  article.dataset.armyKind = army.legacy ? "legacy" : army.out_of_catalog
+    ? "out-of-catalog" : army.role === "reinforcement" ? "reinforcement" : "default";
   article.id = `army-${armyValue(army)}`;
   article.tabIndex = -1;
 
@@ -143,8 +118,6 @@ function renderArmy(army, visibleArmies) {
   }
 
   article.append(heading, description);
-  const relationships = reinforcementRelationships(army, visibleArmies);
-  if (relationships) article.append(relationships);
   article.append(footer);
   return article;
 }
@@ -157,7 +130,6 @@ function render(items) {
     ? `${number.format(playable.length)} playable · ${number.format(legacy.length)} legacy`
     : `${number.format(playable.length)} playable`;
   if (!visible.length) return show(elements.empty);
-  const visibleArmies = new Map(visible.map((army) => [army.id, army]));
 
   const groups = new Map();
   for (const army of visible) {
@@ -175,7 +147,7 @@ function render(items) {
     heading.textContent = group.name;
     const grid = document.createElement("div");
     grid.className = "army-overview-grid";
-    grid.replaceChildren(...group.armies.map((army) => renderArmy(army, visibleArmies)));
+    grid.replaceChildren(...group.armies.map((army) => renderArmy(army)));
     section.append(heading, grid);
     fragment.append(section);
   }

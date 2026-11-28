@@ -3826,6 +3826,7 @@ html[data-distance-unit="in"] .unit-extended-statline {
 }
 
 .unit-match-contexts {
+  cursor: default;
   margin-top: 2px;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
@@ -3835,6 +3836,13 @@ html[data-distance-unit="in"] .unit-extended-statline {
 
 .unit-match-contexts summary {
   cursor: pointer;
+}
+
+.unit-match-contexts summary:hover,
+.unit-match-contexts summary:focus-visible {
+  background: var(--color-surface-control-hover);
+  color: var(--color-text-primary);
+  text-decoration: underline;
 }
 
 .unit-match-contexts ul {

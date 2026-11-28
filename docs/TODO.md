@@ -76,14 +76,41 @@ findings below before final release acceptance.
 Accumulate actionable findings from the manual browser pass here and resolve
 them in coherent batches. Retire completed entries after focused validation.
 
-- [ ] **Web backend:** Confirm the implemented `/favicon.ico` fallback in clean
-  Firefox. The existing branded PNG and cache contract pass the regression test.
-- [ ] **Project infrastructure:** Confirm the updated development footer
-  displays `1.3.0+dev` after restarting the local server. Both declarations and
-  the matched runtime database set have been updated.
-- [ ] **Data processing + Web backend + Web frontend:** Confirm the expanded
-  official, historical and community vocabulary in the manual Glossary and search
-  verification, including Vanilla, Linkable and Pure Fireteam.
+- [ ] **Data processing + Web frontend:** Preserve typed distance parameters in
+  Unit history changes and render them using the shared distance and Skill
+  formatting helpers, honoring the cm/in preference and parameter sign semantics.
+  Cover both old and new values, MOV changes and historically removed Skills;
+  never convert unrelated numbers such as MODs, Points or SWC. Verify GO-POD
+  Super-Jump (7.5 cm / 3 inches) and Jump (20 cm / 8 inches) in both modes,
+  including toggling with an open History disclosure.
+- [ ] **Web backend + Web frontend:** Resolve related-rule links to published
+  reference-only variant cards on their owning catalog detail pages. In
+  Neurocinetics, Effects used by: TinBot: Neurocinetics should link to
+  `/equipment/tinbot#rule-equipment-tinbot-neurocinetics`. Check analogous
+  references, exact anchor navigation and reciprocal links; preserve the
+  distinction between reference-only rules and current Army availability.
+  Do not introduce standalone routes for unpublished variants.
+- [ ] **Data processing + Web backend + Web frontend:** Add MSV as a searchable
+  alias for Multispectral Visor, preserving the canonical Equipment name and
+  identity. Verify global/live search and Equipment catalog search; use the
+  existing alias mechanism rather than creating a duplicate Glossary definition.
+  Check case-insensitive matching.
+- [ ] **Web frontend + Web backend:** Show scenario usage counts for
+  Scenario-specific Skills in the Skills catalog instead of zero Army uses.
+  Derive counts from distinct published scenario contexts (collection and
+  scenario identity), not aliases or rule variants. Distinguish scenario counts
+  from Unit counts in the presentation; preserve ordinary Skill usage semantics.
+  Verify consolidated and single-scenario entries, including Activate Antenna.
+- [ ] **Web backend + Web frontend:** Correct standalone SVG rendering over HTTP
+  in Firefox. Investigate the shared Content Security Policy blocking embedded
+  SVG styles; saved local scenario maps render correctly. Check representative
+  static Army and Unit symbols, the main logo (including inline theme hydration),
+  and Silhouettes as well as generated maps. Scope any style-policy exception to
+  trusted SVG responses needing it; retain script and external-resource
+  restrictions and avoid weakening the HTML policy. Verify direct navigation,
+  embedded images, saved files, themed maps and conditional HTTP responses.
+  Check Firefox and Chromium with real response headers; address inline logo
+  styling separately if needed.
 
 ### Deferred beyond the committed scope
 

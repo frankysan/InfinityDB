@@ -289,6 +289,13 @@ def _audited_palettes() -> Iterator[tuple[str, dict[str, str]]]:
             yield f"{slug}/{mode}", tokens
 
 
+def test_nomads_chrome_is_near_black_in_both_modes() -> None:
+    for mode in ("light", "dark"):
+        tokens = theme_tokens(mode, "nomads")
+        color = tokens["color-nav-surface"]
+        assert 0.003 < _relative_luminance(color) < 0.025
+
+
 def test_faction_palettes_are_distinct_across_visible_roles() -> None:
     """Guard against nearly identical navigation, canvas and action colors."""
     roles = ("color-nav-surface", "color-surface-page", "color-action-primary")

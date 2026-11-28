@@ -199,7 +199,15 @@ def theme_tokens(mode: ThemeMode, palette: str = DEFAULT_PALETTE) -> dict[str, s
             seed, strength = chrome, 1.0
             if name.startswith("color-nav-surface") or name == "color-nav-control-surface":
                 # A more visible faction-colored frame, including in dark mode.
-                target = _luminance(_rgb(value)) + (0.018 if mode == "light" else 0.012)
+                target = _luminance(_rgb(value))
+                if palette == "nomads":
+                    # Nomads use near-black chrome rather than a prominent faction tint.
+                    if name == "color-nav-surface":
+                        target = 0.014 if mode == "light" else 0.008
+                    else:
+                        target = max(target * 0.8, 0.024 if mode == "light" else 0.016)
+                else:
+                    target += 0.018 if mode == "light" else 0.012
             elif name == "color-nav-choice-muted":
                 target = 0.44 if mode == "light" else 0.36
         else:

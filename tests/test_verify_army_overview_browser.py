@@ -1,4 +1,4 @@
-"""Chromium acceptance of the normal Army overview Reinforcement relationships."""
+"""Chromium acceptance of the Army overview cards and navigation."""
 
 from __future__ import annotations
 
@@ -114,28 +114,8 @@ def _visible(army: dict[str, Any]) -> bool:
     return army.get("playable") is not False or bool(army.get("legacy"))
 
 
-def _expected(
-    army: dict[str, Any], by_id: dict[int, dict[str, Any]]
-) -> list[tuple[str, str]]:
-    if army.get("legacy") or army.get("playable") is False:
-        return []
-    references = (
-        army.get("parent_armies")
-        if army.get("role") == "reinforcement"
-        else army.get("reinforcement_sections")
-    ) or []
-    targets = [
-        by_id[ref["id"]]
-        for ref in references
-        if ref.get("id") in by_id
-        and by_id[ref["id"]].get("playable") is not False
-        and not by_id[ref["id"]].get("legacy")
-    ]
-    return [(f"#army-{_slug(target)}", target["name"]) for target in targets]
-
-
 @pytest.mark.parametrize("width", [1440, 390])
-def test_pinned_army_overview_api_links_and_keyboard_navigation(
+def test_pinned_army_overview_cards_and_fragment_navigation(
     army_app: Any, origin: str, chrome: Any, width: int
 ) -> None:
     with _overview_page(army_app, origin, chrome, width) as page:
@@ -150,29 +130,19 @@ def test_pinned_army_overview_api_links_and_keyboard_navigation(
         assert response is not None and response.status == 200
         page.locator("#army-overview-groups").wait_for(state="visible", timeout=60000)
         assert page.locator(".army-overview-card").count() == len(visible)
-        tested_links = 0
-        first_link: tuple[str, str] | None = None
         for army in visible.values():
             card = page.locator(f'[id="army-{_slug(army)}"]')
             assert card.count() == 1, (width, army["name"])
-            links = card.locator(".army-overview-relationships a")
-            expected = _expected(army, visible)
-            actual = [(link.get_attribute("href"), link.text_content()) for link in links.all()]
-            assert actual == expected, (width, army["name"], actual, expected)
-            tested_links += len(expected)
-            if expected and first_link is None:
-                selector = f'[id="army-{_slug(army)}"] .army-overview-relationships a'
-                first_link = (selector, expected[0][0])
-        assert tested_links > 0
-        assert first_link is not None
+            assert card.locator(".army-overview-relationships").count() == 0
+            assert card.locator("a.button-primary").count() == int(
+                army.get("playable") is not False
+            )
+        target_id = f"army-{_slug(next(iter(visible.values())))}"
+        fragment = f"#{target_id}"
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         ), width
 
-        link = page.locator(first_link[0]).first
-        link.focus()
-        assert link.evaluate("(element) => element === document.activeElement")
-        target_id = first_link[1][1:]
         page.evaluate("""() => {
             window.overviewMain = document.querySelector('main#main');
             window.overviewNavigations = 0;
@@ -193,10 +163,12 @@ def test_pinned_army_overview_api_links_and_keyboard_navigation(
             assert page.evaluate("window.overviewNavigations") == 0
             assert page.evaluate("document.querySelector('main#main') === window.overviewMain")
 
-        fragment_navigation(lambda: page.keyboard.press("Enter"), first_link[1])
+        fragment_navigation(
+            lambda: page.evaluate("(hash) => location.hash = hash", fragment), fragment
+        )
         page.wait_for_function("(id) => document.activeElement?.id === id", arg=target_id)
         fragment_navigation(page.go_back, "")
-        fragment_navigation(page.go_forward, first_link[1])
+        fragment_navigation(page.go_forward, fragment)
         page.wait_for_function("(id) => document.activeElement?.id === id", arg=target_id)
         page.locator(f'[id="{target_id}"]').wait_for(state="visible", timeout=5000)
 
@@ -309,7 +281,7 @@ def test_army_links_and_filtered_availability_counts(
 
 
 @pytest.mark.parametrize("width", [1440, 390])
-def test_overview_ignores_missing_nonplayable_and_legacy_targets(
+def test_overview_card_categories_and_theme_contrast(
     army_app: Any, origin: str, chrome: Any, width: int
 ) -> None:
     def army(army_id: int, name: str, role: str, *, playable: bool = True,
@@ -325,7 +297,8 @@ def test_overview_ignores_missing_nonplayable_and_legacy_targets(
     reinforcement = army(3, "Shared section", "reinforcement")
     excluded = army(4, "Nonplayable", "main", playable=False)
     legacy = army(5, "Legacy", "main", playable=False, legacy=True)
-    empty = army(6, "No links", "main")
+    empty = army(6, "Out of catalog", "main")
+    empty["out_of_catalog"] = True
     first["reinforcement_sections"] = [{"id": i} for i in (3, 4, 5, 999)]
     second["reinforcement_sections"] = [{"id": 3}]
     reinforcement["parent_armies"] = [{"id": i} for i in (1, 2, 4, 5, 999)]
@@ -340,14 +313,65 @@ def test_overview_ignores_missing_nonplayable_and_legacy_targets(
         assert response is not None and response.status == 200
         page.locator("#army-overview-groups").wait_for(state="visible", timeout=60000)
         for army_id, expected in (
-            (1, ["#army-army-3"]), (2, ["#army-army-3"]),
-            (3, ["#army-army-1", "#army-army-2"]),
-            (5, []), (6, []),
+            (1, "default"), (2, "default"), (3, "reinforcement"),
+            (5, "legacy"), (6, "out-of-catalog"),
         ):
-            links = page.locator(f'[id="army-army-{army_id}"] .army-overview-relationships a')
-            assert [link.get_attribute("href") for link in links.all()] == expected
+            card = page.locator(f'[id="army-army-{army_id}"]')
+            assert card.get_attribute("data-army-kind") == expected
         assert page.locator('[id="army-army-4"]').count() == 0
-        assert page.locator(".army-overview-relationships a").count() == 4
+        assert page.locator(".army-overview-relationships").count() == 0
+        assert page.locator('[data-army-kind="legacy"] .status-badge').count() == 2
+        assert page.locator('[data-army-kind="out-of-catalog"] .status-badge').count() == 1
+        assert page.locator(
+            '[data-army-kind="reinforcement"] .eyebrow'
+        ).text_content() == "Reinforcements"
+        failures = page.evaluate("""() => {
+            const root = document.documentElement;
+            const original = [root.dataset.theme, root.dataset.themePalette];
+            const canvas = document.createElement('canvas');
+            canvas.width = canvas.height = 1;
+            const ctx = canvas.getContext('2d', {willReadFrequently: true});
+            function luminance(color) {
+                ctx.clearRect(0, 0, 1, 1);
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, 1, 1);
+                const channels = [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
+                    .map(v => v / 255)
+                    .map(v => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
+                return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+            }
+            const failures = [];
+            try {
+                for (const {value: palette} of JSON.parse(root.dataset.themeOptions)) {
+                    for (const mode of ['light', 'dark']) {
+                        root.dataset.theme = mode;
+                        root.dataset.themePalette = palette;
+                        const colors = new Set();
+                        const kinds = ['default', 'reinforcement', 'out-of-catalog', 'legacy'];
+                        for (const kind of kinds) {
+                            const card = document.querySelector('[data-army-kind="' + kind + '"]');
+                            const bg = getComputedStyle(card).backgroundColor;
+                            colors.add(bg);
+                            const content = 'h3, .eyebrow, .army-overview-description, '
+                                + '.detail-source';
+                            for (const child of card.querySelectorAll(content)) {
+                                const a = luminance(bg);
+                                const b = luminance(getComputedStyle(child).color);
+                                const ratio = (Math.max(a,b) + .05) / (Math.min(a,b) + .05);
+                                if (ratio < 4.5) {
+                                    failures.push([palette, mode, kind, child.className, ratio]);
+                                }
+                            }
+                        }
+                        if (colors.size !== 4) failures.push([palette, mode, 'duplicate colors']);
+                    }
+                }
+            } finally {
+                [root.dataset.theme, root.dataset.themePalette] = original;
+            }
+            return failures;
+        }""")
+        assert not failures, failures
         assert page.evaluate(
             "() => document.documentElement.scrollWidth <= window.innerWidth + 1"
         ), width

@@ -618,6 +618,12 @@ def test_matching_context_disclosure_does_not_navigate(
         summary = page.locator(".unit-match-contexts summary").first
         summary.wait_for(state="visible")
         assert "Matched:" in summary.inner_text()
+        assert summary.evaluate("node => getComputedStyle(node).cursor") == "pointer"
+        if width != 390:
+            summary.hover()
+            assert summary.evaluate(
+                "node => getComputedStyle(node).textDecorationLine"
+            ) == "underline"
         url = page.url
         if width == 390:
             summary.tap()
@@ -629,6 +635,7 @@ def test_matching_context_disclosure_does_not_navigate(
         assert items.count() > 0
         details = page.locator(".unit-match-context-details").first
         assert details.is_visible()
+        assert details.evaluate("node => getComputedStyle(node).cursor") == "default"
         assert any(
             category in details.inner_text()
             for category in ("pts", "SWC", "Weapons:", "Equipment:", "Skills:")

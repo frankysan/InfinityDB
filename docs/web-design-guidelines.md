@@ -456,6 +456,8 @@ second, repeated publication/date line above the group. Keep archival source
 dates and first-publication attribution in the maintained data, and preserve
 an explicit expandable discrepancy note when cited sources materially differ.
 Maintain separation between detail/usage panels and following FAQ cards.
+Use a single background for the question and answer, with a small inset from
+an otherwise unpadded containing surface. Keep discrepancy callouts distinct.
 
 ### Preserve predictable geometry
 
@@ -484,6 +486,11 @@ Developer mode should add technical depth rather than redefine the primary prese
 On Unit detail pages, source-defined **Reinforcement relationships** and
 technical Army/faction membership diagnostics belong in Developer Mode;
 normal profile availability and ordinary Army/Unit navigation remain public.
+On the Army overview, distinguish default, Reinforcements, out-of-catalog and
+legacy cards through theme-aware shading alongside readable role/status labels;
+do not repeat the reinforcement relationship lines there. Matched configuration
+summaries are independent disclosures within navigable Unit Explorer rows:
+highlight the summary on hover/focus and use a normal cursor on its expanded content.
 
 The accuracy and independence notice is a **floating, viewport-bottom
 section** in the shared page shell, rather than an ordinary footer row.
@@ -593,7 +600,7 @@ uses corrupted reds and neutral mechanical greys, supporting restrained plum ton
 
 Give each palette distinguishable chrome, page surfaces and action accents.
 Use dark navy, steel blue and cyan (PanOceania), golden yellow and ochre
-(Yu Jing), military olive (Ariadna), sand and olive (Haqqislam), red and charcoal
+(Yu Jing), military olive (Ariadna), sand and olive (Haqqislam), red and near-black charcoal
 (Nomads), desaturated grey-plum (Combined Army), cool lavender (ALEPH),
 amber and graphite (Tohaa), jade (Non-Aligned Armies), navy and gold (O-12),
 and muted teal-grey with crimson (JSA). The editable appearance seeds are in
