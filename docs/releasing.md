@@ -289,6 +289,14 @@ v1.0.0 entry in `docs/CHANGELOG.md` is the style example for future entries.
   releases). Follow with `Added`, `Changed` and `Fixed` as applicable, then
   `Upgrade notes` for operator requirements. Keep the summary brief without
   imposing that brevity on the detailed entries.
+- Group multiple player-facing changes or additions in the same feature area
+  under one descriptive, bold parent bullet with a single level of sub-bullets.
+  Apply this to the Player summary and, where useful, within each detailed
+  section; keep Added, Changed and Fixed distinct. Name groups for the player
+  journey or reference area (for example Search and Glossary, Armies and Units,
+  or Performance improvements), not the implementation layer. Retain domain
+  labels on detailed child entries. Leave unrelated or standalone outcomes as
+  individual bullets; do not flatten distinct improvements into one vague item.
 - Preserve enough detail to introduce each meaningful feature or correction:
   concrete capabilities, choices, representative examples, important
   conditions, scope limits and unresolved source disagreements. Keep distinct
@@ -318,7 +326,8 @@ instructions, because the web application parses it to render **What's changed**
   use past tense for completed changes and present tense for ongoing behavior
   in that version, with an end-user-first perspective. Keep its `Player summary`
   concise and player-visible only, and retain concrete feature and correction
-  detail below it. Merge overlapping entries, remove implementation-only
+  detail below it. Group related player-facing outcomes into feature-area
+  sub-lists. Merge overlapping entries, remove implementation-only
   detail, and make upgrade consequences explicit.
 - [ ] When substantially rewriting or consolidating existing notes, compare
   against the pre-rewrite version in Git history. Verify that distinct
