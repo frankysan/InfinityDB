@@ -80,7 +80,7 @@ export function immunityCaseRows(facts = {}) {
           text("; its Isolated/Immobilized-B effects are ignored. The "),
           reference("trait:non-lethal", "Non-Lethal"),
           text(" Trait still applies, so this weapon inflicts no Wounds. "),
-          text("Only the source Weapon 25 non-Comms profile is reviewed; "),
+          text("This example applies only to the standalone E/Mitter's non-Comms profile; "),
           text("the Armed Turret E/Mitter discrepancy is not adjudicated."),
         ],
         evidence: evidence(item.evidence),

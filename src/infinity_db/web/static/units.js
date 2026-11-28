@@ -51,8 +51,8 @@ const ALL_AND_FILTERS = UNIT_EXPLORER_DEFAULT_AND_FILTERS;
 const MATCHING_SCOPE_DESCRIPTIONS = {
   profile: "All AND selections must occur on one Trooper profile and its compatible loadout.",
   loadout: "Selections may occur on different profiles in one loadout or an explicitly included model. Alternate states need not be active together.",
-  unit: "Selections may occur across the logical Unit’s alternative configurations. Eligible but unselected Peripherals do not contribute.",
-  "": "This shared link retains the previous matching behavior. Choose a scope to use the new semantics.",
+  unit: "Selections may match different profiles or loadouts of the same Unit. Peripherals count only when included in a matching configuration.",
+  "": "This shared link uses the previous matching behavior. Choose a matching option to update it.",
 };
 function renderMatchingScope() {
   const legacy = elements.matchingScope.querySelector('option[value=""]');

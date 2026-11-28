@@ -379,7 +379,7 @@ function render(skill) {
     context.className = "detail-copy";
     const link = document.createElement("a");
     link.href = `/skills/${encodeURIComponent(skill.canonical_slug)}`;
-    link.textContent = "View all applicable contexts";
+    link.textContent = "View all applicable seasons and scenarios";
     context.append(link);
     children.push(context);
   }

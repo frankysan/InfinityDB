@@ -798,7 +798,7 @@ function seasonRulesSection(item, controller) {
   body.className = "surface-body rules-card-stack";
   const note = document.createElement("p");
   note.className = "detail-copy";
-  note.textContent = "Reviewed rules for this season and revision. Mission-specific rules still apply. Tournament restrictions and optional Extras apply only in their stated contexts.";
+  note.textContent = "Rules for this ITS season. Mission-specific rules still apply. Tournament restrictions and optional Extras apply only where specified.";
   body.append(note);
   const contexts = new Map();
   for (const rule of item.season_rules || []) {

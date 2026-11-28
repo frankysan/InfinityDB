@@ -17,8 +17,8 @@ are not retroactively relabeled.
 - Generic Army terminology replaces Main Army, with Vanilla explained as community shorthand.
 - Expanded searchable official, community and historical Glossary vocabulary, including
   Vanilla, Linkable, Pure Fireteam and common army-building terms.
-- Correct Equipment filter counts on repeated matching queries.
-- Matching armies counts exclude non-playable grouping identities.
+- Correct Equipment filter counts when filtering Units.
+- The Matching armies count includes only playable Armies.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
 - Open matching Unit entries directly in official Infinity Army from their Army profile cards.
@@ -30,15 +30,15 @@ are not retroactively relabeled.
 - Clearer distinctions between rules, explanations, source examples, reviewed
   interpretations, FAQ clarifications and unresolved source issues.
 - Improved spacing of placement ruler labels near scenario map edges.
-- ITS scenario pages include a collapsible Season Rules section for reviewed
-  season-wide rules and context-specific event restrictions.
+- ITS scenario pages include a collapsible Season Rules section for rules that
+  apply throughout the season and restrictions for specific tournament formats.
 - Weapon and Equipment profile footnotes link to the applicable reviewed rules
   across the N5.3 chart; unresolved source markers remain visible.
 - **Performance improvements:**
-  - Faster global search through a compact prebuilt search index.
+  - Faster global search.
   - Faster resolution of inline rules references and their previews.
-  - Faster initial Glossary loading and Orders/AROs reference requests.
-  - Faster Skills, Equipment and Weapons catalog loading and detail usage retrieval.
+  - Faster loading of the Glossary and Orders/AROs reference.
+  - Faster Skills, Equipment and Weapons catalogs, including lists of Units using them.
   - Faster Unit Explorer initialization and Specialist Troops filtering.
   - Faster Extended Unit Explorer results, pagination and availability selections.
   - Faster first access to Unit details and Explorer after application startup.

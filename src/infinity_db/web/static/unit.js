@@ -1363,12 +1363,12 @@ function historyDisclosure(changes, general = false) {
   const note = document.createElement("p");
   note.className = "unit-history-note";
   note.textContent = general
-    ? "Changes shared across all Army profiles and loadouts for this General profile, including optional categories. Individual changes appear in Army histories."
-    : "Changes to this Army's profiles and loadouts. Skills, Equipment and Weapons refer to the owning profile or loadout, not its attached entities.";
+    ? "Changes common to this General profile across all Armies and loadouts, including optional availability categories. See each Army's history for individual changes."
+    : "Changes to this Army's profiles and loadouts. Skills, Equipment and Weapons listed here belong to the profile or loadout itself, not to attached models.";
   body.append(note);
   const coverage = document.createElement("p");
   coverage.className = "unit-history-note";
-  coverage.textContent = "Dates are Army data revision dates. Available history is incomplete.";
+  coverage.textContent = "Dates show when changes first appeared in the available Infinity Army updates. This history is incomplete.";
   body.append(coverage);
   if (!changes.length) {
     const empty = document.createElement("p");
@@ -1411,7 +1411,7 @@ function historyDisclosure(changes, general = false) {
         if (!categories.has(category)) continue;
         const label = document.createElement("h5");
         label.className = "data-label";
-        label.textContent = category;
+        label.textContent = category === "Loadout lifecycle" ? "Loadout changes" : category;
         const list = document.createElement("ul");
         for (const change of categories.get(category)) {
           const item = document.createElement("li");

@@ -37,7 +37,7 @@ export function initFeedback() {
       preview();
       dialog.showModal();
       message.focus();
-      status.textContent = "Checking reporting availability…";
+      status.textContent = "Checking whether reports can be sent…";
       try {
         const response = await fetch("/api/feedback", {
           credentials: "omit", referrerPolicy: "origin", cache: "no-store",
@@ -46,7 +46,7 @@ export function initFeedback() {
         submit.disabled = !available;
         status.textContent = available ? "" : "Reporting is currently unavailable.";
       } catch {
-        status.textContent = "Could not check reporting availability.";
+        status.textContent = "Could not check whether reports can be sent. Try reopening the form.";
       }
     });
   }
@@ -90,7 +90,7 @@ export function initFeedback() {
       } else {
         status.textContent = response.status === 429
           ? "Too many reports right now. Try again in a minute."
-          : "Could not send the report. Check the context or try again.";
+          : "Could not send the report. Please try again.";
       }
     } catch {
       status.textContent = "Could not send the report. Check your connection and try again.";
