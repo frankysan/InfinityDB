@@ -16,6 +16,7 @@ are not retroactively relabeled.
 - Live filtering in the Glossary, full search results and both Unit comparison selectors.
 - Generic Army terminology replaces Main Army, with Vanilla explained as community shorthand.
 - Correct Equipment filter counts on repeated matching queries.
+- Matching armies counts exclude non-playable grouping identities.
 - Unit details now include N5 profile and Army history, grouped by revision date
   and change type. Historical coverage is incomplete.
 - Open matching Unit entries directly in official Infinity Army from their Army profile cards.

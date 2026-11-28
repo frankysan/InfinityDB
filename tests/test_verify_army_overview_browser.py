@@ -201,6 +201,32 @@ def test_pinned_army_overview_api_links_and_keyboard_navigation(
         page.locator(f'[id="{target_id}"]').wait_for(state="visible", timeout=5000)
 
 
+
+def test_army_count_excludes_grouping_availability(army_app: Any, origin: str, chrome: Any) -> None:
+    with _overview_page(army_app, origin, chrome, 1440) as page:
+        page.add_init_script("sessionStorage.setItem('infinity-db-reinforcement', 'false')")
+        armies = page.request.get(f"{origin}/api/armies").json()["items"]
+        with page.expect_response(
+            lambda response: "/api/units?" in response.url and "counts=prospective" in response.url,
+            timeout=60000,
+        ) as result:
+            page.goto(f"{origin}/units", wait_until="domcontentloaded")
+        counts = result.value.json()["army_usage_counts"]
+        assert any(
+            army["role"] == "grouping" and counts.get(str(army["id"]))
+            for army in armies
+        ), "Regression requires source-backed grouping availability"
+        playable = [army for army in armies if army.get("playable") is not False]
+        matching = sum(bool(counts.get(str(army["id"]))) for army in playable)
+        page.wait_for_function(
+            "() => document.querySelector('#army-count')?.getAttribute('aria-busy') === 'false'"
+        )
+        assert page.locator("#army-count").inner_text() == f"{matching} / {len(playable)}"
+        breakdown = page.locator("#army-count-shown-breakdown")
+        assert "Other Army availability" not in breakdown.locator("dt").all_text_contents()
+        assert sum(map(int, breakdown.locator("dd").all_text_contents())) == matching
+
+
 @pytest.mark.parametrize("width", [1440, 320])
 def test_army_links_and_filtered_availability_counts(
     army_app: Any, origin: str, chrome: Any, width: int,
@@ -236,11 +262,10 @@ def test_army_links_and_filtered_availability_counts(
         assert page.locator("#army-filter").input_value() == _slug(section)
         counts = payload["army_usage_counts"]
         assert counts[str(section["id"])] == payload["total"]
-        total_armies = sum(
-            army.get("playable") is not False or (army["unit_count"] or 0) > 0
-            for army in armies
-        )
-        assert page.locator("#army-count").inner_text() == f"{len(counts)} / {total_armies}"
+        playable = [army for army in armies if army.get("playable") is not False]
+        total_armies = len(playable)
+        matching = [army for army in playable if counts.get(str(army["id"]))]
+        assert page.locator("#army-count").inner_text() == f"{len(matching)} / {total_armies}"
         disclosure = page.locator("#army-count-details")
         breakdown = page.locator("#army-count-shown-breakdown")
         assert not breakdown.is_visible()
@@ -251,11 +276,10 @@ def test_army_links_and_filtered_availability_counts(
             "non_aligned": "Non-Aligned Armies", "reinforcement": "Reinforcements",
         }
         expected = dict.fromkeys(role_labels.values(), 0)
-        for army in armies:
-            if str(army["id"]) in counts:
-                label = role_labels.get(army["role"], "Other Army availability")
-                expected[label] = expected.get(label, 0) + 1
-        assert sum(expected.values()) == len(counts)
+        for army in matching:
+            label = role_labels.get(army["role"], "Unclassified Armies")
+            expected[label] = expected.get(label, 0) + 1
+        assert sum(expected.values()) == len(matching)
         assert dict(zip(
             breakdown.locator("dt").all_inner_texts(),
             map(int, breakdown.locator("dd").all_inner_texts()),

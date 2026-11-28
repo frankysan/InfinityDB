@@ -487,10 +487,10 @@ function normalizeArmyFilterState(armies) {
 let availabilityArmies = [];
 
 function populateArmies(armies) {
-  availabilityArmies = armies.filter((army) => army.playable !== false || army.unit_count > 0);
+  availabilityArmies = armies.filter((army) => army.playable !== false);
   // Keep source strings out of HTML so upstream data is always treated as text.
   elements.army.replaceChildren(new Option("All armies", ""));
-  const playableArmies = armies.filter((army) => army.playable !== false);
+  const playableArmies = availabilityArmies;
   const normalizedArmyFilter = normalizeArmyFilterState(playableArmies);
   const shownGroups = new Set();
 
@@ -527,15 +527,14 @@ function renderArmyCounts(counts) {
     const count = counts === undefined ? "—" : number.format(counts[option.dataset.armyId] || 0);
     option.textContent = `${option.dataset.armyLabel} (${count})`;
   }
-  // Grouping identities can have source-backed availability without being selectable.
-  const other = { label: "Other Army availability", count: 0 };
+  const other = { label: "Unclassified Armies", count: 0 };
   for (const army of availabilityArmies) {
     if (!counts?.[army.id]) continue;
     (roles.get(army.role) || other).count++;
   }
   if (other.count) roles.set("other", other);
   elements.armyCount.textContent = counts === undefined
-    ? "—" : `${number.format(Object.keys(counts).length)} / ${number.format(availabilityArmies.length)}`;
+    ? "—" : `${number.format([...roles.values()].reduce((total, role) => total + role.count, 0))} / ${number.format(availabilityArmies.length)}`;
   elements.armyCountShown.replaceChildren();
   if (counts === undefined) return;
   for (const { label, count } of roles.values()) {
