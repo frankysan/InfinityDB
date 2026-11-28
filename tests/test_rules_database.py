@@ -641,7 +641,8 @@ def test_export_rules_database_ignores_example_and_preserves_provenance(tmp_path
         # Special Terrain, Difficult Terrain, Saturation, Access Width,
         # Initiative Roll and Combat Group are General Rules,
         # not deployed-object identities.
-        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 498
+        # v1.3.0 adds eleven official/community glossary definitions.
+        assert connection.execute("SELECT COUNT(*) FROM records").fetchone()[0] == 509
         assert connection.execute(
             "SELECT id FROM records WHERE id IN (?, ?) ORDER BY id",
             ("rule:access-width", "rule:special-terrain"),

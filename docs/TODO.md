@@ -68,18 +68,9 @@ candidate acceptance remains in the release checklist.
 Complete the selected development work before the existing
 [release checklist](releasing.md); no new release gates are introduced.
 
-All selected v1.3.0 additions are implemented. Address the manual verification
-findings below before final release acceptance.
-
-### Release acceptance follow-up
-
-- [ ] **Testing:** Reconcile the 14 Ubuntu 3.11 source-check failures at
-  `db725b39` before release. Review reference inventory/citation counts and
-  Rules export expectations against the curated corpus, update the runtime
-  semantic baseline only for intentional Skills, Equipment and Glossary
-  changes, reconcile browser-test lane membership, and update obsolete Army
-  overview and Glossary frontend assertions. Do not weaken coverage or
-  regenerate frozen historical evidence merely to make tests pass.
+All selected v1.3.0 additions and manual verification corrections are implemented.
+The 14 source-check failures at `db725b39` have been reconciled and verified
+locally. Complete final acceptance using the existing release checklist.
 
 ### Deferred beyond the committed scope
 

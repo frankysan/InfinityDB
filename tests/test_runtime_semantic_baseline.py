@@ -259,6 +259,11 @@ def test_v130_unit_detail_preserves_v122_current_semantics() -> None:
     assert scenario_digest == new_rows[scenario_path]["semanticSha256"]
     assert {key for key in old_rows if old_rows[key] != new_rows[key]} == {
         path, scenario_path,
+        # Manual acceptance: scenario usage counts, reference-only Equipment
+        # ownership/aliases, and official/community glossary definitions.
+        "/api/skills",
+        "/api/equipment",
+        "/api/glossary",
     }
 
 
