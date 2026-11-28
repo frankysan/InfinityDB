@@ -217,6 +217,10 @@ preview override remains available and rejects mismatched database hashes;
 override responses are not cached. General history describes the
 all-optional-categories profile scope, regardless of current browser filters,
 which is stated in the disclosure.
+Action rows retain their text fallback alongside optional typed distance and
+MOV parts. Historical source extra types determine which values are distances;
+reviewed Skill conventions determine positive-sign formatting. Historical
+references remain independent of the current Army's available Skills.
 
 Historical snapshots support observed changes, not guaranteed complete
 intervening events or publication dates. Extend the pinned input corpus

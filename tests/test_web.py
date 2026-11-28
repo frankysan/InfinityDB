@@ -2020,6 +2020,69 @@ def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_
             browser.close()
 
 
+def test_published_go_pod_history_distances():
+    from tools.browser_wsgi_transport import route_browser_page
+
+    generated = Path(__file__).resolve().parents[1] / "data/generated"
+    database = Database(generated / "army.db")
+    with database._connect() as connection:
+        candidates = connection.execute(
+            "SELECT unit_id, body FROM unit_history_payloads "
+            "WHERE body LIKE '%Super-Jump%' AND body LIKE '%7.5%' AND body LIKE '%20%'"
+        ).fetchall()
+    units = [(database.get_unit(row[0]), json.loads(row[1])) for row in candidates]
+    matches = [(unit, body) for unit, body in units if unit is not None
+               and ("go-pod" in unit["name"].casefold()
+                    or "go-pod" in json.dumps(body).casefold())]
+    assert len(matches) == 1, [unit["name"] for unit, _ in units if unit]
+    unit, body = matches[0]
+    assert unit is not None
+    changes = [
+        *[change for rows in body["general"].values() for change in rows],
+        *[change for rows in body["armies"].values() for change in rows],
+        *[change for context in body["unmatched"] for change in context["changes"]],
+    ]
+    parts = [part for change in changes for action in change["actions"]
+             for part in action.get("parts", []) if isinstance(part, dict)]
+    for value in (7.5, 20):
+        assert any(p["kind"] == "distance" and float(p["value"]) == value
+                   for p in parts), parts
+    api = pytest.importorskip("playwright.sync_api")
+    app = create_app_from_database_set(generated)
+    with api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch()
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc):
+                pytest.skip(f"Chromium unavailable: {exc}")
+            raise
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        origin = "http://infinitydb-history.test"
+        route_browser_page(page, app, origin)
+        try:
+            page.goto(f"{origin}/units/{unit['slug']}")
+            page.locator(".unit-history").first.wait_for()
+            page.locator("main details").evaluate_all(
+                "(nodes) => nodes.forEach(n => n.open = true)"
+            )
+            history = page.locator(".unit-history-change")
+            for inches, expected in (
+                (False, ["Super-Jump (7.5 cm)", "Jump (20 cm)"]),
+                (True, ['Super-Jump (3")', 'Jump (8")']),
+            ):
+                page.evaluate("""inches => {
+                    const toggle = document.querySelector('#distance-unit-toggle');
+                    toggle.checked = inches;
+                    toggle.dispatchEvent(new Event('change', {bubbles: true}));
+                }""", inches)
+                for label in expected:
+                    assert any(label in value for value in history.all_inner_texts()), label
+                    assert history.filter(has_text=label).first.is_visible()
+        finally:
+            page.close()
+            browser.close()
+
+
 def test_unit_details_are_available_by_id(app: Callable) -> None:
     status, _, body = request(app, "/api/units/1")
     assert status == 200

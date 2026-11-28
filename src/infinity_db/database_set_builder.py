@@ -258,7 +258,9 @@ def build_database_set(
         _build_general_profiles(stage, root)
         publish_filter_contexts(stage / "army.db")
         if history_root is not None:
-            publish_unit_history(stage / "army.db", history_root)
+            publish_unit_history(
+                stage / "army.db", history_root, rules_directory=root / "data/curated/rules",
+            )
         _build_rules_and_publications(stage, root, manifest)
         from .rules_database import RulesDatabase
 

@@ -1,4 +1,5 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
+import { formatSkillDistanceExtra } from "./distance.js";
 import { maintainedTextFragment } from "./maintained-text.js";
 import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteValuePreview } from "./silhouette-diagrams.js";
@@ -1343,6 +1344,16 @@ function appendHistorySummary(disclosure, title, contexts) {
   disclosure.append(summary);
 }
 
+function historyChangeText(change) {
+  if (!Array.isArray(change.parts)) return change.text;
+  return change.parts.map((part) => {
+    if (typeof part === "string") return part;
+    if (part.kind === "distance") return formatSkillDistanceExtra(part.value, part);
+    if (part.kind === "movement") return formatMovement(...part.values, distanceUnit());
+    return "";
+  }).join("");
+}
+
 function historyDisclosure(changes, general = false) {
   const disclosure = document.createElement("details");
   disclosure.className = "unit-history";
@@ -1409,7 +1420,7 @@ function historyDisclosure(changes, general = false) {
           const action = document.createElement("span");
           action.className = "unit-history-action";
           action.textContent = change.action;
-          item.append(action, document.createTextNode(" " + change.text));
+          item.append(action, document.createTextNode(" " + historyChangeText(change)));
           list.append(item);
         }
         group.append(label, list);
@@ -1690,7 +1701,14 @@ if (!unitIdentifier) {
     currentUnit = initialUnit.unit;
     render(currentUnit, helpItems, attributeItems);
     window.addEventListener("distanceunitchange", () => {
-      if (currentUnit) render(currentUnit, helpItems, attributeItems);
+      if (!currentUnit) return;
+      // The distance preference changes presentation, not disclosure state.
+      const openStates = [...content.querySelectorAll("details")].map((node) => node.open);
+      render(currentUnit, helpItems, attributeItems);
+      const disclosures = content.querySelectorAll("details");
+      if (disclosures.length === openStates.length) {
+        disclosures.forEach((node, index) => { node.open = openStates[index]; });
+      }
     }, { signal: pageController.signal });
     window.addEventListener("optionalunitschange", () => {
       fetchUnit().then(({ unit: updatedUnit, requestNumber }) => {

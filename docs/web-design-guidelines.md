@@ -268,6 +268,9 @@ and expandable, with an explicit "No confirmed updates" label. Identify
 incomplete history and the revision-date convention in every disclosure. The
 [historical data contract](data-model-history.md#private-army-history-research-database)
 owns attribution, observation windows and unresolved evidence.
+Use the shared Skill distance and MOV formatters for historical typed values,
+honoring the cm/in preference without converting unrelated numbers. Keep open
+disclosures open when that preference changes.
 
 ### Official Army links
 

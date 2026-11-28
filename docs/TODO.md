@@ -76,13 +76,6 @@ findings below before final release acceptance.
 Accumulate actionable findings from the manual browser pass here and resolve
 them in coherent batches. Retire completed entries after focused validation.
 
-- [ ] **Data processing + Web frontend:** Preserve typed distance parameters in
-  Unit history changes and render them using the shared distance and Skill
-  formatting helpers, honoring the cm/in preference and parameter sign semantics.
-  Cover both old and new values, MOV changes and historically removed Skills;
-  never convert unrelated numbers such as MODs, Points or SWC. Verify GO-POD
-  Super-Jump (7.5 cm / 3 inches) and Jump (20 cm / 8 inches) in both modes,
-  including toggling with an open History disclosure.
 - [ ] **Web backend + Web frontend:** Correct standalone SVG rendering over HTTP
   in Firefox. Investigate the shared Content Security Policy blocking embedded
   SVG styles; saved local scenario maps render correctly. Check representative
@@ -93,6 +86,16 @@ them in coherent batches. Retire completed entries after focused validation.
   embedded images, saved files, themed maps and conditional HTTP responses.
   Check Firefox and Chromium with real response headers; address inline logo
   styling separately if needed.
+
+### Release acceptance follow-up
+
+- [ ] **Testing:** Reconcile the 14 Ubuntu 3.11 source-check failures at
+  `db725b39` before release. Review reference inventory/citation counts and
+  Rules export expectations against the curated corpus, update the runtime
+  semantic baseline only for intentional Skills, Equipment and Glossary
+  changes, reconcile browser-test lane membership, and update obsolete Army
+  overview and Glossary frontend assertions. Do not weaken coverage or
+  regenerate frozen historical evidence merely to make tests pass.
 
 ### Deferred beyond the committed scope
 

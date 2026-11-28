@@ -447,7 +447,8 @@ def test_history_build_embeds_payload_and_serves_without_sidecar(
               "actions": [{"action": "Gained", "text": "Dodge"}]}
     selected: dict[str, Any] = {}
 
-    def publish(army: Path, history_root: Path) -> None:
+    def publish(army: Path, history_root: Path, *, rules_directory: Path) -> None:
+        assert rules_directory == root / "data/curated/rules"
         assert history_root == root / "local/data/history"
         database = Database(army)
         with database._connect() as connection:

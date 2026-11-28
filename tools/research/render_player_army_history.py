@@ -1226,33 +1226,120 @@ def action_text(row: Document) -> tuple[str, str]:
     return "Changed", text
 
 
-def action_rows(row: Document) -> list[tuple[str, str]]:
-    """Split structured reference deltas without parsing player-facing strings."""
+def reference_action_groups(row: Document) -> list[tuple[str, list[list[Document]]]]:
     identity = row["identity"]
     if row["kind"] != "summaries" or identity["field"] not in {"skills", "equip", "weapons"}:
-        return [action_text(row)]
+        return []
     lost, gained = identity["lost"], identity["gained"]
     ids = {ref["filter"]["id"] for ref in lost} & {ref["filter"]["id"] for ref in gained}
     result = []
     for item_id in sorted(ids):
-        a = ", ".join(compact_reference(ref) for ref in lost if ref["filter"]["id"] == item_id)
-        b = ", ".join(compact_reference(ref) for ref in gained if ref["filter"]["id"] == item_id)
-        result.append(("Changed", f"{a} → {b}"))
+        result.append(("Changed", [
+            [ref for ref in lost if ref["filter"]["id"] == item_id],
+            [ref for ref in gained if ref["filter"]["id"] == item_id],
+        ]))
     for action, references in (("Gained", gained), ("Lost", lost)):
-        remaining = [compact_reference(ref) for ref in references if ref["filter"]["id"] not in ids]
+        remaining = [ref for ref in references if ref["filter"]["id"] not in ids]
         if remaining:
-            result.append((action, ", ".join(remaining)))
-    return result or [action_text(row)]
+            result.append((action, [remaining]))
+    return result
 
 
-def history_projection(units: list[Document], names: dict[int, str], sha: str) -> Document:
+def action_rows(row: Document) -> list[tuple[str, str]]:
+    """Split structured reference deltas without parsing player-facing strings."""
+    return [
+        (action, " → ".join(", ".join(compact_reference(ref) for ref in side)
+                            for side in sides))
+        for action, sides in reference_action_groups(row)
+    ] or [action_text(row)]
+
+
+def history_distance_signs(rules_directory: Path) -> dict[str, str]:
+    """Use reviewed Skill sign conventions; source extras establish distance typing."""
+    from infinity_db.curated import load_curated_directory
+
+    signs: dict[str, str] = {}
+    for _, document in load_curated_directory(rules_directory):
+        if document["collection"]["status"] != "current":
+            continue
+        for record in document["records"]:
+            if record["kind"] != "skill":
+                continue
+            for parameter in record.get("variantSemantics", {}).get("occurrenceParameters", []):
+                if parameter["source"] != "army-extra" or parameter["kind"] != "distance":
+                    continue
+                name, sign = record["name"].casefold(), parameter["positiveSign"]
+                if signs.setdefault(name, sign) != sign:
+                    raise ValueError(f"Conflicting distance sign conventions for {name}")
+    return signs
+
+
+def history_reference_parts(ref: Document, signs: dict[str, str]) -> list:
+    """Keep historical labels and source typing, independently of today's Army IDs."""
+    name = ref["filter"]["name"]
+    occurrence = ref["occurrence"]
+    quantity = occurrence.get("q")
+    parts: list = [f"{quantity} × {name}" if quantity not in (None, 1) else name]
+    extras = occurrence.get("extra") or []
+    if extras:
+        parts.append(" (")
+        for index, extra in enumerate(extras):
+            if index:
+                parts.append(", ")
+            if extra.get("type") == "DISTANCE":
+                parts.append({"kind": "distance", "value": extra["name"],
+                              "positive_sign": signs.get(name.casefold(), "preserve")})
+            else:
+                parts.append(extra["name"])
+        parts.append(")")
+    if set(occurrence) - {"q", "extra"}:
+        parts.append(" (additional source modifiers)")
+    return parts
+
+
+def history_actions(row: Document, signs: dict[str, str]) -> list[Document]:
+    actions: list[Document] = [
+        {"action": action, "text": body} for action, body in action_rows(row)
+    ]
+    for entry, (_, sides) in zip(actions, reference_action_groups(row), strict=False):
+        parts: list = []
+        for side_index, side in enumerate(sides):
+            if side_index:
+                parts.append(" → ")
+            for index, ref in enumerate(side):
+                if index:
+                    parts.append(", ")
+                parts.extend(history_reference_parts(ref, signs))
+        if any(isinstance(part, dict) for part in parts):
+            entry["parts"] = parts
+    if row["kind"] == "characteristic" and row["identity"][1] == "move":
+        _, _, before, after = row["identity"]
+        parts = [FIELDS["move"] + ": "]
+        for index, record in enumerate((before, after)):
+            if index:
+                parts.append(" → ")
+            value = record.get("value")
+            if isinstance(value, list) and len(value) == 2 and all(
+                type(v) is int for v in value
+            ):
+                parts.append({"kind": "movement", "values": value})
+            else:
+                parts.append(scalar_text("move", record))
+        actions[0]["parts"] = parts
+    return actions
+
+
+def history_projection(
+    units: list[Document], names: dict[int, str], sha: str,
+    *, distance_signs: dict[str, str] | None = None,
+) -> Document:
     """Export compact player-facing changes, not the private research evidence."""
     def changes(rows: list[Document], *, general: bool = False) -> list[Document]:
         return [{
             "date": row["laterObservedDate"],
             "scope": "" if general else row["scope"].removesuffix(" · Own capabilities only"),
             "category": category(row),
-            "actions": [{"action": action, "text": body} for action, body in action_rows(row)],
+            "actions": history_actions(row, distance_signs or {}),
         } for row in rows]
 
     result = {}
@@ -1725,7 +1812,10 @@ def main() -> int:
     with args.output.open("x", encoding="utf-8", newline="\n") as handle:
         handle.write(html)
     if args.web_projection:
-        projection = history_projection(units, names, preview["armyDatabaseSha256"])
+        projection = history_projection(
+            units, names, preview["armyDatabaseSha256"],
+            distance_signs=history_distance_signs(ROOT / "data/curated/rules"),
+        )
         with args.web_projection.open("x", encoding="utf-8", newline="\n") as handle:
             handle.write(encode(projection))
         print(f"Web history projection: {args.web_projection}")

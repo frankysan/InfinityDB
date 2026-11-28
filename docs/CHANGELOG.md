@@ -130,6 +130,9 @@ are not retroactively relabeled.
   variant links to their owning rule cards, support MSV as a search alias for
   Multispectral Visor, and show distinct scenario usage counts for Scenario-specific
   Skills instead of Army Unit counts.
+- **Data processing + Web frontend:** Corrected historical Skill distances and MOV
+  changes to follow the selected cm/in preference and preserve open History
+  disclosures when switching units of measurement.
 
 - **Data processing:** Include Unit history in normal runtime builds and require
   an explicit opt-out for history-free development builds.

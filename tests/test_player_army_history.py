@@ -613,6 +613,50 @@ def test_contextual_action_rows_keep_reference_changes_distinct():
     ]
 
 
+def test_history_actions_preserve_source_typed_distances_and_movement():
+    def ref(item_id, name, value, extra_type="DISTANCE"):
+        return {
+            "filter": {"id": item_id, "name": name},
+            "occurrence": {"extra": [{"name": value, "type": extra_type}]},
+        }
+
+    row = {
+        "kind": "summaries",
+        "identity": {
+            "field": "skills",
+            "lost": [ref(1, "Super-Jump", "+7.5"), ref(2, "Jump", "+20")],
+            "gained": [ref(1, "Super-Jump", "+10"), ref(3, "Dodge", "+3", "TEXT")],
+        },
+        "text": "Skill delta",
+    }
+    signs = {"super-jump": "omit", "jump": "omit"}
+    changed, gained, lost = player.history_actions(row, signs)
+    assert changed["action"] == "Changed"
+    assert [part for part in changed["parts"] if isinstance(part, dict)] == [
+        {"kind": "distance", "value": "+7.5", "positive_sign": "omit"},
+        {"kind": "distance", "value": "+10", "positive_sign": "omit"},
+    ]
+    assert gained == {"action": "Gained", "text": "Dodge (+3)"}
+    assert lost["parts"] == [
+        "Jump", " (", {"kind": "distance", "value": "+20", "positive_sign": "omit"}, ")",
+    ]
+    assert player.history_reference_parts(ref(99, "Removed Skill", "-5"), signs) == [
+        "Removed Skill", " (",
+        {"kind": "distance", "value": "-5", "positive_sign": "preserve"}, ")",
+    ]
+    movement = {
+        "kind": "characteristic", "text": 'MOV: 4-4" → 6-2"',
+        "identity": [[], "move", {"value": [10, 10]}, {"value": [15, 5]}],
+    }
+    assert player.history_actions(movement, signs)[0]["parts"] == [
+        "MOV: ", {"kind": "movement", "values": [10, 10]},
+        " → ", {"kind": "movement", "values": [15, 5]},
+    ]
+    cost = {"kind": "summaries", "text": "Changed 20 → 19 Points",
+            "identity": {"field": "points"}}
+    assert player.history_actions(cost, signs) == [{"action": "Changed", "text": "20 → 19 Points"}]
+
+
 def test_group_wide_same_delta_different_cost_pairs_stay_separate():
     preview, semantic = fixture()
     row = semantic["summaries"][0]

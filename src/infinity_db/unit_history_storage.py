@@ -93,13 +93,14 @@ def write_unit_history(army: Path, projection: dict[str, Any]) -> None:
     normalize_sqlite_header(army)
 
 
-def publish_unit_history(army: Path, root: Path) -> None:
+def publish_unit_history(army: Path, root: Path, *, rules_directory: Path) -> None:
     """Compose from pinned offline research against the staged current Army."""
     from tools.research.project_army_history import build as project
     from tools.research.project_army_history import read_only
     from tools.research.render_player_army_history import (
         contextual_model,
         historical_scopes,
+        history_distance_signs,
         history_projection,
         model,
     )
@@ -118,7 +119,9 @@ def publish_unit_history(army: Path, root: Path) -> None:
         units, _ = model(preview, semantic, historical_scopes(db, archive))
         contextual_model(units, db, archive, army_path=army)
         names = dict(current.execute("SELECT id,name FROM army_lists WHERE name IS NOT NULL"))
-        projection = history_projection(units, names, army_sha)
+        projection = history_projection(
+            units, names, army_sha, distance_signs=history_distance_signs(rules_directory),
+        )
     if history_input_identity(root) != pins:
         raise ValueError("History inputs changed during publication")
     write_unit_history(army, projection)
