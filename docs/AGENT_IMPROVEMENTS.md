@@ -21,49 +21,6 @@ entries.
 
 ## Open improvements
 
-### AI-0024 — Profile and reduce avoidable initial browser work
-
-- **Date:** 2026-11-28
-- **Area:** Web frontend and Web backend, v1.3.0 performance audit.
-- **Evidence:** At `9d7bde00`, three Windows Chrome Explorer journeys passed;
-  initial median 667 ms (API 414 ms), next page 367 ms (API 51 ms),
-  search 321 ms (API 14 ms, including a deliberate 250 ms UI debounce in
-  the total). Single cold/repeat page samples showed additional catalog
-  renders after visible-Unit lookup (Mimetism 292/455 ms first/final DOM,
-  Combi Rifle 232/338 ms), with decoded detail payloads of 490/277 KB.
-  Hardlock fetched four season-policy responses before Season Rules opened.
-  Policy requests now start on first expansion; focused Node and desktop/mobile
-  Chromium regressions passed. Unit history bodies now render on first opening;
-  fixture and published Go-Pod Chromium checks passed. Three Windows Chrome
-  cold/repeat Minutemen samples showed zero initial history rows versus 22
-  after expansion, and first-open DOM construction took 0.2–0.5 ms (including
-  toggle dispatch, excluding paint). No reliable end-to-end latency improvement
-  established. The Dragoes comparison had no confirmed change rows.
-- **Remaining action:** Benchmark first-open season policy latency separately.
-  The [Explorer interaction profile](testing-performance.md#unit-explorer-interaction-phases)
-  separates actual input, API resource, DOM and browser work. Search is
-  debounce-dominated; Extended screen-only layout deferral reduces median
-  activation layout work from 71 to 32 ms, with mixed overall latency.
-  Desktop/mobile scroll and print-media checks passed; Find and assistive
-  technology remain unverified. The
-  [Extended transport benchmark](testing-performance.md#extended-explorer-transport)
-  supports the compact opt-in view: 49% fewer decoded bytes, similar warm
-  server time and browser row parity. The
-  [catalog visibility benchmark](testing-performance.md#catalog-detail-visibility-and-initial-rendering)
-  rejected concurrent requests after unpreloaded cold regressions; sequential
-  requests now render filtered content once rather than twice, with
-  latest-request-wins protection and distance preference parity. The
-  [live-search prefix benchmark](testing-performance.md#bounded-live-search-prefix-benchmark)
-  found no material benefit from early limiting; retain the existing ranking.
-  The [Unit comparison benchmark](testing-performance.md#unit-comparison-detail-inputs)
-  supports history omission and the compact transport view now in use.
-  Decoded payloads fell 69–73% against history-free details; server
-  latency improved modestly. No additional database projection is justified.
-  Extend benchmark
-  coverage for these new journeys and repeat the pinned full-stack workload
-  before interpreting capacity regressions.
-- **Disposition:** proposed.
-
 ### AI-0023 — Separate presentation-only sources from database build freshness
 
 - **Date:** 2026-11-26

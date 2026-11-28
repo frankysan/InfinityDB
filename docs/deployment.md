@@ -722,6 +722,30 @@ the development capacity investigation. They do not establish a production
 SLO, measure browser rendering or validate production traffic; revisit
 first-visit, exact-variant or asynchronous costs when new evidence warrants it.
 
+#### Full-stack browser-audit follow-up (2026-11-28)
+
+Repeat the same two workloads at `79788e5a` on Linux-dev, with the same
+uncapped 2x4 configuration and 16 logical CPUs. The package reported 1.3.0
+and the snapshot was
+`139eed1c3431d107aadf350e37fc9be8f46575ea78a1e63b13eac7d501152be9`.
+
+| Workload | Steady req/s | Steady p50/p95/p99 (ms) | Burst req/s | Burst p50/p95/p99 (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| General | 508.7 | 10.4/46.3/72.0 | 515.0 | 56.9/109.5/133.7 |
+| Unit Explorer | 101.5 | 79.1/168.2/234.1 | 102.3 | 267.3/560.3/630.9 |
+
+Both runs exited 0 with no HTTP errors, container restarts or OOM events,
+and removed their disposable stacks. Peak app memory was 201.1 MiB for
+General and 305.4 MiB for Explorer, versus 205.4 and 332.3 MiB previously.
+Explorer steady Extended/Extended-next p95 was 247.8/231.0 ms; burst
+p95 was 646.1/617.1 ms. Results are broadly comparable, with mixed Explorer
+latency and throughput; the snapshot changed, so this is not a controlled
+before/after experiment. Preserve the 2x4 configuration. The historical
+HTTP workload retains full Extended responses and does not measure the
+compact browser transport or layout changes directly.
+
+Receipts: `local/performance/http-capacity/20261128-79788e5/` on Linux-dev.
+
 #### Unit Explorer app-only 2x4 measurement (2026-11-25)
 
 The disposable Docker preview on the Linux development worker ran the

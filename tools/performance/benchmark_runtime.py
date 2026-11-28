@@ -467,6 +467,7 @@ def benchmark_unit_explorer(
                 ready = page_cases[selected_route]
                 target_id = "catalog-list" if ready == "#catalog-table-container" else ready[1:]
                 page.add_init_script("""(() => {
+                    performance.setResourceTimingBufferSize(5000);
                     window.detailRenderTimes = [];
                     const targetId = """ + json.dumps(target_id) + """;
                     const observer = new MutationObserver(records => {
@@ -507,6 +508,55 @@ def benchmark_unit_explorer(
                         f"{selected_route} {phase}: {elapsed*1000:.1f} ms {resources}",
                         flush=True,
                     )
+                    if page.locator("#scenario-season-rules").count():
+                        policies = page.evaluate("""async () => {
+                            const disclosure = document.querySelector('#scenario-season-rules');
+                            const requests = () => performance.getEntriesByType('resource')
+                                .filter(e => new URL(e.name).pathname === '/api/season-policies');
+                            const initialRequests = requests().length;
+                            if (initialRequests || disclosure.open) {
+                                throw Error('Season policies loaded before first expansion');
+                            }
+                            const start = performance.now();
+                            const ready = await new Promise((resolve, reject) => {
+                                const observer = new MutationObserver(() => {
+                                    const wrapper = disclosure.querySelector(
+                                        ':scope > div > section.scenario-section:not([hidden])'
+                                    );
+                                    if (!wrapper) return;
+                                    observer.disconnect();
+                                    clearTimeout(timeout);
+                                    resolve({time: performance.now(),
+                                        cards: wrapper.querySelectorAll('article').length});
+                                });
+                                const timeout = setTimeout(() => {
+                                    observer.disconnect();
+                                    reject(Error('Season policy cards did not load'));
+                                }, 15000);
+                                observer.observe(disclosure, {subtree: true, childList: true,
+                                    attributes: true, attributeFilter: ['hidden']});
+                                disclosure.open = true;
+                            });
+                            await new Promise(resolve => requestAnimationFrame(resolve));
+                            const policyRequests = requests();
+                            if (!ready.cards || policyRequests.length < ready.cards + 1
+                                    || policyRequests.some(e => e.responseStatus >= 400)) {
+                                throw Error('No season policy cards or resource timings');
+                            }
+                            const lastEnd = Math.max(...policyRequests.map(e => e.responseEnd));
+                            return {initialRequests, cards: ready.cards,
+                                requests: policyRequests.length,
+                                firstOpenMs: ready.time - start,
+                                resourceMs: lastEnd - start,
+                                bytes: policyRequests.reduce((n, e) => n + e.decodedBodySize, 0)};
+                        }""")
+                        print(f"{selected_route} {phase} season policy: {policies}", flush=True)
+                        samples.setdefault(
+                            f"{selected_route} {phase} first season policy", [],
+                        ).append(policies["firstOpenMs"] / 1000)
+                        samples.setdefault(
+                            f"{selected_route} {phase} season policy resource", [],
+                        ).append(policies["resourceMs"] / 1000)
                     if selected_route.startswith("/units/"):
                         history = page.evaluate("""async () => {
                             const histories = [...document.querySelectorAll('details.unit-history')]

@@ -87,6 +87,31 @@ matched the expected response. The all-optional first page fell from
 276,595 to 146,477 bytes. No separate database projection is justified.
 Actual HTTP compression and browser latency were not measured.
 
+### First-open Scenario Season Rules
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime data/generated/army.db --pages --with-seasons --case "scenarios/hardlock?collection=its-18&army_points=300" --cold-iterations 3
+```
+
+At `79788e5` on Windows Chrome (2026-11-28), all six cold/repeat
+Hardlock navigations made zero policy requests before expansion.
+First expansion loaded four policy responses (3,384 decoded bytes)
+and three cards. Cold/repeat first-open DOM medians were 124.3/120.4 ms;
+the final resource completed at 123.6/119.5 ms. Initial page DOM
+medians were 241.4/73.0 ms. This measures toggle dispatch, request
+and DOM completion, not actual paint. Retain lazy policy loading:
+the measured on-demand cost does not justify eager requests.
+
+### First-open Unit history
+
+At `763b2cd9` with lazy history bodies applied, three Windows Chrome
+cold/repeat Minutemen samples had zero initial change rows and 22 after
+expansion. First-open construction took 0.2–0.5 ms including toggle
+dispatch, excluding paint. The Dragoes comparison had no confirmed
+change rows. End-to-end latency gains were not established by the small
+sample. Retain lazy history bodies; unopened history text is unavailable
+to browser Find until rendered.
+
 Use the current `tools/performance/benchmark_*.py` modules for a measured
 specific projection/build phase. Use fresh ignored paths for reports;
 the worker benchmark checks its selected output before starting expensive
