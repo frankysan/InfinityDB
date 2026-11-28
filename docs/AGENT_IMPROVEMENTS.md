@@ -17,9 +17,36 @@ entries.
 4. Mention new unresolved items during handoff. Never reuse an assigned ID:
    increment the next-ID marker when creating a new entry.
 
-**Next ID:** `AI-0024`
+**Next ID:** `AI-0025`
 
 ## Open improvements
+
+### AI-0024 — Profile and reduce avoidable initial browser work
+
+- **Date:** 2026-11-28
+- **Area:** Web frontend and Web backend, v1.3.0 performance audit.
+- **Evidence:** At `9d7bde00`, three Windows Chrome Explorer journeys passed;
+  initial median 667 ms (API 414 ms), next page 367 ms (API 51 ms),
+  search 321 ms (API 14 ms, including a deliberate 250 ms UI debounce in
+  the total). Single cold/repeat page samples showed additional catalog
+  renders after visible-Unit lookup (Mimetism 292/455 ms first/final DOM,
+  Combi Rifle 232/338 ms), with decoded detail payloads of 490/277 KB.
+  Hardlock fetched four season-policy responses before Season Rules opened.
+  Policy requests now start on first expansion; focused Node and desktop/mobile
+  Chromium regressions passed. First-open latency and broader capacity effects
+  have not yet been measured.
+- **Remaining action:** Measure first-open versus eager history DOM construction,
+  then defer work in collapsed sections where beneficial. Benchmark first-open
+  season policy latency separately.
+  Profile Explorer interaction overhead separately from intentional debounce
+  and automation waits; investigate parallel visible-Unit lookup or targeted
+  catalog updates without changing availability semantics. Measure broad
+  live-search prefixes (the API slices only after matching/ranking all results)
+  and Unit comparison's full detail requests, including unused history, before
+  introducing new projections or ranking optimizations. Extend benchmark
+  coverage for these new journeys and repeat the pinned full-stack workload
+  before interpreting capacity regressions.
+- **Disposition:** proposed.
 
 ### AI-0023 — Separate presentation-only sources from database build freshness
 

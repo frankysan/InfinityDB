@@ -3818,11 +3818,15 @@ def test_scenario_season_rules_disclosure(
     page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}');")
     errors: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    policy_requests: list[str] = []
+    page.on("request", lambda request: policy_requests.append(request.url)
+            if "/api/season-policies?" in request.url else None)
     try:
         for season, revision, skill_type, extra in (
             ("its-18", "2026.09.11", "Basic Short Skill", "#rule-skill-team-ops"),
             ("its-17", "0.2", "Short Movement Skill", "#rule-rule-resilience-operations"),
         ):
+            policy_requests.clear()
             page.goto(
                 f"{ORIGIN}/scenarios/evacuation?army_points=300"
                 f"&collection={season}&revision={revision}",
@@ -3833,7 +3837,9 @@ def test_scenario_season_rules_disclosure(
             assert not disclosure.evaluate("node => node.open")
             skill = disclosure.locator("#rule-skill-civevac")
             assert not skill.is_visible()
-            disclosure.locator("summary").press("Enter")
+            assert not policy_requests
+            with page.expect_request("**/api/season-policies?*", timeout=30000):
+                disclosure.locator("summary").press("Enter")
             skill.wait_for(state="visible", timeout=30000)
             assert skill_type in skill.inner_text()
             assert skill.locator(".rules-source-citations").is_visible()

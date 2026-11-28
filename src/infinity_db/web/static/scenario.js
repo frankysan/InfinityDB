@@ -825,8 +825,13 @@ function seasonRulesSection(item, controller) {
     })));
     body.append(group);
   }
-  const policies = seasonPolicySection(item, controller);
-  if (policies) body.append(policies);
+  let policiesRequested = false;
+  disclosure.addEventListener("toggle", () => {
+    if (!disclosure.open || policiesRequested || controller.signal.aborted) return;
+    policiesRequested = true;
+    const policies = seasonPolicySection(item, controller);
+    if (policies) body.append(policies);
+  }, { signal: controller.signal });
   disclosure.append(body);
   return disclosure;
 }

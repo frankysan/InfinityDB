@@ -164,7 +164,9 @@ collapsed-by-default Season Rules disclosure uses the standard reference cards,
 retains their exact citations and resolves links between its local records
 within the selected season. General rules, optional Extra definitions and
 explicit tournament/Extra policies remain distinguishable; displaying them
-does not activate an Extra. Core N5 scenario details do not include this
+does not activate an Extra. Tournament/Extra policy requests start only on
+the first expansion of the disclosure for the current scenario setup.
+Core N5 scenario details do not include this
 disclosure. Tactical Support remains a separate mission-dependent card.
 
 The reviewed gameplay and event-format references cover Civilians, Designated

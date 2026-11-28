@@ -136,8 +136,25 @@ async function run() {
   assert.equal(body.children[1].children[1].textContent, "Casevac");
   assert.equal(body.children[2].children[0].textContent, "TEAM-OPS Extra");
   assert.equal(body.children[2].children[1].textContent, "Team-Ops");
+  await settle();
+  assert.equal(requests.length, 6, "Collapsed season rules must not fetch policies");
+  disclosure.open = true;
+  disclosure.dispatchEvent(new Event("toggle"));
+  assert.equal(requests.length, 7);
+  assert.equal(requests[6].signal, context.controller.signal);
   requests[6].resolve({ contexts: [] });
   await settle();
+  disclosure.open = false;
+  disclosure.dispatchEvent(new Event("toggle"));
+  disclosure.open = true;
+  disclosure.dispatchEvent(new Event("toggle"));
+  assert.equal(requests.length, 7, "Reopening must not duplicate requests");
+  context.controller = new AbortController();
+  const obsolete = vm.runInContext("seasonRulesSection(item, controller)", context);
+  context.controller.abort();
+  obsolete.open = true;
+  obsolete.dispatchEvent(new Event("toggle"));
+  assert.equal(requests.length, 7, "Aborted disclosures must not start requests");
   assert.equal(vm.runInContext(
     "seasonRulesSection({publication:{collection_id:'n5-core'}}, controller)", context,
   ), null);
