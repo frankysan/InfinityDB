@@ -87,6 +87,7 @@ from infinity_db.web.routes import (
     WEAPON_API_PATH,
 )
 from infinity_db.web.unit_comparison import comparison_unit
+from infinity_db.web.unit_explorer import explorer_unit
 
 LOGGER = logging.getLogger(__name__)
 API_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=600"
@@ -412,7 +413,7 @@ def _unit_detail_presentation_query(
     return optional_filters, army_id, include_history, comparison
 
 
-def _unit_query(query: str) -> dict:
+def _unit_query(query: str, *, allow_view: bool = False) -> dict:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
     for key, values in params.items():
         if key not in {
@@ -447,10 +448,15 @@ def _unit_query(query: str) -> dict:
             "and_filters",
             "matching_scope",
             "cache_bust",
-        }:
+        } and not (allow_view and key == "view"):
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
+    view = params.get("view", ["full"])[0]
+    if view not in {"full", "explorer"}:
+        raise ValueError("view must be full or explorer")
+    if view == "explorer" and not _flag(params, "extended"):
+        raise ValueError("The explorer view requires extended=1")
     specialist = params.get("specialist", [""])[0]
     if specialist and specialist not in SPECIALIST_CONTEXTS:
         raise ValueError("Unknown Specialist Troops filter context")
@@ -529,6 +535,7 @@ def _unit_query(query: str) -> dict:
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
         "extended": _flag(params, "extended"),
+        **({"_explorer_view": view == "explorer"} if allow_view else {}),
         "include_usage_counts": prospective_only or _flag(params, "counts"),
         **({"include_raw_usage_counts": False} if prospective_only else {}),
     }
@@ -1706,7 +1713,8 @@ class ApiHandler:
         elif path == "/api/units":
             cache_control = API_CACHE_CONTROL
             try:
-                query = _unit_query(query_string)
+                query = _unit_query(query_string, allow_view=True)
+                explorer_view = query.pop("_explorer_view")
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1844,6 +1852,8 @@ class ApiHandler:
                                 profiles[item["id"]] if profiles is not None
                                 else self._extended_profiles(item["id"], enabled_flags)
                             )
+                        if explorer_view:
+                            payload["items"] = [explorer_unit(item) for item in payload["items"]]
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": "Choose a playable Army list to browse its units."}

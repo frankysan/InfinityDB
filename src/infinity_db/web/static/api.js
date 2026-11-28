@@ -166,7 +166,10 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, specialis
   if (teamops) params.set("teamops", "1");
   if (reinforcement) params.set("reinforcement", "1");
   if (descending) params.set("order", "desc");
-  if (extended) params.set("extended", "1");
+  if (extended) {
+    params.set("extended", "1");
+    params.set("view", "explorer");
+  }
   return getJson(`/api/units?${params}`, signal);
 }
 

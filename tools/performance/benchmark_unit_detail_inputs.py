@@ -17,6 +17,7 @@ from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_id
 from infinity_db.unit_slugs import attach_public_unit_slug
 from infinity_db.web.app import create_app_from_database_set
 from infinity_db.web.unit_comparison import comparison_unit
+from infinity_db.web.unit_explorer import explorer_unit
 from tools.browser_wsgi_transport import wsgi_response
 
 
@@ -75,13 +76,59 @@ def benchmark_comparison(db_dir: Path, samples: int, *, compact: bool = False) -
         )
 
 
+def benchmark_explorer(db_dir: Path) -> None:
+    """Measure full and projected Extended list responses on identical requests."""
+    app = create_app_from_database_set(db_dir)
+    base = "http://localhost/api/units?extended=1&counts=prospective&matching_scope=profile"
+    cases = [
+        *(f"offset={offset}" for offset in range(0, 1000, 50)),
+        "search=fusiliers", "skill_id=berserk", "equipment_id=medikit",
+        "mercs=1&specops=1&teamops=1&reinforcement=1",
+        "order=desc", "matching_scope=loadout&skill_id=berserk",
+    ]
+    full_sizes, compact_sizes, full_zlib, compact_zlib = [], [], [], []
+    full_times, compact_times = [], []
+    for case in cases:
+        url = base + "&" + case
+        if "matching_scope=loadout" in case:
+            url = url.replace("matching_scope=profile&", "")
+        status, _, full = wsgi_response(app, url)
+        assert status == 200, (case, status, full[:200])
+        expected = json.loads(full)
+        expected["items"] = [explorer_unit(item) for item in expected["items"]]
+        status, _, compact = wsgi_response(app, url + "&view=explorer")
+        assert status == 200 and json.loads(compact) == expected, case
+        full_sizes.append(len(full))
+        compact_sizes.append(len(compact))
+        full_zlib.append(len(zlib.compress(full)))
+        compact_zlib.append(len(zlib.compress(compact)))
+        for iteration in range(6):
+            for projected in (False, True) if iteration % 2 == 0 else (True, False):
+                start = perf_counter()
+                status, _, body = wsgi_response(app, url + ("&view=explorer" if projected else ""))
+                (compact_times if projected else full_times).append(perf_counter() - start)
+                assert status == 200 and body == (compact if projected else full), case
+        print(f"{case}: {len(full):,} -> {len(compact):,} bytes", flush=True)
+    print(
+        f"{len(cases)} cases; total bytes {sum(full_sizes):,} -> {sum(compact_sizes):,}; "
+        f"zlib bytes {sum(full_zlib):,} -> {sum(compact_zlib):,}; "
+        f"warm WSGI median {median(full_times)*1000:.2f} -> "
+        f"{median(compact_times)*1000:.2f} ms; expected response parity",
+        flush=True,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db-dir", type=Path, default=Path("data/generated"))
     parser.add_argument("--samples", type=int, default=50)
     parser.add_argument("--comparison", action="store_true", help="Compare Unit history omission.")
     parser.add_argument("--compact", action="store_true", help="Compare compact Unit responses.")
+    parser.add_argument("--explorer", action="store_true", help="Compare Extended list responses.")
     args = parser.parse_args()
+    if args.explorer:
+        benchmark_explorer(args.db_dir)
+        return
     if args.samples < 1:
         parser.error("--samples must be positive")
     if args.comparison or args.compact:

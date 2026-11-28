@@ -10,7 +10,7 @@ from wsgiref.simple_server import WSGIRequestHandler, WSGIServer, make_server
 import pytest
 
 from infinity_db.web import create_app
-from tools.browser_wsgi_transport import route_browser_page
+from tools.browser_wsgi_transport import route_browser_page, wsgi_response
 
 
 class _ThreadedServer(ThreadingMixIn, WSGIServer):
@@ -640,6 +640,59 @@ def test_extended_profiles_render_when_scrolled_into_view(
         assert profiles.last.evaluate(
             "node => getComputedStyle(node).contentVisibility"
         ) == "visible"
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+def test_extended_explorer_transport_preserves_rendered_rows(
+    app: Any, origin: str, browser: Any,
+) -> None:
+    page = browser.new_page()
+    route_browser_page(page, app, origin)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        with page.expect_response(
+            lambda response: "/api/units?" in response.url and "extended=1" in response.url
+        ) as response_info:
+            page.goto(f"{origin}/units?extended=1", wait_until="domcontentloaded")
+        assert "view=explorer" in response_info.value.url
+        page.locator(".unit-extended-profile").first.wait_for(state="attached")
+        for query in (
+            "mercs=1&specops=1&teamops=1&reinforcement=1",
+            "skill_id=berserk&matching_scope=loadout",
+            "search=fusiliers",
+        ):
+            url = f"{origin}/api/units?extended=1&counts=1&{query}"
+            full = page.request.get(url)
+            compact = page.request.get(url + "&view=explorer")
+            assert full.ok and compact.ok
+            assert page.request.get(url + "&view=full").body() == full.body()
+            assert len(compact.body()) < len(full.body())
+            baseline, projected = full.json(), compact.json()
+            assert {k: v for k, v in baseline.items() if k != "items"} == {
+                k: v for k, v in projected.items() if k != "items"
+            }
+            assert [item["id"] for item in baseline["items"]] == [
+                item["id"] for item in projected["items"]
+            ]
+            assert page.evaluate("""async ([full, compact]) => {
+                const { renderUnitRows } = await import('/static/unit-list.js');
+                const { saveDistanceUnit } = await import('/static/preferences.js');
+                for (const unit of ['cm', 'in']) {
+                    saveDistanceUnit(unit);
+                    const original = document.createElement('tbody');
+                    const projected = document.createElement('tbody');
+                    renderUnitRows(original, full, {extended: true});
+                    renderUnitRows(projected, compact, {extended: true});
+                    if (original.innerHTML !== projected.innerHTML) return false;
+                }
+                return true;
+            }""", [baseline["items"], projected["items"]])
+        for query in ("view=explorer", "extended=1&view=unknown", "view=full&view=explorer"):
+            assert wsgi_response(app, f"{origin}/api/units?{query}")[0] == 400
+        assert wsgi_response(app, f"{origin}/api/visible-unit-ids?view=explorer")[0] == 400
         assert not errors, errors
     finally:
         page.close()

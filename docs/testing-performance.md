@@ -68,8 +68,24 @@ entry preservation, horizontal overflow checks and eager print media.
 Off-screen Chromium `innerText` can be empty until layout; tests inspect
 rendered text after scrolling. Browser Find, assistive technology and
 non-Chromium behavior were not independently verified.
-The larger Extended response (277 KB versus 87 KB) remains a potential optimization.
 Keep the deliberate search debounce. This is not a production capacity test.
+
+### Extended Explorer transport
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_unit_detail_inputs --explorer
+```
+
+At `bf8cfc62`, 26 list cases (20 offsets including five empty pages,
+search, Skill and Equipment filters, all optional categories, descending
+order and loadout matching) were measured with six alternating warm
+request pairs each. Profile-only projection reduced decoded bytes by 16.8%.
+Projecting Unit and Army listing fields as well reduced aggregate decoded
+bytes from 4,310,506 to 2,182,972 and offline zlib bytes from 438,779 to
+246,423. Warm WSGI median was 12.59 versus 12.15 ms. All 156 pairs
+matched the expected response. The all-optional first page fell from
+276,595 to 146,477 bytes. No separate database projection is justified.
+Actual HTTP compression and browser latency were not measured.
 
 Use the current `tools/performance/benchmark_*.py` modules for a measured
 specific projection/build phase. Use fresh ignored paths for reports;

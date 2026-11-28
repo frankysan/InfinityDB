@@ -45,8 +45,10 @@ entries.
   debounce-dominated; Extended screen-only layout deferral reduces median
   activation layout work from 71 to 32 ms, with mixed overall latency.
   Desktop/mobile scroll and print-media checks passed; Find and assistive
-  technology remain unverified. Assess the larger Extended API payload
-  before considering further control-loop optimization. The
+  technology remain unverified. The
+  [Extended transport benchmark](testing-performance.md#extended-explorer-transport)
+  supports the compact opt-in view: 49% fewer decoded bytes, similar warm
+  server time and browser row parity. The
   [catalog visibility benchmark](testing-performance.md#catalog-detail-visibility-and-initial-rendering)
   rejected concurrent requests after unpreloaded cold regressions; sequential
   requests now render filtered content once rather than twice, with

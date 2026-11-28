@@ -224,6 +224,14 @@ should join the catalog share-state schema rather than remaining browser-local s
 This state model is shared vocabulary, not a requirement that every domain implement all four
 states.
 
+The Extended Unit Explorer requests `/api/units?extended=1&view=explorer`
+with its normal filtering and pagination parameters. The view projects Unit,
+Army and General profile fields for the row renderer, retaining complete
+matching evidence and all response-level counts. It is a transport-only
+projection, not a new database or matching model. The default and explicit
+`view=full` responses remain unchanged; `view=explorer` requires
+`extended=1`.
+
 ## Unit comparison
 
 **Current.** `/unit-compare` is a read-only auxiliary Unit view, reachable from
