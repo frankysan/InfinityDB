@@ -3952,6 +3952,97 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
             assert not script.group("body").strip()
 
 
+@pytest.mark.full_assets
+@pytest.mark.parametrize("engine", ("chromium", "firefox"))
+def test_standalone_svg_styles_match_saved_files(tmp_path: Path, engine: str) -> None:
+    """Use real HTTP headers; the in-process Playwright transport bypasses CSP."""
+    from threading import Thread
+    from wsgiref.simple_server import make_server
+
+    api = pytest.importorskip("playwright.sync_api")
+    generated = Path(__file__).resolve().parents[1] / "data/generated"
+    app = create_app_from_database_set(generated)
+    paths = (
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18&theme=dark",
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18&theme=dark&palette=nomads",
+        "/static/armies/aleph/701-aleph.svg",
+        "/static/units/aleph/1128-shukra-consultants.svg",
+        "/static/silhouettes/silhouette-1.svg",
+        "/static/infinitydb-logo.svg",
+    )
+    styles = """() => [...document.querySelectorAll(
+      'svg rect, svg path, svg circle, svg line, svg text, svg stop, svg polygon, svg ellipse'
+    )].map(node => {
+      const s = getComputedStyle(node);
+      return [s.fill, s.stroke, s.strokeWidth, s.fillOpacity, s.stopColor,
+        s.fontSize, s.fontWeight].map(value =>
+          value.startsWith('url(') && value.includes('#') ? value.split('#').pop() : value);
+    })"""
+    with make_server("127.0.0.1", 0, app) as server:
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        origin = f"http://127.0.0.1:{server.server_port}"
+        try:
+            with api.sync_playwright() as driver:
+                try:
+                    browser = getattr(driver, engine).launch()
+                except Exception as exc:
+                    if "Executable doesn't exist" in str(exc):
+                        pytest.skip(f"{engine} unavailable: {exc}")
+                    raise
+                page = browser.new_page()
+                try:
+                    svg_policy = (
+                        "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; "
+                        "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+                    )
+                    for index, path in enumerate(paths):
+                        response = page.request.get(origin + path)
+                        assert response.status == 200, path
+                        assert response.headers["content-security-policy"] == svg_policy
+                        head = page.request.head(origin + path)
+                        assert head.status == 200
+                        assert head.headers["content-security-policy"] == svg_policy
+                        assert not head.body()
+                        if etag := response.headers.get("etag"):
+                            cached = page.request.get(
+                                origin + path, headers={"If-None-Match": etag},
+                            )
+                            assert cached.status == 304
+                            assert cached.headers["content-security-policy"] == svg_policy
+                            assert not cached.body()
+                        saved = tmp_path / f"asset-{index}.svg"
+                        saved.write_bytes(response.body())
+                        page.goto(saved.as_uri())
+                        expected = page.evaluate(styles)
+                        assert expected, path
+                        page.goto(origin + path)
+                        actual = page.evaluate(styles)
+                        assert actual == expected, f"{engine}: {path}"
+                        page.goto(origin + "/")
+                        assert page.evaluate("""async path => {
+                          const img = new Image();
+                          img.src = path;
+                          document.body.append(img);
+                          await img.decode();
+                          return img.naturalWidth > 0 && img.naturalHeight > 0;
+                        }""", path), path
+                    logo = page.locator("img.landing-logo")
+                    logo.wait_for(state="visible")
+                    assert logo.evaluate(
+                        "node => node.complete && node.naturalWidth > 0"
+                    )
+                    assert page.locator("img.brand-mark").evaluate(
+                        "node => node.complete && node.naturalWidth > 0"
+                    )
+                finally:
+                    browser.close()
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
+
+
 def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> None:
     status, _, body = request(app, "/units")
 

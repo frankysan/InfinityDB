@@ -34,6 +34,13 @@ _CONTENT_SECURITY_POLICY = (
     "default-src 'self'; script-src 'self'; object-src 'none'; "
     "base-uri 'none'; frame-ancestors 'none'"
 )
+# Packaged symbols and generated maps are self-contained SVG documents.
+# Their embedded CSS must work when opened directly, without granting scripts
+# or external resource loading and without changing the HTML document policy.
+_SVG_CONTENT_SECURITY_POLICY = (
+    "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; "
+    "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+)
 
 
 def _snapshot_revision(path: Path) -> str:
@@ -328,10 +335,16 @@ class Application:
             status = HTTPStatus.NOT_MODIFIED
             body = b""
 
+        # Select the policy from the original representation, including 304s.
+        csp = (
+            _SVG_CONTENT_SECURITY_POLICY
+            if response.content_type.split(";", 1)[0] == "image/svg+xml"
+            else _CONTENT_SECURITY_POLICY
+        )
         headers = [
             ("Cache-Control", response.cache_control),
             ("X-Content-Type-Options", "nosniff"),
-            ("Content-Security-Policy", _CONTENT_SECURITY_POLICY),
+            ("Content-Security-Policy", csp),
             *([("ETag", etag)] if etag else []),
             *response.headers,
         ]

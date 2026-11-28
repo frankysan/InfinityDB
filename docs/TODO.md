@@ -71,22 +71,6 @@ Complete the selected development work before the existing
 All selected v1.3.0 additions are implemented. Address the manual verification
 findings below before final release acceptance.
 
-### Manual verification fixes and improvements
-
-Accumulate actionable findings from the manual browser pass here and resolve
-them in coherent batches. Retire completed entries after focused validation.
-
-- [ ] **Web backend + Web frontend:** Correct standalone SVG rendering over HTTP
-  in Firefox. Investigate the shared Content Security Policy blocking embedded
-  SVG styles; saved local scenario maps render correctly. Check representative
-  static Army and Unit symbols, the main logo (including inline theme hydration),
-  and Silhouettes as well as generated maps. Scope any style-policy exception to
-  trusted SVG responses needing it; retain script and external-resource
-  restrictions and avoid weakening the HTML policy. Verify direct navigation,
-  embedded images, saved files, themed maps and conditional HTTP responses.
-  Check Firefox and Chromium with real response headers; address inline logo
-  styling separately if needed.
-
 ### Release acceptance follow-up
 
 - [ ] **Testing:** Reconcile the 14 Ubuntu 3.11 source-check failures at

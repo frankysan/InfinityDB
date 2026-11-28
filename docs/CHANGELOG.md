@@ -133,6 +133,9 @@ are not retroactively relabeled.
 - **Data processing + Web frontend:** Corrected historical Skill distances and MOV
   changes to follow the selected cm/in preference and preserve open History
   disclosures when switching units of measurement.
+- **Web backend:** Corrected direct SVG navigation so scenario maps, Army and Unit
+  symbols, Silhouettes and the logo retain their embedded styling without weakening
+  the HTML security policy.
 
 - **Data processing:** Include Unit history in normal runtime builds and require
   an explicit opt-out for history-free development builds.

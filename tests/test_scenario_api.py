@@ -1090,6 +1090,10 @@ def test_scenario_map_api_returns_saveable_theme_complete_svg(
     )
     assert status == 200
     assert headers["content-type"].startswith("image/svg+xml")
+    assert headers["content-security-policy"] == (
+        "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; "
+        "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+    )
     assert f'data-theme="{theme}"'.encode() in svg
     assert b'data-distance-unit="cm"' in svg
     assert f"--color-scenario-map-table:{table_color}".encode() in svg
@@ -1112,8 +1116,12 @@ def test_scenario_map_api_returns_saveable_theme_complete_svg(
         "army_points=300&palette=unknown",
         "army_points=300&palette=nomads&palette=aleph",
     ):
-        status, _, body = request(scenario_app, endpoint, query=query)
+        status, headers, body = request(scenario_app, endpoint, query=query)
         assert status == 400
+        assert headers["content-security-policy"] == (
+            "default-src 'self'; script-src 'self'; object-src 'none'; "
+            "base-uri 'none'; frame-ancestors 'none'"
+        )
         assert b"theme" in body or b"palette" in body or b"duplicate" in body.lower()
 
 
