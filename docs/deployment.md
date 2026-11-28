@@ -150,10 +150,11 @@ remain separately authorized.
 ## Release-artifact generation
 
 The tracked runtime databases are generated during development/release preparation, not on the
-server. Raw archives and intermediate build products remain ignored. Rebuild the complete
-Army/Rules/ITS set from the pinned Army snapshot and tracked curated inputs, run the normal
-validation gates, then commit all three `data/generated/` databases with the code/data
-changes that require them.
+server. Raw archives and intermediate build products remain ignored. When pinned build inputs
+change, rebuild the complete four-file Army/Rules/ITS set, run the normal validation gates,
+and commit the resulting `data/generated/` changes with their inputs. The
+[build-input envelope](data-model.md#shared-runtime-build-input-provenance) distinguishes
+publication dependencies from presentation-only changes; the latter do not require a rebuild.
 
 Historical `data/manifests/army-symbol-build.json` is not part of the deployment
 contract and cannot resume the retired in-tree processor. The tracked

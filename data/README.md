@@ -545,9 +545,10 @@ defines the separate source staging and explicit, verified checkout activation p
 The tracked `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db` are release artifacts:
 a tagged checkout includes exactly what production serves. Their embedded
 projections bind reviewed source relationships and common build provenance;
-runtime JSON sidecars are not release inputs. Rebuild the complete set from pinned source
-inputs when maintained code or curation changes, then validate its source
-freshness and published symbols before commit or deployment. Never rebuild on
+runtime JSON sidecars are not release inputs. Rebuild the complete set when inputs in the
+[build-input envelope](../docs/data-model.md#shared-runtime-build-input-provenance)
+change, then validate its source freshness and published symbols before commit or deployment.
+Presentation-only changes outside that envelope do not require a database rebuild. Never rebuild on
 the deployment host or rewrite binary artifacts during packaging. Ignored
 build/acquisition manifests remain local provenance records.
 
@@ -573,10 +574,11 @@ both siblings and produces byte-identical `army.db` output from the same source.
 `tools.testing.prepare_source_audit` prepares the release-matched legacy
 test inputs in `local/work/build/army/`; these are not runtime artifacts.
 Retain existing private audit copies; do not silently delete them.
-The `tools.data.audit_source_variant_inputs` CLI expects an optional paired archive
-at `local/work/build/army/army.raw.db` unless `--raw` or `--normalized` is
-supplied. This path is a local research input, not a publication artifact;
-the application's source generation must match the selected raw archive.
+For new `tools.data.audit_source_variant_inputs` runs, select verified source
+JSON with `--normalized PATH`. The legacy default paired archive remains
+`local/work/build/army/army.raw.db`; `--raw PATH` selects another legacy pair.
+Neither source is a runtime input, and either must match the application's
+source generation.
 
 Application-only export **refuses** a destination with an existing raw
 sibling, rather than silently deleting or leaving stale private source
@@ -683,11 +685,11 @@ rows preserve their exact source JSON (including absent versus null fields).
 From the repository root, for a matched local Army export:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json verify
-.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json rows skills --start 0 --limit 20
+.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/work/build/army/army.db --normalized local/work/build/army/normalized.json verify
+.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/work/build/army/army.db --normalized local/work/build/army/normalized.json rows skills --start 0 --limit 20
 ```
 
-The `local/data/build/` paths above are illustrative: select the actual
+The `local/work/build/army/` paths above are illustrative: select the actual
 verified outputs of the same source generation. The inspection CLI requires
 an explicit `--normalized` or `--raw` selection; it no longer automatically
 opens the sibling. A stale or mismatched pair fails closed. Bounded listings accept at most 100 entries. This tool is
@@ -705,7 +707,7 @@ validated raw-sibling behavior remains the default; an explicit normalized
 path never silently falls back to a sibling archive. For example:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.data.audit_relationship_semantics local/data/build/army.db --normalized local/data/build/normalized.json --current-only
+.venv\Scripts\python.exe -m tools.data.audit_relationship_semantics local/work/build/army/army.db --normalized local/work/build/army/normalized.json --current-only
 ```
 
 The example paths identify a matched local source generation, not a

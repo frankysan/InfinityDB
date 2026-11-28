@@ -2,10 +2,20 @@
 
 **Project domain:** Data processing
 
-This is a **discovery index and reconciliation procedure** for InfinityDB 1.0 source
-research, not a claim that each historical change has been incorporated or verified.
-The currently selected, versioned sources remain the primary evidence for current
-rules and profile values. Never turn a dated announcement into a silent rules override.
+This is a **discovery index and reconciliation procedure** for N5 source research,
+not a claim that each historical change has been incorporated or verified.
+The selected, versioned sources remain the primary evidence for current rules and
+profile values. Consult the [data lifecycle](../data/README.md) and tracked symbol
+publication manifest for the selected Army input, and the [season ownership contract](season-publication-ownership.md)
+for the selected Rules/FAQ/ITS publications. Never turn a dated announcement into a
+silent rules override.
+
+Dated V1S sections below preserve historical 1.0 review evidence, including the
+paths, artifacts and acceptance obligations as they existed at the recorded
+revision. Their then-current selections, pending V1S/VR checks and test counts
+are not current branch status. The [active backlog](TODO.md),
+[validation queue](validation-queue.md) and [release checklist](releasing.md)
+own current work and acceptance.
 
 ## Local PDF revision inventory (2026-11-06)
 
@@ -262,7 +272,7 @@ gameplay data by this review.
 
 ## Selected Army input for 1.0 (V1S-001; 2026-11-03)
 
-The intended Army input for the current 1.0 completeness review is the
+The Army input selected for the 2026-11-03 1.0 completeness review was the
 **English September 29, 2026 snapshot**:
 `data/raw/JSON 20260929-114335.zip` (59 JSON documents: `metadata.json` and
 58 faction documents). Its generated version-3 provenance manifest is
@@ -271,7 +281,7 @@ SHA-256 is
 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`;
 the separately calculated logical content SHA-256 is
 `cc2212506489d4c9cc88936219131c6c645c20362219f6751fe1e0d3ef3102b3`.
-This selection is also the Army archive identity in the tracked
+At that checkpoint, this selection was also the Army archive identity in the tracked
 `data/manifests/symbol-publication.json`.
 
 The manifest records acquisition at **2026-09-29T11:43:35+02:00** from
@@ -287,18 +297,17 @@ The selected ZIP's SHA-256 was verified from the staged bytes on
 at `dd071c4d` (job `linux-dev:81e892a77b864c298b6603bff55344a6`).
 The source ZIP and acquisition manifest remain ignored external inputs.
 
-This is the **selected review baseline**, not final frozen-release acceptance
-or proof that the source has not changed upstream since acquisition.
-Do not silently fetch or swap in a newer snapshot. A deliberately approved
-source change must reopen affected coverage and rebuild the matched Army/rules
-artifacts. The current database/publication identity checkpoint is below;
-frozen-candidate rechecks remain in V1S-081 and V1S-084. Source-wide and
-browser acceptance remain open.
+This was the **selected 1.0 review baseline**, not final frozen-release acceptance
+or proof that the source remained unchanged upstream. The following artifact
+checkpoint records the development state at that time; the November 25 snapshot
+subsequently entered the current publication and historical corpus. For new
+source changes, reopen affected coverage and rebuild the matched runtime set;
+follow the current [release checklist](releasing.md).
 
 ### Current matched artifacts (V1S-003; 2026-11-03)
 
 At Windows development HEAD `e74b5cb148312e26acf0892d15502ecfd337459e`,
-the existing selected Army archive above is paired with these **current
+the selected Army archive above was paired with these **historical
 development** identities (SHA-256 of exact local bytes):
 
 - Tracked `data/generated/infinity.db`: `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
@@ -606,7 +615,7 @@ a second current source selection.
 
 ### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
 
-The 1.0 current-reference review selects these **existing local inputs**;
+The 2026-11-03 reference review selected these **then-existing local inputs**;
 no source was downloaded or silently updated in this pass:
 
 - **Core rules (primary):** English `data/pdf/rules/n5-rules-v5.3-en.pdf`

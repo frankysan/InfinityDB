@@ -178,6 +178,8 @@ and the [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-pros
 - `CHANGELOG.md` — concise release outcomes and upgrade consequences.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.
+- [AGENT_IMPROVEMENTS.md](AGENT_IMPROVEMENTS.md) — open inbox of actionable agent
+  improvements; retire entries when resolved, declined or transferred to TODO.
 
 ### Backlog completion and retirement
 

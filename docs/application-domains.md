@@ -281,6 +281,10 @@ Legacy entries such as Spiral Corps and Foreign Company are visibly marked **Leg
 playable in N5** and do not offer a Unit Explorer link. Catalog status remains independent from
 playability; Reinforcement entries inherit the display status only from their canonical main
 overview group.
+The four visual card treatments distinguish default, Reinforcements, out-of-catalog
+and legacy entries; labels preserve the distinction without relying on color alone.
+See the [presentation contract](web-design-guidelines.md#use-progressive-disclosure-for-secondary-information)
+for the separation of overview cards and technical relationship disclosures.
 
 The overview reuses canonical Army identities/slugs and existing symbol relationships for current
 entries, with curated identities only for historical lists absent from current Army data. The short

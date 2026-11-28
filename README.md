@@ -55,7 +55,6 @@ its application metrics.
 
 - Imports validated Infinity Army snapshots into a local SQLite database and
   serves a read-only reference browser and HTTP API.
-- Offers live navigation search suggestions alongside the full search page.
 - Shows reviewed N5 Unit history in General-profile and Army-specific sections,
   with incomplete historical coverage explicitly disclosed.
 - Accepts voluntary error reports through a shared anonymous form.
@@ -69,7 +68,8 @@ its application metrics.
   Extended results show only the General profiles, with shared Skills,
   Equipment and Weapons as plain text.
 - Shows a consolidated **General profile** alongside faction- and army-specific
-  profiles, loadouts, availability, skills, equipment, and weapons.
+  profiles, loadouts, availability, skills, equipment, and weapons, with direct
+  links to supported Unit destinations in official Infinity Army.
 - Compares two current Army profiles and optional loadouts side by side, including
   variants of the same Unit, with live Unit lookups, differences-only display and
   shareable selections.
@@ -77,7 +77,8 @@ its application metrics.
   records into coherent unit views while preserving their distinct availability
   and army contexts.
 - Includes a Generic Army and Sectorial overview with symbols, concise role/context summaries, catalog-status labels,
-  legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
+  legacy Army references, theme-aware role/status shading, and direct links into
+  pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
   catalogs, including reviewed current weapons not yet used by an Army Unit,
@@ -125,9 +126,10 @@ its application metrics.
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs
   using the browser's image context menu, with the selected theme and units.
-  The ITS Season 18 scenario also offers optional tournament and Extra
-  context selection; event-only restrictions appear only when explicitly
-  selected.
+  ITS scenarios include a collapsed Season Rules reference for season-wide
+  rules and tournament/Extra policies. ITS Season 18 also offers optional
+  tournament and Extra context selection; event-only restrictions apply in
+  the reference only when explicitly selected.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
 - Supports InfinityDB and eleven faction-inspired themes from Settings, with independent
@@ -150,10 +152,13 @@ its application metrics.
   the current Army data and identify family-source citation scope. Reviewed
   Weapon profiles without a separate rules
   card show their corresponding N5 Weapon Chart page when the matching
-  source publication is available.
+  source publication is available. Reviewed Weapon and Equipment Chart footnotes
+  link to applicable rules; unresolved source markers remain visible.
 - Supports centimetre/inch display preferences and a Developer mode for
   inspecting database IDs, exact reviewed Skill/Equipment source occurrences,
-  and source-scoped Restrictions links. The complete Restrictions chart has
+  source-scoped Restrictions links and locally opened Army snapshot comparison
+  reports without uploading their source evidence.
+  The complete Restrictions chart has
   its own public reference page at `/rules/restrictions`.
 - Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus
   Belli has explicitly permitted InfinityDB to use and redistribute the graphical

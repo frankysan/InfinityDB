@@ -531,8 +531,10 @@ Complete embedded-set application composition now has one explicit factory,
 `infinity_db.web.create_app_from_database_set`. It uses the shared database-set
 validator's complete mode before opening the selected four-file set.
 Current Army/Rules projections, matched recorded provenance and ITS season/core
-source identity are required; incomplete or stale sets fail before application
-creation. The CLI server and production WSGI use this path. The default
+source identity are required; incomplete or internally mismatched sets fail before
+application creation. Exact working-tree build-input freshness is a separate
+[release/deployment check](data-model.md#shared-runtime-build-input-provenance).
+The CLI server and production WSGI use this path. The default
 tracked Army/Rules/ITS set is shared with Docker, with explicit `--db-dir`
 or `INFINITY_DB_DB_DIR` selection.
 Low-level `create_app` retains explicit database injection for source-semantic
