@@ -1,6 +1,6 @@
 import { DISTANCE_CENTIMETERS_PER_INCH } from "./distance.js";
 import { distanceUnit, optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, observeVisibleUnitIds } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
@@ -31,6 +31,7 @@ const rangeModifierClasses = {
 };
 let currentItem;
 let displayedItem;
+let visibility = catalog === "states" ? { ids: null } : null;
 let faqItems = [];
 let restrictionsData = null;
 let exactUsage = null;
@@ -760,11 +761,32 @@ document.addEventListener(
 );
 window.addEventListener("hashchange", revealHashTarget, { signal: pageController.signal });
 window.addEventListener("distanceunitchange", () => {
-  if (currentItem && catalog === "weapons") render(currentItem);
+  if (displayedItem && catalog === "weapons") render(displayedItem);
 }, { signal: pageController.signal });
+
+function renderVisibleItem() {
+  if (!currentItem || !visibility || pageController.signal.aborted) return;
+  if (visibility.error) {
+    displayedItem = undefined;
+    content.hidden = true;
+    status.hidden = false;
+    status.textContent = "Could not load Unit availability. Please try again.";
+    console.error("Could not load Unit availability", visibility.error);
+    return;
+  }
+  const firstRender = !displayedItem;
+  render(visibility.ids === null ? currentItem : withVisibleUnits(currentItem, visibility.ids));
+  if (firstRender) requestAnimationFrame(revealHashTarget);
+}
+
 getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
+  if (pageController.signal.aborted) return;
   currentItem = item;
-  render(item);
+  if (catalog === "states") renderVisibleItem();
+  else observeVisibleUnitIds(optionalUnitFilters, pageController.signal, (result) => {
+    visibility = result;
+    renderVisibleItem();
+  });
   if (["equipment", "traits", "states"].includes(catalog)) {
     const prefix = { equipment: "equipment", traits: "trait", states: "state" }[catalog];
     const topicId = item.rules?.find((rule) => rule.id?.startsWith(`${prefix}:`))?.id
@@ -785,20 +807,9 @@ getCatalogItem(catalog, itemId, pageController.signal).then((item) => {
         if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
       });
   }
-  requestAnimationFrame(revealHashTarget);
-  if (catalog === "states") return null;
-  return visibleUnitIds(optionalUnitFilters(), pageController.signal).then((ids) => render(withVisibleUnits(item, ids)));
 }).catch((error) => {
   if (error.name === "AbortError") return;
   name.firstChild.textContent = "Item unavailable";
   status.textContent = referenceLoadMessage(error, "item");
   console.error("Could not load catalog detail", error);
 });
-window.addEventListener("optionalunitschange", () => {
-  if (!currentItem) return;
-  visibleUnitIds(optionalUnitFilters(), pageController.signal)
-    .then((ids) => render(withVisibleUnits(currentItem, ids)))
-    .catch((error) => {
-      if (error.name !== "AbortError") throw error;
-    });
-}, { signal: pageController.signal });

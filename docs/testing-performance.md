@@ -100,6 +100,30 @@ Retain the compact transport shape; there is no evidence here requiring
 an additional build-time projection. Full composition remains the main
 server-side cost. Browser timing and memory savings are not measured.
 
+## Catalog detail visibility and initial rendering
+
+On Windows Chrome (2026-11-28, base `88edc232`), three fresh-app and
+repeat navigations per page were measured using:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime data/generated/army.db --pages --case skills/mimetism --case weapons/combi-rifle --case equipment/medikit --cold-iterations 3
+```
+
+The original implementation rendered twice per load. Concurrent detail
+and visibility requests reduced this to once, but cold final-DOM medians
+increased from 497/379/410 ms to 540/537/585 ms respectively.
+Concurrent initialization of the shared Unit graph is a plausible cause:
+the loopback benchmark does not preload indexes as deployed WSGI does.
+Repeat medians were 116/92/97 ms originally and 100/90/90 ms in the trial.
+
+Retain sequential requests with a single initially filtered render.
+All 18 revised loads rendered once; cold final-DOM medians were
+489/409/347 ms and repeat medians 108/88/86 ms. Between-run variation
+precludes a reliable end-to-end speedup claim. No unfiltered usage flash
+is shown, and distance changes retain the filtered view. Superseded
+visibility responses cannot overwrite the latest result.
+Preloaded production concurrency was not measured in this comparison.
+
 ## Chromium concurrency under pytest-xdist
 
 Default Windows capacity remains two Chromium slots. On the dedicated

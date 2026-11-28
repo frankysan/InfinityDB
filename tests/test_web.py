@@ -8538,6 +8538,87 @@ def test_wsgi_rejects_retired_individual_database_environment(monkeypatch) -> No
         importlib.import_module("infinity_db.web.wsgi")
 
 
+@pytest.mark.parametrize("catalog,slug", [("skills", "stealth"), ("equipment", "medikit")])
+def test_catalog_visibility_filtered_first_and_latest_request_wins(
+    app: Callable, catalog: str, slug: str,
+) -> None:
+    from tools.browser_wsgi_transport import route_browser_page
+
+    origin = "http://catalog-visibility.test"
+    path = f"/{catalog}/{slug}"
+    status, _, body = request(app, "/api" + path)
+    assert status == 200
+    ids = sorted({unit["id"] for variant in json.loads(body)["variants"]
+                  for unit in variant["units"]})
+    assert ids
+    playwright = pytest.importorskip("playwright.sync_api")
+    with playwright.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        page = browser.new_page()
+        try:
+            route_browser_page(page, app, origin)
+            pending = []
+            page.route("**/api/visible-unit-ids*", lambda route: pending.append(route))
+            errors = []
+            page.on("pageerror", lambda error: errors.append(str(error)))
+            selector = "#skill-content" if catalog == "skills" else "#item-content"
+            content = page.locator(selector)
+            ready = page.locator(selector + ":not([hidden])")
+            variants = content.locator("details.army-profile")
+            with page.expect_request("**/api/visible-unit-ids*"):
+                page.goto(origin + path, wait_until="domcontentloaded")
+            page.wait_for_function("() => true")
+            assert len(pending) == 1
+            assert content.get_attribute("hidden") is not None
+
+            def respond(route, visible, *, status=200):
+                route.fulfill(status=status, content_type="application/json",
+                              body=json.dumps({"ids": visible}))
+
+            respond(pending.pop(0), [])
+            ready.wait_for(state="attached")
+            assert variants.count() == 0
+            page.evaluate("window.dispatchEvent(new Event('distanceunitchange'))")
+            assert variants.count() == 0
+
+            def refresh():
+                with page.expect_request("**/api/visible-unit-ids*"):
+                    page.evaluate("window.dispatchEvent(new Event('optionalunitschange'))")
+                # Dispatch route callbacks before accessing retained Route objects.
+                page.wait_for_function("() => true")
+
+            refresh()
+            refresh()
+            assert len(pending) == 2
+            respond(pending.pop(1), ids)
+            variants.first.wait_for(state="visible")
+            respond(pending.pop(0), [])
+            page.wait_for_load_state("networkidle")
+            assert variants.count() > 0
+
+            refresh()
+            respond(pending.pop(0), [], status=503)
+            ready.wait_for(state="detached")
+            assert page.get_by_text(
+                "Could not load Unit availability. Please try again.", exact=True
+            ).is_visible()
+            refresh()
+            respond(pending.pop(0), [])
+            ready.wait_for(state="attached")
+            assert variants.count() == 0
+            page.evaluate("window.dispatchEvent(new Event('distanceunitchange'))")
+            assert variants.count() == 0
+            assert not errors, errors
+        finally:
+            page.close()
+            browser.close()
+
+
 def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) -> None:
     status, _, script = request(app, "/static/catalog-detail.js")
     assert status == 200

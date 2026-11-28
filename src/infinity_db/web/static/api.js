@@ -10,6 +10,24 @@ export async function visibleUnitIds(optionalFilters, signal) {
   return new Set(payload.ids);
 }
 
+/** Refresh catalog visibility on preference changes; ignore superseded requests. */
+export function observeVisibleUnitIds(getFilters, signal, onChange) {
+  let generation = 0;
+  function refresh() {
+    const request = ++generation;
+    onChange(null);
+    visibleUnitIds(getFilters(), signal).then((ids) => {
+      if (!signal.aborted && request === generation) onChange({ ids });
+    }).catch((error) => {
+      if (!signal.aborted && request === generation && error.name !== "AbortError") {
+        onChange({ error });
+      }
+    });
+  }
+  window.addEventListener("optionalunitschange", refresh, { signal });
+  refresh();
+}
+
 export function getArmies(signal) {
   return getJson("/api/armies", signal);
 }

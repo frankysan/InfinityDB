@@ -41,8 +41,11 @@ entries.
   established. The Dragoes comparison had no confirmed change rows.
 - **Remaining action:** Benchmark first-open season policy latency separately.
   Profile Explorer interaction overhead separately from intentional debounce
-  and automation waits; investigate parallel visible-Unit lookup or targeted
-  catalog updates without changing availability semantics. The
+  and automation waits. The
+  [catalog visibility benchmark](testing-performance.md#catalog-detail-visibility-and-initial-rendering)
+  rejected concurrent requests after unpreloaded cold regressions; sequential
+  requests now render filtered content once rather than twice, with
+  latest-request-wins protection and distance preference parity. The
   [live-search prefix benchmark](testing-performance.md#bounded-live-search-prefix-benchmark)
   found no material benefit from early limiting; retain the existing ranking.
   The [Unit comparison benchmark](testing-performance.md#unit-comparison-detail-inputs)
