@@ -55,7 +55,7 @@ def test_search_projection_pilot(
     queries = [
         "mimetism", "activate console", "Dragões", "dragoes", "combi rifle",
         "spec-ops", "PanOceania", "breaker", "hacker", "casevac", "civevac",
-        "armour", "martial arts", "a", "!!!", "", "no-such-result-987654",
+        "armour", "martial arts", "MSV", "msv", "a", "!!!", "", "no-such-result-987654",
     ]
     legacy_times, indexed_times = [], []
     with (

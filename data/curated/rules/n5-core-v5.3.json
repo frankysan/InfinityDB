@@ -13261,6 +13261,9 @@
             "id": "equipment:multispectral-visor",
             "kind": "equipment",
             "name": "Multispectral Visor",
+            "aliases": [
+                "MSV"
+            ],
             "labelIds": [
                 "obligatory"
             ],

@@ -1743,6 +1743,24 @@ def test_tinbot_reference_only_variants_preserve_citations_and_routes() -> None:
             for relation in record["display_relations"]
         )
 
+    for record_id, (_target, catalog, slug) in expected.items():
+        status, body = _published_get(app, f"/api/{catalog}/{slug}")
+        assert status == "200 OK"
+        relations = [
+            relation
+            for rule in json.loads(body)["rules"]
+            for relation in rule.get("display_relations", [])
+            if relation["record"]["id"] == record_id
+            and relation["type"] == "uses-effects-of"
+            and relation["direction"] == "inbound"
+        ]
+        assert relations
+        assert all(
+            relation["record"]["public_reference"]
+            == {"href": f"/equipment/tinbot#rule-{record_id.replace(':', '-')}"}
+            for relation in relations
+        )
+
     for slug in ("tinbot-albedo", "tinbot-neurocinetics"):
         status, _ = _published_get(app, f"/api/equipment/{slug}")
         assert status == "404 Not Found", slug

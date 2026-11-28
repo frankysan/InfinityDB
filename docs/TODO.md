@@ -83,24 +83,6 @@ them in coherent batches. Retire completed entries after focused validation.
   never convert unrelated numbers such as MODs, Points or SWC. Verify GO-POD
   Super-Jump (7.5 cm / 3 inches) and Jump (20 cm / 8 inches) in both modes,
   including toggling with an open History disclosure.
-- [ ] **Web backend + Web frontend:** Resolve related-rule links to published
-  reference-only variant cards on their owning catalog detail pages. In
-  Neurocinetics, Effects used by: TinBot: Neurocinetics should link to
-  `/equipment/tinbot#rule-equipment-tinbot-neurocinetics`. Check analogous
-  references, exact anchor navigation and reciprocal links; preserve the
-  distinction between reference-only rules and current Army availability.
-  Do not introduce standalone routes for unpublished variants.
-- [ ] **Data processing + Web backend + Web frontend:** Add MSV as a searchable
-  alias for Multispectral Visor, preserving the canonical Equipment name and
-  identity. Verify global/live search and Equipment catalog search; use the
-  existing alias mechanism rather than creating a duplicate Glossary definition.
-  Check case-insensitive matching.
-- [ ] **Web frontend + Web backend:** Show scenario usage counts for
-  Scenario-specific Skills in the Skills catalog instead of zero Army uses.
-  Derive counts from distinct published scenario contexts (collection and
-  scenario identity), not aliases or rule variants. Distinguish scenario counts
-  from Unit counts in the presentation; preserve ordinary Skill usage semantics.
-  Verify consolidated and single-scenario entries, including Activate Antenna.
 - [ ] **Web backend + Web frontend:** Correct standalone SVG rendering over HTTP
   in Firefox. Investigate the shared Content Security Policy blocking embedded
   SVG styles; saved local scenario maps render correctly. Check representative

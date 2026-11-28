@@ -141,6 +141,10 @@ class EquipmentCatalog:
                     "use_count": 0,
                 }
             )
+        for item in items:
+            record = records.get(str(item.get("slug", "")))
+            if record and record.get("aliases"):
+                item["aliases"] = list(record["aliases"])
         return sorted(items, key=lambda item: (str(item["name"]).casefold(), str(item["id"])))
 
     def get_equipment(

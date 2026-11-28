@@ -87,7 +87,10 @@ function render() {
     if (hasUsage) {
       const useCount = document.createElement("td");
       useCount.className = "table-column--metric";
-      useCount.textContent = Number(item.use_count || 0).toLocaleString();
+      const scenarioCount = item.scenario_use_count;
+      useCount.textContent = Number.isInteger(scenarioCount)
+        ? `${scenarioCount.toLocaleString()} scenario${scenarioCount === 1 ? "" : "s"}`
+        : Number(item.use_count || 0).toLocaleString();
       if (page === "skills") {
         const types = document.createElement("td");
         types.className = "skill-category-cell table-column--descriptor";

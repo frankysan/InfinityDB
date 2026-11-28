@@ -102,6 +102,31 @@ def test_live_search_navigation(app: Any, chrome: Any, width: int) -> None:
         page.close()
 
 
+def test_msv_alias_in_search_and_equipment_catalog(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 1440, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/equipment", wait_until="domcontentloaded")
+        entry = page.locator('#catalog-list a[href="/equipment/multispectral-visor"]')
+        entry.wait_for(state="visible")
+        page.locator("#catalog-search").fill("msv")
+        page.wait_for_function(
+            """() => document.querySelectorAll('#catalog-list a').length === 1
+                && document.querySelector('#catalog-list a')?.textContent
+                    === 'Multispectral Visor'"""
+        )
+        assert entry.inner_text() == "Multispectral Visor"
+        query = page.locator("#global-search-query")
+        for value in ("MSV", "msv"):
+            query.fill(value)
+            result = page.locator('#global-search-panel a[href="/equipment/multispectral-visor"]')
+            result.wait_for(state="visible")
+            assert "Multispectral Visor" in result.inner_text()
+            query.press("Escape")
+    finally:
+        page.close()
+
+
 def test_live_search_latest_input_and_keyboard(app: Any, chrome: Any) -> None:
     page = chrome.new_page(viewport={"width": 1440, "height": 900})
     route_browser_page(page, app, ORIGIN)

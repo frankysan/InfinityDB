@@ -125,7 +125,7 @@ def _enrich_scenario_api_item(
 ) -> dict[str, Any]:
     """Attach maintained-text and public-reference projections to a scenario read model."""
 
-    result = enrich_rule_relation_references(database, value)
+    result = enrich_rule_relation_references(database, value, rules_database=rules_database)
     scenario_id = f"scenario:{result['slug']}"
     result = enrich_maintained_text_references(
         database,
@@ -1221,7 +1221,10 @@ class ApiHandler:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     enrich_army_references(self.database, payload, in_place=True)
                     self.symbol_catalog.enrich_nested_units(payload, in_place=True)
-                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_rule_relation_references(
+                        self.database, payload, in_place=True,
+                        rules_database=self.rules_database,
+                    )
                     enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         scenario_id=(payload.get("scenario") or {}).get("id"),
@@ -1257,7 +1260,10 @@ class ApiHandler:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     enrich_army_references(self.database, payload, in_place=True)
                     self.symbol_catalog.enrich_nested_units(payload, in_place=True)
-                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_rule_relation_references(
+                        self.database, payload, in_place=True,
+                        rules_database=self.rules_database,
+                    )
                     enrich_maintained_text_references(
                         self.database, self.rules_database, payload, in_place=True,
                     )
@@ -1290,7 +1296,8 @@ class ApiHandler:
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(
-                        self.database, payload, local_rule_ids=local_rule_ids
+                        self.database, payload, local_rule_ids=local_rule_ids,
+                        rules_database=self.rules_database,
                     )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
@@ -1314,7 +1321,9 @@ class ApiHandler:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1330,7 +1339,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "State not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         additional_records=self._season_rule_records,
@@ -1349,7 +1360,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Hacking Program not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1365,7 +1378,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Ammunition not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1383,7 +1398,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "General rule not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )

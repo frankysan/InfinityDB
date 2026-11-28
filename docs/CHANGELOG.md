@@ -126,6 +126,10 @@ are not retroactively relabeled.
 - **Web frontend:** Distinguish Army overview card types through theme-aware shading,
   clarify Matched configuration interaction, unify FAQ card backgrounds and insets,
   tighten Tactical Support spacing, and darken Nomads sidebar chrome.
+- **Data processing + Web backend + Web frontend:** Resolve reference-only Equipment
+  variant links to their owning rule cards, support MSV as a search alias for
+  Multispectral Visor, and show distinct scenario usage counts for Scenario-specific
+  Skills instead of Army Unit counts.
 
 - **Data processing:** Include Unit history in normal runtime builds and require
   an explicit opt-out for history-free development builds.

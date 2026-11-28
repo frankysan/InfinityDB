@@ -49,7 +49,9 @@ def collect_reference_targets(
             records.setdefault(record_id, {})[scenario_id] = {
                 "name": record["name"],
                 "contextual": bool((record.get("scope") or {}).get("scenarios")),
-                "public_reference": rule_record_public_reference(database, record),
+                "public_reference": rule_record_public_reference(
+                    database, record, rules_database=rules_database,
+                ),
                 "summary_tokens": parse_maintained_text(record["summary"]),
             }
     properties = {
@@ -201,7 +203,9 @@ class _Resolver:
                 contextual = bool((record.get("scope") or {}).get("scenarios"))
                 reference = None if contextual else (
                     local_rule_public_reference(record["id"], self.local_rule_ids)
-                    or rule_record_public_reference(self.database, record)
+                    or rule_record_public_reference(
+                        self.database, record, rules_database=self.rules_database,
+                    )
                 )
             label = token.get("display_text") or name
             if token.get("display_form") == "plural" and not token.get("display_text"):

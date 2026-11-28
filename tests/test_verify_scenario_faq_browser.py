@@ -934,6 +934,13 @@ def test_unpublished_tinbot_source_variant_is_not_a_fake_public_route(
         page.locator("#rule-skill-neurocinetics").wait_for(
             state="visible", timeout=30000,
         )
+        target = page.locator(
+            '.rules-relations a[href="/equipment/tinbot#rule-equipment-tinbot-neurocinetics"]'
+        )
+        target.wait_for(state="visible")
+        target.click()
+        page.wait_for_url(f"{ORIGIN}/equipment/tinbot#rule-equipment-tinbot-neurocinetics")
+        page.locator("#rule-equipment-tinbot-neurocinetics").wait_for(state="visible")
         assert not errors, (width, errors)
     finally:
         page.close()
