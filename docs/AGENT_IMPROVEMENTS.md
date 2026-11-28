@@ -42,10 +42,11 @@ entries.
 - **Remaining action:** Benchmark first-open season policy latency separately.
   Profile Explorer interaction overhead separately from intentional debounce
   and automation waits; investigate parallel visible-Unit lookup or targeted
-  catalog updates without changing availability semantics. Measure broad
-  live-search prefixes (the API slices only after matching/ranking all results)
-  and Unit comparison's full detail requests, including unused history, before
-  introducing new projections or ranking optimizations. Extend benchmark
+  catalog updates without changing availability semantics. The
+  [live-search prefix benchmark](testing-performance.md#bounded-live-search-prefix-benchmark)
+  found no material benefit from early limiting; retain the existing ranking.
+  Measure Unit comparison's full detail requests, including unused history,
+  before introducing new projections. Extend benchmark
   coverage for these new journeys and repeat the pinned full-stack workload
   before interpreting capacity regressions.
 - **Disposition:** proposed.

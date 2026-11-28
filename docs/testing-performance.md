@@ -40,6 +40,27 @@ runs and preserves earlier receipts even on failure. Use
 [deployment's HTTP workload](deployment.md#repeatable-http-capacity-scenario)
 rather than duplicating production capacity instructions here.
 
+## Bounded live-search prefix benchmark
+
+The published index matches normalized substrings, ranks all matches, and
+applies the requested limit at the API boundary. To compare that path with
+SQL-side limiting using the same Unicode ranking and stable tie order:
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_search_index --prefixes --iterations 100
+```
+
+On Windows at `334a5793` (2026-11-28), the seven sampled two-character
+queries matched 64–399 entries. Current index medians were 1.93–3.77 ms;
+bounded WSGI API medians were 2.06–3.92 ms. SQL-side top-eight selection
+saved at most 0.31 ms for these queries and slightly increased narrow-query
+costs. The single-character stress query `a` matched 1,148 entries with a
+7.60 ms API median; navigation suggestions require two characters and use
+a 180 ms debounce. All 1,100 paired candidate and API comparisons matched
+the existing ranked results. Retain the existing ranking and API slicing:
+the observed absolute savings do not justify another ranking path or a
+publication change. This sequential local benchmark is not a capacity test.
+
 ## Chromium concurrency under pytest-xdist
 
 Default Windows capacity remains two Chromium slots. On the dedicated
