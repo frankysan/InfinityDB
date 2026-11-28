@@ -31,7 +31,7 @@ review. `declaration-category` projection records are excluded.
 
 - **0.7.0 primary catalog: 182/182 complete (100.0%), 0 pending.**
 - Primary domains: Skill **95/95**; Equipment **30/30**; Trait **33/33**; State **24/24**.
-- Supporting semantic identities: **224/224** complete, **0** pending.
+- Supporting semantic identities: **235/235** complete, **0** pending.
 - Current authored outgoing relations: **518**.
 - Explicitly tracked future/deferred interactions: **111**.
 
@@ -1342,6 +1342,33 @@ review. `declaration-category` projection records are excluded.
   - `enables-use-of` → Intuitive Attack (`skill:intuitive-attack`)
   - `modifies-use-of` → Mines (`weapon:mines`)
   - `uses-effects-of` → Electromagnetic (E/M) Ammunition (`ammunition:em`)
+
+### 1.3.0
+
+#### Term (11/11)
+
+- [x] **Army List** (`term:army-list`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Army Points** (`term:army-points`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Cheerleader** (`term:cheerleader`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Faction** (`term:faction`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Generic Army** (`term:generic-army`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Open Information** (`term:open-information`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Rambo** (`term:rambo`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Sectorial Army** (`term:sectorial-army`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Unit** (`term:unit`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **Vanilla** (`term:vanilla`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
+- [x] **WYSIWYG** (`term:wysiwyg`) — reviewed: Descriptive terminology only; no additional authored gameplay interaction.
+  - outgoing: none
 
 ## Future interaction queue
 

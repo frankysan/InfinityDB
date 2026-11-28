@@ -2799,7 +2799,7 @@ def _validate_reference(
         return
 
     if "page" in reference or "member" in reference:
-        raise ValueError(f"{context}: URL-backed wiki references use the source URL directly")
+        raise ValueError(f"{context}: URL-backed references use the source URL directly")
 
 
 def _validate_source(source: dict[str, Any], context: str) -> None:
@@ -2808,10 +2808,15 @@ def _validate_source(source: dict[str, Any], context: str) -> None:
         raise ValueError(f"{context}: missing fields {sorted(missing)}")
     for field in REQUIRED_SOURCE_FIELDS:
         _require_string(source[field], field, context)
-    if source["kind"] not in {"pdf", "wiki"}:
-        raise ValueError(f"{context}: 'kind' must be 'pdf' or 'wiki'")
+    if source["kind"] not in {"pdf", "wiki", "web"}:
+        raise ValueError(f"{context}: 'kind' must be 'pdf', 'wiki' or 'web'")
 
     _require_string(source.get("url"), "url", context)
+    if source["kind"] == "web":
+        if source["authority"] != "secondary" or source.get("localPath") is not None:
+            raise ValueError(f"{context}: web sources must be secondary URL-backed evidence")
+        _require_string(source.get("retrievedDate"), "retrievedDate", context)
+        return
     if source["kind"] == "pdf":
         _require_string(source.get("publishedDate"), "publishedDate", context)
         _require_string(source.get("localPath"), "localPath", context)

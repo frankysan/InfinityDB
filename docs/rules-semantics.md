@@ -3595,7 +3595,7 @@ min/max/required conditions, and notes.
 The current curated Fireteam general reference retains `Linkable` with
 `historical-official` provenance and presents its meaning in the landing page
 Terminology section. It is explanatory reference text, not a universal Unit eligibility
-boolean. Broader search-alias support would need a separate reviewed consumer.
+boolean. Glossary and global search project the same definition and provenance.
 
 Sources:
 
@@ -3622,8 +3622,8 @@ current model.
 
 The current curated Fireteam general reference retains `Pure Fireteam` with
 `community-historical` provenance and explains it in the landing page Terminology section.
-It is not presented as a current Fireteam Type or authoritative boolean; any broader
-search-alias support remains separate from the implemented explanatory text.
+It is not presented as a current Fireteam Type or authoritative boolean. Glossary
+and global search project the same definition and provenance.
 
 Sources:
 

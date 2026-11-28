@@ -12,7 +12,9 @@ from infinity_db.application_domains import (
 )
 from infinity_db.database.repository import Database, accent_insensitive_key
 from infinity_db.domain_references import rule_record_public_reference
+from infinity_db.domain_slugs import normalize_domain_slug
 from infinity_db.equipment_catalog import EquipmentCatalog
+from infinity_db.fireteam_reference import GENERAL_FIRETEAM_RULE_ID
 from infinity_db.rules_database import RulesDatabase
 from infinity_db.weapon_properties import WeaponProperties
 
@@ -100,6 +102,37 @@ class GlossaryCatalog:
                     if entry["embedded"]:
                         entry["citations"] = record["citations"]
                     entries.append(entry)
+        return entries
+
+    def _fireteam_terminology_entries(self) -> list[dict[str, Any]]:
+        """Project the existing curated Fireteam terminology without copying definitions."""
+        if self.rules_database is None:
+            return []
+        general = self.rules_database.composed_record(GENERAL_FIRETEAM_RULE_ID)
+        if general is None:
+            return []
+        entries = []
+        for term in general["facts"].get("terminology", []):
+            slug = normalize_domain_slug(term["term"])
+            provenance = term["provenance"]
+            label = (
+                "Historical official terminology" if provenance == "historical-official"
+                else "Community / historical shorthand"
+            )
+            entries.append({
+                "id": f"fireteam-term:{slug}",
+                "kind": "fireteam-term",
+                "domain": "Game term",
+                "domain_slug": "terms",
+                "name": term["term"],
+                "description": f"{label}. {term['meaning']} "
+                               "See [[rule:fireteam-general|Fireteam rules]].",
+                "aliases": [],
+                "href": f"/glossary#fireteam-term-{slug}",
+                "embedded": True,
+                "citations": general["citations"],
+                "provenance": provenance,
+            })
         return entries
 
     def _profile_help_entries(self) -> list[dict[str, Any]]:
@@ -207,6 +240,7 @@ class GlossaryCatalog:
                 [
                     *self._record_entries(),
                     *self._profile_help_entries(),
+                    *self._fireteam_terminology_entries(),
                     *self._label_entries(),
                     *self._weapon_property_entries(),
                 ],
@@ -247,6 +281,7 @@ class GlossaryCatalog:
                 [
                     *self._record_entries(embedded_only=True),
                     *self._profile_help_entries(),
+                    *self._fireteam_terminology_entries(),
                     *self._weapon_property_entries(),
                 ],
                 key=lambda item: (

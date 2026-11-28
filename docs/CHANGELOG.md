@@ -15,6 +15,8 @@ are not retroactively relabeled.
 - Live search suggestions in the navigation, with direct links and access to all results.
 - Live filtering in the Glossary, full search results and both Unit comparison selectors.
 - Generic Army terminology replaces Main Army, with Vanilla explained as community shorthand.
+- Expanded searchable official, community and historical Glossary vocabulary, including
+  Vanilla, Linkable, Pure Fireteam and common army-building terms.
 - Correct Equipment filter counts on repeated matching queries.
 - Matching armies counts exclude non-playable grouping identities.
 - Unit details now include N5 profile and Army history, grouped by revision date
@@ -50,6 +52,9 @@ are not retroactively relabeled.
 - **Web frontend:** Use Generic Army in Army overview labels and Unit Explorer summaries;
   explain Vanilla without changing source role identifiers.
 - **Web backend:** Serve the existing branded PNG for conventional favicon requests.
+- **Data processing + Web backend:** Added eleven reviewed Game terms, projected existing
+  Fireteam terminology into the Glossary and search, and added F2F/FtF aliases.
+  Community usage evidence is secondary and does not create gameplay rules.
 - **Web frontend + Web backend + Deployment:** Added a shared anonymous error
   report form with inspectable optional page context, bounded submission
   limits and configurable email delivery without an application report store.

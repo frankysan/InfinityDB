@@ -446,6 +446,17 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
     terms = rules_database.composed_records_by_kind("term")
     assert {record["id"] for record in terms} == {
         "term:ally",
+        "term:army-list",
+        "term:army-points",
+        "term:cheerleader",
+        "term:faction",
+        "term:generic-army",
+        "term:open-information",
+        "term:rambo",
+        "term:sectorial-army",
+        "term:unit",
+        "term:vanilla",
+        "term:wysiwyg",
         "term:deployable-equipment",
         "term:deployable-weapon",
         "term:enemy",
@@ -471,6 +482,9 @@ def test_game_terms_are_current_canonical_embedded_records(tmp_path: Path) -> No
     }
     assert {record["facts"]["scope"] for record in terms} == {
         "alignment",
+        "army-building",
+        "community-terminology",
+        "information",
         "fireteam-eligibility",
         "game-element",
         "profile",
@@ -1757,7 +1771,7 @@ def test_embedded_glossary_and_profile_help_preserve_definition_citations() -> N
     assert {
         kind: sum(record["kind"] == kind for record in records.values())
         for kind in ("attribute", "term", "rule")
-    } == {"attribute": 13, "term": 23, "rule": 12}
+    } == {"attribute": 13, "term": 34, "rule": 12}
 
     app = create_app(root / "data/generated/army.db", rules_database_path=rules.path)
     status, body = _published_get(app, "/api/glossary")

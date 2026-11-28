@@ -78,17 +78,12 @@ them in coherent batches. Retire completed entries after focused validation.
 
 - [ ] **Web backend:** Confirm the implemented `/favicon.ico` fallback in clean
   Firefox. The existing branded PNG and cache contract pass the regression test.
-- [ ] **Project infrastructure:** Advance both package version declarations from
-  1.2.2 to 1.3.0 and verify the development footer displays `1.3.0+dev`.
-  Combine with the next vocabulary database rebuild because both version
-  declarations participate in the build input fingerprint.
-- [ ] **Data processing + Web backend + Web frontend:** Make reviewed official,
-  historical and community vocabulary discoverable in the Glossary and global
-  search (including live suggestions). Reuse canonical embedded terms and
-  existing definitions, including Generic Army, Vanilla and Linkable; preserve provenance
-  and contextual links. Review other official and community terms and phrases
-  for missing entries, including existing Fireteam terminology, without treating
-  shorthand or historical mechanics as current official rules.
+- [ ] **Project infrastructure:** Confirm the updated development footer
+  displays `1.3.0+dev` after restarting the local server. Both declarations and
+  the matched runtime database set have been updated.
+- [ ] **Data processing + Web backend + Web frontend:** Confirm the expanded
+  official, historical and community vocabulary in the manual Glossary and search
+  verification, including Vanilla, Linkable and Pure Fireteam.
 
 ### Deferred beyond the committed scope
 

@@ -154,3 +154,51 @@ def test_live_full_search_results(app: Any, chrome: Any) -> None:
         assert page.url == f"{ORIGIN}/search"
     finally:
         page.close()
+
+
+def test_expanded_vocabulary_is_searchable_and_linked(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/rules")
+        entries = page.evaluate("async () => (await (await fetch('/api/glossary')).json()).items")
+        by_id = {item["id"]: item for item in entries}
+        terms = {
+            "Generic Army": "term:generic-army", "Sectorial Army": "term:sectorial-army",
+            "Army List": "term:army-list", "Army Points": "term:army-points",
+            "Faction": "term:faction", "Unit": "term:unit",
+            "Open Information": "term:open-information", "Vanilla": "term:vanilla",
+            "Cheerleader": "term:cheerleader", "Rambo": "term:rambo",
+            "WYSIWYG": "term:wysiwyg", "Linkable": "fireteam-term:linkable",
+            "Pure Fireteam": "fireteam-term:pure-fireteam",
+            "Order monkey": "term:cheerleader",
+        }
+        for query, identity in terms.items():
+            entry = by_id[identity]
+            assert entry["embedded"]
+            assert entry["citations"]
+            results = page.evaluate(
+                """async query => (await (await fetch('/api/search?q='
+                    + encodeURIComponent(query))).json()).items""", query,
+            )
+            assert any(item["href"] == entry["href"] for item in results), query
+        assert by_id["fireteam-term:linkable"]["provenance"] == "historical-official"
+        assert by_id["fireteam-term:pure-fireteam"]["provenance"] == "community-historical"
+        assert "Community shorthand" in by_id["term:vanilla"]["description"]
+        assert any(citation["source_id"] == "community-acronym-glossary-2017"
+                   for citation in by_id["term:vanilla"]["citations"])
+        for name, identity in (("Vanilla", "term:vanilla"), ("Linkable", "fireteam-term:linkable")):
+            page.goto(f"{ORIGIN}/rules")
+            toggle = page.locator(".global-search-toggle")
+            if toggle.is_visible():
+                toggle.click()
+            page.locator("#global-search-query").fill(name)
+            page.locator("#global-search-panel").locator(
+                f'a[href="{by_id[identity]["href"]}"]'
+            ).click()
+            entry = page.locator("#" + identity.replace(":", "-"))
+            entry.wait_for(state="visible")
+            assert entry.locator("h3").inner_text() == name
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+    finally:
+        page.close()

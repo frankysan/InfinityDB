@@ -73,6 +73,14 @@ can coexist with a Label or Trait of the same name without merging identities. N
 has a standalone catalog/detail hierarchy; both project through Glossary/search, while Attributes
 also participate in contextual Unit-profile help/tooltips.
 
+Army-building and information terms use the same embedded vocabulary. Community
+terms such as Vanilla, Cheerleader and Rambo have descriptive definitions and
+secondary evidence, not independent mechanics. Existing Fireteam terminology
+(Linkable, Pure Fireteam) is projected directly from the curated Fireteam general
+record with its provenance and contextual rule link, rather than maintaining a
+second definition. All participate in Glossary and global search, including live
+suggestions.
+
 Weapon Properties (`weapon-property:*`) are an InfinityDB-owned embedded
 vocabulary for reviewed named characteristics such as Plasma, Viral, MULTI
 and AP+DA. They are linked from exact Weapon profiles and show their canonical

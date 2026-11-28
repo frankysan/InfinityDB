@@ -469,7 +469,7 @@ example `rules/n5-core-v5.3.json`. Each file contains:
 - `formatVersion`: `23`
 - `collection`: publication/source collection identity, scope, status, and authority
 - optional `scenarioCollection`: stable scenario-set identity, exact set revision, and ordered members
-- `sources`: source-specific PDF or wiki provenance. PDF sources may declare
+- `sources`: source-specific PDF, wiki or secondary web provenance. PDF sources may declare
   an optional 64-character hexadecimal `sha256`; malformed declarations fail
   validation. The source-evidence auditor verifies supplied bytes separately.
   Normal rules builds validate the declaration without opening or downloading
@@ -484,7 +484,9 @@ the exact timestamped ZIP path, SHA-256, acquisition timestamp, language,
 document count, and wiki base URL; citations use archive `member` names and may
 add a heading. Exact pinned wiki revisions remain URL-backed sources with a
 `retrievedDate`; their citations use the source URL directly and may add a
-heading.
+heading. Secondary community web sources (`kind: web`) require a URL,
+`retrievedDate`, version description and secondary authority. They can establish
+terminology usage but do not establish current game mechanics.
 
 `vocabularySources` follows the same locator rules instead of forcing wiki
 references to carry PDF page numbers.
