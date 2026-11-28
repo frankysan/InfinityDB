@@ -15,6 +15,13 @@ MANIFEST_FORMAT = "InfinityDB database-set build inputs"
 FAMILIES = ("army", "rules-n5")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 
+# These modules are shared by web serving and standalone presentation tools.
+# Neither transforms the stored Army, Rules or ITS publications.
+_PRESENTATION_ONLY_SOURCES = frozenset({
+    "src/infinity_db/scenario_map_svg.py",
+    "src/infinity_db/theme_palette.py",
+})
+
 
 def canonical_bytes(value: Any) -> bytes:
     return json.dumps(
@@ -42,6 +49,7 @@ def build_input_fingerprints(root: Path, *, unit_history: bool = False) -> dict[
     paths.extend(
         path for path in (root / "src").rglob("*.py")
         if not path.is_relative_to(web_root)
+        and path.relative_to(root).as_posix() not in _PRESENTATION_ONLY_SOURCES
     )
     paths.extend([
         root / "pyproject.toml", root / "data/manifests/symbol-publication.json",

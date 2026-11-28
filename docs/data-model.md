@@ -156,8 +156,17 @@ The input envelope includes maintained JSON under `config/catalogs`,
 `config/identity`, `config/validation`, `config/symbols`, and
 `data/curated` (excluding `example.json`), `pyproject.toml`, the symbol
 publication manifest, static Restrictions reference, and Python sources
-outside `src/infinity_db/web/`. History-enabled builds also pin the
-accepted historical archive/database hashes and the history projection's
+outside `src/infinity_db/web/`, except the presentation-only
+`theme_palette.py` and `scenario_map_svg.py`. These are shared with standalone
+rendering tools but do not publish stored data; geometry validation and shared
+catalog/model code remain pinned. Generated palette CSS remains covered by
+the static asset revision, and runtime map ETags include rendered SVG bytes.
+Adding a publication dependency on either excluded module requires revisiting
+the exclusion. Existing recorded sets remain internally valid, but require one
+rebuild to pass the exact checkout-input freshness gate under the new envelope;
+the manifest format and set-integrity checks are unchanged.
+History-enabled builds also pin the accepted historical archive/database hashes
+and the history projection's
 research Python sources. All maintained text input digests normalize CRLF
 to LF; upstream Army ZIP and supplementary metadata pins remain byte-exact.
 This is a conservative content envelope, not a claim that every file is

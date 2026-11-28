@@ -323,6 +323,10 @@ class Application:
                 and response.cache_control != "no-store")
             else None
         )
+        if etag and response.content_type.split(";", 1)[0] == "image/svg+xml":
+            # Rendered maps can change independently of the database snapshot.
+            # The response has already been rendered, so bind its actual bytes.
+            etag = f'{etag[:-1]}-{sha256(response.body).hexdigest()}"'
         if etag and path == "/api/variant-usage" and self.api.variant_usage_revision:
             representation = sha256(f"{path}?{query}".encode()).hexdigest()[:16]
             etag = (

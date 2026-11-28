@@ -1035,6 +1035,30 @@ def test_scenario_map_api_renders_every_supported_configuration(
         assert b'<svg xmlns="http://www.w3.org/2000/svg"' in svg
 
 
+def test_scenario_map_etag_tracks_rendered_bytes(
+    scenario_app: Application, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db.web import api_handler
+    from tools.browser_wsgi_transport import wsgi_response
+
+    url = "http://localhost/api/scenarios/domination/map.svg?army_points=300"
+    status, headers, body = wsgi_response(scenario_app, url)
+    assert status == 200
+    etag = dict(headers)["ETag"]
+    assert wsgi_response(scenario_app, url, headers={"If-None-Match": etag})[0] == 304
+    render = api_handler.render_scenario_map_svg
+    monkeypatch.setattr(
+        api_handler, "render_scenario_map_svg",
+        lambda *args, **kwargs: render(*args, **kwargs).replace("</svg>", "<!-- changed --></svg>"),
+    )
+    status, changed_headers, changed_body = wsgi_response(
+        scenario_app, url, headers={"If-None-Match": etag},
+    )
+    assert status == 200
+    assert changed_body != body
+    assert dict(changed_headers)["ETag"] != etag
+
+
 @pytest.mark.parametrize(
     ("slug", "diameter", "count"),
     [("domination", 40, 4), ("supplies", 25, 3)],

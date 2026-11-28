@@ -21,20 +21,6 @@ entries.
 
 ## Open improvements
 
-### AI-0023 — Separate presentation-only sources from database build freshness
-
-- **Date:** 2026-11-26
-- **Area:** Runtime build provenance and theme iteration.
-- **Issue:** Palette and scenario SVG rendering changes outside the web package
-  invalidate the conservative Python input envelope. A palette-only change
-  required a complete history-enabled rebuild (289 seconds on Windows).
-  Editable theme seeds now live in CSS, so routine color balancing no longer
-  requires a rebuild.
-- **Proposed:** Audit remaining actual build dependencies and move or explicitly
-  exclude presentation-only Python sources from the build envelope while
-  retaining static asset revision coverage and genuine data-input checks.
-- **Disposition:** proposed.
-
 ### AI-0015 — Publish ITS 18 Use Panoply as a typed scenario Skill
 
 - **Date:** 2026-11-18

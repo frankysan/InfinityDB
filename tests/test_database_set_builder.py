@@ -24,6 +24,7 @@ from infinity_db.build_provenance import (
     build_set_id,
     canonical_bytes,
     file_sha256,
+    validate_build_input_freshness,
     validate_set_provenance,
 )
 from infinity_db.cli import build_parser
@@ -359,6 +360,42 @@ def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     metadata.write_text('{"factions":[{"id":2,"name":"Other"}]}', encoding="utf-8")
     selected = builder.collect_build_manifest(root, args.source, metadata)
     assert selected["source"]["metadataSha256"] != code_change["source"]["metadataSha256"]
+
+
+def test_presentation_sources_do_not_invalidate_recorded_build(project) -> None:
+    root, args = project
+    package = root / "src/infinity_db"
+    package.mkdir(parents=True, exist_ok=True)
+    presentation = (
+        package / "theme_palette.py",
+        package / "scenario_map_svg.py",
+        package / "web/static/themes/light.css",
+    )
+    geometry = package / "scenario_geometry.py"
+    geometry.write_text("# build geometry\n", encoding="utf-8")
+    for path in presentation:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# original\n", encoding="utf-8")
+    manifest = builder.collect_build_manifest(root, args.source, None)
+    army = root / "recorded.db"
+    with closing(sqlite3.connect(army)) as connection, connection:
+        connection.execute("CREATE TABLE __infinity_metadata (key TEXT PRIMARY KEY, value TEXT)")
+        connection.execute(
+            "INSERT INTO __infinity_metadata VALUES (?,?)",
+            (BUILD_PROVENANCE_KEY, canonical_bytes(build_record(manifest, "army")).decode()),
+        )
+    validate_build_input_freshness(army, root)
+    for path in presentation:
+        assert path.relative_to(root).as_posix() not in manifest["inputs"]
+        path.write_text("# changed\n", encoding="utf-8")
+    assert builder.collect_build_manifest(root, args.source, None) == manifest
+    validate_build_input_freshness(army, root)
+    geometry.write_text("# changed geometry\n", encoding="utf-8")
+    assert builder.collect_build_manifest(root, args.source, None)["builderRevision"] != (
+        manifest["builderRevision"]
+    )
+    with pytest.raises(ValueError, match="scenario_geometry.py"):
+        validate_build_input_freshness(army, root)
 
 
 def test_complete_build_publishes_only_selected_files_and_is_repeatable(
