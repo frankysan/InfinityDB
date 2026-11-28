@@ -364,8 +364,59 @@ def benchmark_unit_explorer(
         page = context.new_page()
         errors: list[str] = []
         page.on("pageerror", lambda error: errors.append(str(error)))
+        if not pages:
+            cdp = context.new_cdp_session(page)
+            cdp.send("Performance.enable")
+            page.add_init_script("""(() => {
+                let current;
+                window.explorerTiming = null;
+                window.beginExplorerTiming = () => {
+                    current = {};
+                    window.explorerTiming = null;
+                };
+                // Capture the actual input/click, not Playwright's actionability wait.
+                for (const event of ['click', 'change', 'input']) {
+                    document.addEventListener(event, () => {
+                        if (current && current.event === undefined) {
+                            current.event = performance.now();
+                        }
+                    }, true);
+                }
+                const observer = new MutationObserver(records => {
+                    if (!current || current.event === undefined
+                            || current.ready !== undefined) return;
+                    const count = document.querySelector('#unit-count');
+                    if (!count || count.getAttribute('aria-busy') !== 'false'
+                            || !records.some(r => r.target === count)) return;
+                    current.ready = performance.now();
+                    const result = current;
+                    // Two frame callbacks bound a presentation opportunity, not actual paint.
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        result.frame = performance.now();
+                        const resource = performance.getEntriesByType('resource').filter(entry =>
+                            new URL(entry.name).pathname === '/api/units'
+                            && entry.startTime >= result.event).at(-1);
+                        if (resource) {
+                            result.requestStart = resource.startTime;
+                            result.responseEnd = resource.responseEnd;
+                            result.bytes = resource.decodedBodySize;
+                        }
+                        window.explorerTiming = result;
+                    }));
+                });
+                observer.observe(document, {subtree: true, attributes: true,
+                    attributeFilter: ['aria-busy']});
+            })()""")
+
+        def browser_metrics():
+            return {item["name"]: item["value"] for item in
+                    cdp.send("Performance.getMetrics")["metrics"]}
+
         try:
             def measure(name: str, action: Callable[[], object]) -> None:
+                if name != "initial":
+                    page.evaluate("window.beginExplorerTiming()")
+                    before = browser_metrics()
                 started = time.perf_counter()
                 with page.expect_response(
                     lambda response: "/api/units?" in response.url
@@ -387,6 +438,28 @@ def benchmark_unit_explorer(
                 if timing["responseEnd"] < 0:
                     raise ValueError("API resource timing unavailable")
                 samples.setdefault(name + " API", []).append(timing["responseEnd"] / 1000)
+                if name != "initial":
+                    page.wait_for_function("() => window.explorerTiming !== null")
+                    trace = page.evaluate("window.explorerTiming")
+                    if "responseEnd" not in trace:
+                        raise ValueError(f"Missing browser resource timing: {name}: {trace}")
+                    after = browser_metrics()
+                    phases = {
+                        "event to request": trace["requestStart"] - trace["event"],
+                        "API resource": trace["responseEnd"] - trace["requestStart"],
+                        "response to DOM": trace["ready"] - trace["responseEnd"],
+                        "DOM to frame": trace["frame"] - trace["ready"],
+                        "event to DOM": trace["ready"] - trace["event"],
+                        "script": (after["ScriptDuration"] - before["ScriptDuration"]) * 1000,
+                        "layout": (after["LayoutDuration"] - before["LayoutDuration"]) * 1000,
+                        "style": (after["RecalcStyleDuration"]
+                                  - before["RecalcStyleDuration"]) * 1000,
+                    }
+                    for phase, elapsed in phases.items():
+                        samples.setdefault(f"{name} {phase}", []).append(elapsed / 1000)
+                    print(f"{name}: {trace['bytes']} bytes; "
+                          + ", ".join(f"{key} {value:.1f} ms" for key, value in phases.items()),
+                          flush=True)
 
             origin = f"http://127.0.0.1:{server.server_port}"
             if pages:

@@ -33,6 +33,33 @@ For Explorer browser performance, with Chrome installed:
 .\.venv\Scripts\python.exe -m tools.performance.benchmark_runtime data/generated/army.db --browser --cold-iterations 3
 ```
 
+### Unit Explorer interaction phases
+
+The browser journey records capture-phase input events, Resource Timing,
+completion of the result count's busy state and two animation-frame callbacks.
+Chromium Performance metrics provide script, layout and style-recalculation
+deltas over the interaction window. These include unrelated browser work
+within that window; response-to-DOM also includes scheduling and parsing.
+The frame measure is a presentation opportunity, not a paint measurement.
+Neither the event-based intervals nor the browser counters should be added
+to the existing Playwright action-to-ready wall times.
+
+On Windows Chrome (2026-11-28, base `2c27cc2`, three fresh-app journeys):
+
+- Initial wall time 650 ms; Unit API 417 ms, with concurrent initialization.
+- Next page: event-to-DOM 75 ms, API resource 48 ms, response-to-DOM
+  24 ms; script/layout/style medians 3.7/10.2/6.6 ms.
+- Extended activation: event-to-DOM 140 ms, API resource 95 ms,
+  response-to-DOM 42 ms; script/layout/style 8.0/71.4/15.0 ms.
+- Extended next page: event-to-DOM 111 ms, API resource 76 ms,
+  response-to-DOM 35 ms; script/layout/style 3.1/20.7/13.3 ms.
+- Search (fusiliers): event-to-DOM 277 ms, event-to-request 254 ms
+  (including 250 ms debounce), API resource 16 ms, response-to-DOM 7 ms.
+
+Extended layout and the larger API response (277 KB versus 87 KB on
+the first page) merit investigation before micro-optimizing filter controls.
+Keep the deliberate search debounce. This is not a production capacity test.
+
 Use the current `tools/performance/benchmark_*.py` modules for a measured
 specific projection/build phase. Use fresh ignored paths for reports;
 the worker benchmark checks its selected output before starting expensive

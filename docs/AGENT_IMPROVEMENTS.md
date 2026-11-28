@@ -40,8 +40,11 @@ entries.
   toggle dispatch, excluding paint). No reliable end-to-end latency improvement
   established. The Dragoes comparison had no confirmed change rows.
 - **Remaining action:** Benchmark first-open season policy latency separately.
-  Profile Explorer interaction overhead separately from intentional debounce
-  and automation waits. The
+  The [Explorer interaction profile](testing-performance.md#unit-explorer-interaction-phases)
+  separates actual input, API resource, DOM and browser work. Search is
+  debounce-dominated; Extended activation has 71 ms median layout work
+  versus 8 ms script. Assess Extended layout before further control-loop
+  optimization. The
   [catalog visibility benchmark](testing-performance.md#catalog-detail-visibility-and-initial-rendering)
   rejected concurrent requests after unpreloaded cold regressions; sequential
   requests now render filtered content once rather than twice, with
