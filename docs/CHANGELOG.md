@@ -12,93 +12,79 @@ are not retroactively relabeled.
 
 ### Player summary
 
-- **Search and Glossary:**
-  - Added live search suggestions in the navigation, with direct links and access to all results.
-  - Added live filtering in the Glossary and full search results.
-  - Expanded searchable official, community and historical terminology, including Vanilla,
-    Linkable, Pure Fireteam and common army-building terms.
-  - Added MSV as a search alias for Multispectral Visor.
 - **Armies and Units:**
-  - Replaced Main Army with Generic Army and explained Vanilla as community shorthand.
-  - Distinguished Army overview card types through theme-aware shading.
-  - Corrected Equipment filter counts and restricted the Matching armies count to playable Armies.
-  - Improved the clarity of expandable matching configurations in Unit Explorer.
-  - Added N5 profile and Army history to Unit details, grouped by revision date
-    and change type. Historical coverage is incomplete.
-  - Corrected distances and MOV changes in Unit histories to follow the cm/in preference.
-  - Added direct links from Army profile cards to matching Units in official Infinity Army.
-  - Added side-by-side comparison of two current Army profiles and loadouts,
-    with live Unit selection, differences-only display and shareable selections.
-- **Rules reference:**
-  - Clarified distinctions between rules, explanations, source examples, reviewed
-    interpretations, FAQ clarifications and unresolved source issues.
-  - Linked reviewed Weapon and Equipment profile footnotes across the N5.3 chart
-    to the applicable rules; unresolved source markers remain visible.
-  - Corrected links for reference-only Equipment variants.
-  - Improved the spacing and backgrounds of FAQ cards.
-- **Scenarios:**
-  - Added a collapsible Season Rules section for ITS season-wide rules,
-    tournament formats and optional Extras.
-  - Expanded ITS 17 and 18 coverage of season rules, tournament procedures and Extras.
-  - Showed how many scenarios use a Scenario-specific Skill instead of counting Army Units.
-  - Improved placement ruler alignment and Tactical Support card spacing.
-- **Appearance:**
-  - Added eleven Army-inspired themes alongside InfinityDB, independently of Auto,
-    Light or Dark mode. Saved scenario maps retain the selected appearance.
-  - Corrected direct SVG viewing for scenario maps, symbols, Silhouettes and the logo.
-  - Darkened the Nomads sidebar to better reflect its faction colors.
-- Added the ability to report incorrect information or website problems from any page
-  without an account, when reporting is enabled.
+  - Added N5 Unit profile and Army availability history, organized by revision date
+    and type of change. Historical coverage is incomplete.
+  - Added side-by-side Unit comparison, with selectable profiles and loadouts,
+    a differences-only view and shareable comparisons.
+  - Added direct links from Unit profile cards to official Infinity Army.
+  - Improved Army overview cards, Unit Explorer filter counts and matching
+    configuration displays. Adopted Generic Army terminology throughout.
+- **Search and Glossary:**
+  - Added live search suggestions in the navigation and live results while typing
+    in Search, the Glossary and Unit comparison.
+  - Expanded the Glossary with official, community and historical game terms,
+    including Vanilla, Linkable and Pure Fireteam, and added common search aliases.
+- **Rules and scenarios:**
+  - Made rules, examples, explanations, FAQ clarifications, interpretations
+    and source disagreements easier to distinguish.
+  - Linked reviewed N5.3 Weapon and Equipment profile footnotes to the relevant rules.
+    Uncertain footnote references remain visible.
+  - Expanded ITS 17 and 18 coverage of season-wide rules, tournament formats
+    and Extras, accessible from a new collapsible Season Rules section.
+  - Corrected Equipment variant links and Scenario-specific Skill usage counts,
+    and improved FAQ cards and scenario maps.
+- Added eleven Army-inspired themes, independently selectable from Light, Dark
+  or Auto mode. Saved scenario maps retain the chosen appearance.
+- Added anonymous reporting of incorrect information or website problems from any
+  page, when reporting is enabled.
 - **Performance improvements:**
-  - Faster global search.
-  - Faster resolution of inline rules references and their previews.
-  - Faster loading of the Glossary and Orders/AROs reference.
-  - Faster Skills, Equipment and Weapons catalogs, including lists of Units using them.
-  - Faster Unit Explorer initialization and Specialist Troops filtering.
-  - Faster Extended Unit Explorer results, pagination and availability selections.
-  - Faster first access to Unit details and Explorer after application startup.
-  - Reduced unnecessary initial loading and rendering on detail pages and disclosures.
+  - Faster global search and inline rules reference previews.
+  - Faster loading of the Glossary, Orders/AROs and Skills, Equipment and Weapons
+    catalogs, including Unit usage lists.
+  - Faster Unit Explorer loading, Specialist Troops and other filtering,
+    Extended results, pagination and Army availability selections.
+  - Faster first access to Units after startup and quicker detail-page loading.
 
 ### Added
 
-- **Search and Glossary:**
-  - **Web frontend + Web backend:** Added debounced global search suggestions with
-    keyboard navigation and bounded API results, preserving full search and ranking.
-  - **Web frontend:** Added live filtering of Glossary matches and full search
-    results, preserving shareable state.
-  - **Data processing + Web backend:** Added eleven reviewed Game terms, projected existing
-    Fireteam terminology into the Glossary and search, and added F2F/FtF aliases.
-    Community usage evidence is secondary and does not create gameplay rules.
 - **Armies and Units:**
-  - **Web frontend:** Adopted Generic Army in Army overview labels and Unit Explorer summaries;
-    explained Vanilla without changing source role identifiers.
-  - **Web frontend + Web backend:** Added Unit comparison using current Army profile
-    and loadout source entries, with live search options, group-local selections and
-    URL-owned state without additional database or API contracts.
-  - **Data processing + Web backend + Web frontend:** Embedded the reviewed N5
-    Unit history projection in Army schema v35. Collapsed histories distinguish
-    shared General-profile changes, Army-specific changes and former Army
-    contexts without needing a runtime JSON sidecar.
-  - **Web backend + Web frontend:** Added source-native official Army destinations
-    to Unit detail cards, including multiple memberships and reinforcement parents.
-    Unsupported or ambiguous destinations are omitted.
+  - **Web frontend:** Adopted Generic Army terminology in Army overview and
+    Unit Explorer, and explained the community term Vanilla.
+  - **Web frontend + Web backend:** Added side-by-side comparison of current
+    Unit profiles and loadouts, with independent selections, live search,
+    a differences-only view and shareable links.
+  - **Data processing + Web backend + Web frontend:** Added collapsible N5
+    Unit histories, distinguishing shared General-profile changes, Army-specific
+    changes and former Army memberships. Available source history is incomplete.
+    History is included in the Army database rather than a separate JSON file.
+  - **Web backend + Web frontend:** Added direct links to matching Units in official
+    Infinity Army, including multiple Army memberships and Reinforcement parents
+    where the destination is known. Ambiguous or unsupported links are omitted.
+- **Search and Glossary:**
+  - **Web frontend + Web backend:** Added live search suggestions in navigation
+    with direct links and keyboard navigation. Full search and ranking remain available.
+  - **Web frontend:** Added live filtering in the Glossary and full search results,
+    preserving shareable search selections.
+  - **Data processing + Web backend:** Added eleven Game terms, made existing
+    Fireteam terminology searchable in the Glossary, and added F2F/FtF aliases.
+    Community usage does not establish gameplay rules.
 - **ITS Season Rules:**
-  - **Web backend + Web frontend:** Presented reviewed season-owned Rules, Skills,
-    States and event policies in a collapsed Season Rules section on ITS scenario
-    pages, with revision-specific citations and separately identified Extras.
-  - **Data processing:** Expanded ITS 17 and 18 Season Rules with bilingual
-    Civilian, Designated Target, Classified Objective, HVT and tournament Army
-    List references, plus Long Service for both seasons and Treasure Hunters for
-    ITS 17. Added tournament format, scoring, pairings and bye references,
-    season-specific Extras including ITS 18 Resilience Operations and Team-Ops
-    Tacball objectives, and visible structured Resilience Operations details.
-- **Web frontend + Web backend:** Added distinct faction-inspired palettes
-  using Army colors, emblems and miniature paint schemes, with compatible
-  first-paint preference resolution, shared standalone SVG colors and contrast
-  regression coverage in both modes.
-- **Web frontend + Web backend + Deployment:** Added a shared anonymous error
-  report form with inspectable optional page context, bounded submission
-  limits and configurable email delivery without an application report store.
+  - **Web backend + Web frontend:** Added a collapsible Season Rules section to ITS
+    scenario pages for season-wide Rules, Skills, States and tournament policies,
+    with citations and optional Extras identified separately.
+  - **Data processing:** Expanded ITS 17 and 18 coverage of Civilians, Designated
+    Targets, Classified Objectives, HVTs, tournament Army Lists, Long Service,
+    tournament formats, scoring, pairings and byes. Added Treasure Hunters for
+    ITS 17 and Resilience Operations and Team-Ops Tacball objectives for ITS 18,
+    including structured Resilience Operations details. Sources include English
+    and Spanish publications.
+- **Web frontend + Web backend:** Added eleven Army-inspired themes based on
+  faction colors, emblems and miniature paint schemes, available in Light and Dark
+  mode and reflected in saved scenario maps.
+- **Web frontend + Web backend + Deployment:** Added anonymous error reporting
+  from any page, with optional page context the player can inspect before sending.
+  Reports use configurable email delivery and are not stored by the application.
 - **Army snapshot maintenance:**
   - **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
     maintenance, separating source changes, effective reference changes and unresolved evidence.
@@ -111,13 +97,14 @@ are not retroactively relabeled.
 ### Changed
 
 - **Rules reference:**
-  - **Data processing + Web frontend:** Completed the N5.3 Weapon Chart
-    footnote review, including exact mode and Equipment identity scope,
-    without modifying source-native Traits or concealing unresolved notation.
-  - **Web frontend:** Unified source-evidence presentation across rules, reviewed
-    interactions, FAQ clarifications and scenario source notes without changing
-    gameplay content or assigning unverified update dates. Gameplay facts and
-    explanation/FAQ prose use the primary text role in every palette.
+  - **Data processing + Web frontend:** Linked reviewed N5.3 Weapon Chart
+    footnotes to the relevant rules for each Weapon mode and Equipment profile.
+    Original Traits and unresolved footnote markers remain visible.
+  - **Web frontend:** Improved the visual distinction between gameplay rules,
+    explanations, examples, reviewed interactions, FAQ clarifications and source
+    disagreements, including scenario rules. Rules and explanatory text remain
+    equally readable in every theme. Gameplay content is unchanged, and dates
+    are shown for official changes only when verified.
 - **Performance improvements:**
   - **Data processing + Web backend:** Materialized deduplicated General-profile
     selections during database generation; Extended Explorer and Unit details
@@ -149,29 +136,28 @@ are not retroactively relabeled.
 ### Fixed
 
 - **Armies and Units:**
-  - **Web frontend:** Distinguished Army overview card types through theme-aware shading
-    and clarified Matched configuration interaction.
+  - **Web frontend:** Distinguished Default, Reinforcements, Out of catalog and
+    Legacy Army cards through theme-aware shading, and made expandable matching
+    configurations easier to identify.
   - **Web backend + Web frontend:** Corrected Equipment filter counts and restricted
-    the Matching armies summary to playable Armies.
+    Matching armies to playable Armies.
   - **Data processing + Web frontend:** Corrected historical Skill distances and MOV
-    changes to follow the selected cm/in preference and preserve open History
-    disclosures when switching units of measurement.
+    changes to follow the cm/in preference without closing open History sections.
 - **Rules reference:**
-  - **Data processing + Web backend + Web frontend:** Resolved reference-only Equipment
-    variant links to their owning rule cards and supported MSV as a search alias for
-    Multispectral Visor.
-  - **Web frontend:** Unified FAQ card backgrounds and insets.
+  - **Data processing + Web backend + Web frontend:** Corrected links to rules for
+    reference-only Equipment variants and added MSV as an alias for Multispectral Visor.
+  - **Web frontend:** Improved FAQ card spacing and made backgrounds consistent,
+    preserving special styling for source discrepancies.
 - **Scenarios:**
-  - **Web backend + Web frontend:** Showed distinct scenario usage counts for Scenario-specific
-    Skills instead of Army Unit counts.
-  - **Web frontend:** Tightened Tactical Support spacing.
-  - **Web backend:** Aligned vertical placement-ruler captions near map edges
-    with their rulers, keeping the measured geometry unchanged.
+  - **Web backend + Web frontend:** Changed Scenario-specific Skill usage counts
+    to show scenarios rather than Units.
+  - **Web frontend:** Reduced excess space in Tactical Support cards.
+  - **Web backend:** Aligned vertical placement ruler labels near map edges,
+    without changing measured distances.
 - **Appearance:**
-  - **Web frontend:** Darkened Nomads sidebar chrome.
-  - **Web backend:** Corrected direct SVG navigation so scenario maps, Army and Unit
-    symbols, Silhouettes and the logo retain their embedded styling without weakening
-    the HTML security policy.
+  - **Web frontend:** Darkened the Nomads sidebar to better reflect its faction colors.
+  - **Web backend:** Corrected direct SVG viewing for scenario maps, Army and Unit
+    symbols, Silhouettes and the logo without weakening HTML security.
 - **Data processing:** Included Unit history in normal runtime builds and required
   an explicit opt-out for history-free development builds.
 - **Project infrastructure:** Corrected identical-tree CI reuse when GitHub's newer API omits PR merge identity.
