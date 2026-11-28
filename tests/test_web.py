@@ -1922,6 +1922,15 @@ def test_unit_history_is_optional_and_snapshot_bound(
         101: [], 201: [change],
     }
     assert unit["historical_contexts"] == document["units"]["1"]["unmatched"]
+    status, _, explicit = request(selected, "/api/units/1", query="history=1")
+    assert status == 200 and json.loads(explicit) == unit
+    status, headers, omitted = request(selected, "/api/units/1", query="history=0")
+    assert status == 200 and headers["cache-control"] == "no-store"
+    assert json.loads(omitted) == json.loads(request(ordinary, "/api/units/1")[2])
+    assert json.loads(request(selected, "/api/units/1")[2]) == unit
+    for query in ("history=", "history=true", "history=2", "history=0&history=1"):
+        assert request(selected, "/api/units/1", query=query)[0] == 400
+    assert request(selected, "/api/units/no-such-unit", query="history=0")[0] == 404
     document["armyDatabaseSha256"] = "wrong"
     projection.write_text(json.dumps(document), encoding="utf-8")
     with pytest.raises(ValueError, match="does not match"):

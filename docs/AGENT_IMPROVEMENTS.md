@@ -45,8 +45,12 @@ entries.
   catalog updates without changing availability semantics. The
   [live-search prefix benchmark](testing-performance.md#bounded-live-search-prefix-benchmark)
   found no material benefit from early limiting; retain the existing ranking.
-  Measure Unit comparison's full detail requests, including unused history,
-  before introducing new projections. Extend benchmark
+  The [Unit comparison benchmark](testing-performance.md#unit-comparison-detail-inputs)
+  confirms history omission reduces request work; comparison now requests
+  current-only details. History-rich Units still have 462–815 KB decoded
+  current-only responses. Assess the benefit of a narrow comparison response
+  shape against these larger payloads before adding another projection.
+  Extend benchmark
   coverage for these new journeys and repeat the pinned full-stack workload
   before interpreting capacity regressions.
 - **Disposition:** proposed.

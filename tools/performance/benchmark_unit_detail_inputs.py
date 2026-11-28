@@ -16,20 +16,74 @@ from infinity_db.catalog_slugs import enrich_nested_catalog_slugs
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.unit_slugs import attach_public_unit_slug
 from infinity_db.web.app import create_app_from_database_set
+from tools.browser_wsgi_transport import wsgi_response
+
+
+def benchmark_comparison(db_dir: Path, samples: int) -> None:
+    """Compare history-inclusive and current-only detail requests, not new projections."""
+    app = create_app_from_database_set(db_dir)
+    with closing(sqlite3.connect(db_dir / "army.db")) as db:
+        rows = db.execute(
+            "SELECT unit_id, length(body) FROM unit_history_payloads ORDER BY unit_id"
+        ).fetchall()
+    assert rows, "Published history is required for this benchmark"
+    ids = [row[0] for row in rows[::max(1, len(rows) // samples)][:samples]]
+    largest = [row[0] for row in sorted(rows, key=lambda row: (-row[1], row[0]))[:5]]
+    for name, cohort in (("systematic", ids), ("history-rich", largest)):
+        full_sizes, current_sizes, full_compressed, current_compressed = [], [], [], []
+        full_times, current_times = [], []
+        for unit_id in cohort:
+            url = f"http://localhost/api/units/{unit_id}"
+            status, _, body = wsgi_response(app, url)
+            assert status == 200, unit_id
+            expected = json.loads(body)
+            expected.pop("historical_contexts", None)
+            for section in ("general_profiles", "armies"):
+                for card in expected[section]:
+                    card.pop("history", None)
+            status, _, current = wsgi_response(app, url + "?history=0")
+            assert status == 200 and json.loads(current) == expected, unit_id
+            full_sizes.append(len(body))
+            current_sizes.append(len(current))
+            full_compressed.append(len(zlib.compress(body)))
+            current_compressed.append(len(zlib.compress(current)))
+            for iteration in range(10):
+                for omit in (False, True) if iteration % 2 == 0 else (True, False):
+                    start = perf_counter()
+                    status, _, actual = wsgi_response(app, url + ("?history=0" if omit else ""))
+                    (current_times if omit else full_times).append(perf_counter() - start)
+                    assert status == 200 and actual == (current if omit else body), unit_id
+            if name == "history-rich":
+                print(
+                    f"{unit_id}: {json.loads(body)['name']}; "
+                    f"{len(body):,} -> {len(current):,} bytes", flush=True,
+                )
+        print(
+            f"{name}: {len(cohort)} Units; total bytes "
+            f"{sum(full_sizes):,} -> {sum(current_sizes):,}; "
+            f"zlib bytes {sum(full_compressed):,} -> {sum(current_compressed):,}; "
+            f"warm WSGI median {median(full_times)*1000:.2f} -> "
+            f"{median(current_times)*1000:.2f} ms; exact response parity apart from history",
+            flush=True,
+        )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--db-dir", type=Path, default=Path("data/generated"))
     parser.add_argument("--samples", type=int, default=50)
+    parser.add_argument("--comparison", action="store_true", help="Compare Unit history omission.")
     args = parser.parse_args()
+    if args.samples < 1:
+        parser.error("--samples must be positive")
+    if args.comparison:
+        benchmark_comparison(args.db_dir, args.samples)
+        return
     app = create_app_from_database_set(args.db_dir)
     api = app.api
     database = app.database
     assert app.rules_database is not None
     ids = sorted(group["id"] for group in database._unit_graph()["groups"])
-    if args.samples < 1:
-        parser.error("--samples must be positive")
     ids = ids[::max(1, len(ids) // args.samples)][:args.samples]
     raw_sizes, enriched_sizes, compressed_sizes = [], [], []
     raw_times, enrichment_times, read_times, compressed_times = [], [], [], []

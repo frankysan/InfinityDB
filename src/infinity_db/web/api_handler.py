@@ -389,16 +389,18 @@ def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str
     return params
 
 
-def _unit_detail_presentation_query(query: str) -> tuple[dict[str, bool], str | None]:
+def _unit_detail_presentation_query(query: str) -> tuple[dict[str, bool], str | None, bool]:
     params = _validated_query_params(
-        query, {"army_id", "cache_bust", *OPTIONAL_AVAILABILITY_FLAGS}
+        query, {"army_id", "cache_bust", "history", *OPTIONAL_AVAILABILITY_FLAGS}
     )
     optional_filters = {
         flag: (_flag(params, flag) if flag in params else True)
         for flag in OPTIONAL_AVAILABILITY_FLAGS
     }
     requested_army = _domain_filter_identifier(params, "army_id")
-    return optional_filters, None if requested_army is None else str(requested_army)
+    include_history = _flag(params, "history") if "history" in params else True
+    army_id = None if requested_army is None else str(requested_army)
+    return optional_filters, army_id, include_history
 
 
 def _unit_query(query: str) -> dict:
@@ -1843,7 +1845,7 @@ class ApiHandler:
         elif match := UNIT_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL if self.unit_histories is None else "no-store"
             try:
-                optional_filters, requested_army = _unit_detail_presentation_query(
+                optional_filters, requested_army, include_history = _unit_detail_presentation_query(
                     query_string
                 )
             except ValueError as exc:
@@ -1866,7 +1868,7 @@ class ApiHandler:
                             profiles[payload["id"]] if profiles is not None else None
                         ),
                     )
-                if payload is not None:
+                if payload is not None and include_history:
                     if self.unit_histories is not None:
                         attach_unit_history(payload, self.unit_histories)
                     elif (history := self.database.unit_history(payload["id"])) is not None:

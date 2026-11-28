@@ -61,6 +61,26 @@ the existing ranked results. Retain the existing ranking and API slicing:
 the observed absolute savings do not justify another ranking path or a
 publication change. This sequential local benchmark is not a capacity test.
 
+## Unit comparison detail inputs
+
+```powershell
+.\.venv\Scripts\python.exe -m tools.performance.benchmark_unit_detail_inputs --comparison --samples 50
+```
+
+On Windows (2026-11-28, base `55245a97` with the history opt-out applied),
+50 systematically selected Units with published history and the five largest
+history records were measured with ten alternating warm WSGI request pairs
+per case. All current-only responses matched the full response with only
+history removed. The systematic cohort's aggregate decoded response size
+fell from 3,958,735 to 3,908,388 bytes (zlib: 174,049 to 168,023);
+median request time fell from 6.73 to 4.98 ms. The history-rich cohort
+fell from 3,233,141 to 3,024,118 bytes (zlib: 62,572 to 56,049),
+with a 58.73 to 54.98 ms median. Compression is an offline estimate, not
+measured HTTP transfer. This justifies the small history opt-out but
+does not measure browser or concurrent request latency. Large current-only
+responses remain (up to 814,771 bytes in the history-rich sample); measure
+a comparison-specific response shape separately before adopting one.
+
 ## Chromium concurrency under pytest-xdist
 
 Default Windows capacity remains two Chromium slots. On the dedicated

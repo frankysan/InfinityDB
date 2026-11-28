@@ -162,7 +162,7 @@ function slot(side, title) {
       return;
     }
     try {
-      const unit = await getUnit(id, { optionalFilters: allAvailability }, signal);
+      const unit = await getUnit(id, { optionalFilters: allAvailability, includeHistory: false }, signal);
       if (signal.aborted || request !== state.request) return;
       state.unit = unit;
       state.id = unitKey(unit);
