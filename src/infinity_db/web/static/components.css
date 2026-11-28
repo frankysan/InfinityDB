@@ -3572,18 +3572,23 @@ tbody tr:last-child>* {
   text-transform: uppercase;
 }
 
-.extended-results-control {
+.extended-results-control,
+.feedback-page-control {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   width: fit-content;
-  margin-top: 18px;
   color: var(--color-text-control);
   font-size: var(--font-size-sm);
   font-weight: 550;
 }
 
-.extended-results-control input {
+.extended-results-control {
+  margin-top: 18px;
+}
+
+.extended-results-control input,
+.feedback-page-control input {
   flex: 0 0 auto;
   width: 16px;
   height: 16px;

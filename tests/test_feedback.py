@@ -182,6 +182,14 @@ def test_feedback_browser(caplog: pytest.LogCaptureFixture) -> None:
                 page.locator(".page-footer-notice .feedback-open").click()
                 dialog = page.locator(".feedback-dialog")
                 assert dialog.is_visible()
+                checkbox = page.locator("#feedback-include-page")
+                box = checkbox.bounding_box()
+                assert box is not None
+                assert 14 <= box["width"] <= 20
+                assert 14 <= box["height"] <= 20
+                assert checkbox.evaluate(
+                    "(input) => getComputedStyle(input.parentElement).display"
+                ) in {"flex", "inline-flex"}
                 context = page.locator("#feedback-context")
                 assert "/units/401" in context.inner_text()
                 assert "private" not in context.inner_text()
