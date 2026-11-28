@@ -11,7 +11,10 @@ from typing import Any
 
 from .army_reference_storage import ARMY_SCHEMA_VERSION as PREVIOUS_SCHEMA_VERSION
 from .army_reference_storage import ARMY_V30_PUBLISHED_TABLES, read_army_reference_data
-from .database.normalized_source import verified_army_export_generation
+from .database.normalized_source import (
+    VerifiedNormalizedSource,
+    verified_army_export_generation,
+)
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -117,7 +120,7 @@ def read_symbol_publication(connection: sqlite3.Connection) -> dict[str, Any]:
 
 def publish_symbol_paths(
     army: Path, raw: Path | None, source: Path, assets: Path, *,
-    normalized: Path | None = None,
+    normalized: Path | VerifiedNormalizedSource | None = None,
 ) -> None:
     """Publish v31 from a verified Army source and actual SVG bytes."""
     source_bytes = source.read_bytes()

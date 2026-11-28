@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "infinity-db"
-version = "1.2.2"
+version = "1.3.0"
 description = "Infinity database, data ingestion tools, and extensible web unit browser"
 readme = "README.md"
 requires-python = ">=3.11"

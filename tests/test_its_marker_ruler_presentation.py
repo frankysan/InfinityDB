@@ -492,20 +492,80 @@ def test_double_bind_exclusion_label_stays_visible(
         assert caption is not None and caption.text is not None
         x = float(caption.get("x", "nan"))
         y = float(caption.get("y", "nan"))
-        # The longer '10 cm' label must not be clipped at the right table edge.
-        half_width = len(caption.text) * 0.6 * 1.1 * text_scale / 2
-        assert x - half_width > 0
-        assert x + half_width < width - 0.1
+        # The vertical caption occupies a separate lane to the right of
+        # the ruler, rather than straddling it or extending past the table.
+        line = guide.find(f"{SVG_NS}line")
+        assert line is not None
+        ruler_x = float(line.get("x1", "nan"))
+        assert caption.get("transform") == f"rotate(-90 {x:g} {y:g})"
+        assert x - 1.1 * text_scale > ruler_x
+        assert x + 0.2 * text_scale < width - 0.1
+        assert caption.text == ("10 cm" if distance_unit == "cm" else "4″")
 
         # Nor should the exclusion guide label return to an Antenna template.
-        bbox = (x - half_width, y - 1.1 * text_scale,
-                x + half_width, y + 0.2 * text_scale)
+        half_height = len(caption.text) * 0.6 * 1.1 * text_scale / 2
+        bbox = (x - 1.1 * text_scale, y - half_height,
+                x + 0.2 * text_scale, y + half_height)
         for circle in (e for e in geometry["elements"] if e["kind"] == "circle"):
             nearest_x = max(bbox[0], min(circle["x"], bbox[2]))
             nearest_y = max(bbox[1], min(circle["y"], bbox[3]))
             separation = ((nearest_x - circle["x"]) ** 2
                           + (nearest_y - circle["y"]) ** 2) ** 0.5
             assert separation > circle["radius"], (configuration["id"], circle["id"])
+
+
+@pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])
+@pytest.mark.parametrize("distance_unit", ["in", "cm"])
+def test_critical_intervention_edge_labels_follow_vertical_rulers(
+    source: Path, distance_unit: Literal["in", "cm"],
+) -> None:
+    document = json.loads(source.read_text(encoding="utf-8"))
+    records = (
+        document["records"] if source == ITS18
+        else [entry["record"] for entry in document["definitions"]]
+    )
+    record = next(r for r in records if r["id"] == "scenario:critical-intervention")
+    for configuration in record["facts"]["configurations"]:
+        geometry = configuration["geometry"]
+        svg = ElementTree.fromstring(render_scenario_map_svg(
+            parse_scenario_geometry(geometry), distance_unit=distance_unit,
+        ))
+        for annotation in geometry["annotations"]:
+            group = next(node for node in svg.iter() if node.get("id") == annotation["id"])
+            line = group.find(f"{SVG_NS}line")
+            caption = group.find(f"{SVG_NS}text")
+            assert line is not None and caption is not None
+            if annotation["x1"] != annotation["x2"]:
+                assert caption.get("transform") is None
+                continue
+            for key in ("x1", "x2", "y1", "y2"):
+                assert float(line.get(key, "nan")) == annotation[key]
+            x = float(caption.get("x", "nan"))
+            y = float(caption.get("y", "nan"))
+            assert caption.get("transform") is not None
+            assert caption.get("transform", "").startswith("rotate(-90 ")
+            assert y == (annotation["y1"] + annotation["y2"]) / 2
+            assert x > annotation["x1"]
+
+
+def test_edge_ruler_uses_inward_lane_when_preferred_side_is_too_narrow() -> None:
+    geometry = parse_scenario_geometry({
+        "format": "InfinityDB scenario geometry",
+        "formatVersion": 1,
+        "title": "Edge placement",
+        "table": {"width": 24, "height": 32, "unit": "in"},
+        "elements": [],
+        "annotations": [{
+            "id": "edge-ruler", "kind": "ruler",
+            "x1": 23.5, "y1": 10, "x2": 23.5, "y2": 18, "offset": 0,
+        }],
+    })
+    root = ElementTree.fromstring(render_scenario_map_svg(geometry, distance_unit="cm"))
+    caption = root.find(f".//{SVG_NS}g[@id='edge-ruler']/{SVG_NS}text")
+    assert caption is not None
+    assert caption.get("transform", "").startswith("rotate(-90 ")
+    assert float(caption.get("x", "nan")) < 23.5
+    assert caption.text == "20 cm"
 
 
 @pytest.mark.parametrize("source", [ITS18, ITS17_SHARED], ids=["its-18", "its-17"])

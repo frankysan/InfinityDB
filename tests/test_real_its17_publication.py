@@ -33,7 +33,7 @@ def get_json(app, url: str) -> dict:
 
 def test_both_seasons_are_required_and_registered(published_app) -> None:
     report = validate_database_set(GENERATED, require_complete=True)
-    assert report["layout"] == "v17-four-file"
+    assert report["layout"] == "v24-four-file"
     assert set(report["sha256"]) == COMPLETE_RUNTIME_FILES == {
         "army.db", "rules_n5.db", "its_17.db", "its_18.db",
     }
@@ -111,14 +111,22 @@ def test_real_scenario_skill_identities_cover_all_scoped_actions(published_app) 
     canonical = get_json(app, "/api/skills/scenario-activate-antenna")
     assert len(canonical["aliases"]) == 8
     assert len(canonical["scenarios"]) == 7
+    assert canonical["scenario_use_count"] == 7
+    assert canonical["use_count"] == 0
     assert all(
         "WIP-3" not in clause
         for clause in canonical["rules"][0]["facts"].get("effects", [])
     )
     for item in skills:
+        contexts = [item["scenario"]] if "scenario" in item else item["scenarios"]
+        assert item["scenario_use_count"] == len({
+            (context["collection"], context["id"]) for context in contexts
+        })
+        assert item["use_count"] == 0
         for slug in item.get("aliases", []):
             exact = get_json(app, f"/api/skills/{slug}")
             assert exact["canonical_slug"] == item["slug"]
+            assert exact["scenario_use_count"] == 1
             assert exact["scenario"]["collection"] in {
                 context["collection"] for context in item["scenarios"]
             }
@@ -141,6 +149,18 @@ def test_consolidated_scenario_skill_browser(published_app, width) -> None:
         errors: list[str] = []
         page.on("pageerror", lambda error: errors.append(str(error)))
         try:
+            page.goto(origin + "/skills", wait_until="domcontentloaded")
+            antenna = page.locator('a[href="/skills/scenario-activate-antenna"]')
+            antenna.wait_for(state="visible")
+            assert antenna.locator("xpath=../..").locator(".table-column--metric").inner_text() == (
+                "7 scenarios"
+            )
+            single = next(
+                item for item in get_json(published_app, "/api/skills")["items"]
+                if item.get("scenario_use_count") == 1
+            )
+            row = page.locator(f'a[href="/skills/{single["slug"]}"]').locator("xpath=../..")
+            assert row.locator(".table-column--metric").inner_text() == "1 scenario"
             page.goto(origin + "/skills/scenario-activate-console", wait_until="domcontentloaded")
             contexts = page.locator(".scenario-skill-contexts")
             contexts.wait_for(state="visible")

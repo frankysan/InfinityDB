@@ -1035,6 +1035,30 @@ def test_scenario_map_api_renders_every_supported_configuration(
         assert b'<svg xmlns="http://www.w3.org/2000/svg"' in svg
 
 
+def test_scenario_map_etag_tracks_rendered_bytes(
+    scenario_app: Application, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db.web import api_handler
+    from tools.browser_wsgi_transport import wsgi_response
+
+    url = "http://localhost/api/scenarios/domination/map.svg?army_points=300"
+    status, headers, body = wsgi_response(scenario_app, url)
+    assert status == 200
+    etag = dict(headers)["ETag"]
+    assert wsgi_response(scenario_app, url, headers={"If-None-Match": etag})[0] == 304
+    render = api_handler.render_scenario_map_svg
+    monkeypatch.setattr(
+        api_handler, "render_scenario_map_svg",
+        lambda *args, **kwargs: render(*args, **kwargs).replace("</svg>", "<!-- changed --></svg>"),
+    )
+    status, changed_headers, changed_body = wsgi_response(
+        scenario_app, url, headers={"If-None-Match": etag},
+    )
+    assert status == 200
+    assert changed_body != body
+    assert dict(changed_headers)["ETag"] != etag
+
+
 @pytest.mark.parametrize(
     ("slug", "diameter", "count"),
     [("domination", 40, 4), ("supplies", 25, 3)],
@@ -1090,15 +1114,39 @@ def test_scenario_map_api_returns_saveable_theme_complete_svg(
     )
     assert status == 200
     assert headers["content-type"].startswith("image/svg+xml")
+    assert headers["content-security-policy"] == (
+        "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; "
+        "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+    )
     assert f'data-theme="{theme}"'.encode() in svg
     assert b'data-distance-unit="cm"' in svg
     assert f"--color-scenario-map-table:{table_color}".encode() in svg
     assert b"<style>" in svg
 
-    for query in ("army_points=300&theme=system", "army_points=300&theme=light&theme=dark"):
-        status, _, body = request(scenario_app, endpoint, query=query)
+    status, _, themed_svg = request(
+        scenario_app, endpoint,
+        query=f"army_points=300&distance_unit=cm&theme={theme}&palette=nomads",
+    )
+    assert status == 200
+    assert themed_svg != svg
+    assert f'data-theme="{theme}"'.encode() in themed_svg
+    assert b'data-distance-unit="cm"' in themed_svg
+    assert f"--color-scenario-map-table:{table_color}".encode() not in themed_svg
+    assert b"var(" not in themed_svg
+
+    for query in (
+        "army_points=300&theme=system",
+        "army_points=300&theme=light&theme=dark",
+        "army_points=300&palette=unknown",
+        "army_points=300&palette=nomads&palette=aleph",
+    ):
+        status, headers, body = request(scenario_app, endpoint, query=query)
         assert status == 400
-        assert b"theme" in body or b"duplicate" in body.lower()
+        assert headers["content-security-policy"] == (
+            "default-src 'self'; script-src 'self'; object-src 'none'; "
+            "base-uri 'none'; frame-ancestors 'none'"
+        )
+        assert b"theme" in body or b"palette" in body or b"duplicate" in body.lower()
 
 
 def test_scenario_map_api_renders_selected_maintained_geometry(

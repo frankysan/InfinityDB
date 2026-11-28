@@ -110,8 +110,20 @@ def test_release_preflight_rejects_changed_database_bytes(
     previous_app = create_app_from_database_set(directory)
     changed = directory / changed_file
     content = bytearray(changed.read_bytes())
-    content[96:100] = (3040000).to_bytes(4, "big")
+    content[99] ^= 1
     changed.write_bytes(content)
+    if changed_file == "its_18.db":
+        # ITS bytes are now bound to the published cross-domain search projection.
+        with pytest.raises(ValueError, match="Global search publication"):
+            create_app_from_database_set(directory)
+        browser = Mock()
+        with pytest.raises(ReleaseCandidateError, match="Global search publication"):
+            verify_release_candidate(
+                "http://127.0.0.1:8000", expected_version=__version__,
+                db_dir=directory, browser_check=browser,
+            )
+        browser.assert_not_called()
+        return
     changed_app = create_app_from_database_set(directory)
     assert changed_app.snapshot_revision == local_revision(directory)
     assert previous_app.snapshot_revision != changed_app.snapshot_revision
@@ -211,14 +223,14 @@ def test_release_gate_rejects_local_its_drift_during_browser(tmp_path: Path) -> 
     def change_its(origin: str, **kwargs: object) -> dict:
         path = directory / "its_18.db"
         content = bytearray(path.read_bytes())
-        content[96:100] = (3040000).to_bytes(4, "big")
+        content[99] ^= 1
         path.write_bytes(content)
         return _browser_ok(origin, slugs=("dragoes",), widths=(390,), channel=None)
 
     with patch(
         "tools.verify_release_candidate_browser.verify_served_runtime", return_value=observed,
     ) as served:
-        with pytest.raises(ReleaseCandidateError, match="Local candidate changed"):
+        with pytest.raises(ReleaseCandidateError, match="Global search publication"):
             verify_release_candidate(
                 "https://example.org", expected_version=__version__, db_dir=directory,
                 slugs=("dragoes",), widths=(390,), browser_check=change_its,

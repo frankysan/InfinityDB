@@ -167,6 +167,89 @@ def chrome() -> Iterator[Any]:
             browser.close()
 
 
+@pytest.mark.parametrize("width", [1440, 390])
+def test_rules_content_hierarchy_across_palettes(
+    scenario_app: Callable[..., Any], chrome: Any, width: int,
+) -> None:
+    """Audit real cards across every palette without reclassifying source text."""
+    from infinity_db.theme_palette import palette_options
+
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        for path, expected_roles in (
+            ("/skills/immunity", {
+                "reviewed-explanation": "solid", "source-example": "dashed",
+                "reviewed-interpretation": "double",
+            }),
+            ("/fireteams", {"source-faq": "solid", "source-discrepancy": "solid"}),
+            ("/scenarios/domination?army_points=350", {"source-uncertainty": "solid"}),
+        ):
+            page.goto(f"{ORIGIN}{path}", wait_until="domcontentloaded")
+            for role in expected_roles:
+                page.locator(f'[data-provenance="{role}"]').first.wait_for(
+                    state="visible", timeout=30000,
+                )
+            failures = page.evaluate(
+                """({palettes, roles}) => {
+                  const root = document.documentElement;
+                  const failures = [];
+                  for (const palette of palettes) {
+                    for (const mode of ["light", "dark"]) {
+                      root.dataset.themePalette = palette;
+                      root.dataset.theme = mode;
+                      for (const [role, border] of Object.entries(roles)) {
+                        const node = document.querySelector('[data-provenance="' + role + '"]');
+                        const style = getComputedStyle(node);
+                        const expectedSurface = role.startsWith("source-discrepancy")
+                          || role === "source-uncertainty"
+                          ? "--color-status-warning-surface" : "--color-surface-default";
+                        const probe = document.createElement("span");
+                        probe.style.color = "var(" + expectedSurface + ")";
+                        root.append(probe);
+                        const expected = getComputedStyle(probe).color;
+                        probe.remove();
+                        if (style.borderInlineStartStyle !== border
+                            || style.backgroundColor !== expected) {
+                          failures.push([palette, mode, role, style.borderInlineStartStyle,
+                            style.backgroundColor, expected]);
+                        }
+                      }
+                      const primary = getComputedStyle(root)
+                        .getPropertyValue("--color-text-primary");
+                      const probe = document.createElement("span");
+                      probe.style.color = primary;
+                      root.append(probe);
+                      const expectedPrimary = getComputedStyle(probe).color;
+                      probe.remove();
+                      for (const node of document.querySelectorAll(
+                        '.detail-fact-group:is([data-provenance="maintained-rule"],'
+                        + ' [data-provenance="reviewed-explanation"]) > .detail-list,'
+                        + ' :is([data-provenance="source-faq"], [data-provenance="source-example"],'
+                        + ' [data-provenance="reviewed-interpretation"]) > .detail-copy'
+                      )) {
+                        if (getComputedStyle(node).color !== expectedPrimary) {
+                          failures.push([palette, mode, "prose color", node.className]);
+                        }
+                      }
+                      if (root.scrollWidth > innerWidth + 1) {
+                        failures.push([palette, mode, "overflow", root.scrollWidth]);
+                      }
+                    }
+                  }
+                  return failures;
+                }""",
+                {"palettes": [option["value"] for option in palette_options()],
+                 "roles": expected_roles},
+            )
+            assert not failures, (path, failures)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", (1440, 390, 320))
 @pytest.mark.parametrize(
     ("slug", "page_number", "required", "excluded", "inbound_path"),
@@ -658,6 +741,9 @@ def test_skill_faq_card_padding_and_developer_occurrence_geometry(
         )
         card = group.locator(".faq-dated-clarification").first
         card.wait_for(state="visible", timeout=30000)
+        assert card.locator("h3").evaluate(
+            "node => getComputedStyle(node).backgroundColor === 'rgba(0, 0, 0, 0)'"
+        )
         card_box = card.bounding_box()
         assert card_box
         for selector in ("h3", ".detail-copy", ".faq-publication-source"):
@@ -848,6 +934,13 @@ def test_unpublished_tinbot_source_variant_is_not_a_fake_public_route(
         page.locator("#rule-skill-neurocinetics").wait_for(
             state="visible", timeout=30000,
         )
+        target = page.locator(
+            '.rules-relations a[href="/equipment/tinbot#rule-equipment-tinbot-neurocinetics"]'
+        )
+        target.wait_for(state="visible")
+        target.click()
+        page.wait_for_url(f"{ORIGIN}/equipment/tinbot#rule-equipment-tinbot-neurocinetics")
+        page.locator("#rule-equipment-tinbot-neurocinetics").wait_for(state="visible")
         assert not errors, (width, errors)
     finally:
         page.close()
@@ -2958,10 +3051,10 @@ def test_sacha_numeric_ava_is_visible_in_its_army_context(
             if army_slug and slug != army_slug:
                 continue
             army = page.locator(".army-profile").filter(
-                has=page.locator("summary").filter(has_text=label),
+                has=page.locator("summary.army-profile-title").filter(has_text=label),
             )
             assert army.count() == 1, (slug, width)
-            summary = army.locator("summary")
+            summary = army.locator(":scope > summary")
             if army_slug:
                 assert army.get_attribute("open") is not None, (slug, width)
             elif army.get_attribute("open") is None:
@@ -3044,14 +3137,14 @@ def test_army_update_native_profiles_costs_and_ava_in_browser(
                     badge["label"] for badge in army.get("availability_badges") or []
                 )
                 section = page.locator(".army-profile").filter(
-                    has=page.locator("summary").filter(
+                    has=page.locator("summary.army-profile-title").filter(
                         has_text=re.compile(f"^{re.escape(expected_heading)}$"),
                     ),
                 )
                 assert section.count() == 1, (slug, army["name"])
                 if section.get_attribute("open") is None:
-                    section.locator("summary").focus()
-                    section.locator("summary").press("Enter")
+                    section.locator(":scope > summary").focus()
+                    section.locator(":scope > summary").press("Enter")
                 assert section.locator(
                     ".profile-details-table tr.profile-summary th",
                 ).all_text_contents() == [profile["name"] for profile in army["profiles"]]
@@ -3555,6 +3648,27 @@ def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
         )
         svg = _rendered_scenario_image(page)
         assert svg.attrib["data-theme"] == next_theme
+        default_style = svg.attrib["style"]
+        default_accent = page.evaluate(
+            "() => getComputedStyle(document.documentElement).getPropertyValue('--color-accent')"
+        )
+        page.evaluate(
+            """() => {
+              const select = document.querySelector("#theme-palette-selector");
+              select.value = "nomads";
+              select.dispatchEvent(new Event("change", { bubbles: true }));
+            }"""
+        )
+        page.wait_for_function(
+            "() => document.querySelector('img.scenario-map')?.src.includes('palette=nomads')",
+            timeout=30000,
+        )
+        svg = _rendered_scenario_image(page)
+        assert svg.attrib["data-theme"] == next_theme
+        assert svg.attrib["style"] != default_style
+        assert page.evaluate(
+            "() => getComputedStyle(document.documentElement).getPropertyValue('--color-accent')"
+        ) != default_accent
 
         page.evaluate(
             """() => {
@@ -3570,6 +3684,11 @@ def test_scenario_map_is_saveable_image_and_tracks_theme_and_units(
         svg = _rendered_scenario_image(page)
         assert svg.attrib["data-distance-unit"] == "cm"
         assert svg.attrib["data-theme"] == next_theme
+        assert "palette=nomads" in image.get_attribute("src")
+        assert page.locator("html").get_attribute("data-theme-palette") == "nomads"
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth + 1"
+        )
     finally:
         page.close()
 
@@ -3685,6 +3804,100 @@ def test_domination_350_swc_conflict_is_visible_at_its_value_and_scoped(
             assert page.evaluate(
                 "() => document.documentElement.scrollWidth <= innerWidth + 1"
             ), (width, slug, points)
+        assert not errors, errors
+    finally:
+        page.close()
+
+
+@pytest.mark.parametrize(("width", "theme"), [(1440, "light"), (390, "dark")])
+def test_scenario_season_rules_disclosure(
+    scenario_app: Callable[..., Any], chrome: Any, width: int, theme: str,
+) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, scenario_app, ORIGIN)
+    page.add_init_script(f"sessionStorage.setItem('infinity-db-theme', '{theme}');")
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    policy_requests: list[str] = []
+    page.on("request", lambda request: policy_requests.append(request.url)
+            if "/api/season-policies?" in request.url else None)
+    try:
+        for season, revision, skill_type, extra in (
+            ("its-18", "2026.09.11", "Basic Short Skill", "#rule-skill-team-ops"),
+            ("its-17", "0.2", "Short Movement Skill", "#rule-rule-resilience-operations"),
+        ):
+            policy_requests.clear()
+            page.goto(
+                f"{ORIGIN}/scenarios/evacuation?army_points=300"
+                f"&collection={season}&revision={revision}",
+                wait_until="domcontentloaded",
+            )
+            disclosure = page.locator("#scenario-season-rules")
+            disclosure.wait_for(state="visible", timeout=30000)
+            assert not disclosure.evaluate("node => node.open")
+            skill = disclosure.locator("#rule-skill-civevac")
+            assert not skill.is_visible()
+            assert not policy_requests
+            with page.expect_request("**/api/season-policies?*", timeout=30000):
+                disclosure.locator("summary").press("Enter")
+            skill.wait_for(state="visible", timeout=30000)
+            assert skill_type in skill.inner_text()
+            assert skill.locator(".rules-source-citations").is_visible()
+            assert disclosure.locator(extra).is_visible()
+            civilian = disclosure.locator("#rule-rule-civilians")
+            assert civilian.is_visible()
+            assert civilian.locator("a[href='#rule-skill-civevac']").count()
+            assert civilian.locator(".rules-source-citations").is_visible()
+            assert disclosure.locator("#rule-rule-classified-objectives").is_visible()
+            assert disclosure.locator("#rule-rule-high-value-target").is_visible()
+            assert disclosure.locator("#rule-rule-tournament-army-lists").is_visible()
+            assert disclosure.locator("#rule-rule-treasure-hunters").count() == (
+                1 if season == "its-17" else 0
+            )
+            assert disclosure.locator("#rule-state-casevac a[href='#rule-skill-casevac']").count()
+            assert disclosure.locator("#rule-rule-tactical-support").count() == 0
+            resilience = disclosure.locator("#rule-rule-resilience-operations")
+            assert resilience.is_visible()
+            assert "Tactical Objective scoring" in resilience.inner_text()
+            assert "F-13 Defensive Turrets" in resilience.inner_text()
+            assert resilience.locator("[data-resilience-size]").count() == 6
+            assert disclosure.locator("#rule-rule-tournament-scoring").is_visible()
+            assert disclosure.locator("#rule-rule-free-game").is_visible()
+            assert disclosure.locator("#rule-rule-long-service").is_visible()
+            if season == "its-18":
+                assert "Placement is unresolved" in resilience.inner_text()
+                assert disclosure.locator("#rule-rule-team-ops-extra").is_visible()
+                assert disclosure.locator("#rule-rule-spec-ops-extra").count() == 0
+            else:
+                assert disclosure.locator("#rule-rule-spec-ops-extra").is_visible()
+                assert disclosure.locator("#rule-rule-team-ops-extra").count() == 0
+                support = page.locator("#scenario-tactical-support")
+                assert support.is_visible()
+                assert support.locator(".surface-body > p").first.evaluate(
+                    "node => getComputedStyle(node).marginBlockEnd === '0px'"
+                )
+                assert support.locator(".surface-body > ul").evaluate(
+                    "node => getComputedStyle(node).marginBlockStart === '0px'"
+                )
+                assert disclosure.locator("#rule-skill-team-ops").count() == 0
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.goto(
+            f"{ORIGIN}/scenarios/b-pong?army_points=300&collection=its-17&revision=0.2",
+            wait_until="domcontentloaded",
+        )
+        support = page.locator("#scenario-tactical-support")
+        support.wait_for(state="visible", timeout=30000)
+        assert support.locator(".surface-body > p").first.evaluate(
+            "node => getComputedStyle(node).marginBlockEnd === '0px'"
+        )
+        assert support.locator(".surface-body > ul").evaluate(
+            "node => getComputedStyle(node).marginBlockStart === '0px'"
+        )
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.goto(f"{ORIGIN}/scenarios/annihilation?army_points=300",
+                  wait_until="domcontentloaded")
+        page.locator("#scenario-content").wait_for(state="visible", timeout=30000)
+        assert page.locator("#scenario-season-rules").count() == 0
         assert not errors, errors
     finally:
         page.close()
@@ -3812,6 +4025,33 @@ def test_fireteam_faq_discloses_real_source_conflict_not_language_omission(
         root.wait_for(state="visible", timeout=30000)
         cards = root.locator(".faq-ruling")
         assert cards.count() == 3  # two general Fireteam and one bonus ruling
+
+        # Verify the FAQ surface against its containing card in both modes.
+        assert root.evaluate("""node => {
+            const html = document.documentElement;
+            const original = html.dataset.theme;
+            const outer = node.closest('.fireteam-explorer');
+            try {
+                for (const mode of ['light', 'dark']) {
+                    html.dataset.theme = mode;
+                    const bounds = node.getBoundingClientRect();
+                    const container = outer.getBoundingClientRect();
+                    if (bounds.left - container.left < 8
+                        || container.right - bounds.right < 8) return false;
+                    for (const card of node.querySelectorAll('.faq-ruling')) {
+                        const heading = card.querySelector('h3');
+                        if (getComputedStyle(heading).backgroundColor !== 'rgba(0, 0, 0, 0)')
+                            return false;
+                        const warning = card.querySelector('.faq-source-discrepancy');
+                        if (warning && getComputedStyle(warning).backgroundColor
+                            === getComputedStyle(card).backgroundColor) return false;
+                    }
+                }
+                return true;
+            } finally {
+                html.dataset.theme = original;
+            }
+        }""")
 
         def ruling_card(identifier: str) -> Any:
             question = records[identifier]["facts"]["question"]

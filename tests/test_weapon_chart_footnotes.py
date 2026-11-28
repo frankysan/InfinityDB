@@ -359,7 +359,11 @@ for (const [slug, item] of Object.entries(payloads)) {
     const rows = weaponFootnotesForProfile(profile, item.rules, slug);
     matched.push(...rows.filter(row => row.source.includes('N5.3 chart')));
     if (slug === 'chest-mine' && profile.mode === 'BS Mode') {
-      assert.equal(matched.length, 0);
+      assert.equal(rows.length, 1);
+      assert.equal(rows[0].source, 'Army and N5.3 chart p. 181');
+      assert.equal(rows[0].target, null);
+      assert.equal(rows[0].unresolved, true);
+      matched.pop();
     }
   }
   assert.equal(matched.length, 1, slug);
@@ -473,3 +477,95 @@ assert.equal(weaponFootnotesForProfile(profile, [], item.slug, 'equipment')[0].t
         check=False, timeout=25,
     )
     assert result.returncode == 0, result.stderr
+
+@pytest.mark.parametrize(("catalog", "slug", "modes", "page", "marker", "href"), [
+    ("weapons", "trench-hammer", ("BS Mode", "CC Mode"), 177, "[*]",
+     "#rule-weapon-mixed-weapons"),
+    ("weapons", "vorpal-cc-weapon", ("BS Mode", "CC Mode"), 177, "[*]",
+     "#rule-weapon-mixed-weapons"),
+    ("weapons", "eclipse-grenade-launcher", ("",), 179, "[**]", "/ammunition/eclipse"),
+    ("weapons", "drop-bears", ("BS Mode", "Deployable Mode"), 181, "[*]",
+     "#rule-weapon-drop-bears"),
+    ("weapons", "mine-dispenser", ("",), 181, "[*]", "#rule-weapon-mine-dispenser"),
+    ("weapons", "wildparrot", ("",), 181, "[*]", "#rule-weapon-wildparrot"),
+    ("weapons", "kobra-pistol", ("BS Mode", "CC Mode"), 182, "[*]",
+     "#rule-weapon-mixed-weapons"),
+    ("weapons", "crazykoala", ("",), 186, "[*]", "#rule-weapon-crazykoala"),
+    ("weapons", "d-charges", ("Demolition Mode", "CC Mode"), 186, "[*]",
+     "#rule-weapon-d-charges"),
+    ("weapons", "disco-baller", ("",), 186, "[*]", "#rule-weapon-disco-baller"),
+    ("weapons", "e-marat", ("",), 186, "[**]", "/ammunition/em"),
+    ("weapons", "e-mitter", ("",), 186, "[**]", "/ammunition/em"),
+    ("weapons", "madtraps", ("",), 187, "[*]", "#rule-weapon-madtraps"),
+    ("weapons", "pitcher", ("",), 187, "[*]", "#rule-weapon-pitcher"),
+    ("weapons", "sepsitor", ("",), 187, "[*]", "#rule-weapon-sepsitor"),
+    ("weapons", "zapper", ("",), 188, "[**]", "/ammunition/em"),
+    ("equipment", "fastpanda", ("",), 186, "[***]", "#rule-equipment-fastpanda"),
+    ("equipment", "gizmokit", ("",), 187, "[***]", "#rule-equipment-gizmokit"),
+    ("equipment", "medikit", ("",), 187, "[***]", "#rule-equipment-medikit"),
+])
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js not installed")
+def test_remaining_reviewed_chart_profile_links(
+    app: Callable, catalog: str, slug: str, modes: tuple[str, ...],
+    page: int, marker: str, href: str,
+) -> None:
+    status, _headers, body = _request(app, f"/api/{catalog}/{slug}")
+    assert status == "200 OK", slug
+    item = json.loads(body)
+    assert item["slug"] == slug
+    script = """
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const source = readFileSync('./src/infinity_db/web/static/weapon-footnotes.js');
+const {weaponFootnotesForProfile} = await import(
+  'data:text/javascript;base64,' + source.toString('base64')
+);
+const {item, catalog, modes, page, marker, href} = JSON.parse(readFileSync(0, 'utf8'));
+const profiles = item.profiles;
+assert(profiles?.length, item.slug);
+for (const mode of modes) {
+  const matches = profiles.filter(profile => (profile.mode || '') === mode);
+  assert.equal(matches.length, 1, mode);
+  const profile = matches[0];
+  assert(profile.traits.some(trait => trait.includes(marker)), mode);
+  const rows = weaponFootnotesForProfile(profile, item.rules || [], item.slug, catalog);
+  assert.equal(rows.length, 1, mode);
+  assert.equal(rows[0].source, 'Army and N5.3 chart p. ' + page);
+  assert.equal(rows[0].marker, marker);
+  assert.equal(rows[0].target?.href, href);
+  assert.equal(rows[0].unresolved, false);
+  if (href.startsWith('#rule-')) {
+    assert([...(item.rules || []), ...(profile.rules || [])].some(rule =>
+      href === '#rule-' + rule.id.replaceAll(':', '-')));
+  }
+  const unreviewed = weaponFootnotesForProfile(
+    {...profile, mode: 'unreviewed'}, item.rules || [], item.slug, catalog,
+  );
+  assert.equal(unreviewed[0].target, null);
+}
+"""
+    result = subprocess.run(
+        ["node", "--input-type=module", "--eval", script],
+        input=json.dumps({
+            "item": item, "catalog": catalog, "modes": modes,
+            "page": page, "marker": marker, "href": href,
+        }),
+        cwd=ROOT, capture_output=True, text=True, check=False, timeout=25,
+    )
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize(("chart_slug", "skill_slug"), [
+    ("discover", "discover"),
+    ("forward-observer", "forward-observer"),
+    ("suppressive-fire-mode-weapon", "suppressive-fire"),
+])
+def test_skill_chart_entries_are_published_as_rules_not_weapons(
+    app: Callable, chart_slug: str, skill_slug: str,
+) -> None:
+    status, _headers, _body = _request(app, f"/api/weapons/{chart_slug}")
+    assert status.startswith("404"), chart_slug
+    status, _headers, body = _request(app, f"/api/skills/{skill_slug}")
+    assert status == "200 OK", skill_slug
+    item = json.loads(body)
+    assert any(rule["id"] == f"skill:{skill_slug}" for rule in item["rules"])

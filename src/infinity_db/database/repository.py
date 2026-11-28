@@ -15,7 +15,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from functools import wraps
 from pathlib import Path
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from infinity_army_data.availability import (
     MERCENARY_AVAILABILITY,
@@ -58,6 +58,7 @@ from .fireteam_relationships import (
 )
 from .include_relationships import validate_include_relationships
 from .logical_unit_payloads import ALIAS_FIELDS, MATERIALIZED_LOGICAL_UNIT_FIELDS
+from .official_army_links import official_army_links
 from .peripheral_relationships import validate_peripheral_relationships
 from .publication import PUBLISHED_CONTENT_SHA256_KEY, published_content_sha256
 from .relation_constraints import validate_relation_constraints
@@ -75,6 +76,9 @@ from .schema import (
 )
 from .unit_filter_matching import MatchContext, matches_selected
 from .unit_filter_matching import evaluate as evaluate_unit_filter_contexts
+
+if TYPE_CHECKING:
+    from infinity_db.catalog_projection import CatalogProjection
 
 SQLITE_INTEGER_MIN = -(2**63)
 SQLITE_INTEGER_MAX = 2**63 - 1
@@ -677,6 +681,7 @@ def visible_armies_for_group(
 class Database:
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
+        self.catalog_projection: CatalogProjection | None = None
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
@@ -723,6 +728,11 @@ class Database:
                 continue
             result[source["id"]] = dict(source)
         return result
+
+    @instance_lru_cache(maxsize=1)
+    def _official_army_unit_links(self) -> dict[tuple[int, int], list[dict[str, str]]]:
+        with self._connect() as connection:
+            return official_army_links(connection, self._army_metadata_factions())
 
     @instance_lru_cache(maxsize=1)
     def _application_army_graph(self) -> dict[str, Any]:
@@ -942,6 +952,18 @@ class Database:
                 ARMY_V27_PUBLISHED_TABLES,
                 read_equipment_encodings,
             )
+            from infinity_db.general_profile_storage import (
+                ARMY_COMPATIBILITY_VERSION as GENERAL_PROFILE_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.general_profile_storage import (
+                ARMY_SCHEMA_VERSION as GENERAL_PROFILE_SCHEMA_VERSION,
+            )
+            from infinity_db.general_profile_storage import (
+                ARMY_V33_PUBLISHED_TABLES,
+                EXPLORER_COMPATIBILITY_VERSION,
+                EXPLORER_SCHEMA_VERSION,
+                validate_general_profiles,
+            )
             from infinity_db.skill_classification_storage import (
                 ARMY_COMPATIBILITY_VERSION as SKILL_COMPATIBILITY_VERSION,
             )
@@ -972,17 +994,41 @@ class Database:
                 ARMY_V29_PUBLISHED_TABLES,
                 read_unit_filter_semantics,
             )
+            from infinity_db.unit_history_storage import (
+                ARMY_COMPATIBILITY_VERSION as HISTORY_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.unit_history_storage import (
+                ARMY_SCHEMA_VERSION as HISTORY_SCHEMA_VERSION,
+            )
+            from infinity_db.unit_history_storage import (
+                ARMY_V35_PUBLISHED_TABLES,
+                validate_unit_history,
+            )
+            from infinity_db.unit_input_storage import (
+                ARMY_COMPATIBILITY_VERSION as CONTEXT_COMPATIBILITY_VERSION,
+            )
+            from infinity_db.unit_input_storage import (
+                ARMY_SCHEMA_VERSION as CONTEXT_SCHEMA_VERSION,
+            )
+            from infinity_db.unit_input_storage import (
+                ARMY_V34_PUBLISHED_TABLES,
+                validate_filter_contexts,
+            )
 
             if application_id != APPLICATION_ID or version not in {
                 SCHEMA_VERSION, ARMY_SCHEMA_VERSION, SKILL_SCHEMA_VERSION, FILTER_SCHEMA_VERSION,
                 REFERENCE_SCHEMA_VERSION,
-                SYMBOL_SCHEMA_VERSION,
+                SYMBOL_SCHEMA_VERSION, EXPLORER_SCHEMA_VERSION, GENERAL_PROFILE_SCHEMA_VERSION,
+                CONTEXT_SCHEMA_VERSION, HISTORY_SCHEMA_VERSION,
             }:
                 raise ValueError("Unsupported InfinityDB database; rebuild it from normalized JSON")
             if source_consistency and version != SCHEMA_VERSION:
                 raise ValueError("Source consistency requires the base Army export schema")
             required_tables = (
                 DATABASE_TABLES if source_consistency else
+                ARMY_V35_PUBLISHED_TABLES if version >= HISTORY_SCHEMA_VERSION else
+                ARMY_V34_PUBLISHED_TABLES if version >= CONTEXT_SCHEMA_VERSION else
+                ARMY_V33_PUBLISHED_TABLES if version >= EXPLORER_SCHEMA_VERSION else
                 ARMY_V31_PUBLISHED_TABLES if version == SYMBOL_SCHEMA_VERSION else
                 ARMY_V30_PUBLISHED_TABLES if version == REFERENCE_SCHEMA_VERSION else
                 ARMY_V29_PUBLISHED_TABLES if version == FILTER_SCHEMA_VERSION else
@@ -1020,7 +1066,11 @@ class Database:
             except (json.JSONDecodeError, TypeError) as exc:
                 raise ValueError("Database has invalid compatibility metadata") from exc
             expected_compatibility = (
-                SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
+                HISTORY_COMPATIBILITY_VERSION if version == HISTORY_SCHEMA_VERSION
+                else CONTEXT_COMPATIBILITY_VERSION if version == CONTEXT_SCHEMA_VERSION
+                else GENERAL_PROFILE_COMPATIBILITY_VERSION if version == GENERAL_PROFILE_SCHEMA_VERSION
+                else EXPLORER_COMPATIBILITY_VERSION if version == EXPLORER_SCHEMA_VERSION
+                else SYMBOL_COMPATIBILITY_VERSION if version == SYMBOL_SCHEMA_VERSION
                 else REFERENCE_COMPATIBILITY_VERSION if version == REFERENCE_SCHEMA_VERSION
                 else FILTER_COMPATIBILITY_VERSION if version == FILTER_SCHEMA_VERSION
                 else SKILL_COMPATIBILITY_VERSION if version == SKILL_SCHEMA_VERSION
@@ -1042,6 +1092,12 @@ class Database:
                 read_army_reference_data(connection)
             if version >= SYMBOL_SCHEMA_VERSION:
                 read_symbol_publication(connection)
+            if version >= EXPLORER_SCHEMA_VERSION:
+                validate_general_profiles(connection)
+            if version >= CONTEXT_SCHEMA_VERSION:
+                validate_filter_contexts(connection)
+            if version >= HISTORY_SCHEMA_VERSION:
+                validate_unit_history(connection)
             identity_config = identity_config_from_connection(connection)
             validate_application_army_integrity(connection)
             validate_application_fireteam_integrity(connection)
@@ -1216,6 +1272,41 @@ class Database:
                 raise ValueError("Database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
                 raise ValueError("Database contains broken foreign keys")
+
+    def general_profiles(
+        self, unit_ids: list[int], enabled_flags: frozenset[str], *, for_detail: bool = False,
+    ) -> dict[int, list[dict[str, Any]]] | None:
+        """Read the published projection; only v33+ preserves detail composition inputs."""
+        from infinity_db.general_profile_storage import (
+            ARMY_SCHEMA_VERSION,
+            EXPLORER_SCHEMA_VERSION,
+            availability_mask,
+            read_general_profiles,
+        )
+        from infinity_db.skill_classification_storage import read_skill_classifications
+        from infinity_db.unit_presentation import classify_published_general_profiles
+
+        with self._connect() as connection:
+            version = connection.execute("PRAGMA user_version").fetchone()[0]
+            minimum = ARMY_SCHEMA_VERSION if for_detail else EXPLORER_SCHEMA_VERSION
+            if version < minimum:
+                return None
+            rows = read_general_profiles(connection, unit_ids, availability_mask(enabled_flags))
+            if for_detail or version == EXPLORER_SCHEMA_VERSION or not rows:
+                return rows
+            classifications = read_skill_classifications(connection)
+            return {
+                unit_id: classify_published_general_profiles(profiles, classifications)
+                for unit_id, profiles in rows.items()
+            }
+
+    def unit_history(self, unit_id: int) -> dict[str, Any] | None:
+        from infinity_db.unit_history_storage import ARMY_SCHEMA_VERSION, read_unit_history
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] < ARMY_SCHEMA_VERSION:
+                return None
+            return read_unit_history(connection, unit_id)
 
     def symbol_publication(self):
         """Read v31 runtime symbol mappings; earlier schemas retain the manifest adapter."""
@@ -1480,6 +1571,13 @@ class Database:
             "declared_faction_ids_by_unit": declared_faction_ids_by_unit,
             "groups": groups,
             "groups_by_source": groups_by_source,
+        }
+
+    def unit_search_terms(self) -> dict[int, tuple[str, ...]]:
+        """Expose the same logical Unit search terms used by the Explorer."""
+        return {
+            group["id"]: tuple(str(term) for term in group["search_terms"] if term)
+            for group in self._unit_graph()["groups"]
         }
 
     @instance_lru_cache(maxsize=16)
@@ -2118,6 +2216,8 @@ class Database:
     @instance_lru_cache(maxsize=3)
     def list_catalog_filter_items(self, catalog: str) -> list[dict[str, Any]]:
         """Return filter identities and source aliases without catalog usage queries."""
+        if self.catalog_projection is not None and catalog in {"skills", "equipment", "weapons"}:
+            return self.catalog_projection.summary(catalog, "army-filter")
         graph = self._application_catalog_graph(catalog)
         return sorted(
             [
@@ -2136,6 +2236,8 @@ class Database:
         """Return the named records in one of the public rules reference catalogs."""
         if catalog not in {"skills", "equipment", "weapons"}:
             raise ValueError(f"Unknown catalog: {catalog}")
+        if self.catalog_projection is not None:
+            return self.catalog_projection.summary(catalog, "army")
         graph = self._application_catalog_graph(catalog)
         suffix = {"skills": "skill", "equipment": "equipment", "weapons": "weapon"}[catalog]
         profile_usage = _canonical_usage_select("profile", catalog, collapse_payloads=True)
@@ -2912,9 +3014,22 @@ class Database:
                 )
         return {**trait, "variants": variants}
 
-    @instance_lru_cache(maxsize=128)
-    def get_catalog_item(self, catalog: str, item_ref: int | str) -> dict[str, Any] | None:
+    def get_catalog_item(
+        self, catalog: str, item_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return an equipment or weapon item and its extra-specific unit usage."""
+        if self.catalog_projection is None:
+            return self._compose_catalog_item(catalog, item_ref)
+        if catalog not in {"equipment", "weapons"}:
+            raise ValueError(f"Unknown catalog: {catalog}")
+        application_item_id = self.application_catalog_id(catalog, item_ref)
+        if application_item_id is None:
+            return None
+        return self.catalog_projection.detail(catalog, application_item_id, expand_usage=expand_usage)
+
+    @instance_lru_cache(maxsize=128)
+    def _compose_catalog_item(self, catalog: str, item_ref: int | str) -> dict[str, Any] | None:
+        """Cache expensive legacy composition, not expanded published payloads."""
         tables = {
             "equipment": ("equipment", "equipment"),
             "weapons": ("weapons", "weapon"),
@@ -3094,9 +3209,20 @@ class Database:
             return ()
         return graph["source_ids_by_item"].get(application_skill_id, ())
 
-    @instance_lru_cache(maxsize=128)
-    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+    def get_skill(
+        self, skill_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return one Skill reference together with the units that use it."""
+        if self.catalog_projection is None:
+            return self._compose_skill(skill_ref)
+        application_skill_id = self.application_catalog_id("skills", skill_ref)
+        if application_skill_id is None:
+            return None
+        return self.catalog_projection.detail("skills", application_skill_id, expand_usage=expand_usage)
+
+    @instance_lru_cache(maxsize=128)
+    def _compose_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+        """Cache expensive legacy composition, not expanded published payloads."""
         graph = self._application_catalog_graph("skills")
         application_skill_id = self.application_catalog_id("skills", skill_ref)
         if application_skill_id is None:
@@ -3191,6 +3317,15 @@ class Database:
 
     @instance_lru_cache(maxsize=1)
     def _scoped_unit_filter_contexts(self) -> dict[str, tuple[MatchContext, ...]]:
+        """Load immutable published contexts, or compose older explicit fixtures."""
+        from infinity_db.unit_input_storage import ARMY_SCHEMA_VERSION, read_filter_contexts
+
+        with self._connect() as connection:
+            if connection.execute("PRAGMA user_version").fetchone()[0] >= ARMY_SCHEMA_VERSION:
+                return read_filter_contexts(connection)
+        return self._compose_scoped_unit_filter_contexts()
+
+    def _compose_scoped_unit_filter_contexts(self) -> dict[str, tuple[MatchContext, ...]]:
         """Index source-owned properties once; never infer Controller attachment.
 
         A profile group identifies compatible selectable loadouts but can contain
@@ -3261,7 +3396,8 @@ class Database:
                 "FROM profile_payload_occurrences AS p "
                 "JOIN profile_payloads AS pp ON pp.id = p.profile_payload_id "
                 "JOIN profile_groups AS pg ON pg.army_id = p.army_id "
-                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id"
+                "AND pg.unit_id = p.unit_id AND pg.group_id = p.group_id "
+                "ORDER BY p.army_id, p.unit_id, p.group_id, p.profile_id"
             ):
                 properties = set(profile_payload_props[int(row["profile_payload_id"])])
                 if row["type_id"] is not None:
@@ -3285,7 +3421,8 @@ class Database:
                 "SELECT o.army_id, o.unit_id, o.group_id, o.option_id, "
                 "o.loadout_payload_id, o.points, o.swc, p.disabled "
                 "FROM loadout_payload_occurrences AS o "
-                "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id"
+                "JOIN loadout_payloads AS p ON p.id = o.loadout_payload_id "
+                "ORDER BY o.army_id, o.unit_id, o.group_id, o.option_id"
             ):
                 army, unit, group, option = (
                     int(row["army_id"]), int(row["unit_id"]),
@@ -4566,6 +4703,7 @@ class Database:
                 row["id"]: row["canonical_faction_id"] for row in graph["rows"]
             }
             placeholders = ", ".join("?" for _ in source_ids)
+            official_links = self._official_army_unit_links()
             armies_by_occurrence: dict[tuple[int, tuple[str, ...]], dict[str, Any]] = {}
             by_source_army: dict[tuple[int, int], dict[str, Any]] = {}
             for occurrence in group["army_occurrences"]:
@@ -4603,11 +4741,16 @@ class Database:
                             if section_id in application_armies["identities"]
                         ],
                         "availability_flags": list(flags),
+                        "official_army_links": [],
                         "profiles": [],
                         "loadouts": [],
                         "_occurrence_key": occurrence_key,
                     },
                 )
+                source_key = (occurrence["source_army_id"], source_id)
+                for link in official_links.get(source_key, []):
+                    if link not in army["official_army_links"]:
+                        army["official_army_links"].append(dict(link))
                 by_source_army[(source_id, occurrence["source_army_id"])] = army
             armies = list(armies_by_occurrence.values())
             note_rows = connection.execute(

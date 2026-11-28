@@ -3,10 +3,15 @@ const vm = require("node:vm");
 
 const startupSource = fs.readFileSync(process.argv[2], "utf8");
 let preferencesSource = fs.readFileSync(process.argv[3], "utf8");
+const themeOptions = process.argv[4];
 
 function startupScenario({ session = {}, cookie = "", systemDark = false }) {
   let prefersDark = systemDark;
-  const dataset = {};
+  const dataset = { themeOptions };
+  const snapshot = () => {
+    const { themeOptions: ignored, ...state } = dataset;
+    return state;
+  };
   const storage = new Map(Object.entries(session));
   const context = {
     document: { cookie, documentElement: { dataset } },
@@ -31,17 +36,21 @@ function startupScenario({ session = {}, cookie = "", systemDark = false }) {
   vm.runInContext(startupSource, context, { filename: "theme-startup.js" });
   const bootstrap = context.window.infinityThemeBootstrap;
 
-  const initial = { ...dataset };
+  const initial = snapshot();
   const switchDark = bootstrap.applySelection("dark");
-  const afterDark = { ...dataset };
+  const afterDark = snapshot();
   const switchLight = bootstrap.applySelection("light");
-  const afterLight = { ...dataset };
+  const afterLight = snapshot();
   prefersDark = true;
   const system = bootstrap.applySelection("system");
-  const afterSystem = { ...dataset };
+  const afterSystem = snapshot();
 
   return {
     options: bootstrap.options.map(({ value }) => value),
+    palettes: bootstrap.paletteOptions.map(({ value }) => value),
+    switchedPalette: bootstrap.applyPalette("nomads"),
+    paletteAfterModeChange: (bootstrap.applySelection("light"), dataset.themePalette),
+    invalidPalette: bootstrap.applyPalette("not-a-palette"),
     initial,
     switchDark: { ...switchDark, dataset: afterDark },
     switchLight: { ...switchLight, dataset: afterLight },
@@ -52,7 +61,7 @@ function startupScenario({ session = {}, cookie = "", systemDark = false }) {
 function preferenceContext(initialCookies = {}, initialSession = {}) {
   const cookies = new Map(Object.entries(initialCookies));
   const session = new Map(Object.entries(initialSession));
-  const document = {};
+  const document = { documentElement: { dataset: { themeOptions } } };
   Object.defineProperty(document, "cookie", {
     get() {
       return [...cookies]
@@ -93,6 +102,7 @@ function preferenceContext(initialCookies = {}, initialSession = {}) {
     String,
   };
   vm.createContext(context);
+  vm.runInContext(startupSource, context, { filename: "theme-startup.js" });
   vm.runInContext(preferencesSource, context, { filename: "preferences.js" });
   return { context, cookies, session };
 }
@@ -100,10 +110,10 @@ function preferenceContext(initialCookies = {}, initialSession = {}) {
 preferencesSource = preferencesSource
   .replace(
     /import\s+\{[\s\S]*?\}\s+from "\.\/theme\.js";/,
-    `const THEME_PREFERENCE_KEY = "infinity-db-theme";
-function normalizeThemeSelection(value) {
-  return new Set(["system", "light", "dark"]).has(value) ? value : "system";
-}`,
+    `const THEME_PREFERENCE_KEY = window.infinityThemeBootstrap.preferenceKey;
+const PALETTE_PREFERENCE_KEY = window.infinityThemeBootstrap.paletteKey;
+const normalizeThemeSelection = window.infinityThemeBootstrap.normalizeSelection;
+const normalizePaletteSelection = window.infinityThemeBootstrap.normalizePalette;`,
   )
   .replaceAll("export ", "");
 
@@ -118,6 +128,14 @@ const cookieWins = startupScenario({
   session: { "infinity-db-theme": "dark" },
   cookie: "infinity-db-remember-settings=true; infinity-db-theme=light",
   systemDark: true,
+});
+const selectedPalette = startupScenario({
+  session: { "infinity-db-theme-palette": "panoceania" },
+  systemDark: true,
+});
+const rememberedPalette = startupScenario({
+  session: { "infinity-db-theme-palette": "panoceania" },
+  cookie: "infinity-db-remember-settings=true; infinity-db-theme-palette=nomads",
 });
 const invalid = startupScenario({
   session: { "infinity-db-theme": "invalid" },
@@ -161,8 +179,28 @@ const invalidNormalized = {
   cookie: restored.cookies.get("infinity-db-theme") ?? null,
 };
 
+const palette = preferenceContext();
+const paletteKey = "infinity-db-theme-palette";
+palette.context.savePaletteSelection("panoceania");
+const paletteTransient = [palette.context.paletteSelection(), palette.session.get(paletteKey),
+  palette.cookies.get(paletteKey) ?? null];
+palette.context.rememberCurrentSettings();
+palette.context.savePaletteSelection("nomads");
+const paletteRemembered = [palette.context.paletteSelection(), palette.session.get(paletteKey),
+  palette.cookies.get(paletteKey) ?? null];
+palette.context.forgetRememberedSettings();
+const paletteForgotten = [palette.context.paletteSelection(), palette.session.get(paletteKey),
+  palette.cookies.get(paletteKey) ?? null];
+
 console.log(JSON.stringify({
   options: defaultLight.options,
+  palettes: defaultLight.palettes,
+  paletteStartup: {
+    selected: selectedPalette.initial, remembered: rememberedPalette.initial,
+    switched: defaultLight.switchedPalette, afterModeChange: defaultLight.paletteAfterModeChange,
+    invalid: defaultLight.invalidPalette,
+  },
+  palettePersistence: { paletteTransient, paletteRemembered, paletteForgotten },
   startup: {
     defaultLight: defaultLight.initial,
     defaultDark: defaultDark.initial,

@@ -273,6 +273,54 @@
     ],
     "factRevisions": {
       "records": {
+        "rule:tournament-format": [
+          "2026.09.11"
+        ],
+        "rule:tournament-scoring": [
+          "2026.09.11"
+        ],
+        "rule:tournament-pairings": [
+          "2026.09.11"
+        ],
+        "rule:escalation-tournament": [
+          "2026.09.11"
+        ],
+        "rule:free-game": [
+          "2026.09.11"
+        ],
+        "rule:soldiers-of-fortune": [
+          "2026.09.11"
+        ],
+        "rule:direct-action": [
+          "2026.09.11"
+        ],
+        "rule:reinforcements-extra": [
+          "2026.09.11"
+        ],
+        "rule:long-service": [
+          "2026.09.11"
+        ],
+        "rule:team-ops-extra": [
+          "2026.09.11"
+        ],
+        "rule:resilience-operations": [
+          "2026.09.11"
+        ],
+        "rule:civilians": [
+          "2026.09.11"
+        ],
+        "rule:designated-target": [
+          "2026.09.11"
+        ],
+        "rule:classified-objectives": [
+          "2026.09.11"
+        ],
+        "rule:high-value-target": [
+          "2026.09.11"
+        ],
+        "rule:tournament-army-lists": [
+          "2026.09.11"
+        ],
         "scenario:crossing-lines": [
           "2026.09.11"
         ],
@@ -19298,6 +19346,1235 @@
       "review": {
         "status": "reviewed",
         "reviewedOn": "2026-11-17"
+      }
+    },
+    {
+      "id": "rule:tournament-format",
+      "kind": "rule",
+      "name": "Tournament Format",
+      "summary": "Official ITS events follow the season tournament rules.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "At least four players compete in one-on-one games across at least three Tournament Rounds. Recommended round counts: 4–8 players, 3 rounds; 9–16 players, 4 rounds; 17 or more players, 5 rounds.",
+          "Each player records their name, ITS PIN, Army or Sectorial, round scores and Private Information on the Tournament Control Sheet so the opponent or referee can validate it when needed.",
+          "The organizer announces the points limit, tournament tier, scenarios and any Extras with the event. Use a different official ITS Scenario in each round; the organizer may add at most one personalized scenario.",
+          "Tiers: 150 points / 3 SWC or 200 / 4; 250 / 5 or 300 / 6; 350 / 7 or 400 / 8."
+        ],
+        "restrictions": [
+          "These rules take precedence over the ITS Basic Rules where they conflict. An announced Extra can change the format, including the number of rounds."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 12,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 13,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 17,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 27,
+          "section": "Tournament Format"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 13,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 14,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 18,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 28,
+          "section": "Formato del evento / Nivel del torneo / Escenarios"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:tournament-scoring",
+      "kind": "rule",
+      "name": "Tournament Scoring",
+      "summary": "Rank players by Tournament Points, then the stated tie-breakers.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Victory: 4 Tournament Points; tie: 2; defeat: 0, determined by comparing Objective Points. Add 1 offensive bonus for scoring at least 5 Objective Points, and 1 defensive bonus when losing by 2 or fewer Objective Points. Both bonuses may apply.",
+          "For a round tie in Tournament Points, compare Objective Points and then Victory Points (surviving Army Points).",
+          "Final standings use accumulated Tournament Points, then accumulated Objective Points, then accumulated Victory Points, then the total Objective Points earned by that player's opponents."
+        ],
+        "restrictions": []
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 13,
+          "section": "Tournament Scoring"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 14,
+          "section": "Tournament Scoring"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 15,
+          "section": "Tournament Scoring"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 14,
+          "section": "Clasificación durante el torneo / Clasificación final"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 15,
+          "section": "Clasificación durante el torneo / Clasificación final"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 16,
+          "section": "Clasificación durante el torneo / Clasificación final"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:tournament-pairings",
+      "kind": "rule",
+      "name": "Tournament Pairings and Byes",
+      "summary": "Random first-round pairings followed by Swiss pairings.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "First-round pairings are random. Later rounds rank players by accumulated Tournament Points, Objective Points, Victory Points and previous opponents' total Objective Points, then pair first with second, third with fourth, and so on.",
+          "With an odd number of players, one player receives a bye: 4 Tournament Points, 0 Objective Points and 0 Victory Points for that round. Select the first bye randomly; later give it to the lowest-ranked player who has not already had one. Record the bye on the Tournament Control Sheet.",
+          "At the end of the event, adjust a bye recipient's total Objective Points: multiply points earned by total tournament rounds, divide by rounds actually played and round up. Apply the same adjustment to Victory Points if needed for a tie."
+        ],
+        "restrictions": [
+          "A player must never receive more than one bye in the same tournament."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 15,
+          "section": "Tournament Pairings and Byes"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 16,
+          "section": "Tournament Pairings and Byes"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 16,
+          "section": "Emparejamientos / Jugadores impares"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 17,
+          "section": "Emparejamientos / Jugadores impares"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:escalation-tournament",
+      "kind": "rule",
+      "name": "Escalation Tournament",
+      "summary": "Three rounds at increasing tournament tiers.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "escalation-tournament-extra",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Play exactly three rounds regardless of player count: 150 or 200 points, then 250 or 300 points, then 350 or 400 points. The organizer specifies the points when announcing the event; use each tier's K factor.",
+          "Each player submits three Army Lists, one for each tier."
+        ],
+        "restrictions": [
+          "Only applies when the organizer announces this Extra."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 27,
+          "section": "Escalation Tournament"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 28,
+          "section": "Torneo de escalada"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:free-game",
+      "kind": "rule",
+      "name": "Free Game",
+      "summary": "Remove the normal 15-Trooper Army List limit.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "free-game-extra",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Army Lists may contain more than 15 Troopers."
+        ],
+        "restrictions": [
+          "Only applies when the organizer announces this Extra."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 27,
+          "section": "Free Game"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 28,
+          "section": "Partida libre"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:soldiers-of-fortune",
+      "kind": "rule",
+      "name": "Soldiers of Fortune",
+      "summary": "Allow up to 85 points of Mercenary Troopers.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "soldiers-of-fortune-extra",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "A player may include up to 85 Army Points of Mercenary Troopers, respecting Unit Profile AVA but not the Army or Sectorial availability restriction. Mercenaries can differ between the player's two lists.",
+          "Using this permission costs 1 SWC in the Army List."
+        ],
+        "restrictions": [
+          "This Extra does not permit duplicate Characters."
+        ],
+        "sourceNotes": [
+          "English explicitly permits different Mercenary selections in the two lists; Spanish omits this sentence."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 27,
+          "section": "Soldiers of Fortune"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Soldiers of Fortune"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 29,
+          "section": "Soldados de Fortuna"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:direct-action",
+      "kind": "rule",
+      "name": "Direct Action",
+      "summary": "Use the dedicated Direct Action mission variants rather than the full ITS mechanics.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "direct-action-extra",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "The dedicated scenario set does not use the Classified Deck, HVTs or terrain rules. Objectives and scoring may differ from standard missions with the same name."
+        ],
+        "restrictions": [
+          "Use the published Direct Action scenario variants, not standard missions with the Classified count removed."
+        ],
+        "sourceNotes": [
+          "The English overview says four scenarios and the Spanish overview says five. Use the actual published scenario inventory rather than the overview count."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Direct Action"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 29,
+          "section": "Direct Action"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:reinforcements-extra",
+      "kind": "rule",
+      "name": "Reinforcements",
+      "summary": "Enable the Reinforcements rules for the tournament.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "reinforcements-extra",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "All players must use the Reinforcements rules when this Extra is selected. Refer to the Reinforcements Annex."
+        ],
+        "restrictions": [
+          "Check each mission's Reinforcements suitability; the Extra is not active by default."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Reinforcements"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 30,
+          "section": "Refuerzos"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:long-service",
+      "kind": "rule",
+      "name": "Long Service",
+      "summary": "Characters also qualify as Veteran Troops during ITS 18.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Troopers classified as Characters also have the Veteran Troop classification during this season."
+        ],
+        "restrictions": []
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 26,
+          "section": "Long Service"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 28,
+          "section": "Veteranía"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:team-ops-extra",
+      "kind": "rule",
+      "name": "Team-Ops and Tacball",
+      "summary": "Optional Team-Ops customization, Fireteams and Tacball interactions.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "team-ops-extra",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Each list may contain one Team-Ops group; its configuration may differ between submitted lists but cannot change during the event. Use [[skill:team-ops|Team-Ops]] and [[skill:request-tacball|Request a Tacball]] for customization and the support drop.",
+          "Team-Ops Troopers may form a Duo or Haris that does not count toward the maximum simultaneous Fireteams. Wildcards cannot join it.",
+          "The stationary Tacball is a Deployable Weapon, responding to Orders by active enemy Models (not Markers) in LoF or Silhouette contact with BS Attack or CC Attack. It does not trigger Deployables; remove it when damage reaches its STR. Represent it with a 55 mm Token or equivalent S4 model.",
+          "Tacball profile: CC 5, BS 10, ARM 2, BTS 3, STR 1, S4; Baggage, 360-degree Visor, Total Reaction, Combi Rifle, PARA CC Weapon (-3).",
+          "If both players have Team-Ops groups, before Deployment each rolls a public Tacball Classified Objective. During play, each may replace one drawn Classified Objective with that result for the same points. If the opponent never deployed a Tacball, the Tacball objective is automatically fulfilled at game end.",
+          "Tacball Classified Objective chart: 1–5 Destroy; 6–8 Target; 9–11 Hack; 12–14 Analyze; 15–17 Scan; 18–20 Threaten.",
+          "Destroy: inflict damage equal to or above STR or otherwise remove the enemy Tacball. Threaten: end the game with a non-Null Trooper Model inside its Zone of Control.",
+          "Analyze: Doctor, Paramedic or Specialist Operative; Scan: Engineer, Chain of Command or Specialist Operative; Hack: Hacker. In each case spend a Short Skill with the enemy Tacball in Zone of Control, pass WIP and place a Player A/B Token. Target: Forward Observer makes the source-specified Roll with +1 SD and places a Player A/B Token on success."
+        ],
+        "restrictions": [
+          "Spec-Ops are not allowed. Only one Classified Objective may be replaced by Tacball Classified Objective or Secure HVT; INTELCOM cards cannot be exchanged."
+        ],
+        "sourceNotes": [
+          "EN p. 34 specifies a Forward Observer Roll for Target; ES p. 35 specifies a Short Skill and a WIP Roll with the enemy Tacball in LoF. Both specify +1 SD; the wording difference remains unresolved.",
+          "The Team-Ops and Tacball support-item charts are referenced by the rules but their options are not printed in these pages. No unsupported item options are inferred."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 29,
+          "section": "Team-Ops and Tacball"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 30,
+          "section": "Team-Ops and Tacball"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 31,
+          "section": "Team-Ops and Tacball"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 32,
+          "section": "Team-Ops and Tacball"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 33,
+          "section": "Team-Ops and Tacball"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 34,
+          "section": "Team-Ops and Tacball"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 30,
+          "section": "Team-Ops / Tacball / Objetivos Clasificados Tacball"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 31,
+          "section": "Team-Ops / Tacball / Objetivos Clasificados Tacball"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 32,
+          "section": "Team-Ops / Tacball / Objetivos Clasificados Tacball"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 33,
+          "section": "Team-Ops / Tacball / Objetivos Clasificados Tacball"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 34,
+          "section": "Team-Ops / Tacball / Objetivos Clasificados Tacball"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 35,
+          "section": "Team-Ops / Tacball / Objetivos Clasificados Tacball"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:resilience-operations",
+      "kind": "rule",
+      "name": "Resilience Operations",
+      "summary": "Optional ITS Season 18 tournament Extra using Tactical Objective and Battle Condition decks in place of standard ITS missions and Classified Objectives. This is an alternate event format, not a standard scenario.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "optional-extra",
+        "applicability": {
+          "context": "resilience-operations-extra",
+          "revision": "2026.09.11"
+        },
+        "tacticalObjectives": {
+          "draw": 4,
+          "discard": 1,
+          "maxPointsPerCard": 3,
+          "completionMinimum": 1,
+          "moreCompletedBonus": 1,
+          "commandTokenRedraw": 1,
+          "revealPerRound": 1,
+          "priorityTargetFirst": true,
+          "privateUntilRevealed": true
+        },
+        "battleConditions": {
+          "draw": 2,
+          "discard": 1,
+          "appliesToBoth": true,
+          "wholeGame": true,
+          "duplicateResolution": "second-player-redraws",
+          "stackMovementBonuses": false
+        },
+        "gameSizes": [
+          {
+            "armyPoints": 150,
+            "swc": 3,
+            "tableWidthIn": 24,
+            "tableHeightIn": 32,
+            "deploymentDepthIn": 8
+          },
+          {
+            "armyPoints": 200,
+            "swc": 4,
+            "tableWidthIn": 32,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 250,
+            "swc": 5,
+            "tableWidthIn": 32,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 300,
+            "swc": 6,
+            "tableWidthIn": 48,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 350,
+            "swc": 7,
+            "tableWidthIn": 48,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          },
+          {
+            "armyPoints": 400,
+            "swc": 8,
+            "tableWidthIn": 48,
+            "tableHeightIn": 48,
+            "deploymentDepthIn": 12
+          }
+        ],
+        "tacticalElements": [
+          {
+            "id": "beacons",
+            "quantity": "2 per player (4 total)",
+            "placement": "Before deployment, fully within each player's Deployment Zone and in Silhouette contact with its boundary. The player who kept Deployment places theirs first.",
+            "rules": [
+              "Beacon Token or matching 25 mm scenery (EN p. 18, ES p. 19).",
+              "ARM 4, BTS 4, STR 3, S2; GizmoKit (PH=10).",
+              "Only Anti-materiel Weapons may damage a Beacon; Engineer or GizmoKit can repair it; remove when STR reaches zero.",
+              "Troopers may not deploy in Silhouette contact with a Beacon."
+            ]
+          },
+          {
+            "id": "hvts",
+            "quantity": "4 per player (8 total)",
+            "placement": "Before deployment, entirely within the area extending 4 inches from that player's Deployment Zone (ES: 10 cm). The player who kept Deployment places theirs first.",
+            "rules": [
+              "Follow ITS Civilian rules except this placement; Troopers may not deploy in Silhouette contact with an HVT.",
+              "Normal HVT: CC 6, BS 5, PH 10, WIP 11. MOV and S differ between the printed profiles; see Source context.",
+              "Hostile HVT: MOV 4-4 inches (ES 10-10 cm), CC 6, BS 8, PH 11, WIP 11, ARM 1, BTS 0, VITA 1, S2; Stun Pistol. EN lists a CC Weapon, ES lists none."
+            ]
+          },
+          {
+            "id": "beepers",
+            "quantity": "1 per Trooper; each Specialist Trooper has 1 additional Beeper",
+            "placement": "Deploy using the Place Deployable Skill, not as part of a Coordinated Order; represented by a Player A/B Token or an S2 Model/scenery.",
+            "rules": [
+              "ARM 2, BTS 0, STR 1, S2; destroyed at STR 0 or less.",
+              "Player A/B Token diameter is 25 mm (EN p. 18 / ES p. 19).",
+              "Beepers can be damaged by Attacks."
+            ]
+          },
+          {
+            "id": "objectives",
+            "quantity": "3 per player (6 total)",
+            "placement": "Before Deployment, each player places three Objectives; the player who kept Deployment places theirs first. EN p. 45 specifies an area extending 8 inches from the Deployment Zone; ES p. 47 specifies a 20 cm band from the centerline in that player's half. Placement is unresolved.",
+            "rules": [
+              "Objective Token or matching 40 mm scenery (EN p. 18 / ES p. 19).",
+              "No deployment in Silhouette contact with an Objective."
+            ]
+          },
+          {
+            "id": "f13-defensive-turrets",
+            "quantity": "Only when specified by a Battle Condition",
+            "placement": "Not initially deployed by default; place according to the selected Battle Condition card.",
+            "rules": [
+              "ARM 2, BTS 3, STR 1, S2; CC 5, BS 10; 360-degree Visor, Total Reaction, Combi Rifle and PARA (-3) CCW.",
+              "Respond with BS or CC Attack to Orders by active enemy Models (not Markers) in LoF or Silhouette contact.",
+              "Defensive Turret Token diameter 25 mm (EN p. 18 / ES p. 19), or an S2 Model/scenery; remove at STR 0 or less."
+            ]
+          }
+        ],
+        "glossary": [
+          {
+            "id": "capture",
+            "text": "Capture Tactical Element is an Attack Short Skill without a Roll. It requires Silhouette contact with a Null-State Model carrying an Element, an allied Trooper carrying one, or an uncarried Element."
+          },
+          {
+            "id": "captured-elements",
+            "text": "Only Models may carry; normally one Element per Model, two with Baggage. Keep the Token on the table in Silhouette contact with its carrier; drop it when the carrier enters/is in a Null State. Carried Elements do not block movement or LoF."
+          },
+          {
+            "id": "control",
+            "text": "A Tactical Element is Controlled if the player alone has a non-Null Trooper Model (not Marker) in Silhouette contact, with no enemy Trooper Model in contact."
+          },
+          {
+            "id": "dominate",
+            "text": "Dominate a Quadrant/Sector by having more Victory Points in it than the opponent. More than half a Trooper's base must be inside; count non-Null Models/Markers including Proxies and Peripherals, not weapon Tokens or fake Holoechoes. Non-Null Baggage adds 20 VP."
+          },
+          {
+            "id": "killing",
+            "text": "Enemy Troopers count as Killed on entering Dead State, being in a Null State at game end, or not being deployed as a Model or Marker at game end."
+          },
+          {
+            "id": "subjugate",
+            "text": "Subjugate a Quadrant/Sector if the player alone has a non-Null Trooper Model (not Marker) with more than half its base inside, and no enemy Trooper inside."
+          }
+        ],
+        "effects": [
+          "Replace the normal ITS Scenario and Classified Deck with the Tactical Objective and Battle Condition decks; ordinary ITS tournament rules otherwise apply.",
+          "After learning the opposing Faction but before Army List selection, each player draws four Tactical Objective cards, discards one and may spend one Command Token to swap a selected card for a new draw. Selected cards apply only to their owner and remain Private Information until revealed, unless otherwise stated.",
+          "Reveal one chosen Tactical Objective simultaneously each Game Round; Priority Target must be revealed first if selected. Show all selected cards to the opponent at game end.",
+          "After Initiative and before Deployment, each player draws two Battle Conditions and discards one; reveal and apply in Initiative order. When identical, the second-turn player discards and redraws.",
+          "Battle Conditions affect both players all game; if multiple conditions grant Movement Bonuses, use only one.",
+          "Sides deploy on opposite table edges. The game ends after the third Game Round, or at the end of a player's Turn if they began their Active Turn in Retreat!. Beacons, HVTs and Objectives are placed before Deployment; Beepers are carried and placed by Troopers. F-13 Turrets are placed only when a Battle Condition specifies them."
+        ],
+        "restrictions": [
+          "Resilience Operations is an Extra that replaces the normal ITS Scenario and Classified Deck.",
+          "Refer to the Tactical Objective and Battle Condition cards for their individual rules and scoring conditions."
+        ],
+        "sourceNotes": [
+          "First reveal timing differs: EN p. 39 specifies the start of the first Game Round, ES p. 41 specifies after Deployment and before the first Game Round. Both sequence summaries put the first reveal after Deployment.",
+          "Normal HVT profile: EN p. 43 leaves MOV and S blank, ES p. 45 prints MOV 10-10 (cm) and S2. Hostile HVT: EN p. 44 includes a CC Weapon, ES p. 46 lists no Melee Weapon.",
+          "ES p. 44 explicitly prevents STR loss on failed Beacon repair; EN p. 42 does not include that clause. EN labels GizmoKit as a Special Skill in the Beacon profile, ES as Equipment.",
+          "Objective placement differs materially on smaller tables: EN p. 45 describes an area measured from the Deployment Zone; ES p. 47 measures from the centerline. No unified placement geometry is asserted.",
+          "EN p. 46 calls Baggage a Special Skill for captured Element capacity; EN p. 47 and ES pp. 49-50 describe it as Equipment."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 38,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 39,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 40,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 41,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 42,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 43,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 44,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 45,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 46,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 47,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 48,
+          "section": "Resilience Operations"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 39,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 40,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 41,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 42,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 43,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 44,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 45,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 46,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 47,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 48,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 49,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 50,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 51,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 29,
+          "section": "Resilience Operations Extra"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 30,
+          "section": "Operaciones de Resiliencia"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 18,
+          "section": "Diameter of ITS Tokens"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 19,
+          "section": "Diámetro de los Tokens ITS"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:civilians",
+      "kind": "rule",
+      "name": "Civilians in Infinity",
+      "summary": "Neutral, noncombatant game elements that may be involved in mission objectives.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "A Civilian has a Unit Profile but belongs to neither Army List; it contributes no Orders and cannot join a Combat Group.",
+          "Unless a rule changes its status, it is neutral. It neither obstructs Line of Fire nor grants Close Combat modifiers; contact alone does not cause Engaged State.",
+          "Ignore damage and effects from Attacks and other harmful sources. Civilians do not trigger Deployable Weapons or Equipment or generate AROs. A Template remains valid when it covers a Civilian, but does not affect that Civilian.",
+          "The ordinary profile has CC 6, BS 5, PH 10, WIP 11 and S 2, with no MOV, ARM, BTS, AVA or Weapons."
+        ],
+        "restrictions": [
+          "Scenario rules, Skills, Equipment or objectives may change the default treatment. See [[skill:civevac|CivEvac]] for moving a Civilian."
+        ],
+        "sourceNotes": [
+          "English p. 22 prints no VITA value; Spanish p. 23 prints VITA 1, despite the Spanish effects text on p. 22 stating that Civilians lack Wounds. The profile discrepancy is unresolved; ordinary immunity is stated in both texts."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 21,
+          "section": "Civilians in Infinity"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 22,
+          "section": "Civilians in Infinity"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 22,
+          "section": "Civiles en Infinity"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 23,
+          "section": "Civiles en Infinity"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:designated-target",
+      "kind": "rule",
+      "name": "Designated Target",
+      "summary": "An enemy HVT can become an attackable, reactive Trooper when the mission specifies it.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Treat the opposing HVT as a hostile enemy Trooper rather than a neutral Civilian; it can be attacked and reacts as an enemy Trooper.",
+          "Designated Target profile: MOV [[distance:4:inch]]–[[distance:4:inch]], CC 6, BS 8, PH 11, WIP 11, ARM 1, BTS 0, VITA 1, S 2; Stun Pistol and PARA CC Weapon."
+        ],
+        "restrictions": [
+          "Use this profile only for HVTs designated as targets by the scenario."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 24,
+          "section": "Designated Target"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 25,
+          "section": "Designated Target"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 25,
+          "section": "Objetivo Designado"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 26,
+          "section": "Objetivo Designado"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:classified-objectives",
+      "kind": "rule",
+      "name": "Classified Objectives",
+      "summary": "Additional objectives drawn from the Classified Deck, with points and quantity determined by the mission.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Normally a completed Classified Objective earns 1 Objective Point, but the scenario may specify a different value. Each objective scores only once.",
+          "Select Classified Objectives after learning the mission and opponent's faction, before choosing the Army List. Shuffle your own deck in front of the opponent, draw two cards per objective and discard one before drawing the next pair.",
+          "Keep the selected cards private until completed; retain them and show completed cards to the opponent on request.",
+          "If the mission permits INTELCOM, decide after drawing and before play whether to use the card as the objective or INTELCOM (Support and Control or Interference). Both players roll a die; the higher result announces the choice first. Card contents stay private. Use INTELCOM at the mission-specified time, in Initiative order."
+        ],
+        "restrictions": [
+          "Follow the selected mission's Classified Objective count and special selection/scoring procedures; Direct Action does not use the Classified Deck. A card used for INTELCOM cannot be exchanged for Secure HVT."
+        ],
+        "sourceNotes": [
+          "The Spanish INTELCOM text specifies use during scoring (p. 36); the English text refers to the timing specified by the mission (p. 35). Follow the mission's explicit timing."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 34,
+          "section": "Classified Objectives"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 35,
+          "section": "Classified Objectives"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 36,
+          "section": "Classified Objectives"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 35,
+          "section": "Objetivos Clasificados"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 36,
+          "section": "Objetivos Clasificados"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 37,
+          "section": "Objetivos Clasificados"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Direct Action"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 29,
+          "section": "Direct Action"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:high-value-target",
+      "kind": "rule",
+      "name": "High Value Target (HVT)",
+      "summary": "A neutral Civilian used for Classified Objectives, unless the mission specifies otherwise.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "season",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "In missions using HVTs, each player places one at the start of their Deployment Phase, at least [[distance:4:inch]] outside every Deployment Zone, in an accessible location and neither inside nor on scenery or buildings.",
+          "An HVT is neutral to both players unless the mission modifies its status. Use an Infinity or Infinity Bootleg miniature, preferably a Civilian or HVT.",
+          "Secure HVT: at game end, have a non-Null allied Trooper within the enemy HVT's Zone of Control and no non-Null enemy Trooper within your own HVT's Zone of Control. This replaces one drawn Classified Objective for the same Objective Points."
+        ],
+        "restrictions": [
+          "The scenario determines whether HVTs and Classified Objectives are used; Direct Action uses neither. An INTELCOM card cannot be replaced with Secure HVT."
+        ],
+        "sourceNotes": [
+          "English describes replacing the Classified Objective at game end (p. 37); Spanish describes choosing Secure HVT during play (p. 38). The scoring condition is evaluated at game end in both."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 36,
+          "section": "High Value Target (HVT)"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 37,
+          "section": "High Value Target (HVT)"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 37,
+          "section": "Miniatura HVT / Asegurar HVT"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 38,
+          "section": "Miniatura HVT / Asegurar HVT"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 28,
+          "section": "Direct Action"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 29,
+          "section": "Direct Action"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
+      }
+    },
+    {
+      "id": "rule:tournament-army-lists",
+      "kind": "rule",
+      "name": "Tournament Army Lists",
+      "summary": "Submit eligible lists before an official ITS event and choose a list for each round.",
+      "composition": {
+        "role": "definition"
+      },
+      "scope": {
+        "game": "N5",
+        "seasons": [
+          "its-18"
+        ]
+      },
+      "facts": {
+        "category": "basic-rule",
+        "applicability": {
+          "context": "official-tournament",
+          "revision": "2026.09.11"
+        },
+        "effects": [
+          "Submit one or two legal Army Lists from the same Generic or Sectorial Army to the event management system. Infinity Army is the officially sanctioned list-building tool.",
+          "Bring two printed copies of each Complete Army List and give one to the organizer before the first round. Bring a printed Courtesy List for each list; show it on request only after Deployment.",
+          "At the start of a round, choose the list after learning the opponent, their faction, the table and the Classified Objectives, if used.",
+          "The organizer may request lists in advance to check legality."
+        ],
+        "restrictions": [
+          "Applies to official tournaments. An announced Extra may alter the list-submission requirements."
+        ],
+        "sourceNotes": [
+          "English p. 16 names the Online Tournament Manager (OTM), while Spanish p. 17 names CorvuSphere. Both require event submission; use the organizer's event instructions."
+        ]
+      },
+      "citations": [
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 16,
+          "section": "Tournament Army Lists"
+        },
+        {
+          "sourceId": "its-season-18-en-pdf",
+          "page": 17,
+          "section": "Tournament Army Lists"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 17,
+          "section": "Listas de Ejército / Elección de la Lista de Ejército"
+        },
+        {
+          "sourceId": "its-season-18-es-pdf",
+          "page": 18,
+          "section": "Listas de Ejército / Elección de la Lista de Ejército"
+        }
+      ],
+      "review": {
+        "status": "reviewed",
+        "reviewedOn": "2026-11-27"
       }
     },
     {

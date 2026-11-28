@@ -46,9 +46,9 @@ def test_selected_set_validates_without_build_sources_or_raw_archive(
                  "weapon-profile-sources.json"):
         (runtime_set / name).write_text("invalid", encoding="utf-8")
     result = validate_database_set(Path("selected"), require_complete=True)
-    assert result["layout"] == "v17-four-file"
+    assert result["layout"] == "v24-four-file"
     assert result["integrityCheck"] == "full"
-    assert result["schemaVersion"] == 17
+    assert result["schemaVersion"] == 24
     assert result["deployedObjects"] == 17
     assert result["unresolvedDeliveries"] == 1
     assert result["variantPublicationVersion"] == 2
@@ -225,7 +225,7 @@ def test_complete_startup_rejects_transitional_set_without_fallback(
     with sqlite3.connect(runtime_set / "rules_n5.db") as connection:
         connection.execute("PRAGMA user_version=16")
     before = fingerprints(runtime_set)
-    with pytest.raises(ValueError, match="require Rules schema v17"):
+    with pytest.raises(ValueError, match="require Rules schema v24"):
         create_app_from_database_set(runtime_set)
     assert fingerprints(runtime_set) == before
 
@@ -246,5 +246,9 @@ def test_directory_selection_conflicts_with_individual_database_or_raw_inspectio
         build_parser().parse_args(["database-health", "custom.db", "--db-dir", "selected"])
     assert exc.value.code == 2
     capsys.readouterr()
-    assert main(["database-health", "--db-dir", str(runtime_set), "--require-raw"]) == 1
-    assert "--require-raw applies to an Army database" in capsys.readouterr().err
+    with pytest.raises(SystemExit) as exc:
+        build_parser().parse_args([
+            "database-health", "--db-dir", str(runtime_set), "--require-raw",
+        ])
+    assert exc.value.code == 2
+    assert "unrecognized arguments: --require-raw" in capsys.readouterr().err

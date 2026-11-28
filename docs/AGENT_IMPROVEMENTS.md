@@ -17,17 +17,6 @@ entries.
 4. Mention new unresolved items during handoff. Never reuse an assigned ID:
    increment the next-ID marker when creating a new entry.
 
-**Next ID:** `AI-0022`
+**Next ID:** `AI-0025`
 
 ## Open improvements
-
-### AI-0015 — Publish ITS 18 Use Panoply as a typed scenario Skill
-
-- **Date:** 2026-11-18
-- **Area:** ITS 18 Corporate Appropriation Skill presentation.
-- **Remaining issue:** ITS 18 still presents Use Panoply in Panoplies prose,
-  though the source identifies it as an Attack, Scenario Short Skill. ITS 17
-  already has a reviewed typed equivalent.
-- **Proposed:** Review and publish an ITS 18 typed Skill without changing its
-  behavior; assess cross-season reuse only after fact-level comparison.
-- **Disposition:** deferred.

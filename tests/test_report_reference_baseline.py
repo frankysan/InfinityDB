@@ -113,7 +113,13 @@ def test_current_citation_minimum_covers_live_n5_reference_collections() -> None
     assert report["totalRecords"] == sum(
         row["records"] for row in report["collections"]
     )
-    assert report["withCurrentCitation"] == report["totalRecords"]
+    assert report["withCurrentCitation"] == report["currentSourceRequiredRecords"]
+    assert report["communityRecords"] == report["withCommunityCitation"] == 4
+    assert report["totalRecords"] == (
+        report["currentSourceRequiredRecords"] + report["communityRecords"]
+    )
+    assert report["withoutCommunityCitation"] == 0
+    assert report["communityGaps"] == []
     assert report["withoutCurrentCitation"] == 0
     assert report["gaps"] == []
     assert "weapon-property-origin-projection" in report["excludedScope"]
@@ -138,6 +144,7 @@ def test_current_citation_minimum_reports_historical_only_record() -> None:
             "records": [{
                 "id": "rule:only-historical" if collection_id == "n5-faq-v0.1"
                 else f"rule:current-{collection_id}",
+                "kind": "rule",
                 "citations": [{
                     "sourceId": "n5-faq-v0.0-en-pdf" if collection_id == "n5-faq-v0.1"
                     else current_source["id"],
@@ -156,20 +163,67 @@ def test_current_citation_minimum_reports_historical_only_record() -> None:
     }]
 
 
+@pytest.mark.parametrize("kind,scope,authority,expected_current,expected_community", [
+    ("term", "community-terminology", "secondary", 0, 0),
+    ("rule", "community-terminology", "secondary", 1, 0),
+    ("term", "army-building", "secondary", 1, 0),
+    ("term", "community-terminology", "primary", 0, 1),
+])
+def test_citation_minimum_requires_classification_and_secondary_provenance(
+    kind: str, scope: str, authority: str, expected_current: int, expected_community: int,
+) -> None:
+    documents = []
+    for collection_id in CURRENT_CITATION_COLLECTIONS:
+        current = {
+            "id": "n5-faq-v0.1-en-pdf" if collection_id == "n5-faq-v0.1"
+            else "n5-core-v5.3-pdf",
+            "version": "0.1" if collection_id == "n5-faq-v0.1" else "5.3",
+            "url": "https://example.org/current",
+        }
+        documents.append({
+            "collection": {"id": collection_id, "status": "current"},
+            "sources": [current, {
+                "id": "community-acronym-glossary-2017",
+                "kind": "web",
+                "authority": authority,
+                "version": "Post 1",
+                "url": "https://example.org/community",
+            }],
+            "records": [{
+                "id": "term:example",
+                "kind": kind,
+                "facts": {"scope": scope},
+                "citations": [{"sourceId": "community-acronym-glossary-2017"}],
+            }] if collection_id == "n5-core-v5.3" else [],
+        })
+    with patch("infinity_db.curated.load_curated_document", side_effect=documents):
+        report = audit_current_rule_citation_minimum()
+    assert report["withoutCurrentCitation"] == expected_current
+    assert report["withoutCommunityCitation"] == expected_community
+    assert len(report["gaps"]) == expected_current
+    assert len(report["communityGaps"]) == expected_community
+
+
 def test_frozen_explanation_inventory_reconciles_current_source_identities() -> None:
     result = reconcile_explanation_inventory()
     assert result["status"] == "identity-bridge-only-pending-clause-and-browser-acceptance"
-    assert (result["frozenCount"], result["currentCount"]) == (367, 466)
+    assert (result["frozenCount"], result["currentCount"]) == (367, 477)
     assert (result["retainedCount"], result["addedCount"], result["removedCount"]) == (
-        350, 116, 17,
+        350, 127, 17,
     )
     assert result["frozenTiers"] == {"D": 304, "S": 63}
     assert len(result["retainedScreeningOnlyIds"]) == 46
     assert result["addedKinds"] == {
         "declaration-category": 20, "equipment": 3, "rule": 33,
-        "skill": 2, "term": 5, "weapon": 53,
+        "skill": 2, "term": 16, "weapon": 53,
     }
-    assert len(result["currentRecords"]) == 466
+    assert len(result["currentRecords"]) == 477
+    assert {
+        f"term:{slug}" for slug in (
+            "generic-army", "sectorial-army", "army-list", "army-points", "faction",
+            "unit", "open-information", "vanilla", "cheerleader", "rambo", "wysiwyg",
+        )
+    } <= set(result["addedIds"])
     assert all(row["id"].startswith("declaration-category:")
                and row["replacementVerified"] is False
                for row in result["retiredIdentityRows"])
@@ -393,7 +447,7 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
     assert summary == {
         "frozen": 367, "historicalD": 304, "historicalS": 63,
         "retained": 350, "retiredDeclarations": 17,
-        "added": 116, "current": 466, "retainedHistoricalS": 46,
+        "added": 127, "current": 477, "retainedHistoricalS": 46,
         "historicalIdentitiesWithLaterEvidence": 26,
         "reviewedDeclarationTransitions": 17,
         "reviewedNewDeclarationHeadings": 20,
@@ -405,11 +459,12 @@ def test_frozen_367_records_join_reviewed_evidence_without_rewriting_tiers() -> 
         # P3 moves ITS Battleground source ownership to its_18.db; the
         # N5 Rules source-section inventory loses those two non-core entries.
         # Neither that migration nor V1S-083 grants whole-record approval.
-        "pendingSourceSections": 830,
+        # Eleven glossary additions contribute seven new source locators.
+        "pendingSourceSections": 837,
     }
     historical = {row["id"]: row for row in evidence["historicalRecords"]}
     current = {row["id"]: row for row in evidence["currentRecords"]}
-    assert len(historical) == 367 and len(current) == 466
+    assert len(historical) == 367 and len(current) == 477
     assert current["rule:special-terrain"]["sourceLocatorCount"] == 2
     hackable_locators = {
         (row["sourceId"], row["page"], row["heading"])
@@ -535,7 +590,7 @@ def test_reviewed_explanation_join_cli_is_deterministic_and_non_approving(
     saved = json.loads(first)
     joined = saved["reviewedEvidenceJoin"]
     assert len(joined["historicalRecords"]) == 367
-    assert len(joined["currentRecords"]) == 466
+    assert len(joined["currentRecords"]) == 477
     assert joined["summary"]["wholeRecordApprovals"] == 0
     assert saved["fullRecordApprovalsIssuedByThisAudit"] == 0
     text = markdown.read_text(encoding="utf-8")
@@ -888,7 +943,7 @@ def test_five_visibility_zone_cli_keeps_whole_corpus_gate_open(tmp_path: Path) -
     assert report["visibilityZones"]["reviewedTermCount"] == 5
     assert report["fullRecordApprovalsIssuedByThisAudit"] == 0
     assert report["frozenCount"] == 367
-    assert report["currentCount"] == 466
+    assert report["currentCount"] == 477
     assert "Five post-inventory Visibility Zone" in markdown.read_text(encoding="utf-8")
     assert all(
         row["sourceDisposition"] == "pending-full-material-clause-reconciliation"
@@ -1111,7 +1166,7 @@ def test_explanation_reconciliation_cli_writes_ignored_style_reports(
         "--markdown-output", str(markdown_path),
     ]) == 0
     result = json.loads(json_path.read_text(encoding="utf-8"))
-    assert (result["currentCount"], result["addedCount"]) == (466, 116)
+    assert (result["currentCount"], result["addedCount"]) == (477, 127)
     markdown = markdown_path.read_text(encoding="utf-8")
     assert "not a v1.0 release gate pass" in markdown
     assert "declaration-category:aro:p40" in markdown

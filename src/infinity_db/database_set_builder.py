@@ -26,7 +26,7 @@ from .build_provenance import (
     file_sha256,
 )
 from .curated import load_curated_directory
-from .database.normalized_source import verified_normalized_generation
+from .database.normalized_source import attest_normalized_source, verified_normalized_generation
 from .database_set import (
     COMPLETE_RUNTIME_FILES,
     SEASON_DATABASE_SOURCES,
@@ -37,10 +37,13 @@ from .deployed_object_builder import build_deployed_objects
 from .equipment_presentation_storage import publish_equipment_encodings
 from .its_season_database import build_its_database
 from .rules_database import export_rules_database
+from .search_index_storage import publish_search_index
 from .skill_classification_storage import publish_skill_classifications
 from .symbol_path_storage import publish_symbol_paths
 from .trait_wiki_references import load_trait_wiki_references
 from .unit_filter_storage import publish_unit_filter_semantics
+from .unit_history_storage import history_input_identity, history_inputs, publish_unit_history
+from .unit_input_storage import publish_filter_contexts
 from .variant_usage import build_variant_usage_from_normalized
 from .variant_usage_reference import publication_from_candidate
 from .weapon_ammunition_references import load_ammunition_reference_map
@@ -53,7 +56,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def collect_build_manifest(
     root: Path, source: Path, metadata: Path | None, *,
-    snapshot_manifest: Path | None = None,
+    snapshot_manifest: Path | None = None, history_root: Path | None = None,
 ) -> dict[str, Any]:
     """Declare a conservative maintained-input envelope, never absolute host paths."""
     if not source.is_file() or not zipfile.is_zipfile(source):
@@ -66,7 +69,7 @@ def collect_build_manifest(
         verify_pinned_army_build_source(source, snapshot_manifest)
     envelope = discover_metadata(source, metadata, required=True)
     assert envelope is not None
-    inputs = build_input_fingerprints(root)
+    inputs = build_input_fingerprints(root, unit_history=history_root is not None)
     code_digests = {name: digest for name, digest in inputs.items()
                     if name.startswith("src/") and name.endswith(".py")}
     manifest = {
@@ -79,8 +82,21 @@ def collect_build_manifest(
         },
         "inputs": inputs,
     }
+    if history_root is not None:
+        manifest["history"] = history_input_identity(history_root)
     build_set_id(manifest)
     return manifest
+
+
+def _build_general_profiles(stage: Path, root: Path) -> None:
+    """Compose against core Rules before later publications bind the final Army bytes."""
+    from .general_profile_storage import publish_general_profiles
+
+    rules = stage / "general-profile-rules.db"
+    export_rules_database(load_curated_directory(root / "data/curated/rules"), rules,
+                          finalize=False)
+    publish_general_profiles(stage / "army.db", rules)
+    rules.unlink()
 
 
 def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
@@ -136,7 +152,7 @@ def _build_rules_and_publications(stage: Path, root: Path, manifest: dict[str, A
         documents, rules, variant_usage=variants, weapon_citations=weapons,
         restriction_chart=chart, trait_wiki_links=trait_links,
         combined_saving_rolls=saving_rolls, ammunition_references=ammunition,
-        weapon_properties=properties,
+        weapon_properties=properties, materialize_composed_records=True,
         army_database=army, **export_options,
     )
 
@@ -178,8 +194,11 @@ def build_database_set(
             )
     selected_manifest = selected_manifest.resolve() if selected_manifest is not None else None
     target = args.db_dir.resolve()
+    history_root = (root / "local/data/history" if getattr(args, "with_unit_history", True)
+                    else None)
     manifest = collect_build_manifest(
         root, source, args.metadata, snapshot_manifest=selected_manifest,
+        history_root=history_root,
     )
     selected_manifest_sha256 = (
         file_sha256(selected_manifest) if selected_manifest is not None else None
@@ -191,6 +210,8 @@ def build_database_set(
         protected.add(args.metadata.resolve())
     if selected_manifest is not None:
         protected.add(selected_manifest)
+    if history_root is not None:
+        protected.update(path.resolve() for path in history_inputs(history_root))
     for name in COMPLETE_RUNTIME_FILES:
         output = target / name
         if output.resolve() in protected or (output.exists() and not output.is_file()):
@@ -206,7 +227,7 @@ def build_database_set(
             raise ValueError("Army build failed before runtime publication")
         # Only the verified normalized model is needed by these overlays.
         # The legacy raw-pair publisher APIs remain available for standalone use.
-        normalized = stage / "normalized.json"
+        normalized = attest_normalized_source(stage / "army.db", stage / "normalized.json")
         publish_equipment_encodings(
             stage / "army.db", None,
             root / "config/catalogs/equipment-presentation-encodings.json",
@@ -234,17 +255,28 @@ def build_database_set(
             root / "src/infinity_db/web/static",
             normalized=normalized,
         )
+        _build_general_profiles(stage, root)
+        publish_filter_contexts(stage / "army.db")
+        if history_root is not None:
+            publish_unit_history(
+                stage / "army.db", history_root, rules_directory=root / "data/curated/rules",
+            )
         _build_rules_and_publications(stage, root, manifest)
         from .rules_database import RulesDatabase
 
         core_revision = RulesDatabase(stage / "rules_n5.db").current_core_scenario_revision()
         _build_registered_seasons(stage, root, core_revision)
+        publish_search_index(
+            stage / "army.db", stage / "rules_n5.db",
+            {season: stage / filename for season, (filename, _) in SEASON_DATABASE_SOURCES.items()},
+        )
         result = validate_database_set(stage, require_complete=True)
         if result["buildProvenance"].get("buildSetId") != build_set_id(manifest):
             raise ValueError("Built runtime set does not match the selected build inputs")
         if (
             collect_build_manifest(
                 root, source, args.metadata, snapshot_manifest=selected_manifest,
+                history_root=history_root,
             ) != manifest
             or (
                 selected_manifest is not None

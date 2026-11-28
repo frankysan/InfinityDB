@@ -182,11 +182,16 @@ def build_manifest(
             str(generated),
             "--compact",
         )
-        _run(
-            project_root, "-m", "infinity_db", "export",
-            str(generated / "normalized.json"), str(generated / "army.db"),
-            *(("--with-raw",) if legacy_paired else ()),
-        )
+        if legacy_paired:
+            # Historical v1 comparison only; the installed CLI no longer creates pairs.
+            from infinity_db.cli import _export
+
+            _export(generated / "normalized.json", generated / "army.db", include_raw=True)
+        else:
+            _run(
+                project_root, "-m", "infinity_db", "export",
+                str(generated / "normalized.json"), str(generated / "army.db"),
+            )
         from infinity_db.curated import load_curated_directory
         from infinity_db.rules_database import export_rules_database
 

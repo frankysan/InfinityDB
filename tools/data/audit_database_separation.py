@@ -30,12 +30,24 @@ from infinity_db.equipment_presentation_storage import (
     ARMY_SCHEMA_VERSION as EQUIPMENT_SCHEMA_VERSION,
 )
 from infinity_db.equipment_presentation_storage import ARMY_V27_PUBLISHED_TABLES
+from infinity_db.general_profile_storage import (
+    ARMY_SCHEMA_VERSION as GENERAL_PROFILE_SCHEMA_VERSION,
+)
+from infinity_db.general_profile_storage import (
+    ARMY_V32_PUBLISHED_TABLES,
+    ARMY_V33_PUBLISHED_TABLES,
+    EXPLORER_SCHEMA_VERSION,
+)
 from infinity_db.skill_classification_storage import ARMY_SCHEMA_VERSION as SKILL_SCHEMA_VERSION
 from infinity_db.skill_classification_storage import ARMY_V28_PUBLISHED_TABLES
 from infinity_db.symbol_path_storage import ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA_VERSION
 from infinity_db.symbol_path_storage import ARMY_V31_PUBLISHED_TABLES
 from infinity_db.unit_filter_storage import ARMY_SCHEMA_VERSION as FILTER_SCHEMA_VERSION
 from infinity_db.unit_filter_storage import ARMY_V29_PUBLISHED_TABLES
+from infinity_db.unit_history_storage import ARMY_SCHEMA_VERSION as HISTORY_SCHEMA_VERSION
+from infinity_db.unit_history_storage import ARMY_V35_PUBLISHED_TABLES
+from infinity_db.unit_input_storage import ARMY_SCHEMA_VERSION as CONTEXT_SCHEMA_VERSION
+from infinity_db.unit_input_storage import ARMY_V34_PUBLISHED_TABLES
 
 if __package__:
     from .audit_runtime_database_surface import audit_database as audit_runtime_surface
@@ -109,6 +121,10 @@ PUBLISHED_TABLES_BY_VERSION = {
     FILTER_SCHEMA_VERSION: ARMY_V29_PUBLISHED_TABLES,
     REFERENCE_SCHEMA_VERSION: ARMY_V30_PUBLISHED_TABLES,
     SYMBOL_SCHEMA_VERSION: ARMY_V31_PUBLISHED_TABLES,
+    EXPLORER_SCHEMA_VERSION: ARMY_V32_PUBLISHED_TABLES,
+    GENERAL_PROFILE_SCHEMA_VERSION: ARMY_V33_PUBLISHED_TABLES,
+    CONTEXT_SCHEMA_VERSION: ARMY_V34_PUBLISHED_TABLES,
+    HISTORY_SCHEMA_VERSION: ARMY_V35_PUBLISHED_TABLES,
 }
 
 EXTENSION_CANONICAL_TABLES = {
@@ -118,6 +134,7 @@ EXTENSION_CANONICAL_TABLES = {
     "army_reference_metadata",
     "symbol_path_metadata",
     "published_symbol_assets",
+    "general_profile_payloads",
 }
 EXTENSION_CONTEXTUAL_TABLES = {
     "equipment_presentation_encodings",
@@ -128,6 +145,9 @@ EXTENSION_CONTEXTUAL_TABLES = {
     "legacy_army_identities",
     "army_overview_text",
     "published_symbol_paths",
+    "general_profile_selections",
+    "unit_filter_contexts",
+    "unit_history_payloads",
 }
 
 DERIVED_CANONICAL_TABLES = {
@@ -174,7 +194,7 @@ def _table_classification(published_tables: Mapping[str, Any]) -> dict[str, str]
         or unknown_derived_policy
         or (EXTENSION_CANONICAL_TABLES & EXTENSION_CONTEXTUAL_TABLES)
         or extensions - extension_policy
-        or extension_policy != set(ARMY_V31_PUBLISHED_TABLES) - set(PUBLISHED_DATABASE_TABLES)
+        or extension_policy != set(ARMY_V35_PUBLISHED_TABLES) - set(PUBLISHED_DATABASE_TABLES)
     ):
         raise DatabaseSeparationAuditError("Maintained database-separation policy is invalid")
 

@@ -1,0 +1,229 @@
+"""Live navigation suggestions preserve canonical search and page navigation."""
+
+from collections.abc import Iterator
+from pathlib import Path
+from typing import Any
+
+import pytest
+
+from infinity_db.web import create_app_from_database_set
+from tools.browser_wsgi_transport import route_browser_page
+from tools.testing.browser_test_metrics import launch_timed_chromium
+
+ROOT = Path(__file__).resolve().parents[1]
+ORIGIN = "http://infinitydb-live-search.test"
+
+
+@pytest.fixture(scope="module")
+def app() -> Any:
+    return create_app_from_database_set(ROOT / "data/generated")
+
+
+@pytest.fixture(scope="module")
+def chrome(pooled_chromium_browser: Any) -> Iterator[Any]:
+    if pooled_chromium_browser is not None:
+        yield pooled_chromium_browser
+        return
+    sync_api = pytest.importorskip("playwright.sync_api")
+    with sync_api.sync_playwright() as driver:
+        try:
+            browser = launch_timed_chromium(driver, "live-search")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chromium unavailable: {exc}")
+            raise
+        try:
+            yield browser
+        finally:
+            browser.close()
+
+
+@pytest.mark.parametrize("width", (1440, 768, 390, 320))
+def test_live_search_navigation(app: Any, chrome: Any, width: int) -> None:
+    page = chrome.new_page(viewport={"width": width, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    errors: list[str] = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    try:
+        page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        toggle = page.locator(".global-search-toggle")
+        if toggle.is_visible():
+            toggle.click()
+        query = page.locator("#global-search-query")
+        panel = page.locator("#global-search-panel")
+        options = panel.get_by_role("option")
+        query.fill("m")
+        assert not panel.is_visible()
+        query.fill("co")
+        panel.wait_for(state="visible")
+        assert options.count() == 9
+        footer = panel.locator(".global-search-option--all")
+        assert footer.evaluate("""node => {
+            const r = node.getBoundingClientRect();
+            const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+            return node.contains(hit);
+        }""")
+        query.fill("mim")
+        panel.wait_for(state="visible")
+        assert query.get_attribute("aria-expanded") == "true"
+        assert 1 < options.count() <= 9
+        assert page.url == f"{ORIGIN}/rules"
+        assert page.evaluate(
+            """() => {
+                const r = document.querySelector('#global-search-panel').getBoundingClientRect();
+                return r.left >= 0 && r.right <= innerWidth + 1
+                    && document.documentElement.scrollWidth <= innerWidth + 1;
+            }"""
+        )
+        query.press("ArrowDown")
+        assert query.get_attribute("aria-activedescendant") == options.first.get_attribute("id")
+        query.press("Escape")
+        assert not panel.is_visible()
+        assert query.get_attribute("aria-expanded") == "false"
+        query.fill("Saturation")
+        result = panel.locator('a[href="/rules/saturation"]')
+        result.wait_for(state="visible")
+        result.click()
+        page.wait_for_url(f"{ORIGIN}/rules/saturation")
+        page.wait_for_function(
+            "() => document.activeElement === document.querySelector('main#main')"
+        )
+        assert not panel.is_visible()
+        if toggle.is_visible():
+            toggle.click()
+        query.fill("Dragões")
+        panel.wait_for(state="visible")
+        assert panel.locator(".global-search-option-domain").count() > 0
+        query.press("Enter")
+        page.wait_for_url(lambda url: url.startswith(f"{ORIGIN}/search?s=v1.s."))
+        assert page.locator("#search-query").input_value() == "Dragões"
+        assert not errors
+    finally:
+        page.close()
+
+
+def test_msv_alias_in_search_and_equipment_catalog(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 1440, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/equipment", wait_until="domcontentloaded")
+        entry = page.locator('#catalog-list a[href="/equipment/multispectral-visor"]')
+        entry.wait_for(state="visible")
+        page.locator("#catalog-search").fill("msv")
+        page.wait_for_function(
+            """() => document.querySelectorAll('#catalog-list a').length === 1
+                && document.querySelector('#catalog-list a')?.textContent
+                    === 'Multispectral Visor'"""
+        )
+        assert entry.inner_text() == "Multispectral Visor"
+        query = page.locator("#global-search-query")
+        for value in ("MSV", "msv"):
+            query.fill(value)
+            result = page.locator('#global-search-panel a[href="/equipment/multispectral-visor"]')
+            result.wait_for(state="visible")
+            assert "Multispectral Visor" in result.inner_text()
+            query.press("Escape")
+    finally:
+        page.close()
+
+
+def test_live_search_latest_input_and_keyboard(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 1440, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/rules", wait_until="domcontentloaded")
+        query = page.locator("#global-search-query")
+        panel = page.locator("#global-search-panel")
+        query.fill("mimetism")
+        query.fill("Saturation")
+        panel.locator('a[href="/rules/saturation"]').wait_for(state="visible")
+        assert panel.locator('a[href="/skills/mimetism"]').count() == 0
+        query.fill("")
+        assert not panel.is_visible()
+        query.fill("no-such-result-987654")
+        panel.get_by_text("No matching suggestions").wait_for(state="visible")
+        assert panel.get_by_role("option").count() == 1
+        query.fill("Saturation")
+        panel.locator('a[href="/rules/saturation"]').wait_for(state="visible")
+        query.press("ArrowDown")
+        query.press("Enter")
+        page.wait_for_url(f"{ORIGIN}/rules/saturation")
+        assert not panel.is_visible()
+    finally:
+        page.close()
+
+
+def test_live_full_search_results(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/search")
+        query = page.locator("#search-query")
+        query.fill("Mimetism")
+        query.fill("Saturation")
+        result = page.locator('#search-list a[href="/rules/saturation"]')
+        result.wait_for(state="visible")
+        assert page.locator('#search-list a[href="/skills/mimetism"]').count() == 0
+        assert query.evaluate("node => document.activeElement === node")
+        assert "?s=v1.s." in page.url
+        saved = page.url
+        page.reload()
+        result.wait_for(state="visible")
+        assert query.input_value() == "Saturation"
+        assert page.url == saved
+        query.fill("no-such-result-987654")
+        page.locator("#search-empty").wait_for(state="visible")
+        assert page.locator("#search-count").inner_text() == "0 results"
+        query.fill("")
+        page.locator("#search-prompt").wait_for(state="visible")
+        assert page.url == f"{ORIGIN}/search"
+    finally:
+        page.close()
+
+
+def test_expanded_vocabulary_is_searchable_and_linked(app: Any, chrome: Any) -> None:
+    page = chrome.new_page(viewport={"width": 390, "height": 900})
+    route_browser_page(page, app, ORIGIN)
+    try:
+        page.goto(f"{ORIGIN}/rules")
+        entries = page.evaluate("async () => (await (await fetch('/api/glossary')).json()).items")
+        by_id = {item["id"]: item for item in entries}
+        terms = {
+            "Generic Army": "term:generic-army", "Sectorial Army": "term:sectorial-army",
+            "Army List": "term:army-list", "Army Points": "term:army-points",
+            "Faction": "term:faction", "Unit": "term:unit",
+            "Open Information": "term:open-information", "Vanilla": "term:vanilla",
+            "Cheerleader": "term:cheerleader", "Rambo": "term:rambo",
+            "WYSIWYG": "term:wysiwyg", "Linkable": "fireteam-term:linkable",
+            "Pure Fireteam": "fireteam-term:pure-fireteam",
+            "Order monkey": "term:cheerleader",
+        }
+        for query, identity in terms.items():
+            entry = by_id[identity]
+            assert entry["embedded"]
+            assert entry["citations"]
+            results = page.evaluate(
+                """async query => (await (await fetch('/api/search?q='
+                    + encodeURIComponent(query))).json()).items""", query,
+            )
+            assert any(item["href"] == entry["href"] for item in results), query
+        assert by_id["fireteam-term:linkable"]["provenance"] == "historical-official"
+        assert by_id["fireteam-term:pure-fireteam"]["provenance"] == "community-historical"
+        assert "Community shorthand" in by_id["term:vanilla"]["description"]
+        assert any(citation["source_id"] == "community-acronym-glossary-2017"
+                   for citation in by_id["term:vanilla"]["citations"])
+        for name, identity in (("Vanilla", "term:vanilla"), ("Linkable", "fireteam-term:linkable")):
+            page.goto(f"{ORIGIN}/rules")
+            toggle = page.locator(".global-search-toggle")
+            if toggle.is_visible():
+                toggle.click()
+            page.locator("#global-search-query").fill(name)
+            page.locator("#global-search-panel").locator(
+                f'a[href="{by_id[identity]["href"]}"]'
+            ).click()
+            entry = page.locator("#" + identity.replace(":", "-"))
+            entry.wait_for(state="visible")
+            assert entry.locator("h3").inner_text() == name
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+    finally:
+        page.close()

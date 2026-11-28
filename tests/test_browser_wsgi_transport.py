@@ -16,6 +16,10 @@ def _app(environ: dict[str, Any], start_response: Any) -> list[bytes]:
         ("Content-Type", "text/plain"),
         ("X-Request-Method", environ["REQUEST_METHOD"]),
     ])
+    if environ["REQUEST_METHOD"] == "POST":
+        assert environ["HTTP_HOST"] == "127.0.0.1:8080"
+        assert environ["CONTENT_TYPE"] == "application/json"
+        return [environ["wsgi.input"].read(int(environ["CONTENT_LENGTH"]))]
     return [f"{path}?{environ['QUERY_STRING']}".encode()]
 
 
@@ -35,6 +39,7 @@ def test_page_routing_handles_same_origin_and_preserves_external_requests() -> N
             self.url = url
             self.method = "GET"
             self.headers: dict[str, str] = {}
+            self.post_data_buffer: bytes | None = None
 
     class Route:
         def __init__(self, url: str) -> None:
@@ -59,6 +64,12 @@ def test_page_routing_handles_same_origin_and_preserves_external_requests() -> N
     internal = Route("http://127.0.0.1:8080/api/units?limit=1")
     page.callback(internal)
     assert internal.handled == (200, b"/api/units?limit=1")
+    submitted = Route("http://127.0.0.1:8080/api/feedback")
+    submitted.request.method = "POST"
+    submitted.request.headers["content-type"] = "application/json"
+    submitted.request.post_data_buffer = b'{"message":"test report"}'
+    page.callback(submitted)
+    assert submitted.handled == (200, submitted.request.post_data_buffer)
     external = Route("https://example.org/api/units")
     page.callback(external)
     assert external.continued

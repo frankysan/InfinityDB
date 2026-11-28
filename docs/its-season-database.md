@@ -825,9 +825,18 @@ This Extra is a **Rule**, not a `scenario`, in the existing
 season-local optional Extra records and their source revision, typed deck
 selection, Tactical Elements, glossary, game sizes, and citation integrity.
 No new SQLite schema or separate Extra-specific web route is introduced.
-The ITS 18 database retains the existing report shape when no Extra
-is present. Cross-season component/Skill equivalence, complete physical
-deck card acquisition and earlier source revisions remain under review.
+ITS 18 now publishes its independently reviewed Resilience Operations Rule
+(EN pp. 38–48, ES pp. 39–51, plus the Extra overview and token charts) in
+the same typed model. It retains its distinct source notes, notably the
+different Objective-placement reference lines, neutral HVT MOV/S values and
+hostile HVT melee weapon. Both seasons also publish the remaining Extra
+overviews as season-local optional-extra Rules, with explicit contexts, and
+general tournament references as basic-rule records. The inspection report
+separates `extras` from `seasonRules` by category. Both seasons retain their
+unchanged scenario membership counts. The
+[scenario page reference](season-publication-ownership.md#season-rules-on-scenario-pages)
+describes the browser coverage. Complete physical deck card acquisition and
+earlier source revisions remain separate research.
 
 Optional `sharedSkillBindings.overrides` entries use exact
 `{scenarioId, ruleId, field, value}` objects. Only complete prose-array
@@ -866,10 +875,11 @@ Both compile to separate tracked SQLite files in the four-file runtime bundle;
 source and library hashes, exact season/revision membership and independent
 citations are checked during build, application startup and deployment validation.
 
-This is proven on synthetic single-season, two-season and revision-tagged
-fixtures, **not** reviewed ITS 17 data. Generic component overrides and
-real migrations remain [unfinished](TODO.md#its-scenarios-and-game-tools); see the
-[canonical data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
+Synthetic single-season, two-season and revision-tagged fixtures validate the
+reuse contract; ITS 17 also uses the registered library in its reviewed publication.
+This does not establish equivalence for every cross-season mechanic. Generic
+component overrides and broader reuse remain [unfinished](TODO.md#its-scenarios-and-game-tools); see the
+[canonical data model](data-model-scenarios.md#accepted-cross-season-scenario-and-skill-reuse).
 
 ### Published 2026.09.11 hotfix curation
 

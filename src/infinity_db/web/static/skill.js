@@ -1,6 +1,6 @@
 import { formatSkillDistanceExtra } from "./distance.js";
 import { optionalUnitFilters } from "./preferences.js";
-import { getCatalogItem, getRestrictionsReference, visibleUnitIds } from "./api.js";
+import { getCatalogItem, getRestrictionsReference, observeVisibleUnitIds } from "./api.js";
 import { faqRulingsSection, fetchReviewedFaqRulings } from "./faq-rulings.js";
 import { renderUnitRows } from "./unit-list.js";
 import { gameplayVariantRules, rulesReferenceSection } from "./rules-reference.js";
@@ -17,6 +17,7 @@ const status = document.getElementById("skill-status");
 const content = document.getElementById("skill-content");
 let currentSkill;
 let displayedSkill;
+let visibility = null;
 let faqItems = [];
 let restrictionsData = null;
 let exactUsage = null;
@@ -379,7 +380,7 @@ function render(skill) {
     context.className = "detail-copy";
     const link = document.createElement("a");
     link.href = `/skills/${encodeURIComponent(skill.canonical_slug)}`;
-    link.textContent = "View all applicable contexts";
+    link.textContent = "View all applicable seasons and scenarios";
     context.append(link);
     children.push(context);
   }
@@ -424,15 +425,33 @@ document.addEventListener(
   { once: true },
 );
 window.addEventListener("distanceunitchange", () => {
-  if (currentSkill) render(currentSkill);
+  if (displayedSkill) render(displayedSkill);
 }, { signal: pageController.signal });
+
+function renderVisibleSkill() {
+  if (!currentSkill || !visibility || pageController.signal.aborted) return;
+  if (visibility.error) {
+    displayedSkill = undefined;
+    content.hidden = true;
+    status.hidden = false;
+    status.textContent = "Could not load Unit availability. Please try again.";
+    console.error("Could not load Unit availability", visibility.error);
+    return;
+  }
+  render(withVisibleUnits(currentSkill, visibility.ids));
+}
+
 if (!skillId) {
   name.firstChild.textContent = "Skill unavailable";
   status.textContent = "This Skill link is invalid.";
 } else {
   getCatalogItem("skills", skillId, pageController.signal).then((skill) => {
+    if (pageController.signal.aborted) return;
     currentSkill = skill;
-    render(skill);
+    observeVisibleUnitIds(optionalUnitFilters, pageController.signal, (result) => {
+      visibility = result;
+      renderVisibleSkill();
+    });
     const topicId = skill.rules?.find((rule) => rule.id?.startsWith("skill:"))?.id
       || `skill:${skillId}`;
     loadExactVariantUsage(skill, "skill", pageController.signal, (payload) => {
@@ -448,8 +467,6 @@ if (!skillId) {
       .catch((error) => {
         if (error.name !== "AbortError") console.error("Could not load FAQ clarifications", error);
       });
-    return visibleUnitIds(optionalUnitFilters(), pageController.signal)
-      .then((ids) => render(withVisibleUnits(skill, ids)));
   }).catch((error) => {
     if (error.name === "AbortError") return;
     name.firstChild.textContent = "Skill unavailable";
@@ -457,11 +474,3 @@ if (!skillId) {
     console.error("Could not load Skill detail", error);
   });
 }
-window.addEventListener("optionalunitschange", () => {
-  if (!currentSkill) return;
-  visibleUnitIds(optionalUnitFilters(), pageController.signal)
-    .then((ids) => render(withVisibleUnits(currentSkill, ids)))
-    .catch((error) => {
-      if (error.name !== "AbortError") throw error;
-    });
-}, { signal: pageController.signal });

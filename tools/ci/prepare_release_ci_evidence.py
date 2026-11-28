@@ -22,6 +22,8 @@ from tools.ci.release_metadata import check_repository
 
 GITHUB_API_BASE = "https://api.github.com"
 GITHUB_API_VERSION = "2026-03-10"
+# PR merge identity must use the API version that returns the merge SHA.
+GITHUB_PR_API_VERSION = "2022-11-28"
 SCHEMA_VERSION = 1
 _SHA_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 _REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -147,11 +149,13 @@ def verify_release_metadata_for_tag(tag: str, commit_sha: str) -> None:
         )
 
 
-def _request_payload(url: str, *, token: str | None) -> Any:
+def _request_payload(
+    url: str, *, token: str | None, api_version: str = GITHUB_API_VERSION,
+) -> Any:
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "InfinityDB-release-evidence",
-        "X-GitHub-Api-Version": GITHUB_API_VERSION,
+        "X-GitHub-Api-Version": api_version,
     }
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -168,8 +172,10 @@ def _request_payload(url: str, *, token: str | None) -> Any:
     return payload
 
 
-def _request_json(url: str, *, token: str | None) -> dict[str, Any]:
-    payload = _request_payload(url, token=token)
+def _request_json(
+    url: str, *, token: str | None, api_version: str = GITHUB_API_VERSION,
+) -> dict[str, Any]:
+    payload = _request_payload(url, token=token, api_version=api_version)
     if not isinstance(payload, dict):
         raise ReleaseEvidenceError("GitHub response was not a JSON object")
     return payload
@@ -497,10 +503,23 @@ def collect_identical_merge_evidence(
     )
     if not isinstance(prs, list) or len(prs) >= 100:
         raise ReleaseEvidenceError("Associated pull requests are unavailable or incomplete")
+    # Association responses can omit merge identity even for merged PRs.
+    # Use them only for discovery; verify the authoritative individual PR.
     matches = []
-    for pr in prs:
-        if not isinstance(pr, dict):
+    seen_numbers: set[int] = set()
+    for association in prs:
+        if not isinstance(association, dict):
             raise ReleaseEvidenceError("Invalid associated pull request")
+        number = _required_int(association, "number", workflow="Associated PR")
+        if number <= 0 or number in seen_numbers:
+            raise ReleaseEvidenceError("Invalid or duplicated associated pull request number")
+        seen_numbers.add(number)
+        pr = _request_json(
+            f"{GITHUB_API_BASE}/repos/{repository}/pulls/{number}", token=token,
+            api_version=GITHUB_PR_API_VERSION,
+        )
+        if _required_int(pr, "number", workflow="Merged PR") != number:
+            raise ReleaseEvidenceError("GitHub returned a different pull request")
         base, head = pr.get("base"), pr.get("head")
         if not isinstance(base, dict) or not isinstance(head, dict):
             continue

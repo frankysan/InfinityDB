@@ -1,4 +1,5 @@
 import { shareStateHref } from "./share-state.js";
+import { setupLiveSearch } from "./live-search.js";
 
 /** Shared behavior for menus: expanded sidebar sections and compact top-bar popovers. */
 const menus = [...document.querySelectorAll("[data-menu]")];
@@ -8,6 +9,8 @@ const globalSearch = document.querySelector("[data-global-search]");
 const globalSearchToggle = globalSearch?.querySelector(".global-search-toggle");
 const globalSearchInput = globalSearch?.querySelector("#global-search-query");
 const navigationShell = globalSearch?.closest(".sidebar");
+const liveSearch = globalSearch && globalSearchInput
+  ? setupLiveSearch(globalSearch, globalSearchInput) : null;
 
 function setGlobalSearchOpen(isOpen, { focus = false } = {}) {
   if (!globalSearch || !globalSearchToggle || !globalSearchInput) return;
@@ -20,6 +23,7 @@ function setGlobalSearchOpen(isOpen, { focus = false } = {}) {
 }
 
 function closeGlobalSearch() {
+  liveSearch?.dismiss();
   setGlobalSearchOpen(false);
 }
 
@@ -39,7 +43,8 @@ if (globalSearch && globalSearchToggle && globalSearchInput) {
 
   globalSearchToggle.addEventListener("click", () => {
     const isOpen = globalSearch.dataset.open === "true";
-    setGlobalSearchOpen(!isOpen, { focus: !isOpen });
+    if (isOpen) closeGlobalSearch();
+    else setGlobalSearchOpen(!isOpen, { focus: !isOpen });
   });
 
   document.addEventListener("pointerdown", (event) => {
@@ -51,12 +56,13 @@ if (globalSearch && globalSearchToggle && globalSearchInput) {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && globalSearch.dataset.open === "true") {
+    if (!event.defaultPrevented && event.key === "Escape" && globalSearch.dataset.open === "true") {
       closeGlobalSearch();
       globalSearchToggle.focus();
     }
   });
 
+  document.addEventListener("infinity:beforenavigation", closeGlobalSearch);
   window.addEventListener("pagehide", closeGlobalSearch);
   window.addEventListener("pageshow", closeGlobalSearch);
 }

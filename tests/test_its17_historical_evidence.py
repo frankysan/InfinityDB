@@ -1,6 +1,7 @@
 """ITS 17 older-edition observations remain source-pinned and unprojected."""
 from __future__ import annotations
 
+import json
 import sqlite3
 from copy import deepcopy
 from pathlib import Path
@@ -186,9 +187,18 @@ def test_history_does_not_create_older_scenario_routes_or_sqlite_rows(
     with sqlite3.connect(output) as db:
         assert db.execute("SELECT COUNT(*) FROM scenario_sets").fetchone()[0] == 1
         assert db.execute("SELECT COUNT(*) FROM sources").fetchone()[0] == 2
-        rows = db.execute("SELECT payload_json FROM records").fetchall()
-        assert len(rows) == len(EXPECTED_ITS17_SCENARIO_IDS) + 5  # Season records.
-        assert all("historicalEvidence" not in row[0] for row in rows)
+        rows = db.execute("SELECT id, kind, payload_json FROM records").fetchall()
+        assert {row[0] for row in rows if row[1] == "scenario"} == set(
+            EXPECTED_ITS17_SCENARIO_IDS
+        )
+        assert {row[0] for row in rows if row[1] != "scenario"} == {
+            record["id"] for record in current["records"] if record["kind"] != "scenario"
+        }
+        assert all("historicalEvidence" not in row[2] for row in rows)
+        assert all(
+            json.loads(row[2])["facts"]["applicability"]["revision"] == "0.2"
+            for row in rows if row[1] != "scenario"
+        )
 
 
 @pytest.mark.parametrize(("mutation", "message"), [

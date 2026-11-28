@@ -55,6 +55,24 @@ def test_pinned_pdf_keeps_early_profile_and_trait_rows_aligned(
         "53921e91c2d3d62ad5f7125abcd4174b2cf937d45320233eed5b6d301b66af3f"
     )
     assert report["traitRows"] == 173
+
+    # Compare the entire Army metadata inventory, not only the matched chart rows.
+    import re
+
+    marker = re.compile(r"\[\*{1,3}\]")
+    printed = {
+        (row["name"], row["mode"]): marker.findall(" ".join(row["printedTraits"]))
+        for row in report["traits"] if marker.search(" ".join(row["printedTraits"]))
+    }
+    army = {(row["name"], row["mode"]): row["markers"]
+            for row in report["armyMarkerRows"]}
+    assert len(printed) == 46
+    assert len(army) == 45
+    assert not army.keys() - printed.keys()
+    assert printed.keys() - army.keys() == {("Sepsitor Plus", "")}
+    assert {
+        key for key in printed.keys() & army.keys() if printed[key] != army[key]
+    } == {("PARA Mine", "")}
     early = {
         (row["name"], row["mode"]): row for row in report["traits"]
         if (row["name"], row["mode"]) in {

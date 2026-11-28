@@ -28,6 +28,39 @@ ARMY_PATH = ROOT / "data/generated/army.db"
 RULES_PATH = ROOT / "data/generated/rules_n5.db"
 
 
+def _copy_mutable_rules_fixture(path: Path) -> None:
+    """Exercise source-link edits using the supported pre-projection reader."""
+    shutil.copyfile(RULES_PATH, path)
+    with sqlite3.connect(path) as connection:
+        if connection.execute("PRAGMA user_version").fetchone()[0] >= 18:
+            connection.execute("DROP TABLE IF EXISTS reference_pages")
+            connection.execute(
+                "DELETE FROM __rules_metadata WHERE key='referencePagesSha256'"
+            )
+            connection.execute("DROP TABLE IF EXISTS maintained_reference_targets")
+            connection.execute(
+                "DELETE FROM __rules_metadata WHERE key='referenceTargetsSha256'"
+            )
+            connection.execute("DROP TABLE IF EXISTS specialist_candidates")
+            connection.execute(
+                "DELETE FROM __rules_metadata WHERE key='specialistProjectionSha256'"
+            )
+            connection.execute("DROP TABLE IF EXISTS catalog_details")
+            connection.execute("DROP TABLE IF EXISTS catalog_usage_units")
+            connection.execute("DROP TABLE IF EXISTS catalog_summaries")
+            connection.execute("DELETE FROM __rules_metadata WHERE key='catalogProjectionSha256'")
+            connection.execute("DROP TABLE IF EXISTS search_index_terms")
+            connection.execute("DROP TABLE IF EXISTS search_index")
+            connection.execute("DELETE FROM __rules_metadata WHERE key='searchIndex'")
+            connection.execute("DROP TABLE composed_rule_records")
+            connection.execute("DELETE FROM __rules_metadata WHERE key='composedRecordsSha256'")
+            connection.execute("PRAGMA user_version=17")
+            connection.execute("UPDATE __rules_metadata SET value='17' WHERE key='formatVersion'")
+            connection.execute(
+                "UPDATE __rules_metadata SET value='19' WHERE key='databaseCompatibilityVersion'"
+            )
+
+
 def _services():
     database = Database(ARMY_PATH)
     rules = RulesDatabase(RULES_PATH)
@@ -264,7 +297,7 @@ def test_weapon_property_reviewed_examples_have_current_citations_and_routes() -
 
 def test_weapon_property_example_resolves_numeric_army_links(tmp_path: Path) -> None:
     rules_path = tmp_path / "rules_n5.db"
-    shutil.copyfile(RULES_PATH, rules_path)
+    _copy_mutable_rules_fixture(rules_path)
     with sqlite3.connect(rules_path) as connection:
         result = connection.execute(
             "UPDATE record_army_links SET external_id = ? "
@@ -325,7 +358,7 @@ def test_weapon_property_example_filters_stale_weapon_slug(
     tmp_path: Path, valid_ref: str,
 ) -> None:
     rules_path = tmp_path / "rules_n5.db"
-    shutil.copyfile(RULES_PATH, rules_path)
+    _copy_mutable_rules_fixture(rules_path)
     with sqlite3.connect(rules_path) as connection:
         result = connection.execute(
             "UPDATE record_army_links SET external_id = ? "

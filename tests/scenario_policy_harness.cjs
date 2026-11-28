@@ -40,6 +40,11 @@ const context = vm.createContext({
   }),
   readShareState: () => ({ params: new URLSearchParams(), source: "none" }),
   createPanelSwitcher: () => () => {},
+  rulesReferenceArticle: (rule) => {
+    const card = new Element("article");
+    card.textContent = rule.name;
+    return card;
+  },
 });
 vm.runInContext(fs.readFileSync(source, "utf8").replace(/^import .*;$/gm, ""), context);
 
@@ -112,6 +117,47 @@ async function run() {
     "seasonPolicySection({publication:{collection_id:'n5-core'}}, controller)", context,
   ), null);
   assert.equal(requests.length, 6);
+
+  context.controller = new AbortController();
+  context.item = {
+    ...item,
+    season_rules: [
+      { name: "Casevac", facts: { applicability: { context: "season" } } },
+      { name: "Team-Ops", facts: { applicability: { context: "team-ops-extra" } } },
+    ],
+  };
+  const disclosure = vm.runInContext("seasonRulesSection(item, controller)", context);
+  assert.equal(disclosure.tag, "details");
+  assert.equal(Boolean(disclosure.open), false);
+  const [summary, body] = disclosure.children;
+  assert.equal(summary.tag, "summary");
+  assert.equal(summary.children[0].textContent, "Season Rules");
+  assert.equal(body.children[1].children[0].textContent, "General season rules");
+  assert.equal(body.children[1].children[1].textContent, "Casevac");
+  assert.equal(body.children[2].children[0].textContent, "TEAM-OPS Extra");
+  assert.equal(body.children[2].children[1].textContent, "Team-Ops");
+  await settle();
+  assert.equal(requests.length, 6, "Collapsed season rules must not fetch policies");
+  disclosure.open = true;
+  disclosure.dispatchEvent(new Event("toggle"));
+  assert.equal(requests.length, 7);
+  assert.equal(requests[6].signal, context.controller.signal);
+  requests[6].resolve({ contexts: [] });
+  await settle();
+  disclosure.open = false;
+  disclosure.dispatchEvent(new Event("toggle"));
+  disclosure.open = true;
+  disclosure.dispatchEvent(new Event("toggle"));
+  assert.equal(requests.length, 7, "Reopening must not duplicate requests");
+  context.controller = new AbortController();
+  const obsolete = vm.runInContext("seasonRulesSection(item, controller)", context);
+  context.controller.abort();
+  obsolete.open = true;
+  obsolete.dispatchEvent(new Event("toggle"));
+  assert.equal(requests.length, 7, "Aborted disclosures must not start requests");
+  assert.equal(vm.runInContext(
+    "seasonRulesSection({publication:{collection_id:'n5-core'}}, controller)", context,
+  ), null);
   fs.writeSync(1, "scenario ITS context cards: passed\n");
 }
 

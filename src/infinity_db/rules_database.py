@@ -30,6 +30,20 @@ from infinity_db.sqlite_determinism import (
 RULES_APPLICATION_ID = 0x49445231
 RULES_SCHEMA_VERSION = 8
 RULES_COMPATIBILITY_VERSION = 10
+COMPOSED_SCHEMA_VERSION = 18
+COMPOSED_COMPATIBILITY_VERSION = 20
+SEARCH_INDEX_SCHEMA_VERSION = 19
+SEARCH_INDEX_COMPATIBILITY_VERSION = 21
+CATALOG_SCHEMA_VERSION = 20
+CATALOG_COMPATIBILITY_VERSION = 22
+SPECIALIST_SCHEMA_VERSION = 21
+SPECIALIST_COMPATIBILITY_VERSION = 23
+REFERENCE_TARGET_SCHEMA_VERSION = 22
+REFERENCE_TARGET_COMPATIBILITY_VERSION = 24
+REFERENCE_PAGE_SCHEMA_VERSION = 23
+REFERENCE_PAGE_COMPATIBILITY_VERSION = 25
+CATALOG_PRESENTATION_SCHEMA_VERSION = 24
+CATALOG_PRESENTATION_COMPATIBILITY_VERSION = 26
 RULES_METADATA_TABLE = "__rules_metadata"
 ArmyLinkRef = int | str
 
@@ -602,6 +616,7 @@ def export_rules_database(
     ammunition_references: dict[int, dict[str, Any]] | None = None,
     weapon_properties: list[dict[str, Any]] | None = None,
     army_database: Path | None = None,
+    materialize_composed_records: bool = False,
 ) -> None:
     """Atomically replace a rules database from validated curated documents.
 
@@ -631,6 +646,8 @@ def export_rules_database(
         raise ValueError("Embedded Ammunition references require Combined Saving Rolls")
     if weapon_properties is not None and ammunition_references is None:
         raise ValueError("Embedded Weapon Properties require Ammunition references")
+    if materialize_composed_records and weapon_properties is None:
+        raise ValueError("Composed Rules publication requires the v17 baseline")
     if build_provenance is not None:
         from .build_provenance import validate_build_record
 
@@ -844,6 +861,8 @@ def export_rules_database(
                             f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
                             (_json_text(value), key),
                         )
+                if materialize_composed_records:
+                    RulesDatabase(temporary)._stage_composed_records(connection)
                 connection.execute("ANALYZE")
             if finalize:
                 vacuum_deterministic_sqlite(connection)
@@ -997,7 +1016,9 @@ class RulesDatabase:
             if connection.execute("PRAGMA application_id").fetchone()[0] != RULES_APPLICATION_ID:
                 raise ValueError("Unsupported rules database application ID")
             schema_version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema_version not in {RULES_SCHEMA_VERSION, 9, 10, 11, 12, 13, 14, 15, 16, 17}:
+            if schema_version not in {
+                RULES_SCHEMA_VERSION, *range(9, CATALOG_PRESENTATION_SCHEMA_VERSION + 1),
+            }:
                 raise ValueError("Unsupported rules database schema; rebuild rules_n5.db")
             metadata_rows = connection.execute(
                 f"SELECT key, value FROM {RULES_METADATA_TABLE} "
@@ -1007,18 +1028,25 @@ class RulesDatabase:
             expected_compatibility = {
                 8: RULES_COMPATIBILITY_VERSION, 9: 11, 10: 12, 11: 13,
                 12: 14, 13: 15, 14: 16, 15: 17, 16: 18, 17: 19,
+                COMPOSED_SCHEMA_VERSION: COMPOSED_COMPATIBILITY_VERSION,
+                SEARCH_INDEX_SCHEMA_VERSION: SEARCH_INDEX_COMPATIBILITY_VERSION,
+                CATALOG_SCHEMA_VERSION: CATALOG_COMPATIBILITY_VERSION,
+                SPECIALIST_SCHEMA_VERSION: SPECIALIST_COMPATIBILITY_VERSION,
+                REFERENCE_TARGET_SCHEMA_VERSION: REFERENCE_TARGET_COMPATIBILITY_VERSION,
+                REFERENCE_PAGE_SCHEMA_VERSION: REFERENCE_PAGE_COMPATIBILITY_VERSION,
+                CATALOG_PRESENTATION_SCHEMA_VERSION: CATALOG_PRESENTATION_COMPATIBILITY_VERSION,
             }[schema_version]
             if (
                 metadata.get("databaseCompatibilityVersion") != expected_compatibility
                 or (
-                    schema_version in {9, 10, 11, 12, 13, 14, 15, 16, 17}
+                    schema_version >= 9
                     and metadata.get("formatVersion") != schema_version
                 )
             ):
                 raise ValueError(
                     "Rules database compatibility revision does not match this application"
                 )
-            if schema_version in {9, 10, 11, 12, 13, 14, 15, 16, 17}:
+            if schema_version >= 9:
                 from infinity_db.restriction_storage import validate_restriction_snapshot
 
                 try:
@@ -1027,7 +1055,7 @@ class RulesDatabase:
                     raise ValueError(
                         "Invalid Restrictions snapshot: missing or damaged table"
                     ) from exc
-            if schema_version in {10, 11, 12, 13, 14, 15, 16, 17}:
+            if schema_version >= 10:
                 from infinity_db.deployed_object_storage import (
                     validate_deployed_object_snapshot,
                 )
@@ -1036,55 +1064,95 @@ class RulesDatabase:
                     validate_deployed_object_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid v10 deployed-object snapshot") from exc
-            if schema_version in {11, 12, 13, 14, 15, 16, 17}:
+            if schema_version >= 11:
                 from .variant_usage_storage import validate_variant_usage_snapshot
 
                 try:
                     validate_variant_usage_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded variant usage snapshot") from exc
-            if schema_version in {12, 13, 14, 15, 16, 17}:
+            if schema_version >= 12:
                 from .weapon_profile_storage import validate_weapon_profile_snapshot
 
                 try:
                     validate_weapon_profile_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Weapon citation snapshot") from exc
-            if schema_version in {13, 14, 15, 16, 17}:
+            if schema_version >= 13:
                 from .restriction_chart_storage import validate_restriction_chart_snapshot
 
                 try:
                     validate_restriction_chart_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Restrictions chart snapshot") from exc
-            if schema_version in {14, 15, 16, 17}:
+            if schema_version >= 14:
                 from .trait_wiki_storage import validate_trait_wiki_snapshot
 
                 try:
                     validate_trait_wiki_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Trait Wiki snapshot") from exc
-            if schema_version in {15, 16, 17}:
+            if schema_version >= 15:
                 from .combined_saving_roll_storage import validate_combined_saving_roll_snapshot
 
                 try:
                     validate_combined_saving_roll_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Combined Saving Rolls") from exc
-            if schema_version in {16, 17}:
+            if schema_version >= 16:
                 from .ammunition_reference_storage import validate_ammunition_reference_snapshot
 
                 try:
                     validate_ammunition_reference_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Ammunition references") from exc
-            if schema_version == 17:
+            if schema_version >= 17:
                 from .weapon_property_storage import validate_weapon_property_snapshot
 
                 try:
                     validate_weapon_property_snapshot(connection)
                 except sqlite3.Error as exc:
                     raise ValueError("Invalid embedded Weapon Properties") from exc
+            if schema_version >= COMPOSED_SCHEMA_VERSION:
+                try:
+                    self._validate_composed_records(connection)
+                except sqlite3.Error as exc:
+                    raise ValueError("Invalid composed Rules publication") from exc
+            if schema_version >= SEARCH_INDEX_SCHEMA_VERSION:
+                from .search_index_storage import validate_search_index
+
+                try:
+                    validate_search_index(connection)
+                except (sqlite3.Error, TypeError, KeyError) as exc:
+                    raise ValueError("Invalid global search publication") from exc
+            if schema_version >= CATALOG_SCHEMA_VERSION:
+                from .catalog_projection import validate_catalog_projection
+
+                try:
+                    validate_catalog_projection(connection)
+                except (sqlite3.Error, TypeError, KeyError) as exc:
+                    raise ValueError("Invalid catalog projection") from exc
+            if schema_version >= SPECIALIST_SCHEMA_VERSION:
+                from .specialist_filter import validate_specialist_projection
+
+                try:
+                    validate_specialist_projection(connection)
+                except (sqlite3.Error, TypeError, KeyError) as exc:
+                    raise ValueError("Invalid Specialist candidate projection") from exc
+            if schema_version >= REFERENCE_TARGET_SCHEMA_VERSION:
+                from .maintained_text_references import validate_reference_targets
+
+                try:
+                    validate_reference_targets(connection)
+                except (sqlite3.Error, TypeError, KeyError) as exc:
+                    raise ValueError("Invalid maintained reference targets") from exc
+            if schema_version >= REFERENCE_PAGE_SCHEMA_VERSION:
+                from .reference_page_storage import validate_reference_pages
+
+                try:
+                    validate_reference_pages(connection)
+                except (sqlite3.Error, TypeError, KeyError) as exc:
+                    raise ValueError("Invalid reference page projection") from exc
             if connection.execute("PRAGMA quick_check").fetchone()[0] != "ok":
                 raise ValueError("Rules database integrity check failed")
             if connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
@@ -1096,7 +1164,7 @@ class RulesDatabase:
 
         with self._connect() as connection:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema not in {10, 11, 12, 13, 14, 15, 16, 17}:
+            if schema not in range(10, CATALOG_PRESENTATION_SCHEMA_VERSION + 1):
                 return None
             return read_deployed_objects(connection, army_database)
 
@@ -1109,7 +1177,7 @@ class RulesDatabase:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
             if schema in {RULES_SCHEMA_VERSION, 9, 10}:
                 return None
-            if schema not in {11, 12, 13, 14, 15, 16, 17}:
+            if schema not in range(11, CATALOG_PRESENTATION_SCHEMA_VERSION + 1):
                 raise ValueError("Unsupported Rules schema for exact variant usage")
             publication = read_variant_usage(connection, army_database)
         publication["sourceSnapshot"]["rulesDatabaseSha256"] = file_sha256(self.path)
@@ -1121,7 +1189,7 @@ class RulesDatabase:
 
         with self._connect() as connection:
             schema = connection.execute("PRAGMA user_version").fetchone()[0]
-            if schema not in {12, 13, 14, 15, 16, 17}:
+            if schema not in range(12, CATALOG_PRESENTATION_SCHEMA_VERSION + 1):
                 raise ValueError("Embedded Weapon citations require Rules v12 or newer")
             return read_weapon_profile_citations(connection, army_database)
 
@@ -1197,7 +1265,7 @@ class RulesDatabase:
                     "items": [],
                     "evaluationSupported": False,
                 }
-            if schema not in {9, 10, 11, 12, 13, 14, 15, 16, 17}:
+            if schema not in range(9, CATALOG_PRESENTATION_SCHEMA_VERSION + 1):
                 raise ValueError("Unsupported rules database schema")
             payload = candidate_restrictions_payload(
                 connection, subject=subject, record_id=record_id,
@@ -1541,6 +1609,141 @@ class RulesDatabase:
             if display_relations:
                 record["display_relations"] = display_relations
 
+    @staticmethod
+    def _composed_selection_keys(
+        connection: sqlite3.Connection,
+    ) -> set[tuple[str, str, str]]:
+        """Expected (identity, context, kind) rows from current contributions."""
+        by_id: dict[str, list[tuple[str, str, list[str] | None]]] = {}
+        for record_id, kind, role, scope in connection.execute(
+            "SELECT r.id,r.kind,r.composition_role,r.scope_json FROM records r "
+            "JOIN collections c ON c.id=r.collection_id WHERE c.status='current' "
+            "ORDER BY r.id,r.collection_id"
+        ):
+            by_id.setdefault(record_id, []).append(
+                (kind, role, (_decode_json(scope, None) or {}).get("scenarios"))
+            )
+        keys = set()
+        for record_id, contributions in by_id.items():
+            contexts = {scenario for _, _, scope in contributions for scenario in scope or ()}
+            for context in ["", *sorted(contexts)]:
+                selected = [
+                    (kind, role) for kind, role, scope in contributions
+                    if scope is None or context in scope
+                ]
+                if not selected:
+                    continue
+                definitions = [kind for kind, role in selected if role == "definition"]
+                if len(definitions) != 1 or any(kind != definitions[0] for kind, _ in selected):
+                    raise ValueError(f"Invalid composed Rules selection: {record_id}, {context}")
+                keys.add((record_id, context, definitions[0]))
+        return keys
+
+    @staticmethod
+    def _composed_rows(connection: sqlite3.Connection) -> list[tuple[str, str, str, str]]:
+        return [
+            tuple(row) for row in connection.execute(
+                "SELECT record_id,scenario_id,kind,body FROM composed_rule_records "
+                "ORDER BY record_id,scenario_id"
+            )
+        ]
+
+    def _stage_composed_records(self, connection: sqlite3.Connection) -> None:
+        """Use the canonical composer against the uncommitted final source tables."""
+        if connection.execute("PRAGMA user_version").fetchone()[0] != 17:
+            raise ValueError("Composed Rules publication requires Rules v17")
+        original_factory = connection.row_factory
+        connection.row_factory = sqlite3.Row
+        try:
+            expected = self._composed_selection_keys(connection)
+            source = self._records_from_rows(connection, connection.execute(
+                "SELECT r.* FROM records r JOIN collections c ON c.id=r.collection_id "
+                "WHERE c.status='current' ORDER BY r.id,r.collection_id"
+            ).fetchall())
+            records_by_id: dict[str, list[dict[str, Any]]] = {}
+            for record in source:
+                records_by_id.setdefault(record["id"], []).append(record)
+            ordinary = self._compose_records(source)
+            self._attach_reverse_relations(connection, ordinary)
+            self._attach_current_army_links(connection, ordinary)
+            published = {(record["id"], ""): record for record in ordinary}
+            for record_id, context, _kind in sorted(expected):
+                if not context:
+                    continue
+                records = self._compose_records(records_by_id[record_id], scenario_id=context)
+                self._attach_reverse_relations(connection, records)
+                self._attach_current_army_links(connection, records)
+                published[record_id, context] = records[0]
+            connection.execute(
+                "CREATE TABLE composed_rule_records (record_id TEXT NOT NULL, "
+                "scenario_id TEXT NOT NULL, kind TEXT NOT NULL, body TEXT NOT NULL, "
+                "PRIMARY KEY(record_id,scenario_id)) WITHOUT ROWID"
+            )
+            connection.execute(
+                "CREATE INDEX composed_rule_records_kind ON "
+                "composed_rule_records(kind,scenario_id,record_id)"
+            )
+            connection.executemany(
+                "INSERT INTO composed_rule_records VALUES (?,?,?,?)",
+                [
+                    (record_id, context, record["kind"], _json_text(record))
+                    for (record_id, context), record in sorted(published.items())
+                ],
+            )
+            connection.execute(
+                f"INSERT INTO {RULES_METADATA_TABLE} VALUES (?,?)",
+                ("composedRecordsSha256", _json_text(_content_sha256(
+                    self._composed_rows(connection)
+                ))),
+            )
+            connection.execute(f"PRAGMA user_version={COMPOSED_SCHEMA_VERSION}")
+            for key, value in (
+                ("formatVersion", COMPOSED_SCHEMA_VERSION),
+                ("databaseCompatibilityVersion", COMPOSED_COMPATIBILITY_VERSION),
+            ):
+                connection.execute(
+                    f"UPDATE {RULES_METADATA_TABLE} SET value=? WHERE key=?",
+                    (_json_text(value), key),
+                )
+            self._validate_composed_records(connection)
+        finally:
+            connection.row_factory = original_factory
+
+    def _validate_composed_records(self, connection: sqlite3.Connection) -> None:
+        rows = self._composed_rows(connection)
+        if {row[:3] for row in rows} != self._composed_selection_keys(connection):
+            raise ValueError("Incomplete composed Rules selection coverage")
+        digest = connection.execute(
+            f"SELECT value FROM {RULES_METADATA_TABLE} WHERE key='composedRecordsSha256'"
+        ).fetchone()
+        if digest is None or _decode_json(digest[0], None) != _content_sha256(rows):
+            raise ValueError("Composed Rules content fingerprint differs")
+
+    @staticmethod
+    def _has_composed_publication(connection: sqlite3.Connection) -> bool:
+        return connection.execute("PRAGMA user_version").fetchone()[0] >= COMPOSED_SCHEMA_VERSION
+
+    @staticmethod
+    def _published_record(row: sqlite3.Row, include_army_links: bool) -> dict[str, Any]:
+        record = json.loads(row["body"])
+        if not include_army_links:
+            record.pop("army_links", None)
+        return record
+
+    def _published_records_for_ids(
+        self, connection: sqlite3.Connection, ids: list[str], *, include_army_links: bool,
+    ) -> list[dict[str, Any]]:
+        result = []
+        for start in range(0, len(ids), 500):
+            batch = ids[start:start + 500]
+            placeholders = ", ".join("?" for _ in batch)
+            result.extend(self._published_record(row, include_army_links) for row in
+                          connection.execute(
+                "SELECT body FROM composed_rule_records WHERE scenario_id='' "
+                f"AND record_id IN ({placeholders}) ORDER BY record_id", batch,
+            ))
+        return result
+
     def composed_records_for_army_link(
         self,
         entity: str,
@@ -1567,6 +1770,10 @@ class RulesDatabase:
             record_ids = [row["id"] for row in linked_rows]
             if not record_ids:
                 return []
+            if self._has_composed_publication(connection):
+                return self._published_records_for_ids(
+                    connection, record_ids, include_army_links=False,
+                )
             placeholders = ", ".join("?" for _ in record_ids)
             rows = connection.execute(
                 "SELECT r.* FROM records AS r JOIN collections AS c "
@@ -1616,6 +1823,13 @@ class RulesDatabase:
         """
 
         with self._connect() as connection:
+            if self._has_composed_publication(connection):
+                row = connection.execute(
+                    "SELECT body FROM composed_rule_records WHERE record_id=? "
+                    "AND scenario_id IN ('',?) ORDER BY scenario_id DESC LIMIT 1",
+                    (record_id, scenario_id or ""),
+                ).fetchone()
+                return self._published_record(row, include_army_links) if row else None
             rows = connection.execute(
                 "SELECT r.* FROM records AS r JOIN collections AS c "
                 "ON c.id = r.collection_id "
@@ -1644,6 +1858,15 @@ class RulesDatabase:
         include_army_links: bool = False,
     ) -> list[dict[str, Any]]:
         """Return current records of a kind, optionally including Army route links."""
+        with self._connect() as connection:
+            if self._has_composed_publication(connection):
+                return [
+                    self._published_record(row, include_army_links)
+                    for row in connection.execute(
+                        "SELECT body FROM composed_rule_records WHERE kind=? "
+                        "AND scenario_id='' ORDER BY record_id", (kind,),
+                    )
+                ]
         cache = self._composed_kind_cache
         if cache is None:
             with self._connect() as connection:
@@ -1852,6 +2075,10 @@ class RulesDatabase:
             )
             if not record_ids:
                 return []
+            if self._has_composed_publication(connection):
+                return self._published_records_for_ids(
+                    connection, record_ids, include_army_links=True,
+                )
 
             placeholders = ", ".join("?" for _ in record_ids)
             rows = connection.execute(

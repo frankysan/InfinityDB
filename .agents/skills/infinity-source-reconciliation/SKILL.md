@@ -16,6 +16,11 @@ description: "Use when reviewing Infinity or Army rules sources, reconciling con
 Do not use this workflow as a substitute for implementing a database pipeline or browser feature;
 hand those parts to the appropriate workflow after the source semantics are clear.
 
+Where connected MCP tools are available, use the
+[source and artifact workflow](../infinity-mcp-workspace/SKILL.md#source-and-artifact-research)
+to inspect pinned archives, PDF text and file identity efficiently. Treat live
+browser observations as supplementary evidence, not authoritative rules.
+
 ## Procedure
 
 1. Select autonomous work from the [active backlog](../../../docs/TODO.md).
@@ -70,4 +75,6 @@ hand those parts to the appropriate workflow after the source semantics are clea
 - [Rules research](../../../docs/rules-research.md)
 - [Rules semantics](../../../docs/rules-semantics.md)
 - [Data model](../../../docs/data-model.md)
+- [Rules model](../../../docs/data-model-rules.md)
+- [Weapons model](../../../docs/data-model-weapons.md)
 - [Curated data contracts](../../../data/curated/README.md)

@@ -1,7 +1,17 @@
 from __future__ import annotations
 
+import itertools
+import math
 import re
+from collections.abc import Iterator
 from pathlib import Path
+
+from infinity_db.theme_palette import (
+    ARMY_THEMES,
+    army_palette_stylesheet,
+    palette_options,
+    theme_tokens,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src" / "infinity_db" / "web" / "static"
@@ -69,6 +79,8 @@ TEXT_CONTRAST_PAIRS = (
     ("settings choice text", "color-nav-choice-muted", "color-nav-control-surface"),
     ("primary button", "color-text-on-action", "color-action-primary"),
     ("warning status", "color-status-warning-text", "color-status-warning-surface"),
+    ("rules prose", "color-text-primary", "color-surface-subtle"),
+    ("rules source context", "color-text-secondary", "color-surface-subtle"),
     (
         "default availability badge",
         "color-availability-default-text",
@@ -132,8 +144,11 @@ NON_TEXT_CONTRAST_PAIRS = (
         "color-status-warning-indicator",
         "color-status-warning-surface",
     ),
+    ("history addition", "color-status-history-addition", "color-surface-default"),
+    ("history removal", "color-status-history-removal", "color-surface-default"),
     ("loading spinner", "color-spinner-active", "color-spinner-track"),
     ("extended profile accent", "color-profile-accent", "color-surface-default"),
+    ("FAQ edge", "color-text-rule-heading", "color-surface-default"),
     (
         "subordinate profile accent",
         "color-profile-accent-subordinate",
@@ -239,25 +254,89 @@ def test_registered_explicit_themes_have_one_palette_file_each() -> None:
     assert registered == palette_files
 
 
+def test_every_faction_has_three_independent_appearance_seeds() -> None:
+    tokens = _theme_tokens("light")
+    expected = {
+        f"appearance-{slug}-{role}"
+        for _, slug, _ in ARMY_THEMES
+        for role in ("accent", "surface", "chrome")
+    }
+    assert {name for name in tokens if name.startswith("appearance-")} == expected
+    for name in expected:
+        _rgb(tokens[name])
+
+
+def _audited_palettes() -> Iterator[tuple[str, dict[str, str]]]:
+    stylesheet = army_palette_stylesheet().decode()
+    for mode in ("light", "dark"):
+        base = _theme_tokens(mode)
+        assert theme_tokens(mode) == base
+        yield mode, base
+        for _, slug, _ in ARMY_THEMES:
+            selector = f':root[data-theme="{mode}"][data-theme-palette="{slug}"]'
+            body = stylesheet.split(selector + " {\n", 1)[1].split("}\n", 1)[0]
+            overrides = dict(re.findall(r"--([\w-]+):\s*([^;]+);", body))
+            tokens = base | overrides
+            assert tokens == theme_tokens(mode, slug)
+            assert tokens != base
+            for name in base:
+                if name.startswith((
+                    "color-faction-", "color-skill-category-", "color-status-", "color-range-",
+                    "color-division-", "color-availability-", "color-scenario-map-deployment-",
+                    "color-scenario-map-scoring",
+                )):
+                    assert tokens[name] == base[name]
+            yield f"{slug}/{mode}", tokens
+
+
+def test_nomads_chrome_is_near_black_in_both_modes() -> None:
+    for mode in ("light", "dark"):
+        tokens = theme_tokens(mode, "nomads")
+        color = tokens["color-nav-surface"]
+        assert 0.003 < _relative_luminance(color) < 0.025
+
+
+def test_faction_palettes_are_distinct_across_visible_roles() -> None:
+    """Guard against nearly identical navigation, canvas and action colors."""
+    roles = ("color-nav-surface", "color-surface-page", "color-action-primary")
+    for mode in ("light", "dark"):
+        signatures = {}
+        for option in palette_options():
+            tokens = theme_tokens(mode, option["value"])
+            signatures[option["value"]] = tuple(
+                channel for role in roles for channel in _rgb(_resolve_token(tokens, role))
+            )
+        for (first, a), (second, b) in itertools.combinations(signatures.items(), 2):
+            # This is a simple RGB regression guard, not a perceptual contrast metric.
+            assert math.dist(a, b) >= 0.12, (mode, first, second)
+
+
 def test_every_explicit_theme_meets_compact_text_contrast_contract() -> None:
-    for theme in _registered_explicit_themes():
-        tokens = _theme_tokens(theme)
+    for theme, tokens in _audited_palettes():
         default_pairs = tuple(
             (name, name, "color-surface-default") for name in DEFAULT_SURFACE_TEXT
         )
         _assert_contrast_pairs(
             theme,
             tokens,
-            default_pairs + TEXT_CONTRAST_PAIRS,
+            default_pairs + TEXT_CONTRAST_PAIRS + (
+                ("page text", "color-text-primary", "color-surface-page"),
+                ("page secondary text", "color-text-secondary", "color-surface-page"),
+                ("footer", "color-text-footer", "color-surface-page"),
+                ("active navigation", "color-nav-text-active", "color-nav-surface-active"),
+                ("hovered navigation", "color-nav-text-active", "color-nav-surface-hover"),
+                ("hovered primary button", "color-text-on-action", "color-action-primary-hover"),
+                ("skip link", "color-text-on-highlight", "color-action-highlight"),
+            ),
             NORMAL_TEXT_MINIMUM,
         )
 
 
 def test_every_explicit_theme_meets_non_text_contrast_contract() -> None:
-    for theme in _registered_explicit_themes():
+    for theme, tokens in _audited_palettes():
         _assert_contrast_pairs(
             theme,
-            _theme_tokens(theme),
+            tokens,
             NON_TEXT_CONTRAST_PAIRS,
             NON_TEXT_MINIMUM,
         )
@@ -265,8 +344,7 @@ def test_every_explicit_theme_meets_non_text_contrast_contract() -> None:
 
 
 def test_scenario_map_semantic_colors_meet_theme_contrast_contract() -> None:
-    for theme in _registered_explicit_themes():
-        tokens = _theme_tokens(theme)
+    for theme, tokens in _audited_palettes():
         text_pairs = tuple(
             (
                 f"scenario map text on {surface}",
@@ -305,8 +383,7 @@ def test_faction_accents_remain_supplementary_in_every_explicit_theme() -> None:
     assert faction_names
     assert "color: var(--color-faction-" not in PRESENTATION_RULES
 
-    for theme in _registered_explicit_themes():
-        tokens = _theme_tokens(theme)
+    for theme, tokens in _audited_palettes():
         for faction in faction_names:
             primary = _resolve_token(tokens, f"color-faction-{faction}-primary")
             secondary = _resolve_token(tokens, f"color-faction-{faction}-secondary")

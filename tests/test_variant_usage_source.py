@@ -13,6 +13,7 @@ import pytest
 from infinity_db import variant_usage
 from infinity_db.database import export_database, raw_database_path
 from infinity_db.database.normalized_source import (
+    attest_normalized_source,
     verified_army_export_generation,
     verified_normalized_generation,
 )
@@ -83,6 +84,55 @@ def test_overlay_source_requires_exactly_one_verified_input(
     ):
         with pytest.raises(ValueError, match="exactly one"):
             verified_army_export_generation(army, raw, source)
+
+
+def test_attested_source_reuses_validation_without_weakening_generation_checks(
+    source_pair: tuple[Path, Path, dict], monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db.database import importer
+
+    army, normalized, _ = source_pair
+    expected = verified_normalized_generation(army, normalized)
+    receipt = attest_normalized_source(army, normalized)
+
+    def unexpected_validation(_document: dict) -> None:
+        pytest.fail("Attested generation-only consumers revalidated the document")
+
+    monkeypatch.setattr(importer, "validate_input", unexpected_validation)
+    for _ in range(5):
+        assert verified_army_export_generation(army, None, receipt) == expected
+    # Overlay-only metadata is intentionally excluded from the base generation.
+    with closing(sqlite3.connect(army)) as connection, connection:
+        connection.execute(
+            "UPDATE __infinity_metadata SET value='99' "
+            "WHERE key='database_compatibility_version'"
+        )
+    assert verified_normalized_generation(army, receipt) == expected
+
+
+@pytest.mark.parametrize("mutation", ("source-bytes", "base-row", "metadata", "generation"))
+def test_attested_source_rejects_changed_inputs(
+    source_pair: tuple[Path, Path, dict], mutation: str,
+) -> None:
+    army, normalized, _ = source_pair
+    receipt = attest_normalized_source(army, normalized)
+    if mutation == "source-bytes":
+        normalized.write_bytes(normalized.read_bytes() + b" ")
+    else:
+        with closing(sqlite3.connect(army)) as connection, connection:
+            if mutation == "base-row":
+                connection.execute("UPDATE units SET name='changed'")
+            elif mutation == "metadata":
+                connection.execute(
+                    "UPDATE __infinity_metadata SET value='[]' WHERE key='imported_tables'"
+                )
+            else:
+                connection.execute(
+                    "UPDATE __infinity_metadata SET value=? WHERE key='export_pair_sha256'",
+                    (json.dumps("0" * 64),),
+                )
+    with pytest.raises(ValueError, match="changed during build"):
+        verified_normalized_generation(army, receipt)
 
 
 @pytest.mark.parametrize("mutation", ("source-row", "source-metadata", "export-generation"))

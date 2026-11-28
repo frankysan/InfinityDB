@@ -77,12 +77,30 @@ def database_health_report(
     from infinity_db.army_reference_storage import (
         ARMY_SCHEMA_VERSION as REFERENCE_SCHEMA_VERSION,
     )
+    from infinity_db.general_profile_storage import (
+        ARMY_COMPATIBILITY_VERSION as GENERAL_PROFILE_COMPATIBILITY_VERSION,
+    )
+    from infinity_db.general_profile_storage import (
+        ARMY_SCHEMA_VERSION as GENERAL_PROFILE_SCHEMA_VERSION,
+    )
+    from infinity_db.general_profile_storage import (
+        EXPLORER_COMPATIBILITY_VERSION,
+        EXPLORER_SCHEMA_VERSION,
+    )
     from infinity_db.symbol_path_storage import (
         ARMY_COMPATIBILITY_VERSION as SYMBOL_COMPATIBILITY_VERSION,
     )
     from infinity_db.symbol_path_storage import (
         ARMY_SCHEMA_VERSION as SYMBOL_SCHEMA_VERSION,
     )
+    from infinity_db.unit_history_storage import (
+        ARMY_COMPATIBILITY_VERSION as HISTORY_COMPATIBILITY_VERSION,
+    )
+    from infinity_db.unit_history_storage import ARMY_SCHEMA_VERSION as HISTORY_SCHEMA_VERSION
+    from infinity_db.unit_input_storage import (
+        ARMY_COMPATIBILITY_VERSION as CONTEXT_COMPATIBILITY_VERSION,
+    )
+    from infinity_db.unit_input_storage import ARMY_SCHEMA_VERSION as CONTEXT_SCHEMA_VERSION
 
     database_path = Path(path)
     raw_path = raw_database_path(database_path)
@@ -116,6 +134,18 @@ def database_health_report(
         elif schema_revision == SYMBOL_SCHEMA_VERSION:
             application["expectedSchemaRevision"] = SYMBOL_SCHEMA_VERSION
             application["expectedCompatibilityRevision"] = SYMBOL_COMPATIBILITY_VERSION
+        elif schema_revision == EXPLORER_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = EXPLORER_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = EXPLORER_COMPATIBILITY_VERSION
+        elif schema_revision == GENERAL_PROFILE_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = GENERAL_PROFILE_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = GENERAL_PROFILE_COMPATIBILITY_VERSION
+        elif schema_revision == CONTEXT_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = CONTEXT_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = CONTEXT_COMPATIBILITY_VERSION
+        elif schema_revision == HISTORY_SCHEMA_VERSION:
+            application["expectedSchemaRevision"] = HISTORY_SCHEMA_VERSION
+            application["expectedCompatibilityRevision"] = HISTORY_COMPATIBILITY_VERSION
     except (OSError, sqlite3.Error, json.JSONDecodeError, TypeError, ValueError):
         pass
 

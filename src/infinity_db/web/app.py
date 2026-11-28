@@ -12,14 +12,18 @@ from time import perf_counter
 from typing import Any
 
 from infinity_db import __display_version__, __version__
+from infinity_db.catalog_projection import CatalogProjection
 from infinity_db.database import Database
 from infinity_db.publication_registry import PublicationRegistry
 from infinity_db.rules_database import RulesDatabase
+from infinity_db.search_index_storage import PublishedSearchIndex, search_scope
 from infinity_db.snapshot_revision import database_set_snapshot_revision
 from infinity_db.symbol_catalog import SymbolCatalog
+from infinity_db.unit_history import load_unit_history
 from infinity_db.variant_usage_reference import load_runtime_variant_usage
 from infinity_db.weapon_profile_publication import load_runtime_weapon_profile_publication
 from infinity_db.web.api_handler import ApiHandler
+from infinity_db.web.feedback import FeedbackHandler, MailDelivery
 from infinity_db.web.metrics import RequestMetrics
 from infinity_db.web.presentation import ASSETS, PresentationHandler, static_asset_revision
 from infinity_db.web.response import WebResponse
@@ -29,6 +33,13 @@ LOGGER = logging.getLogger(__name__)
 _CONTENT_SECURITY_POLICY = (
     "default-src 'self'; script-src 'self'; object-src 'none'; "
     "base-uri 'none'; frame-ancestors 'none'"
+)
+# Packaged symbols and generated maps are self-contained SVG documents.
+# Their embedded CSS must work when opened directly, without granting scripts
+# or external resource loading and without changing the HTML document policy.
+_SVG_CONTENT_SECURITY_POLICY = (
+    "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; "
+    "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
 )
 
 
@@ -62,6 +73,7 @@ class Application:
         self, database_path: Path, rules_database_path: Path | None = None,
         *, runtime_fingerprints: dict[str, str] | None = None,
         season_databases: Mapping[str, Path] | None = None,
+        history_path: Path | None = None,
     ) -> None:
         self.database = Database(database_path)
         self.database.validate()
@@ -122,6 +134,21 @@ class Application:
         self.snapshot_revision = database_set_snapshot_revision(
             runtime_fingerprints if runtime_fingerprints is not None else fingerprints
         )
+        search_index = (
+            PublishedSearchIndex.select(
+                self.rules_database.path,
+                search_scope(
+                    fingerprints[self.database.path.name],
+                    self.publication_registry.season_manifest()
+                    if self.publication_registry is not None else {},
+                ),
+            )
+            if self.rules_database is not None else None
+        )
+        catalog_projection = (
+            CatalogProjection.select(search_index.path) if search_index is not None else None
+        )
+        self.database.catalog_projection = catalog_projection
         symbols = SymbolCatalog(publication=self.database.symbol_publication())
         static_revision = static_asset_revision(symbols)
         self.presentation = PresentationHandler(
@@ -129,6 +156,10 @@ class Application:
             snapshot_downloaded_on=self.snapshot_downloaded_on,
             snapshot_revision=self.snapshot_revision,
             static_revision=static_revision,
+        )
+        unit_histories = (
+            load_unit_history(history_path, fingerprints[self.database.path.name])
+            if history_path is not None else None
         )
         self.api = ApiHandler(
             self.database,
@@ -141,6 +172,9 @@ class Application:
             variant_usage_revision=self.variant_usage_revision,
             weapon_profile_citations=self.weapon_profile_citations,
             publication_registry=self.publication_registry,
+            search_index=search_index,
+            catalog_projection=catalog_projection,
+            unit_histories=unit_histories,
         )
         # Preserve the existing Application service attributes while request ownership moves
         # behind the API handler. They remain internal compatibility aliases, not dispatch logic.
@@ -155,6 +189,16 @@ class Application:
         self.symbol_catalog = self.api.symbol_catalog
         self.fireteam_rules_reference = self.api.fireteam_rules_reference
         self.request_metrics = RequestMetrics()
+        self.feedback = FeedbackHandler(MailDelivery.from_environment())
+
+    def preload_runtime_indexes(self) -> None:
+        """Warm shared snapshot indexes before accepting concurrent requests.
+
+        Both cached loaders close their read-only connections before returning.
+        Do not populate contextual result caches or retain a live connection.
+        """
+        self.database._unit_graph()
+        self.database._official_army_unit_links()
 
     def _snapshot_etag(self, path: str, query: str) -> str:
         """Return a snapshot validator scoped to one requested representation."""
@@ -268,13 +312,21 @@ class Application:
         method = environ.get("REQUEST_METHOD", "GET")
         path = environ.get("PATH_INFO", "/")
         query = environ.get("QUERY_STRING", "")
-        response = self._dispatch(method, path, query)
+        response = (
+            self.feedback.handle(environ) if path == "/api/feedback"
+            else self._dispatch(method, path, query)
+        )
 
         etag = (
             self._snapshot_etag(path, query)
-            if path.startswith("/api/") and response.status == HTTPStatus.OK
+            if (path.startswith("/api/") and response.status == HTTPStatus.OK
+                and response.cache_control != "no-store")
             else None
         )
+        if etag and response.content_type.split(";", 1)[0] == "image/svg+xml":
+            # Rendered maps can change independently of the database snapshot.
+            # The response has already been rendered, so bind its actual bytes.
+            etag = f'{etag[:-1]}-{sha256(response.body).hexdigest()}"'
         if etag and path == "/api/variant-usage" and self.api.variant_usage_revision:
             representation = sha256(f"{path}?{query}".encode()).hexdigest()[:16]
             etag = (
@@ -287,10 +339,16 @@ class Application:
             status = HTTPStatus.NOT_MODIFIED
             body = b""
 
+        # Select the policy from the original representation, including 304s.
+        csp = (
+            _SVG_CONTENT_SECURITY_POLICY
+            if response.content_type.split(";", 1)[0] == "image/svg+xml"
+            else _CONTENT_SECURITY_POLICY
+        )
         headers = [
             ("Cache-Control", response.cache_control),
             ("X-Content-Type-Options", "nosniff"),
-            ("Content-Security-Policy", _CONTENT_SECURITY_POLICY),
+            ("Content-Security-Policy", csp),
             *([("ETag", etag)] if etag else []),
             *response.headers,
         ]
@@ -306,15 +364,19 @@ class Application:
 def create_app(
     database_path: Path, rules_database_path: Path | None = None,
     *, season_databases: Mapping[str, Path] | None = None,
+    history_path: Path | None = None,
 ) -> Application:
     """Create the app with optionally registered, explicitly selected ITS files."""
 
     return Application(
         database_path, rules_database_path, season_databases=season_databases,
+        history_path=history_path,
     )
 
 
-def create_app_from_database_set(directory: Path) -> Application:
+def create_app_from_database_set(
+    directory: Path, *, history_path: Path | None = None,
+) -> Application:
     """Open exactly one complete embedded set after shared, read-only validation."""
     from infinity_db.database_set import (
         ARMY_DATABASE_FILENAME,
@@ -328,6 +390,7 @@ def create_app_from_database_set(directory: Path) -> Application:
     return Application(
         selected / ARMY_DATABASE_FILENAME, selected / RULES_DATABASE_FILENAME,
         runtime_fingerprints=report["sha256"],
+        history_path=history_path,
         season_databases={
             season: selected / filename
             for season, (filename, _source) in SEASON_DATABASE_SOURCES.items()

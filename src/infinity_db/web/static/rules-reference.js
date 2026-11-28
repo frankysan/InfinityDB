@@ -199,9 +199,8 @@ function appendRuleFactGroup(container, rule, key, label) {
   if (!Array.isArray(facts[key]) || !facts[key].length) return;
   const group = document.createElement("div");
   group.className = "detail-fact-group";
-  if (key === "clarifications") {
-    group.setAttribute("data-provenance", "reviewed-explanation");
-  }
+  group.setAttribute("data-provenance", key === "clarifications"
+    ? "reviewed-explanation" : "maintained-rule");
   const heading = document.createElement("h4");
   heading.className = "detail-fact-heading";
   heading.textContent = label;
@@ -275,6 +274,7 @@ function appendTerrainExamples(container, rule) {
   if (!Array.isArray(examples?.rows)) return;
   const group = document.createElement("section");
   group.className = "detail-fact-group terrain-examples-reference";
+  group.setAttribute("data-provenance", "source-example");
   const heading = document.createElement("h4");
   heading.className = "detail-fact-heading";
   heading.textContent = "Suggested terrain combinations";
@@ -369,6 +369,7 @@ function appendImmunityCases(container, rule) {
   list.className = "detail-list";
   for (const row of rows) {
     const item = document.createElement("li");
+    item.setAttribute("data-provenance", row.provenance);
     const title = document.createElement("strong");
     appendMaintainedText(title, row.title);
     const explanation = document.createElement("p");
@@ -377,7 +378,7 @@ function appendImmunityCases(container, rule) {
     const provenance = document.createElement("p");
     provenance.className = "detail-source";
     provenance.textContent = row.evidence;
-    item.append(title, explanation, provenance);
+    item.append(title, provenance, explanation);
     list.append(item);
   }
   const caveat = document.createElement("p");
@@ -432,6 +433,7 @@ function appendRuleDetails(
   )) {
     const paragraph = document.createElement("p");
     paragraph.className = "detail-copy";
+    paragraph.setAttribute("data-provenance", "maintained-rule");
     appendMaintainedText(paragraph, paragraphTokens);
     container.append(paragraph);
   }

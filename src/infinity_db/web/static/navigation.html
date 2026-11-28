@@ -16,6 +16,10 @@
         <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="4.8"></circle><path d="m12 12 4.2 4.2"></path></svg>
         <input id="global-search-query" name="q" type="search" placeholder="Search InfinityDB" autocomplete="off">
       </div>
+      <div id="global-search-panel" class="global-search-panel" hidden>
+        <p id="global-search-status" class="global-search-status" role="status"></p>
+        <div id="global-search-results" role="listbox" aria-label="Search suggestions"></div>
+      </div>
     </form>
     <div class="menu navigation-menu" data-menu>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="compact-navigation-menu">Navigation <span aria-hidden="true">⌄</span></button>
@@ -28,6 +32,10 @@
         <a class="nav-item" href="/units"{{UNIT_EXPLORER_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="12" y="3" width="5" height="5" rx="1"/><rect x="3" y="12" width="5" height="5" rx="1"/><rect x="12" y="12" width="5" height="5" rx="1"/></svg>
           Unit explorer
+        </a>
+        <a class="nav-item" href="/unit-compare"{{UNIT_COMPARE_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="4" width="6" height="12" rx="1"/><rect x="11" y="4" width="6" height="12" rx="1"/><path d="M5 8h2M13 8h2M5 12h2M13 12h2"/></svg>
+          Unit comparison
         </a>
         <a class="nav-item" href="/skills"{{SKILLS_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 4h12v12H4z"/><path d="M7 7h6M7 10h6M7 13h3"/></svg>
@@ -85,6 +93,10 @@
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 3h10v14H5z"/><path d="M8 7h4M8 10h4M8 13h3"/></svg>
           What's changed
         </a>
+        <a class="nav-item nav-item--project developer-only" href="/snapshot-compare"{{SNAPSHOT_COMPARE_CURRENT}}>
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 3h5v14H4zM11 3h5v14h-5zM5.5 8h2M12.5 12h2"/></svg>
+          Army snapshot comparison
+        </a>
         <a class="nav-item" href="/about"{{ABOUT_CURRENT}}>
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 9v4"/><path d="M10 6.5h.01"/></svg>
           About InfinityDB
@@ -95,9 +107,13 @@
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="settings-menu">Settings <span aria-hidden="true">⌄</span></button>
       <p class="nav-label menu-label">Settings</p>
       <div id="settings-menu" class="compact-menu-panel" aria-label="Settings">
-        <label class="setting-row setting-row--select" for="theme-selector">
+        <label class="setting-row setting-row--select" for="theme-palette-selector">
           <span class="setting-label">Theme</span>
-          <select id="theme-selector" class="setting-select" aria-label="Theme"></select>
+          <select id="theme-palette-selector" class="setting-select" aria-label="Theme"></select>
+        </label>
+        <label class="setting-row setting-row--select" for="theme-selector">
+          <span class="setting-label">Theme mode</span>
+          <select id="theme-selector" class="setting-select" aria-label="Theme mode"></select>
         </label>
         <label class="setting-row setting-row--choice" for="distance-unit-toggle">
           <span class="setting-label">Distance</span>

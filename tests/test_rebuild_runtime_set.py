@@ -47,8 +47,9 @@ def test_rebuild_requires_explicit_pair_and_allows_alternate_destination(
     assert Path(calls[-1][1]).name == "army.zip"
 
 
+@pytest.mark.parametrize("skip_history", [False, True])
 def test_rebuild_can_reuse_the_published_source(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, skip_history: bool,
 ) -> None:
     calls: list[list[str]] = []
     monkeypatch.setattr(
@@ -59,10 +60,12 @@ def test_rebuild_can_reuse_the_published_source(
         rebuild_runtime_set, "infinity_db_main",
         lambda argv: calls.append(argv) or 0,
     )
-    assert rebuild_runtime_set.main(["--use-recorded-source"]) == 0
+    flags = ["--no-unit-history"] if skip_history else []
+    assert rebuild_runtime_set.main(["--use-recorded-source", *flags]) == 0
     assert calls == [[
         "build", "pinned.zip", "--snapshot-manifest", "pinned.json",
         "--db-dir", str(Path("data/generated")), "--compact",
+        *flags,
     ]]
     with pytest.raises(SystemExit):
         rebuild_runtime_set.main([

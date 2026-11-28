@@ -13,7 +13,10 @@ from contextlib import closing
 from pathlib import Path
 from typing import Any
 
-from .database.normalized_source import verified_army_export_generation
+from .database.normalized_source import (
+    VerifiedNormalizedSource,
+    verified_army_export_generation,
+)
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -137,7 +140,7 @@ def read_equipment_encodings(
 
 def publish_equipment_encodings(
     army: Path, raw: Path | None, source: Path,
-    *, normalized: Path | None = None,
+    *, normalized: Path | VerifiedNormalizedSource | None = None,
 ) -> None:
     """Publish v27 from an explicitly verified raw or normalized Army source."""
     encodings = load_equipment_presentation_config(source)

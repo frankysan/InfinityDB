@@ -2,7 +2,7 @@ import { getGlossary } from "./api.js";
 import { appendMaintainedText } from "./maintained-text.js";
 import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteReferenceSet } from "./silhouette-diagrams.js";
-import { readShareState, shareStateHref, writeShareState } from "./share-state.js";
+import { readShareState, writeShareState } from "./share-state.js";
 import { createPanelSwitcher, referenceLoadMessage } from "./view-components.js";
 
 const byId = (id) => document.getElementById(id);
@@ -17,7 +17,10 @@ const elements = {
   list: byId("glossary-list"),
 };
 const controller = new AbortController();
-const query = readShareState("glossary").params.get("q")?.trim().slice(0, 200) || "";
+let query = readShareState("glossary").params.get("q")?.trim().slice(0, 200) || "";
+
+let items;
+let searchTimer;
 
 const show = createPanelSwitcher({
   container: elements.results,
@@ -115,21 +118,25 @@ function revealHashTarget() {
   target.focus?.({ preventScroll: true });
 }
 
-function render(items) {
+function render({ reveal = false } = {}) {
   const needle = query.toLocaleLowerCase();
   const visible = items.filter((item) => matches(item, needle));
   elements.count.textContent = `${visible.length.toLocaleString()} term${visible.length === 1 ? "" : "s"}`;
   if (!visible.length) return show(elements.empty);
   elements.list.replaceChildren(...visible.map(entryNode));
   show(elements.list);
-  requestAnimationFrame(revealHashTarget);
+  if (reveal) requestAnimationFrame(() => {
+    if (!controller.signal.aborted && document.activeElement !== elements.search) revealHashTarget();
+  });
 }
 
 async function load() {
   show(elements.loading);
   try {
     const payload = await getGlossary(controller.signal);
-    render(payload.items);
+    if (controller.signal.aborted) return;
+    items = payload.items;
+    render({ reveal: true });
   } catch (error) {
     if (error.name === "AbortError") return;
     elements.errorMessage.textContent = referenceLoadMessage(error, "glossary");
@@ -140,11 +147,27 @@ async function load() {
 
 elements.search.value = query;
 writeShareState("glossary", query ? { q: query } : {}, { replace: true });
+function applySearch() {
+  clearTimeout(searchTimer);
+  const nextQuery = elements.search.value.trim().slice(0, 200);
+  if (nextQuery === query) return;
+  query = nextQuery;
+  writeShareState("glossary", query ? { q: query } : {}, { replace: true });
+  if (items) render();
+}
+function scheduleSearch(event) {
+  clearTimeout(searchTimer);
+  if (!event.isComposing) searchTimer = setTimeout(applySearch, 150);
+}
+elements.search.addEventListener("input", scheduleSearch);
+elements.search.addEventListener("compositionend", scheduleSearch);
 elements.search.form?.addEventListener("submit", (event) => {
   event.preventDefault();
-  const nextQuery = elements.search.value.trim().slice(0, 200);
-  window.location.href = shareStateHref("/glossary", "glossary", nextQuery ? { q: nextQuery } : {});
+  applySearch();
 });
-document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
+document.addEventListener("infinity:beforenavigation", () => {
+  clearTimeout(searchTimer);
+  controller.abort();
+}, { once: true });
 window.addEventListener("hashchange", revealHashTarget);
 load();

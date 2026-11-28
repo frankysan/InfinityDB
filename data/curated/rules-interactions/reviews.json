@@ -220,6 +220,83 @@
       "note": "Canonical embedded game-term identity; this definition introduces no additional authored rules interaction beyond the scoped terminology itself."
     },
     {
+      "recordId": "term:army-list",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:army-points",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:cheerleader",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:faction",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:generic-army",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:open-information",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:rambo",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:sectorial-army",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:unit",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:vanilla",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
+      "recordId": "term:wysiwyg",
+      "targetRelease": "1.3.0",
+      "status": "reviewed",
+      "reviewedOn": "2026-11-28",
+      "note": "Descriptive terminology only; no additional authored gameplay interaction."
+    },
+    {
       "recordId": "equipment:albedo",
       "targetRelease": "0.7.0",
       "status": "reviewed",

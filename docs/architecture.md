@@ -160,8 +160,8 @@ InfinityDB deliberately separates four kinds of repository data:
 - `data/curated/` contains human-reviewed source-derived knowledge and rules-reference content.
 - `data/manifests/` contains publication/provenance state; the tracked symbol publication manifest
   is a release contract, while acquisition/build manifests are normally local generated evidence.
-- `data/generated/` contains the three tracked runtime databases: `army.db`,
-  `rules_n5.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
+- `data/generated/` contains the four tracked runtime databases: `army.db`,
+  `rules_n5.db`, `its_17.db` and `its_18.db`. Structured reference facts and symbol mappings are embedded.
   SVG/CSS/JS remain ordinary static files. Development intermediates and raw
   exports belong under ignored `local/work/build/`.
 
@@ -173,7 +173,7 @@ See `data/README.md` and `data/curated/README.md` for the concrete file contract
 
 ## Design direction: build-time materialization
 
-**Accepted direction for v1.3.0; not yet implemented.**
+**Accepted direction for v1.3.0; General profiles, composed Rules, search and catalogs implemented.**
 
 The immutable runtime database set is the publication boundary. Move suitable
 deterministic composition, enrichment and indexing from request handling into
@@ -194,21 +194,50 @@ measured need justifies additional infrastructure.
 
 The first candidate is the General profile. Its four optional availability
 flags (Mercenaries, Spec-Ops, Team Operations and Reinforcements) give
-16 combinations per logical Unit. Generate the applicable representations
-and deduplicate identical derived payloads where beneficial, preserving
-the selection mapping, profile identity, shared items, symbols and availability.
-A Unit-detail request may also explicitly include a requested Army; preserve
-that context-specific behavior rather than assuming the 16 flag combinations
-cover every request. The existing [General profile contract](data-model.md#general-profile)
-remains authoritative. Extended Explorer rows must continue to agree with
-Unit details for equivalent selections.
+16 combinations per logical Unit. Army v33 publishes a complete selection
+matrix and deduplicated General-profile payloads, preserving hidden rows
+and raw shared-item buckets. Extended Explorer reads the appropriate
+projections in one batch; Unit details use them to calculate specific-item
+differences. An explicitly requested Army that changes the effective
+selection still uses the shared runtime composer. The existing
+[General profile contract](data-model-army.md#general-profile) remains authoritative;
+both surfaces agree for equivalent selections.
 
-Potential subsequent candidates include canonical Unit details, composed
-Rules records and relations, Skill/Equipment/Weapon enrichment, search
-identity indexes, Glossary entries, catalog usage associations and Scenario
-map SVGs for bounded presentation variants. Respect publication/season scope,
-requested Army context and presentation parameters; materialize only the
-snapshot-dependent portion when a result also depends on a request.
+Rules v18 additionally publishes composed current Rules records with
+their contributions, citations, reverse relations and Army links, indexed
+by identity, kind and applicable N5 scenario context. The canonical
+composer remains the build implementation and legacy reader. Rules v19 adds a
+compact global search projection from canonical catalog entries after the Army
+and ITS publications are finalized. Search matching and ranking remain dynamic;
+complete serving requires matching Army and ordered season fingerprints.
+Rules v20 adds canonical catalog summaries, filter identities and Army detail
+usage, with shared logical Unit display records instead of repeated Unit
+payloads. Rules v24 additionally publishes presentation-enriched shared Unit
+usage records, bound to the embedded Army symbol publication. The catalog API
+retains Unit IDs until after catalog-specific enrichment and expands the prepared
+records only for the final response. Raw repository reads remain unchanged;
+curated detail enrichment and contextual filter counts remain dynamic. Retain
+this projection based on the [Docker comparison](testing-performance.md#catalog-presentation-materialization-pilot--2026-11-27):
+latency, throughput and peak container memory improved across all three catalog
+cases. Additional serialized-response materialization is not currently justified.
+Army v34 publishes the canonical source-owned filter contexts with shared
+property sets and exact occurrence coordinates. The same runtime matcher
+selects eligible occurrences and evaluates prospective counts. The Unit graph
+remains relational: the pilot's small construction-time gain did not justify
+its additional storage and peak allocations.
+Rules v21 adds the four bounded Specialist qualification candidate sets,
+derived from reviewed qualifying Skills and exact Army variants. Candidate
+membership is not permanent Specialist status or a filtered result.
+Full invariant Unit-detail materialization is not selected: its measured
+gain did not justify duplicating the enriched occurrence payloads.
+Rules v22 publishes compact maintained-text target descriptors, including
+parsed preview tokens and canonical routes. Resolve local anchors, scenario
+selection, display forms and season-owned fallback targets in the consumer.
+Rules v23 publishes canonical raw Glossary entries and the core Orders/AROs
+matrix with separate core scenario declaration extensions. The Glossary reuses
+the reference target projection instead of storing fully enriched previews.
+Unit-profile help retains its small runtime cache; Scenario SVGs retain
+runtime rendering because the measured savings do not justify duplication.
 Arbitrary filter combinations, prospective counts, pagination and user
 preferences remain runtime selection/query work; precompute reusable
 associations or indexes rather than enumerating unbounded query results.
@@ -219,6 +248,35 @@ database size, application startup and per-worker memory. Preserve public
 API behavior and source provenance, and retire superseded runtime work/caches
 when parity and compatibility are established. The objective is less total
 work and simpler serving, not maximum precomputation at any cost.
+
+The published General-profile and composed Rules paths bypass their legacy
+composition caches. Keep those caches for compatible fallback readers.
+Published catalog detail reads decode fresh expanded Unit usage without
+retaining it in the repository LRU caches. Keep legacy composition caches
+and small catalog summary caches. The Glossary cache retains runtime-enriched
+tokens, and the shared maintained-text target cache avoids repeated decoding.
+
+The production WSGI entry point warms the shared Unit graph and official Army
+link index before Gunicorn forks, using the existing snapshot caches. The
+loaders close all read-only SQLite connections; contextual and request-specific
+results remain lazy. The direct application factory stays lazy. This is a
+runtime-only choice supported by the [paired Docker comparison](testing-performance.md#pre-fork-runtime-index-initialization-pilot);
+no generated database content changes. The cross-route comparison shows a
+route-dependent memory tradeoff: the warmup reduces Unit-detail memory but
+increases Explorer and catalog peak memory relative to lazy initialization.
+Retain it for the substantial first-access improvement; measure mixed-traffic
+memory during deployment capacity acceptance. The diagnostic opt-out is
+documented with the benchmark procedure.
+
+Retain SQLite's ordinary `mode=ro` connection semantics. The standard
+read-only Docker image has an immutable database lifecycle, but direct
+checkout serving and build/research readers do not have the same guarantee.
+The [paired SQLite benchmark](testing-performance.md#sqlite-immutable-mode-pilot--2026-11-27)
+found only small repeated-request improvements on Linux; they do not justify
+a separate deployment-only connection policy and its propagation across
+runtime readers. Application-level immutable snapshot caches remain separate
+from SQLite's `immutable=1` flag. Reconsider only with a measured workload
+showing significant connection/locking overhead.
 
 Implementation priorities and remaining tasks belong to the
 [performance backlog](TODO.md#performance-storage-and-build-tooling).
@@ -252,7 +310,7 @@ renderer owns labels, links, list formatting, and ordinary Skill detail structur
 are excluded from default core help, and cannot grant permanent Army profile facts. Runtime reads
 consume the materialized `rules_n5.db`, independently of curation files.
 
-[The data model](data-model.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
+[The data model](data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions) owns the implemented contract. Dedicated
 scenario collection/publication indexes and central revision-aware selection live in `rules_n5.db`. The
 JSON API exposes the current list plus exact Army-Points detail projections, and `/scenarios` plus
 `/scenarios/<slug>` provide the corresponding player-facing catalog/detail surface. The backend
@@ -303,7 +361,7 @@ publication validation, source provenance and current-revision selection, and
 retain existing scenario/Skill URLs as compatibility aliases when a definition
 becomes shared. Cross-season composition must be in place before curating ITS
 17 against ITS 18. The detailed authoring and override invariants belong in
-[the data model](data-model.md#accepted-cross-season-scenario-and-skill-reuse).
+[the data model](data-model-scenarios.md#accepted-cross-season-scenario-and-skill-reuse).
 
 **Implemented v1.2.2:** Separate a reviewed canonical
 Scenario Skill identity from the exact versioned definition and its applicability.
@@ -327,17 +385,17 @@ copies/overlays, not mutate authoritative source publications or `rules_n5.db`.
 Its serialization follows the stateless-sharing direction below and its custom
 rule semantics follow `docs/data-model.md`.
 The implemented deterministic SVG projection covers all four N5.3 Core
-scenarios and the separately published ITS Season 18 Battleground pilot.
-Only the Core maps are required for the 1.0 completeness gate; the shared
-geometry schema and renderer can also handle this reviewed ITS sector layout.
+scenarios and the published ITS Season 17/18 missions. See the
+[ITS database](its-season-database.md#release-diagram-acceptance) for reviewed
+season geometry and acceptance.
 Point markers retain semantic marker identity;
 known marker types resolve through canonical marker metadata, including physical diameter where that
 affects the represented game object. N5.3 Domination requires a Console A Marker or same-diameter
 scenery, so Console footprint is rules-relevant; the ITS token table supplies the explicit 40 mm value.
 Renderer-only styling remains separate. The SVG response embeds the canonical map palette
-from the selected Light or Dark theme, so it has the same appearance as a saved standalone file;
-the map API defaults to Light for existing callers and accepts an explicit `theme=light|dark`
-parameter. Scenario pages retain the SVG as a normal `<img>` element for native browser
+from the selected palette and Light or Dark mode, so it has the same appearance as a saved standalone file;
+the map API defaults to InfinityDB Light for existing callers and accepts explicit
+`theme=light|dark` and optional `palette=<army-slug>` parameters. Scenario pages retain the SVG as a normal `<img>` element for native browser
 Save Image As support. Theme changes update the image URL rather than inlining SVG or injecting
 styles into the page. Renderer typography scales with table width in viewBox coordinates
 without changing scenario geometry. The endpoint accepts `distance_unit=in|cm` for deterministic
@@ -356,15 +414,15 @@ Semantic style and marker identities are open at the geometry boundary rather th
 SVG palette; renderer v1 separately validates the styles and canonical marker metadata it can faithfully
 project and fails closed for unsupported presentation. Geometry also permits asymmetric and multiple
 Deployment Zone regions without encoding a one-zone-per-side rule.
-Reviewed ITS variation constrains the extension points. Battleground already
-uses the shared model; additional unsupported ITS geometry, the full mission
-library and an interactive map editor remain post-1.0. Existing catalog
-entities are referenced by typed identity rather than duplicated locally.
+Reviewed ITS variation constrains the extension points. Published missions use
+the shared model; unsupported geometry for future seasons and an interactive
+map editor remain backlog work. Existing catalog entities are referenced by
+typed identity rather than duplicated locally.
 Core and ITS scenarios share this boundary; tournament pairing, rankings
 and mutable match state remain outside it.
 
 The detailed accepted scenario model belongs to
-[the data model](data-model.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in
+[the data model](data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions). Source comparison and rationale remain in
 `docs/rules-semantics.md`; concrete implementation tasks remain in `docs/TODO.md`.
 
 ## Identifiers and routing
@@ -426,7 +484,7 @@ scenario/list content; neither may become a repository for user-authored content
 
 Implementation and codec choices remain post-1.0; the current browser `s=` format
 and server behavior are **unchanged** by this decision. See `docs/TODO.md` for
-benchmarks/acceptance tasks and `docs/data-model.md` for the authored-scenario model.
+benchmarks/acceptance tasks and `docs/data-model-scenarios.md` for the authored-scenario model.
 
 ## Acquisition and snapshot lifecycle
 
@@ -446,19 +504,20 @@ The detailed snapshot/archive contract is owned by `data/README.md`.
 
 ## Generated database boundary
 
-InfinityDB serves three tracked runtime databases:
+InfinityDB serves four tracked runtime databases:
 
 - `data/generated/army.db` — canonical application data derived from Army snapshots and reviewed
   source relationships;
 - `data/generated/rules_n5.db` — curated N5 rules/reference semantics;
-- `data/generated/its_18.db` — ITS Season 18 scenario publications and scoped policies.
+- `data/generated/its_17.db` and `data/generated/its_18.db` — independently selected
+  ITS scenario publications and scoped policies.
 
-`army.raw.db` remains an optional **legacy paired-export** research format,
-available only on explicit request. Neither complete runtime builds nor the
-default standalone export creates it. Runtime repositories query application
+`army.raw.db` remains an optional **legacy paired-export** research format
+for programmatic parity and release-audit consumers only. The installed CLI
+no longer creates it; see the [data lifecycle](../data/README.md#current-paths-and-behavior). Runtime repositories query application
 tables and materialized provenance; they never fall back to raw source tables.
 
-The complete serving contract requires Army v31, Rules v17 and ITS v2,
+The complete serving contract requires Army v34/v35, Rules v24 and ITS v2,
 with source-bound embedded publications and no runtime JSON sidecars.
 Explicit two-file historical fixture validation is retained for research,
 not as an alternate serving path. The [data lifecycle](../data/README.md)
@@ -472,8 +531,10 @@ Complete embedded-set application composition now has one explicit factory,
 `infinity_db.web.create_app_from_database_set`. It uses the shared database-set
 validator's complete mode before opening the selected four-file set.
 Current Army/Rules projections, matched recorded provenance and ITS season/core
-source identity are required; incomplete or stale sets fail before application
-creation. The CLI server and production WSGI use this path. The default
+source identity are required; incomplete or internally mismatched sets fail before
+application creation. Exact working-tree build-input freshness is a separate
+[release/deployment check](data-model.md#shared-runtime-build-input-provenance).
+The CLI server and production WSGI use this path. The default
 tracked Army/Rules/ITS set is shared with Docker, with explicit `--db-dir`
 or `INFINITY_DB_DB_DIR` selection.
 Low-level `create_app` retains explicit database injection for source-semantic
@@ -594,30 +655,32 @@ accessibility are owned by `docs/web-design-guidelines.md`.
 
 The browser CSS separates theme-neutral geometry/typography from an explicit semantic theme
 contract. Component and layout rules consume semantic color/shadow roles rather than concrete
-palette literals. Light and Dark are the initial implementations of that contract. Domain identity
-colors such as faction and rules-category accents remain semantic data roles inside the theme layer
-so each theme can provide contrast-safe values without changing domain meaning.
+palette literals. Light and Dark provide the base InfinityDB palettes. Faction palettes use
+separate authored accent, surface and chrome seeds, with luminance-controlled tinting and
+contrast-audited surface levels. Domain identity, rules-category, status, range and
+deployment colors retain their existing semantic meaning.
 
 CSS source ownership is explicit without introducing a build pipeline: `static/foundation.css` owns
-font declarations and theme-neutral foundational tokens, each explicit theme owns one semantic
-palette file under `static/themes/` (currently `light.css` and `dark.css`),
+font declarations and theme-neutral foundational tokens, the base modes own semantic
+palette files under `static/themes/` (`light.css` and `dark.css`),
 `static/components.css` owns the established shared layout/component rules, and
 `static/page-overrides.css` owns late page-specific exceptions that intentionally sit after the
 shared rules. `/static/styles.css` remains the stable public stylesheet URL; the presentation layer
-composes those sources in that order at request time. This preserves the existing cascade and cache
-contract while keeping maintainership boundaries visible in source. A new explicit theme therefore
-adds a registry entry plus its own `static/themes/<theme>.css` implementation instead of extending a
-shared theme stylesheet.
+composes those sources with generated Army palette overrides immediately after the base palettes.
+`theme_palette.py` resolves eleven faction-inspired palettes from the authored
+appearance seeds in `themes/light.css`, separately from the unchanged Army
+identity pairs. Both modes share these seeds with the standalone SVG renderer.
+The generated stylesheet is cached and included in static-asset revision
+hashing. Seed-only changes do not require database regeneration.
 
-Theme preference defaults to **System**, which follows the operating-system color-scheme preference;
-an explicit user selection wins. The selected preference uses the same session-first, optional-cookie
-persistence contract as other Settings. `static/theme-startup.js` is the intentionally small
-synchronous bootstrap exception to normal browser-module loading: it reads that preference and sets
-the resolved `data-theme` before the stylesheet can produce the first meaningful paint. It also owns
-the data-driven theme registry consumed by `static/theme.js` and the Settings selector.
-`static/preferences.js` owns persistence of the selected theme, while `static/settings.js` owns the
-selector and live System-preference updates. Adding another explicit theme should require a registry
-entry and semantic-token implementation, not new persistence logic.
+Theme defaults to **InfinityDB**; Theme mode defaults to **Auto**, following the operating-system
+color scheme. Both use the existing session-first, optional-cookie persistence contract. The mode
+retains its original preference key and stored `system` value for compatibility. The backend embeds
+the ordered palette registry on the page root. The synchronous `static/theme-startup.js` bootstrap
+resolves both `data-theme` and `data-theme-palette` before first paint, without an API request.
+`static/preferences.js` owns persistence; `static/settings.js` owns both selectors and live
+Auto-mode updates. Theme palettes are faction-based; separate sectorial palettes
+are not planned.
 
 Theme contrast is enforced as a browser design contract: compact/normal text roles must retain at
 least 4.5:1 contrast against their owned surfaces, while meaningful focus/status/graphical cues use
@@ -678,6 +741,29 @@ and operator commands.
 
 Temporary raw request logging is an incident-diagnostic exception, not the normal analytics path,
 and should be minimized and short-lived.
+
+Voluntary error reports are a separate, explicit communication channel, not
+analytics or a personal-content store. The shared form posts bounded JSON to
+`/api/feedback` with an inspectable, optional reference page path (including its
+public entity identifier when present), category and message. The handler
+accepts only recognized page routes, excludes URL queries and fragments, and
+adds the running version. Requests omit preference cookies and the referrer
+path; no visitor identifiers, request headers or source IPs enter the report.
+Same-origin checks, a honeypot field, a 16 KiB body limit, a 2,000-character
+message limit and a process-local six-report sliding-minute cap bound casual
+abuse without tracking individual visitors. The cap is shared by threads of
+each worker, not across workers; it is not a distributed anti-spam service.
+
+The app sends a plain-text email through a configured SMTP relay using
+certificate-validated TLS (STARTTLS or implicit TLS). Sender and recipient
+are fixed operator configuration, never reporter-supplied headers. An
+unconfigured relay disables reporting; delivery errors are reported without
+logging content, credentials or addresses. At most one mail delivery runs
+per worker at a time, and the rate limit counts delivery attempts. The server
+holds no report store or retry queue; successful submission means the SMTP
+relay accepted the message, not confirmed inbox delivery.
+The [deployment policy](deployment.md#voluntary-error-reports) owns
+configuration and mailbox retention.
 
 Capacity/resource evidence follows the same boundary. Retained host/container reports may contain
 bounded CPU, memory/swap, filesystem/inode, disk-I/O, network, container utilization, and

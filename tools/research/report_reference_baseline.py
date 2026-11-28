@@ -3101,12 +3101,15 @@ def audit_current_rule_citation_minimum(
     The authoritative curated loader already checks nonempty citations,
     known source IDs, and locator shape. This additional read-only release
     audit identifies records whose citations reference only noncurrent sources.
+    Explicitly classified community terms require secondary provenance, not an
+    official rules citation. Other record kinds retain the current-source gate.
     It does not inspect source text, adjudicate versions, or verify browser routes.
     """
     from infinity_db.curated import load_curated_document
 
     by_collection = []
     gaps = []
+    community_gaps = []
     for collection_id in CURRENT_CITATION_COLLECTIONS:
         path = root / "data/curated/rules" / f"{collection_id}.json"
         document = load_curated_document(path)
@@ -3127,9 +3130,30 @@ def audit_current_rule_citation_minimum(
             )
         checked = 0
         covered = 0
+        community_checked = 0
+        community_covered = 0
+        community_sources = {
+            source["id"] for source in document["sources"]
+            if source["id"] == "community-acronym-glossary-2017"
+            and source.get("kind") == "web"
+            and source.get("authority") == "secondary"
+            and source.get("version") and source.get("url")
+        }
         for record in document["records"]:
-            checked += 1
             cited = {citation["sourceId"] for citation in record["citations"]}
+            if (collection_id == "n5-core-v5.3" and record["kind"] == "term"
+                    and (record.get("facts") or {}).get("scope") == "community-terminology"):
+                community_checked += 1
+                if cited & community_sources:
+                    community_covered += 1
+                else:
+                    community_gaps.append({
+                        "collection": collection_id,
+                        "recordId": record["id"],
+                        "citedSourceIds": sorted(cited),
+                    })
+                continue
+            checked += 1
             if cited & eligible:
                 covered += 1
             else:
@@ -3140,21 +3164,32 @@ def audit_current_rule_citation_minimum(
                 })
         by_collection.append({
             "collection": collection_id,
-            "records": checked,
+            "records": checked + community_checked,
+            "currentSourceRequiredRecords": checked,
             "withCurrentCitation": covered,
             "withoutCurrentCitation": checked - covered,
+            "communityRecords": community_checked,
+            "withCommunityCitation": community_covered,
+            "withoutCommunityCitation": community_checked - community_covered,
             "currentSourceIds": sorted(eligible),
         })
     return {
         "format": "InfinityDB current citation minimum",
-        "formatVersion": 1,
+        "formatVersion": 2,
         "scope": "current-core-hacking-faq-records",
         "evidence": "declared-version-and-locator-only-not-source-semantics-or-browser",
         "totalRecords": sum(row["records"] for row in by_collection),
+        "currentSourceRequiredRecords": sum(
+            row["currentSourceRequiredRecords"] for row in by_collection
+        ),
         "withCurrentCitation": sum(row["withCurrentCitation"] for row in by_collection),
         "withoutCurrentCitation": len(gaps),
+        "communityRecords": sum(row["communityRecords"] for row in by_collection),
+        "withCommunityCitation": sum(row["withCommunityCitation"] for row in by_collection),
+        "withoutCommunityCitation": len(community_gaps),
         "collections": by_collection,
         "gaps": gaps,
+        "communityGaps": community_gaps,
         "excludedScope": [
             "optional-n4-origin-reinforcements",
             "its-season-18-only",
@@ -3266,13 +3301,21 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         print(
             f"Current N5 citation minimum: {minimum['withCurrentCitation']}/"
-            f"{minimum['totalRecords']} records have a declared current source; "
+            f"{minimum['currentSourceRequiredRecords']} records have a declared current source; "
             f"{minimum['withoutCurrentCitation']} missing"
+        )
+        print(
+            f"Community terminology: {minimum['withCommunityCitation']}/"
+            f"{minimum['communityRecords']} records have declared secondary provenance; "
+            f"{minimum['withoutCommunityCitation']} missing"
         )
         for gap in minimum["gaps"]:
             print(f"  {gap['collection']} / {gap['recordId']}: "
                   f"{', '.join(gap['citedSourceIds'])}")
-        return 1 if minimum["gaps"] else 0
+        for gap in minimum["communityGaps"]:
+            print(f"  Community: {gap['collection']} / {gap['recordId']}: "
+                  f"{', '.join(gap['citedSourceIds'])}")
+        return 1 if minimum["gaps"] or minimum["communityGaps"] else 0
     if args.reconcile_explanation_inventory:
         if args.verify_declaration_pdf is not None and not args.reconcile_declarations:
             parser.error("--verify-declaration-pdf requires --reconcile-declarations")

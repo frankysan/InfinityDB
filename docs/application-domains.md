@@ -73,6 +73,14 @@ can coexist with a Label or Trait of the same name without merging identities. N
 has a standalone catalog/detail hierarchy; both project through Glossary/search, while Attributes
 also participate in contextual Unit-profile help/tooltips.
 
+Army-building and information terms use the same embedded vocabulary. Community
+terms such as Vanilla, Cheerleader and Rambo have descriptive definitions and
+secondary evidence, not independent mechanics. Existing Fireteam terminology
+(Linkable, Pure Fireteam) is projected directly from the curated Fireteam general
+record with its provenance and contextual rule link, rather than maintaining a
+second definition. All participate in Glossary and global search, including live
+suggestions.
+
 Weapon Properties (`weapon-property:*`) are an InfinityDB-owned embedded
 vocabulary for reviewed named characteristics such as Plasma, Viral, MULTI
 and AP+DA. They are linked from exact Weapon profiles and show their canonical
@@ -136,15 +144,14 @@ catalog/detail domain owning `scenario:*` records. It participates in primary
 navigation and the landing page; global search and Glossary participation
 are deliberately disabled for the directly discoverable collections.
 The catalog defaults to the four N5.3 Core missions and can explicitly
-select the published ITS Season 18 Battleground pilot through
-`its-18@2026.09.01`; this is not the full ITS mission library or a 1.0
-completion requirement. Scenario slug
-normalization remains the typed `scenario:<slug>` contract used by the maintained scenario layer.
-Rules export keeps stable scenario collection identity, collection revision, ordered membership,
-source publication revision, and deterministic content identity separate. `RulesDatabase` owns central
-selection: default reads consider only `current` publications, historical revisions require an explicit
-collection/revision pair, and unsupported selections never fall back silently. `ScenarioCatalog`
-composes current publication list/detail read models in maintained collection order. Detail reads
+select the independently published ITS Season 17 V0.2 and Season 18 2026.09.11
+mission collections. Scenario slug normalization remains the typed
+`scenario:<slug>` contract. The publication registry resolves exact collection,
+revision and scenario identity across Rules and ITS databases; unsupported
+selections never fall back silently. See the
+[season publication ownership](season-publication-ownership.md#stable-selection-and-identity-contract)
+for the canonical selection contract. `ScenarioCatalog` composes selected
+publication list/detail read models. Detail reads
 require an explicit supported Army Points value and project setup, geometry, scoring, special
 Rules/Skills, end conditions, source issues, and publication provenance for that selection.
 
@@ -217,6 +224,45 @@ should join the catalog share-state schema rather than remaining browser-local s
 This state model is shared vocabulary, not a requirement that every domain implement all four
 states.
 
+The Extended Unit Explorer requests `/api/units?extended=1&view=explorer`
+with its normal filtering and pagination parameters. The view projects Unit,
+Army and General profile fields for the row renderer, retaining complete
+matching evidence and all response-level counts. It is a transport-only
+projection, not a new database or matching model. The default and explicit
+`view=full` responses remain unchanged; `view=explorer` requires
+`extended=1`.
+
+## Unit comparison
+
+**Current.** `/unit-compare` is a read-only auxiliary Unit view, reachable from
+navigation, the landing page and Unit details. Two independently selected Units
+may be identical. Each side selects an actual Army context and profile, with an
+optional loadout from the same source profile group. The comparison uses the
+existing Unit list and detail API rather than a new database projection or
+independent gameplay model. Its detail requests use `view=comparison&history=0`:
+the comparison view retains current occurrence identities, availability, source
+Attributes, capabilities, attached-model references and formatting inputs, omitting
+unconsumed presentation metadata and history. It filters the existing composed
+response without changing the source-layer semantics. `view=comparison` implies
+history omission and rejects `history=1`. The default detail view retains its
+existing response, including history unless explicitly disabled.
+
+The table compares source-layer Attributes, AVA, type, classification,
+characteristics, Points, SWC, Skills, Equipment, Weapons and attached-model
+references. Profile and loadout source entries remain separate; source Skill
+entries can include Training and Attribute modifiers. Differences-only mode
+hides equal rows, not individual shared items. The view is not a legality
+check or a composite-option/attachment builder.
+
+The comparison's versioned share-state token stores the two Unit identifiers,
+Army context keys, profile and loadout occurrence selectors, and differences-only
+state. Unit and Army identifiers prefer public slugs. Occurrence selectors
+are validated against the current response, with missing or ambiguous selections
+requiring an explicit replacement rather than silently substituting a different
+profile or loadout. Links compare the current snapshot, not a pinned historical
+snapshot. All optional availability categories are included without changing
+saved preferences; distance formatting follows the normal display preference.
+
 ## Armies
 
 **Current.** Armies are a top-level **overview** domain rather than a conventional catalog/detail
@@ -235,6 +281,10 @@ Legacy entries such as Spiral Corps and Foreign Company are visibly marked **Leg
 playable in N5** and do not offer a Unit Explorer link. Catalog status remains independent from
 playability; Reinforcement entries inherit the display status only from their canonical main
 overview group.
+The four visual card treatments distinguish default, Reinforcements, out-of-catalog
+and legacy entries; labels preserve the distinction without relying on color alone.
+See the [presentation contract](web-design-guidelines.md#use-progressive-disclosure-for-secondary-information)
+for the separation of overview cards and technical relationship disclosures.
 
 The overview reuses canonical Army identities/slugs and existing symbol relationships for current
 entries, with curated identities only for historical lists absent from current Army data. The short

@@ -364,8 +364,60 @@ def benchmark_unit_explorer(
         page = context.new_page()
         errors: list[str] = []
         page.on("pageerror", lambda error: errors.append(str(error)))
+        if not pages:
+            cdp = context.new_cdp_session(page)
+            cdp.send("Performance.enable")
+            page.add_init_script("""(() => {
+                performance.setResourceTimingBufferSize(5000);
+                let current;
+                window.explorerTiming = null;
+                window.beginExplorerTiming = () => {
+                    current = {};
+                    window.explorerTiming = null;
+                };
+                // Capture the actual input/click, not Playwright's actionability wait.
+                for (const event of ['click', 'change', 'input']) {
+                    document.addEventListener(event, () => {
+                        if (current && current.event === undefined) {
+                            current.event = performance.now();
+                        }
+                    }, true);
+                }
+                const observer = new MutationObserver(records => {
+                    if (!current || current.event === undefined
+                            || current.ready !== undefined) return;
+                    const count = document.querySelector('#unit-count');
+                    if (!count || count.getAttribute('aria-busy') !== 'false'
+                            || !records.some(r => r.target === count)) return;
+                    current.ready = performance.now();
+                    const result = current;
+                    // Two frame callbacks bound a presentation opportunity, not actual paint.
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        result.frame = performance.now();
+                        const resource = performance.getEntriesByType('resource').filter(entry =>
+                            new URL(entry.name).pathname === '/api/units'
+                            && entry.startTime >= result.event).at(-1);
+                        if (resource) {
+                            result.requestStart = resource.startTime;
+                            result.responseEnd = resource.responseEnd;
+                            result.bytes = resource.decodedBodySize;
+                        }
+                        window.explorerTiming = result;
+                    }));
+                });
+                observer.observe(document, {subtree: true, attributes: true,
+                    attributeFilter: ['aria-busy']});
+            })()""")
+
+        def browser_metrics():
+            return {item["name"]: item["value"] for item in
+                    cdp.send("Performance.getMetrics")["metrics"]}
+
         try:
             def measure(name: str, action: Callable[[], object]) -> None:
+                if name != "initial":
+                    page.evaluate("window.beginExplorerTiming()")
+                    before = browser_metrics()
                 started = time.perf_counter()
                 with page.expect_response(
                     lambda response: "/api/units?" in response.url
@@ -387,12 +439,35 @@ def benchmark_unit_explorer(
                 if timing["responseEnd"] < 0:
                     raise ValueError("API resource timing unavailable")
                 samples.setdefault(name + " API", []).append(timing["responseEnd"] / 1000)
+                if name != "initial":
+                    page.wait_for_function("() => window.explorerTiming !== null")
+                    trace = page.evaluate("window.explorerTiming")
+                    if "responseEnd" not in trace:
+                        raise ValueError(f"Missing browser resource timing: {name}: {trace}")
+                    after = browser_metrics()
+                    phases = {
+                        "event to request": trace["requestStart"] - trace["event"],
+                        "API resource": trace["responseEnd"] - trace["requestStart"],
+                        "response to DOM": trace["ready"] - trace["responseEnd"],
+                        "DOM to frame": trace["frame"] - trace["ready"],
+                        "event to DOM": trace["ready"] - trace["event"],
+                        "script": (after["ScriptDuration"] - before["ScriptDuration"]) * 1000,
+                        "layout": (after["LayoutDuration"] - before["LayoutDuration"]) * 1000,
+                        "style": (after["RecalcStyleDuration"]
+                                  - before["RecalcStyleDuration"]) * 1000,
+                    }
+                    for phase, elapsed in phases.items():
+                        samples.setdefault(f"{name} {phase}", []).append(elapsed / 1000)
+                    print(f"{name}: {trace['bytes']} bytes; "
+                          + ", ".join(f"{key} {value:.1f} ms" for key, value in phases.items()),
+                          flush=True)
 
             origin = f"http://127.0.0.1:{server.server_port}"
             if pages:
                 ready = page_cases[selected_route]
                 target_id = "catalog-list" if ready == "#catalog-table-container" else ready[1:]
                 page.add_init_script("""(() => {
+                    performance.setResourceTimingBufferSize(5000);
                     window.detailRenderTimes = [];
                     const targetId = """ + json.dumps(target_id) + """;
                     const observer = new MutationObserver(records => {
@@ -433,6 +508,84 @@ def benchmark_unit_explorer(
                         f"{selected_route} {phase}: {elapsed*1000:.1f} ms {resources}",
                         flush=True,
                     )
+                    if page.locator("#scenario-season-rules").count():
+                        policies = page.evaluate("""async () => {
+                            const disclosure = document.querySelector('#scenario-season-rules');
+                            const requests = () => performance.getEntriesByType('resource')
+                                .filter(e => new URL(e.name).pathname === '/api/season-policies');
+                            const initialRequests = requests().length;
+                            if (initialRequests || disclosure.open) {
+                                throw Error('Season policies loaded before first expansion');
+                            }
+                            const start = performance.now();
+                            const ready = await new Promise((resolve, reject) => {
+                                const observer = new MutationObserver(() => {
+                                    const wrapper = disclosure.querySelector(
+                                        ':scope > div > section.scenario-section:not([hidden])'
+                                    );
+                                    if (!wrapper) return;
+                                    observer.disconnect();
+                                    clearTimeout(timeout);
+                                    resolve({time: performance.now(),
+                                        cards: wrapper.querySelectorAll('article').length});
+                                });
+                                const timeout = setTimeout(() => {
+                                    observer.disconnect();
+                                    reject(Error('Season policy cards did not load'));
+                                }, 15000);
+                                observer.observe(disclosure, {subtree: true, childList: true,
+                                    attributes: true, attributeFilter: ['hidden']});
+                                disclosure.open = true;
+                            });
+                            await new Promise(resolve => requestAnimationFrame(resolve));
+                            const policyRequests = requests();
+                            if (!ready.cards || policyRequests.length < ready.cards + 1
+                                    || policyRequests.some(e => e.responseStatus >= 400)) {
+                                throw Error('No season policy cards or resource timings');
+                            }
+                            const lastEnd = Math.max(...policyRequests.map(e => e.responseEnd));
+                            return {initialRequests, cards: ready.cards,
+                                requests: policyRequests.length,
+                                firstOpenMs: ready.time - start,
+                                resourceMs: lastEnd - start,
+                                bytes: policyRequests.reduce((n, e) => n + e.decodedBodySize, 0)};
+                        }""")
+                        print(f"{selected_route} {phase} season policy: {policies}", flush=True)
+                        samples.setdefault(
+                            f"{selected_route} {phase} first season policy", [],
+                        ).append(policies["firstOpenMs"] / 1000)
+                        samples.setdefault(
+                            f"{selected_route} {phase} season policy resource", [],
+                        ).append(policies["resourceMs"] / 1000)
+                    if selected_route.startswith("/units/"):
+                        history = page.evaluate("""async () => {
+                            const histories = [...document.querySelectorAll('details.unit-history')]
+                                .filter(node => !node.querySelector(':scope > section'));
+                            const rows = () =>
+                                document.querySelectorAll('.unit-history-change').length;
+                            const initialRows = rows();
+                            const first = histories.find(node =>
+                                !node.classList.contains('unit-history--empty'));
+                            const expand = node => new Promise(resolve => {
+                                if (node.open) return resolve();
+                                node.addEventListener('toggle', resolve, {once: true});
+                                node.open = true;
+                            });
+                            let firstOpenMs = null;
+                            if (first) {
+                                const start = performance.now();
+                                await expand(first);
+                                firstOpenMs = performance.now() - start;
+                            }
+                            await Promise.all(histories.map(expand));
+                            return {initialRows, expandedRows: rows(), firstOpenMs};
+                        }""")
+                        print(f"{selected_route} {phase} history: {history}", flush=True)
+                        if history["firstOpenMs"] is not None:
+                            name = f"{selected_route} {phase} first history"
+                            samples.setdefault(name, []).append(
+                                history["firstOpenMs"] / 1000,
+                            )
                 if errors:
                     raise ValueError(f"Browser errors: {errors}")
                 return
@@ -482,6 +635,97 @@ def benchmark_unit_explorer(
         print(f"{name:<24} p50 {summary['medianMs']:8.1f} ms  p95 {summary['p95Ms']:8.1f} ms")
 
 
+def benchmark_sqlite_immutable(path: Path, iterations: int, repeats: int) -> None:
+    """Compare identical full-set WSGI workloads with only SQLite URI mode changed.
+
+    This single-threaded offline benchmark temporarily intercepts only read-only
+    connections to the four selected files. Do not rebuild that set during a run.
+    """
+    from collections import Counter
+    from contextlib import closing
+    from unittest.mock import patch
+
+    from infinity_db.database_set import SEASON_DATABASE_SOURCES
+    from infinity_db.web.app import create_app_from_database_set
+    from tools.browser_wsgi_transport import wsgi_response
+    from tools.performance.capacity_test import FIRST_ACCESS_CASES
+
+    directory = path.resolve().parent
+    if path.name != "army.db":
+        raise ValueError("Immutable benchmark requires a complete Army database set")
+    paths = [path.resolve(), directory / "rules_n5.db", *(
+        directory / filename for filename, _ in SEASON_DATABASE_SOURCES.values()
+    )]
+    uris = {p.as_uri() + "?mode=ro" for p in paths}
+    connect = sqlite3.connect
+    for p in paths:
+        if any(p.with_name(p.name + suffix).exists() for suffix in ("-wal", "-journal", "-shm")):
+            raise ValueError(f"Unexpected SQLite sidecar for {p.name}")
+        with closing(connect(p.as_uri() + "?mode=ro", uri=True)) as db:
+            if db.execute("PRAGMA journal_mode").fetchone()[0] == "wal":
+                raise ValueError(f"WAL mode is unsuitable for this benchmark: {p.name}")
+
+    routes = {name: case.path for name, case in FIRST_ACCESS_CASES.items()}
+    routes.update({
+        "glossary": "/api/glossary",
+        "orders-aros": "/api/orders-aros",
+        "its18": "/api/scenarios?collection=its-18",
+    })
+    samples: dict[tuple[bool, str], list[float]] = {}
+    counts: Counter[tuple[bool, str]] = Counter()
+    expected: dict[str, bytes] = {}
+
+    def measure(mode: bool, name: str, action: Callable[[], Any]) -> Any:
+        def selected_connect(database: Any, *args: Any, **kwargs: Any) -> sqlite3.Connection:
+            if isinstance(database, str) and database in uris and kwargs.get("uri"):
+                counts[mode, name] += 1
+                if mode:
+                    database += "&immutable=1"
+            return connect(database, *args, **kwargs)
+
+        with patch("sqlite3.connect", new=selected_connect):
+            start = time.perf_counter()
+            result = action()
+            samples.setdefault((mode, name), []).append(time.perf_counter() - start)
+            return result
+
+    print(f"SQLite {sqlite3.sqlite_version}; {iterations} paired startups; "
+          f"{repeats} repeat sweeps per startup; {len(routes)} API routes", flush=True)
+    for iteration in range(iterations):
+        modes = (False, True) if iteration % 2 == 0 else (True, False)
+        apps = {}
+        for mode in modes:
+            def start_app():
+                app = create_app_from_database_set(directory)
+                app.preload_runtime_indexes()
+                return app
+
+            apps[mode] = measure(mode, "startup + preload", start_app)
+        for sweep in range(repeats + 1):
+            for name, route in routes.items():
+                for mode in modes if sweep % 2 == 0 else reversed(modes):
+                    phase = "first" if sweep == 0 else "repeat"
+                    status, _, body = measure(
+                        mode, f"{phase} {name}",
+                        lambda app=apps[mode], target=route: wsgi_response(
+                            app, "http://localhost" + target,
+                        ),
+                    )
+                    if status != 200 or expected.setdefault(name, body) != body:
+                        raise ValueError(f"Unexpected response or parity failure: {name}, {status}")
+        print(f"Completed pair {iteration + 1}/{iterations}", flush=True)
+    for mode, name in samples:
+        if mode:
+            continue
+        baseline, immutable = _summary(samples[False, name]), _summary(samples[True, name])
+        ratio = immutable["medianMs"] / baseline["medianMs"]
+        print(f"{name:30} ro {baseline['medianMs']:8.3f} ms / "
+              f"immutable {immutable['medianMs']:8.3f} ms "
+              f"({(ratio-1)*100:+6.1f}%); "
+              f"connections {counts[False, name]}/{counts[True, name]}", flush=True)
+    print("All API response bodies identical.", flush=True)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("database", type=Path, help="Path to a built army.db snapshot.")
@@ -495,6 +739,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--with-seasons", action="store_true",
         help="Register both ITS databases beside the Army snapshot for browser benchmarks.",
     )
+    parser.add_argument("--sqlite-immutable", action="store_true",
+                        help="Compare SQLite read-only and immutable full-set WSGI reads.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     return parser
 
@@ -504,6 +750,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.cold_iterations < 1 or args.warm_iterations < 1:
         raise SystemExit("iteration counts must be positive")
     try:
+        if args.sqlite_immutable:
+            if args.browser or args.pages or args.profile or args.case or args.json:
+                raise ValueError("--sqlite-immutable is a standalone benchmark")
+            benchmark_sqlite_immutable(args.database, args.cold_iterations, args.warm_iterations)
+            return 0
         if args.with_seasons and not (args.browser or args.pages):
             raise ValueError("--with-seasons requires --browser or --pages")
         if args.browser or args.pages:

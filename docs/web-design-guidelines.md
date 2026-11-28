@@ -28,6 +28,23 @@ Recurring UI behavior should be represented by shared primitives with explicit s
 
 Page-specific CSS and markup remain appropriate for genuinely unique content, but they should not redefine common concepts such as surfaces, table geometry, badges, headers, controls, spacing, responsive behavior, or developer-only presentation.
 
+### Global search suggestions
+
+The navigation search offers a bounded list of live suggestions from the same
+ranked cross-domain search used by the full results page. Typing does not change
+page or history state. Show names and domain labels, preserve the full search
+action, and support pointer, touch, arrow keys, Enter and Escape. Keep keyboard
+focus in the search field during suggestion selection; close the panel when
+leaving search or navigating. Debounce requests and ignore superseded responses.
+Use theme tokens and keep the panel within narrow viewports.
+
+Page-local search inputs also update live where the existing results can be
+filtered or fetched efficiently. Reuse loaded Glossary and catalog data;
+debounce API-backed full search and Unit comparison lookups. Keep explicit
+submit actions available, preserve keyboard focus and shareable filter state,
+and cancel obsolete work on input changes or navigation. Searching for a Unit
+to compare must not silently change an existing selection.
+
 ### Card spacing
 
 **Give every content card an explicit inset.** The `.surface` class supplies
@@ -82,6 +99,14 @@ an implicit source note. Important unresolved *gameplay* ambiguities remain visi
 in normal mode with an intelligible explanation; developer mode is not a way to
 hide conflicting rules.
 
+**Accepted design direction (not yet implemented):** Distinguish official rules
+and statistics, recent official changes, examples, explanations, corrections,
+interpretations and source inconsistencies using shared semantic presentation.
+Official change notices must use reviewed change history; editorial corrections
+and interpretations must not appear to be official rulings. Meaning must remain
+clear independently of color. The final typography and visual treatments are
+subject to the representative-content comparison tracked in [TODO](TODO.md).
+
 **Prefer canonical player labels.** Present reviewed N5 Trait names and preserve
 source labels in the API. Pure spelling, abbreviation, and duplicate Army labels
 (`Zone of Control` versus `Zone of Control (ZoC)`) are developer-only annotations
@@ -110,18 +135,25 @@ publication/row/mode identifies the exact rule and that target is routable
 from the published API; otherwise show the legend category and leave the
 exact target unverified.
 
-The reviewed N5.3 chart subset covers E/M Carbine (p. 176), E/M CC
-Weapon (p. 177, combined N+E/M), Blitzen and Smoke/E/M/Eclipse Grenades
-(p. 178), Smoke/E/M Grenade Launchers (p. 179), seven named Mines
-and **Chest Mine CC Mode only** (p. 181), Deactivator Equipment (p. 186)
-and Sepsitor Plus (p. 187). The combined E/M CC marker links to E/M
-Ammunition, not an invented combined-Ammunition rule. Do not apply the
-Chest Mine CC mapping to its BS Mode, whose Army marker stays unlinked.
-Deactivator's `[***]` marker links to `equipment:deactivator`, never an
-inferred Weapon. Show Army and PDF markers separately on disagreement
-(SRC-013/014). Split combined labels such as `NON-LETHAL [**]` for display,
-retaining the raw source in the API and Developer Mode. Never infer
-missing gameplay Traits or agreement between publications.
+The N5.3 chart (pp. 176–188) has 46 marked profile rows. The complete
+Army metadata inventory reviewed on 2026-11-27 has 45 marked profiles;
+no marked Army identity is absent from the chart. The mapping in
+`src/infinity_db/web/static/weapon-footnotes.js` resolves 42 chart rows
+in the Weapon and Equipment catalogs using the legend and contextual
+rules, including both modes of Mixed Weapons, Drop Bears and D-Charges,
+Perimeter Weapons, and ammunition-specific profiles. The three
+Skill-only chart entries (Discover, Forward Observer and Suppressive
+Fire Mode Weapon) are represented by their canonical Skill rules,
+not separate published Weapons. Chest Mine BS Mode has matching Army
+and PDF notation but remains unlinked; its CC Mode alone links to the
+reviewed Chest Mine rule. The combined E/M CC marker links to E/M
+Ammunition, not an invented combined-Ammunition rule. Equipment markers
+link to their exact Equipment rules, never inferred Weapons.
+
+Show Army and PDF markers separately on disagreement (SRC-013/014).
+Split combined labels such as `NON-LETHAL [**]` for display, retaining
+the raw source in the API and Developer Mode. Never infer missing
+gameplay Traits or agreement between publications.
 
 **Glossary term previews.** Where curated rules prose names a reviewed Visibility Zone
 variant, use a typed `term:` link to its Game term definition. The shared inline
@@ -161,24 +193,32 @@ references, with theme tokens and a second cue beyond color:
   do not repeat a maintenance disclaimer on every card or suggest that its
   gameplay meaning differs from cited official rules.
 - **Explanations, examples and reviewed interpretations:** keep gameplay
-  requirements/effects at body size. Distinguish explanations under
-  **Clarifications and examples**, with an explicit InfinityDB-reviewed
-  caption and a neutral left border. Keep reviewed interaction provenance.
-  A curation review date alone is not an official rules effective date.
+  requirements/effects in upright primary body text. Use an inset explanation
+  with a solid leading edge and an italic InfinityDB-reviewed caption for mixed
+  **Clarifications and examples**. Use a dashed edge for explicitly identified
+  source examples and a double edge for reviewed interpretations, accompanied
+  by a compact semibold evidence label before the explanation. Do not classify
+  unstructured prose by keyword. A curation review date alone is not an
+  official rules effective date.
 - **Source history/context:** label editorial `facts.sourceNotes` as
   **Source context**, in secondary type with a neutral divider, preserving
   maintained links. Cite sources as **Sources**, without conflating Wiki
   evidence, PDFs and official Army data.
 - **Dated FAQ/errata:** render an actual source-reviewed FAQ in its own
-  **FAQ clarifications** section with selected version, publication date and
-  linked citation. The date describes this source publication; it is
-  not an automatically assigned "new" or "changed" badge. Future official
+  **FAQ clarifications** section with selected version and linked citation.
+  Show a publication date only when independently established. The current FAQ
+  v0.1 date is an announcement-era source anchor, not an independently verified
+  PDF publication date (see [FAQ source scope](data-model-rules.md#dated-faqerrata-layer-published-reviewed-subset)).
+  Do not present that anchor as a publication date or use an automatically
+  assigned "new" or "changed" badge. Future official
   errata must have equally explicit publication evidence before adopting
   a distinct revision status.
 - **Unresolved conflict:** when structured competing citations exist, show
   **Source discrepancy — cited publications differ** in the ordinary
   interface even while explanatory detail remains collapsible. The warning
   uses readable text, a leading border and accessible warning theme colors.
+  Unresolved scenario source uncertainty uses the same warning treatment;
+  reviewed scenario interpretations use the interpretation treatment.
   Inline `[[review-needed:source-conflict]]` markers retain their own
   visible uncertainty labels. Do not silently select a winner or hide
   material gameplay ambiguity in Developer Mode.
@@ -189,7 +229,60 @@ This **provenance presentation contract** does not authorize invented source
 classifications or complete an audit of every Army statline, scenario
 discrepancy, or possible historical update. Maintain the source-model
 boundaries in [data-model.md](data-model.md) and test both light/dark,
-desktop/mobile layouts and non-color text cues.
+desktop/mobile layouts and non-color text cues. Use the shared provenance
+styles across all palettes; distinguish categories without changing body
+font family or relying on color alone.
+
+### Unit history presentation
+
+Put a collapsed
+**History** disclosure immediately beneath the current content of each
+General profile and within each applicable Army profile card. History
+belongs to the particular profile or Army context it describes; do not
+repeat a shared General-profile event in every Army card. For Units with
+multiple General profiles (including distinct forms and Peripherals), keep
+their histories separate. An Army history stays within its parent card
+and remains independently collapsed by default. Retain readable historical
+contexts without a corresponding current card in a separate collapsed
+historical section rather than inventing a current profile or Army.
+
+Within each disclosure, group changes by encoded Army revision date (newest
+first), then by meaningful profile/loadout scope and change category:
+characteristics, Skills, Equipment, Weapons, costs, availability and
+lifecycle/relationships as applicable. Classification changes must be
+distinguished from gains, losses and changed values. Use concise
+before/after rows, explicit action labels, and clear spacing between
+scopes and categories; color is supplementary. Consolidate identical
+effects only where the underlying history model supports the scope.
+Keep normal-mode text readable on narrow screens and technical evidence
+available separately. An empty General-profile history must explicitly identify
+the shared General-profile scope and direct readers to the Army histories for
+individual changes. An empty or incomplete history is not evidence that a
+profile has never changed. Direct-owner capability scope excludes attached
+entities; explain that distinction without repeating it in loadout headings
+or splitting otherwise identical display scopes. Show the number of dated
+update posts and displayed change rows in each collapsed heading, counting
+each revision date once per context. Aggregate the displayed posts and rows
+across Other historical contexts. Keep empty disclosures muted but readable
+and expandable, with an explicit "No confirmed updates" label. Identify
+incomplete history and the revision-date convention in every disclosure. The
+[historical data contract](data-model-history.md#private-army-history-research-database)
+owns attribution, observation windows and unresolved evidence.
+Use the shared Skill distance and MOV formatters for historical typed values,
+honoring the cm/in preference without converting unrelated numbers. Keep open
+disclosures open when that preference changes. Construct history bodies on first
+expansion, retaining headings and counts immediately; browser Find cannot match
+unopened history bodies until they have been rendered.
+
+### Official Army links
+
+Place **Open in Infinity Army** at the top of the relevant expanded Army
+profile card, outside its disclosure summary. Open the external destination
+in a separate tab and label distinct parent Army or source Unit destinations
+when necessary. Omit the link row for unsupported targets and never attach a
+current destination to a former historical context. Use the
+[data-model contract](data-model-army.md#official-army-unit-destinations) rather
+than deriving external paths from display names.
 
 ### Explain rules interactions, not just outcomes
 
@@ -335,7 +428,7 @@ not a list-building or active-game-state legality claim. Historical shared
 links without a scope show a labelled legacy compatibility setting until
 changed. Switching scope updates the result and all count labels in one
 request and persists through sharing, navigation and Back/Forward.
-The [data model](data-model.md#context-coherent-filtering) owns the query
+The [data model](data-model-army.md#context-coherent-filtering) owns the query
 and share-state contract.
 
 An individual Clear button resets both its selections and option search.
@@ -368,6 +461,8 @@ second, repeated publication/date line above the group. Keep archival source
 dates and first-publication attribution in the maintained data, and preserve
 an explicit expandable discrepancy note when cited sources materially differ.
 Maintain separation between detail/usage panels and following FAQ cards.
+Use a single background for the question and answer, with a small inset from
+an otherwise unpadded containing surface. Keep discrepancy callouts distinct.
 
 ### Preserve predictable geometry
 
@@ -396,6 +491,11 @@ Developer mode should add technical depth rather than redefine the primary prese
 On Unit detail pages, source-defined **Reinforcement relationships** and
 technical Army/faction membership diagnostics belong in Developer Mode;
 normal profile availability and ordinary Army/Unit navigation remain public.
+On the Army overview, distinguish default, Reinforcements, out-of-catalog and
+legacy cards through theme-aware shading alongside readable role/status labels;
+do not repeat the reinforcement relationship lines there. Matched configuration
+summaries are independent disclosures within navigable Unit Explorer rows:
+highlight the summary on hover/focus and use a normal cursor on its expanded content.
 
 The accuracy and independence notice is a **floating, viewport-bottom
 section** in the shared page shell, rather than an ordinary footer row.
@@ -409,9 +509,12 @@ choice persists only in the current tab's session storage, including soft
 navigation and reload; it is not a cookie, permanent dismissal, or consent
 control. When session storage is disabled, the native disclosure still works.
 Keep visible focus and accessible expanded/collapsed state, avoid obscuring
-mobile navigation or other fixed controls, and do not invent a feedback
-collection destination. Dedicated assistive-technology testing remains part
-of final accessibility acceptance.
+mobile navigation or other fixed controls. Both the ordinary footer and the
+expanded notice offer the same error-reporting dialog with an optional page
+context preview, no personal/contact fields and explicit submission. Preserve
+native modal keyboard/focus behavior and communicate submission success or
+failure without navigating away. Dedicated assistive-technology testing
+remains part of final accessibility acceptance.
 
 ### Write player-facing copy for players
 
@@ -481,7 +584,43 @@ branding.
 
 Themes define semantic color and appearance roles. Layout primitives define structure, spacing, sizing, and interaction behavior. Components should consume both without baking a particular theme into geometry or duplicating layout for individual theme variants.
 
+Theme identity and theme mode are independent preferences. InfinityDB remains
+the default palette; eleven optional faction palettes are ordered by numerical
+Army ID. Auto, Light and Dark apply to every palette. Semantic game colors
+remain independent of the selected palette, and the same contrast contract
+applies to every combination.
+
+Faction themes are authored interpretations, not official paint recipes.
+Use Army colors, the published faction SVG emblems under `static/armies/`,
+and miniature paint schemes as inspiration. Corvus Belli's
+[painting article](https://infinityuniverse.com/en/news/alternative-color-scheme-for-infinity-troops)
+describes the studio blue, yellow/orange, green, earth, red and cool-gray schemes.
+The [official Infinity paint sets](https://thearmypainter.com/pages/infinity),
+developed with Corvus Belli, provide additional faction-specific color families.
+The [Beyond Operation Sandtrap](https://store.corvusbelli.com/en/infinity/wargame/miniatures/beyond-operation-sandtrap)
+miniatures illustrate the contrast between PanOceania's blue armor and JSA's
+cool neutral armor and red accents. The
+[Combined Army paint set](https://thearmypainter.com/products/private-label-corvus-belli-combined-army-paint-set-wp8104p)
+uses corrupted reds and neutral mechanical greys, supporting restrained plum tones.
+
+Give each palette distinguishable chrome, page surfaces and action accents.
+Use dark navy, steel blue and cyan (PanOceania), golden yellow and ochre
+(Yu Jing), military olive (Ariadna), sand and olive (Haqqislam), red and near-black charcoal
+(Nomads), desaturated grey-plum (Combined Army), cool lavender (ALEPH),
+amber and graphite (Tohaa), jade (Non-Aligned Armies), navy and gold (O-12),
+and muted teal-grey with crimson (JSA). The editable appearance seeds are in
+`static/themes/light.css` and are shared by both modes. Keep default InfinityDB
+and established Army identity colors unchanged.
+
 ### Maintain measurable contrast and non-color meaning
+
+Follow [WCAG 2.2](https://www.w3.org/TR/WCAG22/) success criteria 1.4.1, 1.4.3
+and 1.4.11. As a design principle, distinguish neutral/base, primary,
+secondary and accent families, as in the
+[US Web Design System](https://designsystem.digital.gov/design-tokens/color/theme-tokens/).
+Reserve strong chroma for smaller accents and use restrained large surfaces.
+Check actual adjacent foreground/background pairs, including interactive
+states; do not infer accessibility from the seed colors alone.
 
 Normal and compact text roles must maintain at least 4.5:1 contrast against the surfaces they own in every shipped theme. Meaningful focus indicators and other graphical cues that communicate state or structure must maintain at least 3:1 against the adjacent audited surface. Disabled controls and purely decorative separators are not treated as normal readable content.
 

@@ -628,6 +628,15 @@ class ScenarioCatalog:
                             alias.update(id=route, slug=route, canonical_slug=slug)
                             self._scenario_skill_aliases[route] = alias
                     published.append(canonical)
+            # Count distinct published missions, not source revisions, aliases
+            # or different mechanical variants within the same mission.
+            for item in [*published, *self._scenario_skill_aliases.values()]:
+                if item["category"] != "Scenario-specific Skills":
+                    continue
+                contexts = [item["scenario"]] if "scenario" in item else item.get("scenarios", [])
+                item["scenario_use_count"] = len({
+                    (context["collection"], context["id"]) for context in contexts
+                })
             self._scenario_skills_cache = published
         return self._scenario_skills_cache
 

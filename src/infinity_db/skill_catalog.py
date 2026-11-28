@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database.repository import Database
@@ -20,6 +20,9 @@ from infinity_db.structured_chart_outcomes import (
     project_booty_rows,
     project_metachemistry_rows,
 )
+
+if TYPE_CHECKING:
+    from infinity_db.catalog_projection import CatalogProjection
 
 UNCLASSIFIED_CATEGORY = {"id": "unclassified", "name": "Unclassified", "source": None, "page": None}
 DECLARATION_KIND = "declaration-category"
@@ -56,10 +59,12 @@ class SkillCatalog:
     def __init__(
         self, database: Database, rules_database: RulesDatabase | None,
         scenario_catalog: ScenarioCatalog | None = None,
+        *, projection: CatalogProjection | None = None,
     ) -> None:
         self.database = database
         self.rules_database = rules_database
         self.scenario_catalog = scenario_catalog
+        self._projection = projection
         self._category_index: dict[ArmyLinkRef, list[dict[str, Any]]] | None = None
         self._skill_record_category_index: (
             dict[ArmyLinkRef, list[dict[str, Any]]] | None
@@ -284,6 +289,8 @@ class SkillCatalog:
 
     def list_skills(self, *, filter_only: bool = False) -> list[dict[str, Any]]:
         """Return rules-domain Skills plus unresolved Army Skill identities."""
+        if self._projection is not None:
+            return self._projection.summary("skills", "public-filter" if filter_only else "public")
         excluded = self._rules_catalog_excluded_source_ids()
         source_items = (
             self.database.list_catalog_filter_items("skills") if filter_only
@@ -409,9 +416,11 @@ class SkillCatalog:
             return {"kind": "random-chart", "title": "MetaChemistry chart", "rows": rows}
         return None
 
-    def get_skill(self, skill_ref: int | str) -> dict[str, Any] | None:
+    def get_skill(
+        self, skill_ref: int | str, *, expand_usage: bool = True,
+    ) -> dict[str, Any] | None:
         """Return one Army Skill reference enriched with curated declarations and rules."""
-        item = self.database.get_skill(skill_ref)
+        item = self.database.get_skill(skill_ref, expand_usage=expand_usage)
         if (
             item is not None
             and self.rules_database is not None

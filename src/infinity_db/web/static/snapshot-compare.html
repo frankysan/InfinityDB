@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Review a local Army snapshot comparison report.">
+  <title>Army snapshot comparison · InfinityDB</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script type="module" src="/static/snapshot-compare.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to comparison</a>
+  <!-- navigation -->
+  <main id="main" class="main snapshot-comparison" tabindex="-1">
+    <!-- page-header -->
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Source review</p>
+        <h1 id="page-title">Army snapshot comparison<span>.</span></h1>
+        <p class="intro-copy">Review observed differences between two selected Army snapshots, not a confirmed gameplay changelog.</p>
+      </div>
+    </section>
+    <section class="surface content-frame" aria-labelledby="snapshot-input-heading">
+      <div class="section-heading"><h2 id="snapshot-input-heading">Comparison report</h2></div>
+      <div class="surface-body">
+        <label for="snapshot-report">Open a generated Army snapshot diff JSON file</label>
+        <input id="snapshot-report" type="file" accept=".json,application/json">
+        <p class="detail-copy">Generate the report offline using <code>python -m tools.data.compare_army_snapshots</code> with both ZIPs and their matching manifests. The selected file stays in this browser and is not uploaded. Its recorded provenance is displayed, not independently verified here.</p>
+        <p id="snapshot-status" role="status" aria-live="polite">No report selected.</p>
+      </div>
+    </section>
+    <div id="snapshot-review" hidden>
+      <section class="surface content-frame" aria-labelledby="snapshot-endpoints-heading">
+        <div class="section-heading"><h2 id="snapshot-endpoints-heading">Selected endpoints</h2></div>
+        <div class="surface-body">
+          <div id="snapshot-endpoints" class="snapshot-pair"></div>
+          <p id="snapshot-summary"></p>
+          <details><summary>Scope and limitations</summary><ul id="snapshot-limitations"></ul></details>
+        </div>
+      </section>
+      <section class="surface content-frame" aria-labelledby="snapshot-results-heading">
+        <div class="section-heading"><h2 id="snapshot-results-heading">Observed differences</h2></div>
+        <div class="surface-body">
+          <div class="snapshot-filters">
+            <label>Source <select id="snapshot-member"></select></label>
+            <label>Change <select id="snapshot-kind"></select></label>
+            <label>Classification <select id="snapshot-classification"></select></label>
+            <label>Search source coordinates <input id="snapshot-search" type="search" placeholder="e.g. points, skills, 101"></label>
+          </div>
+          <p id="snapshot-count" role="status" aria-live="polite"></p>
+          <div id="snapshot-results"></div>
+          <div class="snapshot-pagination">
+            <button id="snapshot-previous" class="button button-quiet" type="button">Previous</button>
+            <button id="snapshot-next" class="button button-quiet" type="button">Next</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- page-footer -->
+    <noscript><p class="noscript">Enable JavaScript to inspect a local comparison report.</p></noscript>
+  </main>
+</body>
+</html>

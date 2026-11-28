@@ -17,6 +17,11 @@ If the requested feature also changes source semantics, stored data, or API beha
 workflow with [reference vertical slice](../infinity-reference-vertical-slice/SKILL.md); do not
 make frontend acceptance a substitute for backend or data validation.
 
+For exploratory visual and interaction work, use the connected
+[MCP browser workflow](../infinity-mcp-workspace/SKILL.md#interactive-browser-investigation)
+when its origin policy permits. Inspect actual UI state, styles and screenshots,
+then use the tracked browser harness for reproducible regression coverage.
+
 ## Procedure
 
 1. Read [web design guidelines](../../../docs/web-design-guidelines.md) before changing browser
@@ -43,6 +48,7 @@ make frontend acceptance a substitute for backend or data validation.
 ## References
 
 - [Web design guidelines](../../../docs/web-design-guidelines.md)
+- [Browser acceptance](../../../docs/testing-browser.md)
 - [Development checks](../../../docs/testing.md)
 - [Application domains](../../../docs/application-domains.md)
 - [Project domains](../../../docs/project-domains.md)

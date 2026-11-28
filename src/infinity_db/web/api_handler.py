@@ -17,8 +17,9 @@ from infinity_db.army_overview import (
     army_overview_out_of_catalog,
 )
 from infinity_db.army_slugs import attach_public_army_slug, enrich_army_references
+from infinity_db.catalog_projection import CatalogProjection
 from infinity_db.catalog_rules import CatalogRules
-from infinity_db.catalog_slugs import attach_public_catalog_slug, enrich_nested_catalog_slugs
+from infinity_db.catalog_slugs import attach_public_catalog_slug
 from infinity_db.database import ArmySelectionError, Database
 from infinity_db.database.repository import instance_lru_cache
 from infinity_db.declaration_matrix import (
@@ -46,20 +47,22 @@ from infinity_db.scenario_catalog import ScenarioCatalog
 from infinity_db.scenario_geometry import parse_scenario_geometry
 from infinity_db.scenario_map_svg import render_scenario_map_svg
 from infinity_db.search_catalog import SearchCatalog
+from infinity_db.search_index_storage import PublishedSearchIndex
 from infinity_db.skill_catalog import SkillCatalog
 from infinity_db.specialist_filter import SPECIALIST_CONTEXTS, candidate_unit_ids
 from infinity_db.state_catalog import StateCatalog
 from infinity_db.symbol_catalog import SymbolCatalog
+from infinity_db.theme_palette import DEFAULT_PALETTE, PALETTE_IDS
 from infinity_db.trait_catalog import TraitCatalog
+from infinity_db.unit_composition import present_unit
+from infinity_db.unit_history import attach_unit_history
 from infinity_db.unit_presentation import (
     OPTIONAL_AVAILABILITY_FLAGS,
     enrich_unit_filter_presentation,
     enrich_unit_list_presentation,
-    enrich_unit_presentation,
     extended_general_profiles,
 )
 from infinity_db.unit_slugs import (
-    attach_public_unit_slug,
     enrich_nested_unit_slugs,
     enrich_unit_items,
 )
@@ -83,6 +86,8 @@ from infinity_db.web.routes import (
     UNIT_API_PATH,
     WEAPON_API_PATH,
 )
+from infinity_db.web.unit_comparison import comparison_unit
+from infinity_db.web.unit_explorer import explorer_unit
 
 LOGGER = logging.getLogger(__name__)
 API_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=600"
@@ -122,7 +127,7 @@ def _enrich_scenario_api_item(
 ) -> dict[str, Any]:
     """Attach maintained-text and public-reference projections to a scenario read model."""
 
-    result = enrich_rule_relation_references(database, value)
+    result = enrich_rule_relation_references(database, value, rules_database=rules_database)
     scenario_id = f"scenario:{result['slug']}"
     result = enrich_maintained_text_references(
         database,
@@ -229,10 +234,13 @@ def _scenario_army_points(
 
 def _scenario_map_options(
     query_string: str,
-) -> tuple[int, Literal["in", "cm"], Literal["light", "dark"], str | None, str | None]:
+) -> tuple[int, Literal["in", "cm"], Literal["light", "dark"], str, str | None, str | None]:
     params = _validated_query_params(
         query_string,
-        {"army_points", "distance_unit", "theme", "collection", "revision", "cache_bust"},
+        {
+            "army_points", "distance_unit", "theme", "palette", "collection", "revision",
+            "cache_bust",
+        },
     )
     army_points = _integer(params, "army_points", None, 1, 10000)
     if army_points is None:
@@ -251,7 +259,10 @@ def _scenario_map_options(
         theme = "dark"
     else:
         raise ValueError("theme must be light or dark")
-    return army_points, unit, theme, *_scenario_selection(params)
+    palette = params.get("palette", [DEFAULT_PALETTE])[0]
+    if palette not in PALETTE_IDS:
+        raise ValueError("unknown theme palette")
+    return army_points, unit, theme, palette, *_scenario_selection(params)
 
 
 def _scenario_summary(
@@ -380,19 +391,29 @@ def _validated_query_params(query: str, allowed: set[str]) -> dict[str, list[str
     return params
 
 
-def _unit_detail_presentation_query(query: str) -> tuple[dict[str, bool], str | None]:
+def _unit_detail_presentation_query(
+    query: str,
+) -> tuple[dict[str, bool], str | None, bool, bool]:
     params = _validated_query_params(
-        query, {"army_id", "cache_bust", *OPTIONAL_AVAILABILITY_FLAGS}
+        query, {"army_id", "cache_bust", "history", "view", *OPTIONAL_AVAILABILITY_FLAGS}
     )
     optional_filters = {
         flag: (_flag(params, flag) if flag in params else True)
         for flag in OPTIONAL_AVAILABILITY_FLAGS
     }
     requested_army = _domain_filter_identifier(params, "army_id")
-    return optional_filters, None if requested_army is None else str(requested_army)
+    view = params.get("view", ["detail"])[0]
+    if view not in {"detail", "comparison"}:
+        raise ValueError("view must be detail or comparison")
+    comparison = view == "comparison"
+    include_history = _flag(params, "history") if "history" in params else not comparison
+    if comparison and include_history:
+        raise ValueError("History is unavailable in the comparison view")
+    army_id = None if requested_army is None else str(requested_army)
+    return optional_filters, army_id, include_history, comparison
 
 
-def _unit_query(query: str) -> dict:
+def _unit_query(query: str, *, allow_view: bool = False) -> dict:
     params = parse_qs(query, keep_blank_values=True, max_num_fields=40)
     for key, values in params.items():
         if key not in {
@@ -427,10 +448,15 @@ def _unit_query(query: str) -> dict:
             "and_filters",
             "matching_scope",
             "cache_bust",
-        }:
+        } and not (allow_view and key == "view"):
             raise ValueError(f"Unknown query parameter: {key}")
         if len(values) != 1:
             raise ValueError(f"Provide {key} only once")
+    view = params.get("view", ["full"])[0]
+    if view not in {"full", "explorer"}:
+        raise ValueError("view must be full or explorer")
+    if view == "explorer" and not _flag(params, "extended"):
+        raise ValueError("The explorer view requires extended=1")
     specialist = params.get("specialist", [""])[0]
     if specialist and specialist not in SPECIALIST_CONTEXTS:
         raise ValueError("Unknown Specialist Troops filter context")
@@ -509,6 +535,7 @@ def _unit_query(query: str) -> dict:
         "reinforcement": _flag(params, "reinforcement"),
         "descending": order == "desc",
         "extended": _flag(params, "extended"),
+        **({"_explorer_view": view == "explorer"} if allow_view else {}),
         "include_usage_counts": prospective_only or _flag(params, "counts"),
         **({"include_raw_usage_counts": False} if prospective_only else {}),
     }
@@ -530,8 +557,12 @@ class ApiHandler:
         variant_usage_revision: str | None = None,
         weapon_profile_citations: ProfileCitations | None = None,
         publication_registry: PublicationRegistry | None = None,
+        search_index: PublishedSearchIndex | None = None,
+        catalog_projection: CatalogProjection | None = None,
+        unit_histories: dict[str, Any] | None = None,
     ) -> None:
         self.database = database
+        self.unit_histories = unit_histories
         self.rules_database = rules_database
         self.static_revision = static_revision
         self.snapshot_revision = snapshot_revision
@@ -557,8 +588,12 @@ class ApiHandler:
             if publication_registry is not None else {}
         )
         self.scenario_catalog = ScenarioCatalog(rules_database, publication_registry)
-        self.skill_catalog = SkillCatalog(database, rules_database, self.scenario_catalog)
-        self.equipment_catalog = EquipmentCatalog(database, rules_database)
+        self.skill_catalog = SkillCatalog(
+            database, rules_database, self.scenario_catalog, projection=catalog_projection,
+        )
+        self.equipment_catalog = EquipmentCatalog(
+            database, rules_database, projection=catalog_projection,
+        )
         self.hacking_program_catalog = HackingProgramCatalog(database, rules_database)
         self.ammunition_catalog = RulesRecordCatalog(rules_database, "ammunition")
         self.label_catalog = LabelCatalog(rules_database)
@@ -578,6 +613,11 @@ class ApiHandler:
             self.general_rules_catalog,
             self.glossary_catalog,
             self.legacy_armies,
+            published_search=search_index.search if search_index is not None else None,
+        )
+        self._presented_catalog_usage = (
+            catalog_projection if catalog_projection is not None
+            and catalog_projection.has_presented_usage else None
         )
         self.catalog_rules = CatalogRules(rules_database, database=database)
         self.symbol_catalog = symbol_catalog
@@ -587,58 +627,73 @@ class ApiHandler:
                 database, rules_database, self.fireteam_rules_reference
             )
 
+    @instance_lru_cache(maxsize=8)
+    def _season_rule_cards(self, season: str, revision: str) -> list[dict[str, Any]]:
+        """Project reviewed standalone records for this exact season, not the core catalog."""
+        registry = self.scenario_catalog.publication_registry
+        if registry is None or not registry.has_season(season, revision):
+            return []
+        entries = [
+            entry
+            for records in (
+                registry.season_rule_entries(),
+                registry.season_skill_entries(),
+                registry.season_state_entries(),
+            )
+            for entry in records
+            if entry["collection"] == season and entry["revision"] == revision
+        ]
+        cards = []
+        for entry in entries:
+            record = entry["record"]
+            context = record["facts"]["applicability"]["context"]
+            # Mission-specific support has its own complete contextual card.
+            if context == "tactical-support":
+                continue
+            card = {**record, "citations": entry["citations"]}
+            if record["kind"] == "skill":
+                slug = record["id"].removeprefix("skill:")
+                for route in (f"{season}-{slug}", slug):
+                    skill = self.scenario_catalog.get_scenario_skill(route)
+                    if skill is None or not any(
+                        use["collection"] == season and use["revision"] == revision
+                        for use in skill.get("seasons", [])
+                    ):
+                        continue
+                    rule = skill["rules"][0]
+                    card.update(
+                        skill_types=rule.get("skill_types", []),
+                        labels=rule.get("labels", []),
+                    )
+                    break
+            cards.append(card)
+        # Bind references to the actual season-local cards, including previews.
+        # Unqualified catalog routes may combine or prefer a different season.
+        local = {card["id"]: card for card in cards}
+        result = enrich_maintained_text_references(
+            self.database, self.rules_database, {"items": cards},
+            local_rule_ids=frozenset(local), additional_records=local,
+        )
+        return sorted(
+            result["items"], key=lambda card: (
+                card["facts"]["applicability"]["context"], card["name"].casefold(),
+                card["id"],
+            ),
+        )
+
     def _present_unit(
         self, unit: dict[str, Any], *,
         optional_filters: dict[str, bool], requested_army: str | None = None,
         general_only: bool = False,
+        materialized_general_profiles: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
-        """Use the same General profile semantics for detail and Explorer."""
-        if general_only:
-            # General profiles need occurrence data, not source notes, charts,
-            # selection constraints, composite options or Army detail metadata.
-            # Keep every Army's profiles for snapshot-wide symbol resolution,
-            # including occurrences excluded by the current optional filters.
-            unit = {
-                **{key: unit[key] for key in ("id", "name", "isc", "slug") if key in unit},
-                "armies": [
-                    {
-                        "id": army["id"],
-                        "availability_flags": army.get("availability_flags", []),
-                        "profiles": [
-                            {key: value for key, value in profile.items() if key in {
-                                "profile_identity", "display_name", "name", "group_id",
-                                "type", "classification", "move_1", "move_2", "cc", "bs",
-                                "ph", "wip", "arm", "bts", "vitality", "silhouette",
-                                "is_structure", "ava", "logo_urls", "skills", "equipment",
-                                "characteristics",
-                            }}
-                            for profile in army.get("profiles", ())
-                        ],
-                        "loadouts": [
-                            {key: value for key, value in loadout.items() if key in {
-                                "group_id", "skills", "equipment", "weapons", "orders",
-                            }}
-                            for loadout in army.get("loadouts", ())
-                        ],
-                    }
-                    for army in unit.get("armies", ())
-                ],
-            }
-        # Skill enrichment detaches the cached repository payload. All further
-        # enrichment owns this copy, so no intermediate deep copies are needed.
-        unit = self.skill_catalog.enrich_unit(unit)
-        unit = self.equipment_catalog.enrich_unit(unit, in_place=True)
-        unit = enrich_nested_catalog_slugs(
-            self.database, unit, frozenset({"equipment", "weapons"}), in_place=True,
-        )
-        if not general_only:
-            attach_public_unit_slug(self.database, unit)
-            unit = enrich_army_references(self.database, unit, in_place=True)
-        self.symbol_catalog.enrich_unit(unit)
-        return enrich_unit_presentation(
-            unit, optional_filters=optional_filters, requested_army=requested_army,
+        return present_unit(
+            unit, database=self.database, skill_catalog=self.skill_catalog,
+            equipment_catalog=self.equipment_catalog, symbol_catalog=self.symbol_catalog,
             source_skill_classifications=self._source_skill_classifications(),
+            optional_filters=optional_filters, requested_army=requested_army,
             general_only=general_only,
+            materialized_general_profiles=materialized_general_profiles,
         )
 
     @instance_lru_cache(maxsize=1)
@@ -735,10 +790,19 @@ class ApiHandler:
             try:
                 if self.rules_database is None:
                     raise ValueError("Core rules reference unavailable")
-                payload = core_declaration_matrix(self.database, self.rules_database)
+                projection = self.database.catalog_projection
+                payload = projection.reference_page("orders-aros") if projection else None
+                if payload is None:
+                    payload = core_declaration_matrix(self.database, self.rules_database)
                 if scenario_slug is not None:
-                    payload["scenario"] = core_scenario_declaration_extension(
-                        self.rules_database, scenario_slug,
+                    extension = (
+                        projection.reference_page(f"orders-aros:{scenario_slug}")
+                        if projection else None
+                    )
+                    payload["scenario"] = (
+                        extension if extension is not None else core_scenario_declaration_extension(
+                            self.rules_database, scenario_slug,
+                        )
                     )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not project scoped Orders/AROs")
@@ -937,7 +1001,7 @@ class ApiHandler:
             cache_control = API_CACHE_CONTROL
             try:
                 params = parse_qs(query_string, keep_blank_values=True)
-                unknown = sorted(set(params) - {"q", "cache_bust"})
+                unknown = sorted(set(params) - {"q", "limit", "cache_bust"})
                 if unknown:
                     raise ValueError(f"Unknown query parameter: {unknown[0]}")
                 if len(params.get("q", [])) != 1:
@@ -949,13 +1013,25 @@ class ApiHandler:
                     raise ValueError("q must be at most 200 characters")
                 if len(params.get("cache_bust", [])) > 1:
                     raise ValueError("Provide cache_bust only once")
+                limit_values = params.get("limit", [])
+                limit = None
+                if limit_values:
+                    if (
+                        len(limit_values) != 1
+                        or not limit_values[0].isascii()
+                        or not limit_values[0].isdigit()
+                        or len(limit_values[0]) > 2
+                        or not 1 <= int(limit_values[0]) <= 50
+                    ):
+                        raise ValueError("limit must be an integer from 1 to 50")
+                    limit = int(limit_values[0])
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)}, status=HTTPStatus.BAD_REQUEST,
                     cache_control=cache_control,
                 )
             try:
-                payload = {"items": self.search_catalog.search(query)}
+                payload = {"items": self.search_catalog.search(query)[:limit]}
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not search the database")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1151,7 +1227,9 @@ class ApiHandler:
             try:
                 identifier = match.group("identifier")
                 skill_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.skill_catalog.get_skill(skill_ref)
+                payload = self.skill_catalog.get_skill(
+                    skill_ref, expand_usage=self._presented_catalog_usage is None,
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Skill not found"}
@@ -1161,13 +1239,18 @@ class ApiHandler:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     enrich_army_references(self.database, payload, in_place=True)
                     self.symbol_catalog.enrich_nested_units(payload, in_place=True)
-                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_rule_relation_references(
+                        self.database, payload, in_place=True,
+                        rules_database=self.rules_database,
+                    )
                     enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         scenario_id=(payload.get("scenario") or {}).get("id"),
                         additional_records=self._season_rule_records,
                         in_place=True,
                     )
+                    if self._presented_catalog_usage is not None:
+                        self._presented_catalog_usage.present_usage(payload)
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read skill")
@@ -1178,7 +1261,9 @@ class ApiHandler:
             try:
                 identifier = match.group("identifier")
                 item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.equipment_catalog.get_equipment(item_ref)
+                payload = self.equipment_catalog.get_equipment(
+                    item_ref, expand_usage=self._presented_catalog_usage is None,
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
@@ -1193,10 +1278,15 @@ class ApiHandler:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     enrich_army_references(self.database, payload, in_place=True)
                     self.symbol_catalog.enrich_nested_units(payload, in_place=True)
-                    enrich_rule_relation_references(self.database, payload, in_place=True)
+                    enrich_rule_relation_references(
+                        self.database, payload, in_place=True,
+                        rules_database=self.rules_database,
+                    )
                     enrich_maintained_text_references(
                         self.database, self.rules_database, payload, in_place=True,
                     )
+                    if self._presented_catalog_usage is not None:
+                        self._presented_catalog_usage.present_usage(payload)
                     payload["variant_usage_published"] = self.variant_usage is not None
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
@@ -1207,7 +1297,9 @@ class ApiHandler:
             try:
                 identifier = match.group("identifier")
                 item_ref = int(identifier) if identifier.isdigit() else identifier
-                payload = self.database.get_catalog_item("weapons", item_ref)
+                payload = self.database.get_catalog_item(
+                    "weapons", item_ref, expand_usage=self._presented_catalog_usage is None,
+                )
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Reference item not found"}
@@ -1222,12 +1314,15 @@ class ApiHandler:
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
                     payload = enrich_rule_relation_references(
-                        self.database, payload, local_rule_ids=local_rule_ids
+                        self.database, payload, local_rule_ids=local_rule_ids,
+                        rules_database=self.rules_database,
                     )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         local_rule_ids=local_rule_ids,
                     )
+                    if self._presented_catalog_usage is not None:
+                        self._presented_catalog_usage.present_usage(payload)
                     attach_weapon_profile_citations(payload, self.weapon_profile_citations)
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read reference item")
@@ -1244,7 +1339,9 @@ class ApiHandler:
                     payload = enrich_nested_unit_slugs(self.database, payload)
                     payload = enrich_army_references(self.database, payload)
                     payload = self.symbol_catalog.enrich_nested_units(payload)
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1260,7 +1357,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "State not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload,
                         additional_records=self._season_rule_records,
@@ -1279,7 +1378,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Hacking Program not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1295,7 +1396,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Ammunition not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1313,7 +1416,9 @@ class ApiHandler:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "General rule not found"}
                 else:
-                    payload = enrich_rule_relation_references(self.database, payload)
+                    payload = enrich_rule_relation_references(
+                        self.database, payload, rules_database=self.rules_database,
+                    )
                     payload = enrich_maintained_text_references(
                         self.database, self.rules_database, payload
                     )
@@ -1408,9 +1513,9 @@ class ApiHandler:
         elif match := SCENARIO_MAP_API_PATH.fullmatch(path):
             cache_control = API_CACHE_CONTROL
             try:
-                army_points, distance_unit, theme, collection, revision = _scenario_map_options(
-                    query_string
-                )
+                (
+                    army_points, distance_unit, theme, palette, collection, revision,
+                ) = _scenario_map_options(query_string)
             except ValueError as exc:
                 return WebResponse.json(
                     {"error": str(exc)},
@@ -1456,7 +1561,9 @@ class ApiHandler:
                         cache_control=cache_control,
                     )
                 geometry = parse_scenario_geometry(scenario["placement"]["geometry"])
-                svg = render_scenario_map_svg(geometry, distance_unit=distance_unit, theme=theme)
+                svg = render_scenario_map_svg(
+                    geometry, distance_unit=distance_unit, theme=theme, palette=palette,
+                )
                 return WebResponse(
                     body=svg.encode("utf-8"),
                     content_type="image/svg+xml; charset=utf-8",
@@ -1515,6 +1622,11 @@ class ApiHandler:
                             self.rules_database,
                             payload,
                         )
+                        publication = payload["publication"]
+                        if publication["collection_id"].startswith("its-"):
+                            payload["season_rules"] = self._season_rule_cards(
+                                publication["collection_id"], publication["revision"],
+                            )
             except (OSError, ValueError, sqlite3.Error):
                 LOGGER.exception("Could not read scenario")
                 status = HTTPStatus.SERVICE_UNAVAILABLE
@@ -1601,7 +1713,8 @@ class ApiHandler:
         elif path == "/api/units":
             cache_control = API_CACHE_CONTROL
             try:
-                query = _unit_query(query_string)
+                query = _unit_query(query_string, allow_view=True)
+                explorer_view = query.pop("_explorer_view")
             except ValueError as exc:
                 status = HTTPStatus.BAD_REQUEST
                 payload = {"error": str(exc)}
@@ -1644,9 +1757,15 @@ class ApiHandler:
                     if specialist:
                         if self.rules_database is None:
                             raise ValueError("Specialist filter requires published rules data")
-                        qualifying = candidate_unit_ids(
-                            self.database, self.rules_database, specialist,
+                        projection = self.database.catalog_projection
+                        qualifying = (
+                            projection.specialist_candidates(specialist)
+                            if projection is not None else None
                         )
+                        if qualifying is None:
+                            qualifying = candidate_unit_ids(
+                                self.database, self.rules_database, specialist,
+                            )
                         logical_unit_ids = (
                             qualifying if logical_unit_ids is None
                             else logical_unit_ids & qualifying
@@ -1690,9 +1809,13 @@ class ApiHandler:
                             )},
                         )
                         if "prospective_counts" in payload:
-                            payload["prospective_counts"] = public_prospective(
-                                payload["prospective_counts"]
-                            )
+                            # Repository results are cached; never replace their raw counts.
+                            payload = {
+                                **payload,
+                                "prospective_counts": public_prospective(
+                                    payload["prospective_counts"]
+                                ),
+                            }
                         payload = {
                             **payload,
                             **(
@@ -1721,10 +1844,16 @@ class ApiHandler:
                         enabled_flags = frozenset(
                             flag for flag in OPTIONAL_AVAILABILITY_FLAGS if query[flag]
                         )
+                        profiles = self.database.general_profiles(
+                            [item["id"] for item in payload["items"]], enabled_flags,
+                        ) if self.variant_usage is not None else None
                         for item in payload["items"]:
-                            item["general_profiles"] = self._extended_profiles(
-                                item["id"], enabled_flags,
+                            item["general_profiles"] = (
+                                profiles[item["id"]] if profiles is not None
+                                else self._extended_profiles(item["id"], enabled_flags)
                             )
+                        if explorer_view:
+                            payload["items"] = [explorer_unit(item) for item in payload["items"]]
                 except ArmySelectionError:
                     status = HTTPStatus.BAD_REQUEST
                     payload = {"error": "Choose a playable Army list to browse its units."}
@@ -1733,10 +1862,10 @@ class ApiHandler:
                     status = HTTPStatus.SERVICE_UNAVAILABLE
                     payload = {"error": "Unit information is unavailable. Please try again."}
         elif match := UNIT_API_PATH.fullmatch(path):
-            cache_control = API_CACHE_CONTROL
+            cache_control = API_CACHE_CONTROL if self.unit_histories is None else "no-store"
             try:
-                optional_filters, requested_army = _unit_detail_presentation_query(
-                    query_string
+                optional_filters, requested_army, include_history, comparison = (
+                    _unit_detail_presentation_query(query_string)
                 )
             except ValueError as exc:
                 return WebResponse.json(
@@ -1748,9 +1877,23 @@ class ApiHandler:
                 unit_ref = int(identifier) if identifier.isdigit() else identifier
                 payload = self.database.get_unit(unit_ref)
                 if payload is not None:
+                    flags = frozenset(flag for flag, enabled in optional_filters.items() if enabled)
+                    profiles = self.database.general_profiles(
+                        [payload["id"]], flags, for_detail=True,
+                    ) if self.variant_usage is not None else None
                     payload = self._present_unit(
                         payload, optional_filters=optional_filters, requested_army=requested_army,
+                        materialized_general_profiles=(
+                            profiles[payload["id"]] if profiles is not None else None
+                        ),
                     )
+                if payload is not None and include_history:
+                    if self.unit_histories is not None:
+                        attach_unit_history(payload, self.unit_histories)
+                    elif (history := self.database.unit_history(payload["id"])) is not None:
+                        attach_unit_history(payload, {str(payload["id"]): history})
+                if payload is not None and comparison:
+                    payload = comparison_unit(payload)
                 if payload is None:
                     status = HTTPStatus.NOT_FOUND
                     payload = {"error": "Unit not found"}

@@ -19,6 +19,37 @@ RULES = Path("data/generated/rules_n5.db")
 ORIGIN = "http://infinitydb-movement.test"
 
 
+def test_glossary_live_search(chrome: Any) -> None:
+    app = create_app(ROOT / ARMY, rules_database_path=ROOT / RULES)
+    page = chrome.new_page()
+    route_browser_page(page, app, ORIGIN)
+    requests: list[str] = []
+    page.on("request", lambda request: requests.append(request.url))
+    try:
+        page.goto(f"{ORIGIN}/glossary#attribute-s")
+        search = page.locator("#glossary-search")
+        page.locator("#attribute-s").wait_for(state="visible", timeout=30000)
+        initial_count = page.locator("#glossary-count").inner_text()
+        search.fill("not-a-real-term-123456")
+        page.locator("#glossary-empty").wait_for(state="visible")
+        assert page.locator("#glossary-count").inner_text() == "0 terms"
+        search.fill("Support Weapons Cost")
+        page.locator("#attribute-swc").wait_for(state="visible")
+        assert page.locator("#glossary-count").inner_text() != initial_count
+        assert search.evaluate("node => document.activeElement === node")
+        assert "?s=v1.g." in page.url
+        assert len([url for url in requests if "/api/glossary" in url]) == 1
+        saved = page.url
+        page.goto(saved)
+        page.locator("#attribute-swc").wait_for(state="visible")
+        assert search.input_value() == "Support Weapons Cost"
+        search.fill("")
+        page.locator("#attribute-s").wait_for(state="visible")
+        assert page.locator("#glossary-count").inner_text() == initial_count
+    finally:
+        page.close()
+
+
 @pytest.mark.parametrize("width", (1440, 390, 320))
 def test_suggested_terrain_table_and_gate_label_discovery(chrome: Any, width: int) -> None:
     """Source-value examples and Gate labels have normal player entry points."""
@@ -80,18 +111,26 @@ def test_suggested_terrain_table_and_gate_label_discovery(chrome: Any, width: in
         viewport = table.locator("..")
         assert viewport.get_attribute("role") == "region"
         assert viewport.get_attribute("tabindex") == "0"
-        if width < 400:
+        page.evaluate("() => document.fonts.ready")
+        geometry = viewport.evaluate(
+            "node => ({clientWidth: node.clientWidth, scrollWidth: node.scrollWidth})"
+        )
+        overflow = geometry["scrollWidth"] > geometry["clientWidth"]
+        if width == 320:
+            assert overflow, geometry
+        if overflow:
             viewport.focus()
+            assert viewport.evaluate("node => document.activeElement === node"), geometry
             viewport.press("ArrowRight")
             page.wait_for_function(
                 "() => document.querySelector('.terrain-examples-reference .table-viewport')"
                 ".scrollLeft > 0"
             )
             viewport.evaluate("node => { node.scrollLeft = node.scrollWidth; }")
-            assert viewport.evaluate(
-                "node => node.querySelector('thead th:last-child').getBoundingClientRect().right"
-                " <= node.getBoundingClientRect().right + 1"
-            )
+        assert viewport.evaluate(
+            "node => node.querySelector('thead th:last-child').getBoundingClientRect().right"
+            " <= node.getBoundingClientRect().right + 1"
+        ), geometry
         card = page.locator("#rule-rule-special-terrain")
         assert "not additional Terrain Types or mandatory scenery" in card.inner_text()
         assert "p. 145" in card.locator(".rules-source-citations").inner_text()

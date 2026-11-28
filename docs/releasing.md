@@ -59,6 +59,10 @@ affected acceptance before the merge.
   `infinitydb-test` Docker Compose stack, not just a built-image verifier.
   Confirm health, version/runtime identity, representative changed routes,
   Caddy and metrics-history behavior, and no interaction with production.
+- [ ] **Feedback delivery (when applicable):** When introducing or materially
+  changing feedback delivery or its production mail configuration, pass the
+  [end-to-end feedback acceptance](deployment.md#end-to-end-feedback-acceptance)
+  on an isolated test deployment on the intended production host.
 - [ ] **Browser and accessibility acceptance:** Exercise materially changed
   player journeys in ordinary mode, including relevant desktop/mobile,
   keyboard, touch, loading/error and shared-link behavior. Record manual
@@ -289,6 +293,14 @@ v1.0.0 entry in `docs/CHANGELOG.md` is the style example for future entries.
   releases). Follow with `Added`, `Changed` and `Fixed` as applicable, then
   `Upgrade notes` for operator requirements. Keep the summary brief without
   imposing that brevity on the detailed entries.
+- Where grouping improves readability, consider consolidating related player-facing
+  outcomes under a descriptive, bold parent bullet with one level of sub-bullets.
+  Use this selectively in the Player summary and detailed sections; keep Added,
+  Changed and Fixed distinct. Name groups for the player
+  journey or reference area (for example Search and Glossary, Armies and Units,
+  or Performance improvements), not the implementation layer. Retain domain
+  labels on detailed child entries. Leave unrelated or standalone outcomes as
+  individual bullets; do not flatten distinct improvements into one vague item.
 - Preserve enough detail to introduce each meaningful feature or correction:
   concrete capabilities, choices, representative examples, important
   conditions, scope limits and unresolved source disagreements. Keep distinct
@@ -318,7 +330,8 @@ instructions, because the web application parses it to render **What's changed**
   use past tense for completed changes and present tense for ongoing behavior
   in that version, with an end-user-first perspective. Keep its `Player summary`
   concise and player-visible only, and retain concrete feature and correction
-  detail below it. Merge overlapping entries, remove implementation-only
+  detail below it. Use feature-area sub-lists where they improve readability.
+  Merge overlapping entries, remove implementation-only
   detail, and make upgrade consequences explicit.
 - [ ] When substantially rewriting or consolidating existing notes, compare
   against the pre-rewrite version in Git history. Verify that distinct
@@ -366,8 +379,9 @@ the stable candidate. Re-run affected gates if the candidate changes.
   legacy raw SQLite archive, run `python -m tools.testing.prepare_source_audit`
   from the checkout root before the suite. It uses the pinned Army ZIP and
   complete runtime build provenance, verifies the published export generation,
-  and writes only ignored local audit artifacts. An ordinary standalone
-  normalization/export is not a matched release pair.
+  and writes only ignored local audit artifacts. A prior audit directory
+  with a different or unverifiable generation is retained separately.
+  An ordinary standalone normalization/export is not a matched release pair.
 
   Follow the [validation host policy](testing.md#validation-host-selection):
   Linux is the default for complete release suites; Windows supplies focused
@@ -385,7 +399,7 @@ the stable candidate. Re-run affected gates if the candidate changes.
   .\.venv\Scripts\python.exe tools\run_checks.py --stage test --assets required --test-workers 8 --test-dist browserlanes --report
   ```
 
-- [ ] Run the tracked-database FAQ parity gate in [testing](testing.md)
+- [ ] Run the [tracked-database FAQ parity gate](testing-data.md#release-tracked-faq-parity)
   after rebuilding the matched release databases. Set
   `INFINITYDB_RELEASE_FAQ_PARITY=1` for the 17 opt-in API/browser cases;
   the ordinary full suite skips them.
@@ -572,6 +586,10 @@ the production host must not substitute newly built data.
   ```sh
   .venv/bin/python -m tools.ci.verify_running_deployment --public-base https://YOUR-HOST --metrics-base http://127.0.0.1:9090 --expected-version <version>
   ```
+
+  If the external proxy rejects the probe, use the
+  [direct Caddy invocation with an explicit Host header](deployment.md#isolated-local-deployment-test)
+  and separately verify public browser access.
 
   Use the available paired database/source verifier when the release changes
   data publications.

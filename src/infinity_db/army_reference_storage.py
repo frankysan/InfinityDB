@@ -14,7 +14,10 @@ from .army_overview_copy import (
     ARMY_OVERVIEW_COPY_FORMAT_VERSION,
     parse_army_overview_copy,
 )
-from .database.normalized_source import verified_army_export_generation
+from .database.normalized_source import (
+    VerifiedNormalizedSource,
+    verified_army_export_generation,
+)
 from .database.publication import (
     PUBLISHED_CONTENT_SHA256_KEY,
     published_content_sha256,
@@ -162,7 +165,7 @@ def read_army_reference_data(
 
 def publish_army_reference_data(
     army: Path, raw: Path | None, overview_source: Path, legacy_source: Path,
-    *, normalized: Path | None = None,
+    *, normalized: Path | VerifiedNormalizedSource | None = None,
 ) -> None:
     """Publish v30 from an explicitly verified raw or normalized Army source."""
     overview_bytes, legacy_bytes = overview_source.read_bytes(), legacy_source.read_bytes()

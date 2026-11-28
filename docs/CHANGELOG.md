@@ -8,6 +8,170 @@ meaningful release outcomes rather than detailed implementation history. New or 
 entries use the project-domain labels defined in `docs/project-domains.md`; historical release notes
 are not retroactively relabeled.
 
+## [1.3.0] - 2026-11-28
+
+### Player summary
+
+- **Armies and Units:**
+  - Added N5 Unit profile and Army availability history, organized by revision date
+    and type of change. Historical coverage is incomplete.
+  - Added side-by-side Unit comparison, with selectable profiles and loadouts,
+    a differences-only view and shareable comparisons.
+  - Added direct links from Unit profile cards to official Infinity Army.
+  - Improved Army overview cards, Unit Explorer filter counts and matching
+    configuration displays. Adopted Generic Army terminology throughout.
+- **Search and Glossary:**
+  - Added live search suggestions in the navigation and live results while typing
+    in Search, the Glossary and Unit comparison.
+  - Expanded the Glossary with official, community and historical game terms,
+    including Vanilla, Linkable and Pure Fireteam, and added common search aliases.
+- **Rules and scenarios:**
+  - Made rules, examples, explanations, FAQ clarifications, interpretations
+    and source disagreements easier to distinguish.
+  - Linked reviewed N5.3 Weapon and Equipment profile footnotes to the relevant rules.
+    Uncertain footnote references remain visible.
+  - Expanded ITS 17 and 18 coverage of season-wide rules, tournament formats
+    and Extras, accessible from a new collapsible Season Rules section.
+  - Corrected Equipment variant links and Scenario-specific Skill usage counts,
+    and improved FAQ cards and scenario maps.
+- Added eleven Army-inspired themes, independently selectable from Light, Dark
+  or Auto mode. Saved scenario maps retain the chosen appearance.
+- Added anonymous reporting of incorrect information or website problems from any
+  page, when reporting is enabled.
+- **Performance improvements:**
+  - Faster global search and inline rules reference previews.
+  - Faster loading of the Glossary, Orders/AROs and Skills, Equipment and Weapons
+    catalogs, including Unit usage lists.
+  - Faster Unit Explorer loading, Specialist Troops and other filtering,
+    Extended results, pagination and Army availability selections.
+  - Faster first access to Units after startup and quicker detail-page loading.
+
+### Added
+
+- **Armies and Units:**
+  - **Web frontend:** Adopted Generic Army terminology in Army overview and
+    Unit Explorer, and explained the community term Vanilla.
+  - **Web frontend + Web backend:** Added side-by-side comparison of current
+    Unit profiles and loadouts, with independent selections, live search,
+    a differences-only view and shareable links.
+  - **Data processing + Web backend + Web frontend:** Added collapsible N5
+    Unit histories, distinguishing shared General-profile changes, Army-specific
+    changes and former Army memberships. Available source history is incomplete.
+    History is included in the Army database rather than a separate JSON file.
+  - **Web backend + Web frontend:** Added direct links to matching Units in official
+    Infinity Army, including multiple Army memberships and Reinforcement parents
+    where the destination is known. Ambiguous or unsupported links are omitted.
+- **Search and Glossary:**
+  - **Web frontend + Web backend:** Added live search suggestions in navigation
+    with direct links and keyboard navigation. Full search and ranking remain available.
+  - **Web frontend:** Added live filtering in the Glossary and full search results,
+    preserving shareable search selections.
+  - **Data processing + Web backend:** Added eleven Game terms, made existing
+    Fireteam terminology searchable in the Glossary, and added F2F/FtF aliases.
+    Community usage does not establish gameplay rules.
+- **ITS Season Rules:**
+  - **Web backend + Web frontend:** Added a collapsible Season Rules section to ITS
+    scenario pages for season-wide Rules, Skills, States and tournament policies,
+    with citations and optional Extras identified separately.
+  - **Data processing:** Expanded ITS 17 and 18 coverage of Civilians, Designated
+    Targets, Classified Objectives, HVTs, tournament Army Lists, Long Service,
+    tournament formats, scoring, pairings and byes. Added Treasure Hunters for
+    ITS 17 and Resilience Operations and Team-Ops Tacball objectives for ITS 18,
+    including structured Resilience Operations details. Sources include English
+    and Spanish publications.
+- **Web frontend + Web backend:** Added eleven Army-inspired themes based on
+  faction colors, emblems and miniature paint schemes, available in Light and Dark
+  mode and reflected in saved scenario maps.
+- **Web frontend + Web backend + Deployment:** Added anonymous error reporting
+  from any page, with optional page context the player can inspect before sending.
+  Reports use configurable email delivery and are not stored by the application.
+- **Army snapshot maintenance:**
+  - **Data processing:** Added offline, provenance-pinned Army snapshot diff reports for
+    maintenance, separating source changes, effective reference changes and unresolved evidence.
+  - **Web frontend + Web backend:** Added a Developer-mode Army snapshot comparison
+    screen for locally opened two-endpoint JSON reports, including change filters,
+    exact values and recorded provenance without uploading private source evidence.
+- **Web backend:** Served the existing branded PNG for conventional favicon requests.
+- **Deployment:** Added a public Host-header override for direct Caddy release verification.
+
+### Changed
+
+- **Rules reference:**
+  - **Data processing + Web frontend:** Linked reviewed N5.3 Weapon Chart
+    footnotes to the relevant rules for each Weapon mode and Equipment profile.
+    Original Traits and unresolved footnote markers remain visible.
+  - **Web frontend:** Improved the visual distinction between gameplay rules,
+    explanations, examples, reviewed interactions, FAQ clarifications and source
+    disagreements, including scenario rules. Rules and explanatory text remain
+    equally readable in every theme. Gameplay content is unchanged, and dates
+    are shown for official changes only when verified.
+- **Performance improvements:**
+  - **Data processing + Web backend:** Materialized deduplicated General-profile
+    selections during database generation; Extended Explorer and Unit details
+    share them while preserving public profile and availability semantics.
+  - **Data processing + Web backend:** Materialized composed current N5 Rules
+    records during database generation for faster reference and catalog lookups,
+    preserving scoped contributions, reverse relations and citations.
+  - **Data processing + Web backend:** Materialized global search identities and
+    normalized search terms across Army, Rules and ITS; preserved matching,
+    ranking and public routes.
+  - **Data processing + Web backend:** Materialized catalog summaries, filter
+    identities and canonical Army detail usage with shared Unit display records.
+    Contextual matching and curated detail enrichment remain dynamic.
+  - **Web backend + Deployment:** Preloaded the shared Unit graph and official Army
+    links before worker forks to reduce redundant first-access initialization.
+  - **Web backend + Web frontend:** Reduced Extended Explorer and Unit comparison
+    response payloads without changing matching or selection semantics.
+  - **Web frontend:** Deferred history body rendering and Season Rules policy
+    requests until expansion; removed redundant initial catalog detail rendering.
+- **Web backend + Deployment:** Evaluated SQLite immutable connection mode
+  against the complete runtime set; retained ordinary read-only connections
+  because measured Linux request gains did not justify a separate policy.
+- **Data processing + Project infrastructure:** Retired installed CLI
+  `export --with-raw` and `database-health --require-raw`; use verified
+  normalized source health instead. The source-row inspection CLI requires explicit
+  input selection. Independent legacy release-audit and determinism
+  parity consumers and prior private audit files remain supported.
+
+### Fixed
+
+- **Armies and Units:**
+  - **Web frontend:** Distinguished Default, Reinforcements, Out of catalog and
+    Legacy Army cards through theme-aware shading, and made expandable matching
+    configurations easier to identify.
+  - **Web backend + Web frontend:** Corrected Equipment filter counts and restricted
+    Matching armies to playable Armies.
+  - **Data processing + Web frontend:** Corrected historical Skill distances and MOV
+    changes to follow the cm/in preference without closing open History sections.
+- **Rules reference:**
+  - **Data processing + Web backend + Web frontend:** Corrected links to rules for
+    reference-only Equipment variants and added MSV as an alias for Multispectral Visor.
+  - **Web frontend:** Improved FAQ card spacing and made backgrounds consistent,
+    preserving special styling for source discrepancies.
+- **Scenarios:**
+  - **Web backend + Web frontend:** Changed Scenario-specific Skill usage counts
+    to show scenarios rather than Units.
+  - **Web frontend:** Reduced excess space in Tactical Support cards.
+  - **Web backend:** Aligned vertical placement ruler labels near map edges,
+    without changing measured distances.
+- **Appearance:**
+  - **Web frontend:** Darkened the Nomads sidebar to better reflect its faction colors.
+  - **Web backend:** Corrected direct SVG viewing for scenario maps, Army and Unit
+    symbols, Silhouettes and the logo without weakening HTML security.
+- **Data processing:** Included Unit history in normal runtime builds and required
+  an explicit opt-out for history-free development builds.
+- **Project infrastructure:** Corrected identical-tree CI reuse when GitHub's newer API omits PR merge identity.
+
+### Upgrade notes
+
+- Use the matched four-database set and graphical publication bundled with v1.3.0.
+  Older database schemas are not supported by the complete serving path.
+- Anonymous error reporting is disabled by default. Configure the private SMTP
+  settings described in the deployment guide to enable it; ordinary browsing
+  does not require SMTP.
+- For source-only inspection and export health checks, use verified normalized JSON
+  rather than the retired installed CLI raw SQLite options.
+
 ## [1.2.2] - 2026-11-26
 
 ### Player summary

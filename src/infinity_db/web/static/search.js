@@ -9,8 +9,10 @@ const elements = {
   error: byId("search-error"), errorMessage: byId("search-error-message"), empty: byId("search-empty"),
   list: byId("search-list"),
 };
-const controller = new AbortController();
-const query = readShareState("search").params.get("q")?.trim().slice(0, 200) || "";
+let controller;
+let searchTimer;
+let generation = 0;
+const initialQuery = readShareState("search").params.get("q")?.trim().slice(0, 200) || "";
 
 const show = createPanelSwitcher({
   container: elements.results,
@@ -46,26 +48,51 @@ function render(items) {
   show(elements.list);
 }
 
-async function search() {
-  if (!query) return show(elements.prompt);
+function cancelSearch() {
+  clearTimeout(searchTimer);
+  controller?.abort();
+  generation += 1;
+}
+
+async function search(query, requestGeneration) {
+  const request = new AbortController();
+  controller = request;
   show(elements.loading);
   try {
-    const payload = await getSearchResults(query, controller.signal);
+    const payload = await getSearchResults(query, request.signal);
+    if (requestGeneration !== generation) return;
     render(payload.items);
   } catch (error) {
-    if (error.name === "AbortError") return;
+    if (requestGeneration !== generation || error.name === "AbortError") return;
     elements.errorMessage.textContent = collectionLoadMessage(error, "search results");
     console.error("Could not load search results", error);
     show(elements.error);
   }
 }
 
-elements.query.value = query;
-writeShareState("search", query ? { q: query } : {}, { replace: true });
+function scheduleSearch({ immediate = false, composing = false } = {}) {
+  cancelSearch();
+  if (composing) return;
+  const query = elements.query.value.trim().slice(0, 200);
+  writeShareState("search", query ? { q: query } : {}, { replace: true });
+  elements.count.textContent = "";
+  if (!query) {
+    show(elements.prompt);
+    return;
+  }
+  show(elements.loading);
+  const requestGeneration = generation;
+  if (immediate) search(query, requestGeneration);
+  else searchTimer = setTimeout(() => search(query, requestGeneration), 250);
+}
+
+elements.count.setAttribute("role", "status");
+elements.query.value = initialQuery;
+elements.query.addEventListener("input", (event) => scheduleSearch({ composing: event.isComposing }));
+elements.query.addEventListener("compositionend", () => scheduleSearch());
 elements.form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const nextQuery = elements.query.value.trim().slice(0, 200);
-  window.location.href = shareStateHref("/search", "search", nextQuery ? { q: nextQuery } : {});
+  scheduleSearch({ immediate: true });
 });
-document.addEventListener("infinity:beforenavigation", () => controller.abort(), { once: true });
-search();
+document.addEventListener("infinity:beforenavigation", cancelSearch, { once: true });
+scheduleSearch({ immediate: true });

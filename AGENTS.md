@@ -36,6 +36,13 @@ not required.
 
 ## Tooling and validation
 
+When connected MCP workspace tools are available, use the
+[MCP workspace skill](.agents/skills/infinity-mcp-workspace/SKILL.md) for
+direct repository work, interactive browser investigation and artifact
+research. Discover actual capabilities; use existing local runners when
+a tool or approved destination is unavailable. MCP observations complement
+focused tests and do not replace release acceptance.
+
 For **new** ignored project artifacts and maintained tool modules, follow
 the accepted prospective [workspace conventions](docs/architecture.md#accepted-workspace-conventions-prospective-not-a-path-migration)
 and [artifact policy](data/README.md#accepted-ignored-artifact-policy-prospective).

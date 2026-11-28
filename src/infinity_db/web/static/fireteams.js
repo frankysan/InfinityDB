@@ -482,6 +482,10 @@ function renderReference(reference) {
   for (const [index, note] of (levelFacts.sourceNotes || []).entries()) {
     const paragraph = document.createElement("p");
     paragraph.className = "rules-source-note";
+    const label = document.createElement("strong");
+    label.className = "rules-provenance-label";
+    label.textContent = "Source context: ";
+    paragraph.append(label);
     appendMaintainedText(paragraph, levels.fact_tokens?.sourceNotes?.[index], note);
     fragment.append(paragraph);
   }

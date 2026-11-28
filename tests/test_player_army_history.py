@@ -1,0 +1,672 @@
+"""Player history preview preserves observed scope and hides technical evidence."""
+
+from tools.research import render_player_army_history as player
+
+
+def fixture():
+    date = {"earlierObservedDate": "2025-01-01", "laterObservedDate": "2025-02-01"}
+    group = {
+        **date, "armyIds": [101], "status": "observedCandidate",
+        "sourcePath": ["units", 42, "profileGroups", 1, "profiles", 2],
+        "historicalLabels": [[{"id": 42, "name": "Unit"}, {"id": 1, "isc": "Group"},
+                              {"id": 2, "name": "Peripheral <X>"}]],
+        "changes": [
+            {"field": "bs", "before": {"present": True, "value": 11},
+             "after": {"present": True, "value": 12}},
+            {"field": "skills", "before": {}, "after": {}},
+        ],
+    }
+    unit = {
+        "logicalUnitId": 42, "name": "Unit <X>", "slug": "unit-x",
+        "composition": [group], "reviewEvidence": {}, "catalogEvidence": {},
+        "sourceIdentities": [],
+    }
+    row = {
+        **date, "logicalUnitId": 42, "sourceUnitId": 42, "groupId": 1,
+        "field": "points", "summary": "-2 Points", "allGroupLoadouts": True,
+        "loadouts": [{"optionId": 1, "label": "HMG", "before": 32, "after": 30}],
+        "evidence": [{"armyId": 101}, {"armyId": 102}],
+    }
+    semantic = {k: [] for k in (*player.STREAMS, "outcomes", "lifecycleOutcomes",
+                                "availabilityOutcomes", "relationshipOutcomes")}
+    semantic["summaries"] = [row, row, {**row, "laterObservedDate": "2025-03-01"}]
+    semantic["outcomes"] = [{"logicalUnitId": 42, "outcome": "partialChanged"}]
+    return {"units": [unit, {**unit, "logicalUnitId": 43, "composition": []}]}, semantic
+
+
+def test_combines_supported_streams_and_keeps_exact_windows_and_scope():
+    preview, semantic = fixture()
+    units, counts = player.model(
+        preview, semantic, lambda row, ev, stream: player.effective_scope(row, "Group"),
+    )
+    assert counts["scalarCandidates"] == 1
+    assert counts["summaries"] == 3
+    assert counts["timelineEntries"] == 3
+    assert counts["unitsWithHistory"] == 1
+    newest, *earlier = units[0]["entries"]
+    assert newest["laterObservedDate"] == "2025-03-01"
+    cost = next(row for row in earlier if row["kind"] == "summaries")
+    assert cost["text"] == "Points: 32 → 30"
+    assert cost["scope"] == "Group · All loadouts in this group"
+    assert cost["armyIds"] == [101, 102]
+    assert len(cost["evidence"]) == 2
+    scalar = next(row for row in earlier if row["kind"] == "characteristic")
+    assert scalar["scope"] == "Group / Peripheral <X> (profile)"
+    assert scalar["text"] == "BS: 11 → 12"
+    assert units[0]["semanticReview"]["outcomes"] == semantic["outcomes"]
+
+
+def test_different_historical_scopes_are_not_consolidated():
+    preview, semantic = fixture()
+    semantic["summaries"] = semantic["summaries"][:1]
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: str(ev["armyId"]))
+    costs = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert {tuple(r["armyIds"]) for r in costs} == {(101,), (102,)}
+
+
+def test_group_wide_effect_consolidates_despite_army_loadout_variants():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    variant = {**row, "loadouts": [{"optionId": 7, "label": "Rifle",
+                                    "before": 32, "after": 30}],
+               "evidence": [{"armyId": 103}]}
+    semantic["summaries"] = [row, variant]
+    units, _ = player.model(
+        preview, semantic, lambda row, ev, stream: player.effective_scope(row, "Group"),
+    )
+    costs = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(costs) == 1
+    assert costs[0]["armyIds"] == [101, 102, 103]
+    assert len(costs[0]["evidence"]) == 2
+    # Different displayed costs or partial coverage must remain separate.
+    variant["loadouts"][0].update(before=30, after=28)
+    units, _ = player.model(
+        preview, semantic, lambda row, ev, stream: player.effective_scope(row, "Group"),
+    )
+    assert len([r for r in units[0]["entries"] if r["kind"] == "summaries"]) == 2
+
+
+def test_partial_profile_and_attachment_scope():
+    row = {
+        "allGroupLoadouts": False,
+        "loadouts": [{"label": "HMG", "relationshipScope": "directOwners"}],
+        "profiles": [{"name": "Pilot", "allProfileLoadouts": False}],
+    }
+    assert player.effective_scope(row, "TAG") == (
+        "TAG · HMG · Profiles: Pilot · Own capabilities only"
+    )
+    row["profiles"][0]["allProfileLoadouts"] = True
+    assert player.effective_scope(row, "TAG") == (
+        "TAG · All loadouts for Pilot · Own capabilities only"
+    )
+
+
+def test_scalar_display_uses_units_and_non_applicable_marker():
+    assert player.scalar_text("move", {"present": True, "value": [10, 10]}) == '4-4"'
+    assert player.scalar_text("move", {"present": True, "value": [15, 5]}) == '6-2"'
+    assert player.scalar_text("move", {"present": True, "value": [-1, -1]}) == "—"
+    assert player.scalar_text("bs", {"present": True, "value": -1}) == "—"
+
+
+def test_compact_option_labels_distinguish_siblings_without_shared_references(monkeypatch):
+    def resolve(values, field, army, contexts):
+        return [{"filter": {"name": v}, "occurrence": {}} for v in values], "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+    options = {
+        1: {"name": "Trooper", "weapons": ["Pistol", "Rifle"], "points": 10, "swc": 0},
+        2: {"name": "Trooper", "weapons": ["Pistol", "HMG"], "points": 20, "swc": 1},
+        3: {"name": "Trooper", "weapons": ["Pistol", "HMG"], "points": 21, "swc": 1},
+    }
+    labels = player.compact_option_labels(options, {}, [])
+    assert labels == {
+        1: "Trooper — Rifle",
+        2: "Trooper — HMG (20 Points, 1 SWC)",
+        3: "Trooper — HMG (21 Points, 1 SWC)",
+    }
+    options[3]["points"] = 20
+    labels = player.compact_option_labels(options, {}, [])
+    assert labels[2] == labels[3]
+    assert labels[2].endswith("(not uniquely distinguished)")
+
+
+def test_unresolved_option_references_do_not_suppress_known_common_items(monkeypatch):
+    def resolve(values, field, army, contexts):
+        if values == ["unknown"]:
+            return None, "unresolved"
+        return [{"filter": {"name": v}, "occurrence": {}} for v in values], "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+    labels = player.compact_option_labels({
+        1: {"name": "A", "weapons": ["Pistol"], "skills": ["unknown"]},
+        2: {"name": "B", "weapons": ["Pistol"]},
+    }, {}, [])
+    assert labels[1] == "A — Pistol; Unresolved Skills"
+    assert labels[2] == "B — Pistol"
+
+
+def test_html_keeps_all_units_searchable_and_escapes_historical_text():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    html = player.render(units, {101: "Army <A>", 102: "Army B"}, {"private": True})
+    assert 'data-history="no"' in html
+    assert 'id="with-history" checked' in html
+    assert 'id="technical"' in html
+    assert 'class="technical-only"' in html
+    assert "Peripheral &lt;X&gt;" in html
+    assert "Army &lt;A&gt;" in html
+    assert "No supported changes found" in html
+    assert "<X>" not in html
+    assert html.index('<time datetime="2025-03-01">') < html.index('<time datetime="2025-02-01">')
+    assert "Observation window: 2025-01-01 – 2025-02-01" in html
+
+
+def test_same_observation_date_shares_heading_but_preserves_distinct_windows():
+    preview, semantic = fixture()
+    original = semantic["summaries"][0]
+    semantic["summaries"] = [original, {
+        **original, "earlierObservedDate": "2025-01-15",
+        "evidence": [{"armyId": 103}],
+    }]
+    units, counts = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    assert counts["timelineEntries"] == 3
+    html = player.render(units, {101: "Army A", 102: "Army B", 103: "Army C"}, {})
+    assert html.count('<time datetime="2025-02-01">') == 1
+    assert html.count("<strong>Points: 32 → 30</strong>") == 1
+    assert "Observation window: 2025-01-01 – 2025-02-01" in html
+    assert "Observation window: 2025-01-15 – 2025-02-01" in html
+    assert '<p class="armies">Army A, Army B, Army C</p>' in html
+
+
+def test_presentation_keeps_distinct_targets_and_overlapping_army_observations():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    variant = {**row, "earlierObservedDate": "2025-01-15",
+               "evidence": [{"armyId": 101}, {"armyId": 103}]}
+    semantic["summaries"] = [row, variant]
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(player.presentation_rows(rows)) == 2
+
+    variant["evidence"] = [{"armyId": 103}]
+    variant["groupId"] = 2
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(player.presentation_rows(rows)) == 2
+
+    variant["groupId"] = 1
+    variant["laterObservedDate"] = "2025-03-01"
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(player.presentation_rows(rows)) == 2
+
+
+def test_exact_cross_catalog_transition_keeps_both_source_observations():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    base = {k: v for k, v in row.items() if k not in {"field", "summary", "loadouts"}}
+    base["loadouts"] = [{"optionId": 1, "label": "HMG"}]
+    before = {"filter": {"id": 266, "name": "Bangbomb", "wiki": "wiki"},
+              "occurrence": {"extra": [{"id": 310, "name": "+4", "type": "TEXT"}], "q": 1}}
+    after = {**before, "filter": {**before["filter"], "id": 246, "type": "WEAPON"}}
+    lost = {**base, "field": "skills", "summary": "Lost Bangbomb (+4)",
+            "lost": [before], "gained": []}
+    gained = {**base, "field": "equip", "summary": "Gained Bangbomb (+4)",
+              "lost": [], "gained": [after]}
+    semantic["summaries"] = [lost, gained]
+    units, counts = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    assert counts["summaries"] == 2
+    changes = [r for r in units[0]["entries"] if r["kind"] != "characteristic"]
+    assert len(changes) == 1
+    change = changes[0]
+    assert change["kind"] == "classification"
+    assert change["text"] == (
+        f"Bangbomb (+4): {player.FIELDS['skills']} → {player.FIELDS['equip']} (classification)"
+    )
+    assert change["evidence"][0]["from"]["lost"] == [before]
+    assert change["evidence"][0]["to"]["gained"] == [after]
+    # Same display label is insufficient when coverage, modifiers or targets differ.
+    for variant in (
+        {**gained, "evidence": [{"armyId": 103}]},
+        {**gained, "loadouts": [{"optionId": 2, "label": "HMG"}]},
+        {**gained, "gained": [{**after, "occurrence": {"q": 2}}]},
+        {**gained, "gained": [{**after, "filter": {**after["filter"], "wiki": "other"}}]},
+    ):
+        semantic["summaries"] = [lost, variant]
+        units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+        assert len([r for r in units[0]["entries"] if r["kind"] == "summaries"]) == 2
+
+
+def test_contextual_scalar_attribution_requires_every_known_army_and_unique_profile():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    row = next(r for r in units[0]["entries"] if r["kind"] == "characteristic")
+    row["armyIds"] = [101, 102]
+
+    def endpoint(value, duplicate=False):
+        profiles = [{"id": 2, "name": "Peripheral <X>", "bs": value}]
+        if duplicate:
+            profiles.append({"id": 3, "name": "Peripheral <X>", "bs": value})
+        return {"units": [{"id": 42, "profileGroups": [{"id": 1, "profiles": profiles}]}]}
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    profiles = [{"profile_identity": "peripheral <x>"}]
+    ends = [(101, endpoint(11), endpoint(12)), (102, endpoint(11), endpoint(12))]
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102}, ends, identity,
+    ) == "peripheral <x>"
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102, 103}, ends, identity,
+    ) is None
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102}, ends[:1], identity,
+    ) is None
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102},
+        [ends[0], (102, endpoint(11, True), endpoint(12))], identity,
+    ) is None
+    assert player.scalar_general_target(
+        row, [42], profiles, {101, 102},
+        [ends[0], (102, endpoint(10), endpoint(12))], identity,
+    ) is None
+
+
+def test_contextual_history_uses_collapsed_disclosures_and_typed_categories():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    unit = units[0]
+    scalar = next(r for r in unit["entries"] if r["kind"] == "characteristic")
+    costs = [r for r in unit["entries"] if r["kind"] == "summaries"]
+    unit.update(currentGeneral=[{
+        "profile_identity": "profile", "display_name": "General profile <X>",
+        "stats": {"move_1": 10, "move_2": 10, "bs": 12}, "shared_items": {},
+    }], currentArmies=[{
+        "id": 101, "name": "Army A", "profiles": [], "loadouts": [],
+    }], generalHistory={"profile": [scalar]}, armyHistory={0: costs}, unmatchedHistory={})
+    html = player.contextual_sections(unit, {101: "Army A", 102: "Army B"})
+    general, army = html.split("<h3>Army profiles</h3>")
+    assert '<details class="history"><summary>History</summary>' in general
+    assert '<details class="history"><summary>History</summary>' in army
+    assert 'class="history" open' not in html
+    assert "General profile &lt;X&gt;" in general
+    assert "Characteristics" in general and "BS: 11 → 12" in general
+    assert "Costs" in army and "Points: 32 → 30" in army
+    assert "BS: 11 → 12" not in army
+    assert "Points: 32 → 30" not in general
+    assert "Observation window:" in html
+
+
+def test_contextual_empty_general_history_explains_shared_scope():
+    html = player.context_history([], {}, general=True)
+    assert "this General profile, shared across its Army profiles and loadouts" in html
+    assert "respective Army histories" in html
+    assert "confirmed in the available history" in html
+
+
+def test_contextual_direct_owner_scope_shares_heading_but_keeps_evidence():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    row = next(r for r in units[0]["entries"] if r["kind"] == "summaries")
+    rows = [
+        row,
+        {**row, "scope": "Group · Own capabilities only"},
+    ]
+    html = player.context_history(rows, {101: "Army A", 102: "Army B"})
+    assert html.count('<h4 class="scope">Group</h4>') == 1
+    assert html.count('Points: 32 → 30') == 2
+    assert "Group · Own capabilities only" not in html
+    assert "Scope: Own capabilities only (excluding attached entities)." in html
+
+
+def test_historical_shared_items_use_both_endpoints_and_retain_residuals(monkeypatch):
+    def ref(item_id):
+        return {"filter": {"id": item_id, "name": f"Item {item_id}"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return [ref(i) for i in values], "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(shared, first, second):
+        return {"units": [{"id": 42, "name": "Unit", "profileGroups": [{
+            "id": 1, "name": "Group",
+            "profiles": [{"id": 2, "name": "Profile", "skills": shared}],
+            "options": [{"id": 1, "skills": first}, {"id": 2, "skills": second}],
+        }]}]}
+
+    before = endpoint([1], [], [])
+    after = endpoint([2], [3], [])
+    row = {
+        "kind": "summaries", "identity": {
+            "field": "skills", "groupId": 1, "lost": [ref(1)], "gained": [ref(2), ref(3)],
+        }, "text": "old", "evidence": {"original": True},
+    }
+    general = [{"profile_identity": "profile"}]
+    ends = [(101, before, after, [], []), (102, before, after, [], [])]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    result = player.historical_shared_delta([row], 42, general, ends, identity, set(), set())
+    assert result == ("profile", {"lost": [ref(1)], "gained": [ref(2)]})
+    assert result is not None
+    residual = player.subtract_shared(row, result[1])
+    assert residual is not None
+    assert residual["text"] == "Gained Item 3"
+    assert residual["evidence"] == row["evidence"]
+    assert row["identity"]["gained"] == [ref(2), ref(3)]
+    assert player.historical_shared_delta(
+        [row], 42, general, ends, identity, set(), {("skills", 2)},
+    ) is None
+    # A skill gained by only one Army is not a shared gain.
+    divergent = [(101, before, after, [], []), (102, before, before, [], [])]
+    assert player.historical_shared_delta(
+        [row], 42, general, divergent, identity, set(), set(),
+    ) == ("profile", {"lost": [ref(1)], "gained": []})
+
+
+def test_historical_equipment_and_weapon_projection_uses_canonical_owners(monkeypatch):
+    def ref(item_id, extras=()):
+        return {
+            "filter": {"id": item_id, "name": f"Item {item_id}"},
+            "occurrence": {"extra": [{"id": i, "name": str(i)} for i in extras]},
+        }
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(field, profile, options):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [{"id": 2, "name": "Profile", field: profile}],
+            "options": [{"id": i, field: items} for i, items in enumerate(options, 1)],
+        }]}]}
+
+    general = [{"profile_identity": "profile"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    old, new, specific = ref(1), ref(2), ref(3)
+    for field, before, after in (
+        ("equip", endpoint("equip", [old], [[], []]),
+         endpoint("equip", [new], [[specific], []])),
+        ("weapons", endpoint("weapons", [], [[old], [old]]),
+         endpoint("weapons", [], [[new, specific], [new]])),
+    ):
+        row = {"identity": {
+            "field": field, "groupId": 1, "lost": [old], "gained": [new, specific],
+        }}
+        result = player.historical_shared_delta(
+            [row], 42, general, [(101, before, after, [], [])], identity, set(), set(),
+        )
+        assert result == ("profile", {"lost": [old], "gained": [new]})
+
+    # The canonical projection can show a common base even when extras differ.
+    # Do not turn that synthetic display item into an exact historical occurrence.
+    before = endpoint("weapons", [], [[], []])
+    after = endpoint("weapons", [], [[ref(2, (10,))], [ref(2, (20,))]])
+    row = {"identity": {
+        "field": "weapons", "groupId": 1, "lost": [],
+        "gained": [ref(2, (10,)), ref(2, (20,))],
+    }}
+    assert player.historical_shared_delta(
+        [row], 42, general, [(101, before, after, [], [])], identity, set(), set(),
+    ) is None
+
+
+def test_historical_classified_equipment_requires_exact_identity_and_no_native_counterpart(
+    monkeypatch,
+):
+    def ref(item_id, label):
+        return {"filter": {"id": item_id, "name": label}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(skills, equipment=()):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [{"id": 2, "name": "Profile",
+                                  "skills": skills, "equip": list(equipment)}],
+            "options": [{"id": 1}, {"id": 2}],
+        }]}]}
+
+    medikit = ref(5, "MediKit")
+    row = {"identity": {"field": "skills", "groupId": 1, "lost": [], "gained": [medikit]}}
+    general = [{"profile_identity": "profile"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    def compare(before, after):
+        return player.historical_shared_delta(
+            [row], 42, general, [(101, before, after, [], [])], identity,
+            {("skills", 5)}, set(), {5: ("MediKit", "medikit")},
+        )
+
+    assert compare(endpoint([]), endpoint([medikit])) == (
+        "profile", {"lost": [], "gained": [medikit]},
+    )
+    assert compare(endpoint([], [ref(106, "MediKit")]), endpoint([medikit])) is None
+    assert compare(endpoint([]), endpoint([ref(5, "Different item")])) is None
+
+
+def test_historical_shared_items_allow_stable_direct_attachments(monkeypatch):
+    skill = {"filter": {"id": 5, "name": "Skill"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(skills, includes):
+        return {"units": [{"id": 42, "profileGroups": [
+            {"id": 1, "profiles": [{"id": 2, "name": "Controller", "skills": skills}],
+             "options": [{"id": 1, "includes": includes}]},
+            {"id": 2, "profiles": [{"id": 3, "name": "Peripheral"}],
+             "options": [{"id": 1}]},
+        ]}]}
+
+    row = {"identity": {"field": "skills", "groupId": 1, "lost": [], "gained": [skill]}}
+    general = [{"profile_identity": "controller"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    edge = [{"group": 2, "option": 1}]
+    before, after = endpoint([], edge), endpoint([skill], edge)
+    assert player.historical_shared_delta(
+        [row], 42, general, [(101, before, after, [], [])], identity, set(), set(),
+    ) == ("controller", {"lost": [], "gained": [skill]})
+    assert player.historical_shared_delta(
+        [row], 42, general, [(101, before, endpoint([skill], []), [], [])],
+        identity, set(), set(),
+    ) is None
+
+
+def test_multi_profile_history_promotes_only_direct_profile_owned_changes(monkeypatch):
+    skill = {"filter": {"id": 5, "name": "Skill"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(first, second=(), options=(), sibling_name="Peripheral"):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [
+                {"id": 2, "name": "Controller", "skills": list(first)},
+                {"id": 3, "name": sibling_name, "skills": list(second)},
+            ], "options": [{"id": 1, "skills": list(options)}],
+        }]}]}
+
+    row = {"identity": {
+        "field": "skills", "groupId": 1, "lost": [], "gained": [skill],
+        "profiles": [{"profileId": 2, "name": "Controller", "allProfileLoadouts": True}],
+    }}
+    general = [{"profile_identity": "controller"}, {"profile_identity": "peripheral"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    def compare(before, after, selected: int | None = 2):
+        return player.historical_shared_delta(
+            [row], 42, general, [(101, before, after, [], [])], identity,
+            set(), set(), target_profile_id=selected,
+        )
+
+    assert compare(endpoint([]), endpoint([skill])) == (
+        "controller", {"lost": [], "gained": [skill]},
+    )
+    assert compare(endpoint([]), endpoint([], [skill])) is None
+    assert compare(endpoint([]), endpoint([], options=[skill])) is None
+    assert compare(endpoint([], options=[skill]), endpoint([skill])) is None
+    assert compare(endpoint([]), endpoint([skill], sibling_name="Other")) is None
+    assert compare(endpoint([]), endpoint([skill]), selected=3) is None
+    assert compare(endpoint([]), endpoint([skill]), selected=None) is None
+
+
+def test_common_revision_records_selects_unique_per_army_windows():
+    records = {(101, "2025-10-15"): [("2025-10-02", {"id": 1})],
+               (102, "2025-10-15"): [("2025-09-30", {"id": 2})]}
+    rows = [
+        {"armyIds": [101], "earlierObservedDate": "2025-10-02",
+         "laterObservedDate": "2025-10-15"},
+        {"armyIds": [102], "earlierObservedDate": "2025-09-30",
+         "laterObservedDate": "2025-10-15"},
+    ]
+    assert player.common_revision_records(records, {101, 102}, "2025-10-15", rows) == [
+        (101, "2025-10-02", {"id": 1}), (102, "2025-09-30", {"id": 2}),
+    ]
+    assert player.common_revision_records(records, {101, 102, 103}, "2025-10-15", rows) is None
+    assert player.common_revision_records(records, {101, 102}, "2025-10-16", rows) is None
+    wrong = [{**rows[0], "earlierObservedDate": "2025-10-01"}, rows[1]]
+    assert player.common_revision_records(records, {101, 102}, "2025-10-15", wrong) is None
+    records[(102, "2025-10-15")].append(("2025-10-01", {"id": 3}))
+    assert player.common_revision_records(records, {101, 102}, "2025-10-15", rows) is None
+
+
+def test_common_revision_scalars_keep_conflicting_transitions_and_later_dates_separate():
+    preview, semantic = fixture()
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    row = next(r for r in units[0]["entries"] if r["kind"] == "characteristic")
+    other = {**row, "earlierObservedDate": "2025-09-30", "armyIds": [102]}
+    conflict = {**other, "identity": [*row["identity"][:3], {"present": True, "value": 13}]}
+    later = {**other, "laterObservedDate": "2025-10-16"}
+    assert player.same_revision_scalars([row, other, conflict, later]) == [[0, 1], [2], [3]]
+
+
+def test_common_revision_items_require_independent_army_support(monkeypatch):
+    skill = {"filter": {"id": 5, "name": "Skill"}, "occurrence": {}}
+
+    def resolve(values, field, army, metadata):
+        return values, "resolved"
+
+    monkeypatch.setattr(player, "resolve_references", resolve)
+
+    def endpoint(skills):
+        return {"units": [{"id": 42, "profileGroups": [{
+            "id": 1, "profiles": [{"id": 2, "name": "Profile", "skills": skills}],
+            "options": [{"id": 1}, {"id": 2}],
+        }]}]}
+
+    row = {"armyIds": [101], "identity": {
+        "field": "skills", "groupId": 1, "lost": [], "gained": [skill],
+    }}
+    other = {**row, "armyIds": [102]}
+    general = [{"profile_identity": "profile"}]
+
+    def identity(label: object) -> str:
+        return str(label).lower()
+
+    def compare(rows, endpoints):
+        return player.unanimous_revision_delta(
+            rows, 42, general, endpoints, identity, set(), set(), {}, None,
+        )
+
+    before, after = endpoint([]), endpoint([skill])
+    ends = [(101, before, after, [], []), (102, before, after, [], [])]
+    assert compare([row, other], ends) == ("profile", {"lost": [], "gained": [skill]})
+    assert compare([row], ends) is None
+    assert compare([row, other], [ends[0], (102, after, after, [], [])]) is None
+
+
+def test_contextual_action_rows_keep_reference_changes_distinct():
+    def ref(item_id, label, extra=None):
+        occurrence = {"extra": [{"name": extra}]} if extra else {}
+        return {"filter": {"id": item_id, "name": label}, "occurrence": occurrence}
+    row = {
+        "kind": "summaries", "identity": {
+            "field": "skills",
+            "lost": [ref(1, "Dodge", "+2.5"), ref(2, "Forward Observer")],
+            "gained": [ref(1, "Dodge", "+5"), ref(3, "NCO")],
+        }, "text": "Compound reference delta",
+    }
+    assert player.action_rows(row) == [
+        ("Changed", "Dodge (+2.5) → Dodge (+5)"),
+        ("Gained", "NCO"), ("Lost", "Forward Observer"),
+    ]
+
+
+def test_history_actions_preserve_source_typed_distances_and_movement():
+    def ref(item_id, name, value, extra_type="DISTANCE"):
+        return {
+            "filter": {"id": item_id, "name": name},
+            "occurrence": {"extra": [{"name": value, "type": extra_type}]},
+        }
+
+    row = {
+        "kind": "summaries",
+        "identity": {
+            "field": "skills",
+            "lost": [ref(1, "Super-Jump", "+7.5"), ref(2, "Jump", "+20")],
+            "gained": [ref(1, "Super-Jump", "+10"), ref(3, "Dodge", "+3", "TEXT")],
+        },
+        "text": "Skill delta",
+    }
+    signs = {"super-jump": "omit", "jump": "omit"}
+    changed, gained, lost = player.history_actions(row, signs)
+    assert changed["action"] == "Changed"
+    assert [part for part in changed["parts"] if isinstance(part, dict)] == [
+        {"kind": "distance", "value": "+7.5", "positive_sign": "omit"},
+        {"kind": "distance", "value": "+10", "positive_sign": "omit"},
+    ]
+    assert gained == {"action": "Gained", "text": "Dodge (+3)"}
+    assert lost["parts"] == [
+        "Jump", " (", {"kind": "distance", "value": "+20", "positive_sign": "omit"}, ")",
+    ]
+    assert player.history_reference_parts(ref(99, "Removed Skill", "-5"), signs) == [
+        "Removed Skill", " (",
+        {"kind": "distance", "value": "-5", "positive_sign": "preserve"}, ")",
+    ]
+    movement = {
+        "kind": "characteristic", "text": 'MOV: 4-4" → 6-2"',
+        "identity": [[], "move", {"value": [10, 10]}, {"value": [15, 5]}],
+    }
+    assert player.history_actions(movement, signs)[0]["parts"] == [
+        "MOV: ", {"kind": "movement", "values": [10, 10]},
+        " → ", {"kind": "movement", "values": [15, 5]},
+    ]
+    cost = {"kind": "summaries", "text": "Changed 20 → 19 Points",
+            "identity": {"field": "points"}}
+    assert player.history_actions(cost, signs) == [{"action": "Changed", "text": "20 → 19 Points"}]
+
+
+def test_group_wide_same_delta_different_cost_pairs_stay_separate():
+    preview, semantic = fixture()
+    row = semantic["summaries"][0]
+    row["loadouts"].append({"optionId": 2, "label": "Rifle", "before": 30, "after": 28})
+    variant = {**row, "loadouts": [
+        {"optionId": 1, "label": "HMG", "before": 35, "after": 33},
+        {"optionId": 2, "label": "Rifle", "before": 33, "after": 31},
+    ], "evidence": [{"armyId": 103}]}
+    semantic["summaries"] = [row, variant]
+    units, _ = player.model(preview, semantic, lambda row, ev, stream: "Group")
+    rows = [r for r in units[0]["entries"] if r["kind"] == "summaries"]
+    assert len(rows) == 2
+    assert len(player.presentation_rows(rows)) == 2

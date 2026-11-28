@@ -150,10 +150,11 @@ remain separately authorized.
 ## Release-artifact generation
 
 The tracked runtime databases are generated during development/release preparation, not on the
-server. Raw archives and intermediate build products remain ignored. Rebuild the complete
-Army/Rules/ITS set from the pinned Army snapshot and tracked curated inputs, run the normal
-validation gates, then commit all three `data/generated/` databases with the code/data
-changes that require them.
+server. Raw archives and intermediate build products remain ignored. When pinned build inputs
+change, rebuild the complete four-file Army/Rules/ITS set, run the normal validation gates,
+and commit the resulting `data/generated/` changes with their inputs. The
+[build-input envelope](data-model.md#shared-runtime-build-input-provenance) distinguishes
+publication dependencies from presentation-only changes; the latter do not require a rebuild.
 
 Historical `data/manifests/army-symbol-build.json` is not part of the deployment
 contract and cannot resume the retired in-tree processor. The tracked
@@ -182,8 +183,21 @@ sh ./scripts/deploy-local-test.sh
 The probe defaults to `http://localhost:8080` for the Caddy public host
 and `http://127.0.0.1:8081` for the metrics listener. Use
 `--public-base` and `--metrics-base` for custom test ports. For production,
-use the public HTTPS URL and loopback metrics port, plus
+use the public HTTPS URL and configured metrics listener, plus
 `--expected-version <version>` to reject an accidental `+dev` footer.
+
+To verify production directly through Caddy when the external TLS proxy
+rejects the probe, use its loopback HTTP listener and the configured
+public hostname as an explicit Host header:
+
+```sh
+.venv/bin/python -m tools.ci.verify_running_deployment --public-base http://127.0.0.1 --public-host YOUR-HOST --metrics-base http://127.0.0.1:9090 --expected-version <version>
+```
+
+Adjust the listener addresses/ports to the deployment configuration.
+`--public-host` applies to every public probe request, never to metrics.
+This verifies the running Caddy/application path, not external TLS or
+reverse-proxy availability; check public browser access separately.
 
 This creates a separate `infinitydb-test` Compose project, binds Caddy only to
 `127.0.0.1:8080`, deploys the current tracked runtime/symbol artifacts, and disables production
@@ -283,6 +297,64 @@ container itself remains unpublished. Deployment tooling rejects wildcard metric
 `0.0.0.0` or `::`, so LAN access must name a specific trusted server interface address. The
 metrics are process-lifetime operational state and intentionally reset when the application
 container restarts.
+
+### Voluntary error reports
+
+The shared form sends reports to a fixed maintainer email address using
+an authenticated or otherwise authorized SMTP relay. Reporting is disabled
+by default, without affecting reference browsing. Set these values in the
+deployment checkout's private, Git-ignored `.env` file (mode 600):
+
+```dotenv
+INFINITYDB_FEEDBACK_SMTP_HOST=smtp.example.invalid
+INFINITYDB_FEEDBACK_SMTP_PORT=587
+INFINITYDB_FEEDBACK_SMTP_SECURITY=starttls
+INFINITYDB_FEEDBACK_SMTP_FROM=sender@example.invalid
+INFINITYDB_FEEDBACK_SMTP_TO=maintainer@example.invalid
+INFINITYDB_FEEDBACK_SMTP_USERNAME=sender@example.invalid
+INFINITYDB_FEEDBACK_SMTP_PASSWORD='replace-with-mail-app-password'
+```
+
+Use the relay's authorized sender address and the intended maintainer
+recipient. For implicit TLS use `ssl` and port 465; the port defaults
+to 587 for STARTTLS and 465 for SSL. Username and password may both be
+omitted for a relay that authorizes the application without credentials.
+Plaintext SMTP is not supported. The installer preserves the separate
+`.env` file across updates; Compose passes the values only to the app.
+Keep credentials private and do not include them in diagnostics or Git.
+
+The app does not retain report bodies or retry failed deliveries. Review
+email in the configured mailbox, retain it only as needed to resolve the
+issue, and transfer only actionable non-personal findings to the normal
+project issue/backlog workflow. SMTP acceptance is not a guarantee of
+inbox delivery.
+
+#### End-to-end feedback acceptance
+
+Ordinary isolated test deployments disable mail delivery. When introducing or
+materially changing feedback delivery or its production mail configuration,
+test the complete browser-to-mailbox path on the intended production host
+before release. Use a separate checkout of the exact candidate with its own
+private `.env` containing the intended SMTP settings. Do not change the running
+production checkout or expose the test listener publicly.
+
+```sh
+INFINITYDB_TEST_ENABLE_FEEDBACK=1 sh ./scripts/deploy-local-test.sh
+```
+
+The opt-in permits the configured SMTP relay; it does not change the isolated
+Compose project, loopback bindings or image-pruning policy. Access the test
+site through the SSH tunnel described above. Check that reporting is available,
+submit a clearly labeled test report from a reference page and confirm the
+success message and actual inbox receipt. Verify category, message, version
+and optional page path, without query strings or fragments. Submit another
+test with page inclusion unchecked and verify that the path is absent.
+Do not include personal data or credentials in reports or acceptance records.
+Stop the test stack afterward, or redeploy it without the opt-in to restore
+the default disabled-mail behavior. Keep production unchanged throughout.
+
+The [architecture privacy contract](architecture.md#privacy-preserving-observability)
+describes the submitted fields and abuse limits.
 
 ### Retained metrics history
 
@@ -493,6 +565,27 @@ The general scenario remains the default; do not compare aggregate throughput
 across the two workloads. This is a warmed, repeatedly sampled HTTP workload,
 not a measurement of cold worker initialization or browser rendering.
 
+For first-access diagnostics, restart the **isolated** application workers
+before each invocation, wait for health only, and send no other application
+traffic. Select one fixed API case rather than discovering identities:
+
+```bash
+.venv/bin/python -m tools.performance.capacity_test http://localhost:8080 --first-access-case unit-detail --steady-seconds 10 --burst-seconds 5 --output local/performance/http-capacity/RUN_ID/unit-detail.json
+```
+
+The initial batch sends one request per steady-concurrency slot (default 8)
+before any discovery or warm-up; the subsequent steady and burst phases use
+the same route after normal warm-up. A failed initial batch is reported
+without proceeding to the warmed phases. Use `--help` for the fixed Explorer,
+Unit, catalog/detail and Search cases. Repeat on independently restarted
+workers for each case and retain separate receipts. This measures deployment
+first-access latency, not per-worker cache misses or cold filesystem caches:
+HTTP dispatch does not establish worker identity, and simultaneous requests
+can share initialization work. Small initial batches have limited percentile
+resolution. Compare repeated fresh starts with warmed per-route p50/p95 and
+record the resource configuration. Do not run this diagnostic against live
+production traffic or infer browser rendering time from the HTTP samples.
+
 On the Linux development checkout, use the isolated test stack and collect a
 fresh resource and capacity report with the normal 2x4 worker configuration:
 
@@ -514,8 +607,28 @@ runtime image preview also supports `--capacity-output`:
 It builds the normal Dockerfile, starts a read-only preview with an ephemeral
 IPv4 loopback port, waits for health, runs the same Unit Explorer workload,
 retains the JSON receipt and removes the owned container/image. This mode
-does not run semantic parity checks, Caddy, or the Compose resource sampler;
-use the full isolated stack for deployment-level resource evidence.
+does not run semantic parity checks or Caddy. Select another workload with
+`--capacity-case general` or a fixed first-access case, and on Linux add
+`--capacity-resources` with a separate new JSON path to sample the host and
+the owned app container during the same run. Each invocation starts a new
+container, without application traffic before the selected workload. The
+default 60/10-second phases are configurable with `--steady-seconds` and
+`--burst-seconds`. App-only evidence excludes Caddy; use the full isolated
+stack for deployment-level resource evidence.
+
+The same preview tool can run the complete disposable Compose stack on Linux
+without disturbing an existing deployment. For example:
+
+```bash
+.venv/bin/python -m tools.preview_runtime_image --compose-capacity --capacity-case general --capacity-output local/performance/http-capacity/RUN_ID/general.json --capacity-resources local/performance/http-capacity/RUN_ID/general-resources.json
+```
+
+Compose mode uses a unique project, ephemeral IPv4 loopback ports, the tracked
+Caddy configuration, and separate temporary metrics-history storage. It
+requires both receipt paths and collects resources from all three services.
+Each invocation starts fresh and removes its own containers, volumes and
+image tags afterward. Use `--capacity-case unit-explorer` for the separate
+Explorer workload; fixed first-access cases are also supported.
 
 The HTTP report is only one half of a capacity result. On the Linux deployment host, wrap the
 capacity command with the resource sampler so both ignored JSON reports cover the same interval:
@@ -582,6 +695,79 @@ After the experiment, restore the ordinary isolated 2x4 stack simply by redeploy
 ```bash
 sh scripts/deploy-local-test.sh 8080
 ```
+
+#### Full-stack v1.3.0 development capacity (2026-11-27)
+
+The Linux-dev disposable Compose preview at `e8f7035e` used the tracked
+Caddy, Gunicorn (2 workers × 4 threads) and metrics-history services. The
+snapshot was `3457c90e15f84b17ce2cf44e8402726f8fa1fb71ab0b39a507024c21c3efb37b`;
+the development package reported 1.2.2. The host exposed 16 logical CPUs and
+approximately 31.3 GiB RAM, without explicit Docker CPU or memory limits.
+The two workloads ran sequentially in fresh isolated stacks with discovery
+and warmup before the 60-second concurrency-8 steady phase and 10-second
+concurrency-32 burst.
+
+| Workload | Steady req/s | Steady p50/p95/p99 (ms) | Burst req/s | Burst p50/p95/p99 (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| General (18 cases) | 495.7 | 10.5/48.3/74.6 | 487.1 | 59.8/114.9/139.1 |
+| Unit Explorer (15 cases) | 103.4 | 75.3/178.7/257.4 | 106.2 | 255.3/558.4/620.1 |
+
+Both runs had zero HTTP errors, restarts or OOM events, exited 0, and removed
+their temporary containers, volumes, networks and image tags. The sampled
+resource results were:
+
+| Workload | App peak MiB | Caddy peak MiB | Metrics peak MiB | Sum of peaks MiB | Host CPU avg/max | Host memory peak |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| General | 205.4 | 25.4 | 21.5 | 252.3 | 28.9%/34.2% | 6.7% |
+| Unit Explorer | 332.3 | 22.6 | 21.1 | 375.9 | 15.7%/19.1% | 7.0% |
+
+The sum of individual sampled container peaks is an upper bound on their
+simultaneous sampled total, not a simultaneous peak measurement. App memory
+is container usage across workers, not summed process RSS. The app averaged
+305.3% CPU during general traffic and 200.0% during Explorer traffic.
+
+General steady API p50/p95 (ms): Unit detail 24.5/40.6, Skill detail
+35.2/56.0, Equipment detail 49.6/84.7, Weapon detail 35.5/58.2, search
+9.9/18.4 and Unit list 10.0/15.4. These use discovered identities rather
+than the fixed high-usage catalog detail cases. Explorer steady p50/p95:
+initial 114.8/155.1, Extended 152.9/283.6, Extended next 137.8/250.9,
+profile/loadout/Unit matching 62.3/92.6, 75.0/103.9 and 76.4/105.2.
+Explorer burst p95 was 619.0 ms for Extended and 573.4 ms for Extended next.
+
+HTTP and resource receipts are retained under
+`local/performance/http-capacity/20261127-e8f7035e/` on Linux-dev.
+The earlier [fixed-route first-access measurements](testing-performance.md#pre-fork-runtime-index-initialization-pilot)
+were app-only, while these full-stack workloads measure warmed representative
+HTTP traffic. They are complementary, not a paired Caddy overhead experiment.
+The older baseline differs in revision, snapshot and/or resource boundary.
+These results support retaining the default 2x4 configuration and closing
+the development capacity investigation. They do not establish a production
+SLO, measure browser rendering or validate production traffic; revisit
+first-visit, exact-variant or asynchronous costs when new evidence warrants it.
+
+#### Full-stack browser-audit follow-up (2026-11-28)
+
+Repeat the same two workloads at `79788e5a` on Linux-dev, with the same
+uncapped 2x4 configuration and 16 logical CPUs. The package reported 1.3.0
+and the snapshot was
+`139eed1c3431d107aadf350e37fc9be8f46575ea78a1e63b13eac7d501152be9`.
+
+| Workload | Steady req/s | Steady p50/p95/p99 (ms) | Burst req/s | Burst p50/p95/p99 (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| General | 508.7 | 10.4/46.3/72.0 | 515.0 | 56.9/109.5/133.7 |
+| Unit Explorer | 101.5 | 79.1/168.2/234.1 | 102.3 | 267.3/560.3/630.9 |
+
+Both runs exited 0 with no HTTP errors, container restarts or OOM events,
+and removed their disposable stacks. Peak app memory was 201.1 MiB for
+General and 305.4 MiB for Explorer, versus 205.4 and 332.3 MiB previously.
+Explorer steady Extended/Extended-next p95 was 247.8/231.0 ms; burst
+p95 was 646.1/617.1 ms. Results are broadly comparable, with mixed Explorer
+latency and throughput; the snapshot changed, so this is not a controlled
+before/after experiment. Preserve the 2x4 configuration. The historical
+HTTP workload retains full Extended responses and does not measure the
+compact browser transport or layout changes directly.
+
+Receipts: `local/performance/http-capacity/20261128-79788e5/` on Linux-dev.
 
 #### Unit Explorer app-only 2x4 measurement (2026-11-25)
 

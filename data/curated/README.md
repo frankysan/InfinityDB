@@ -20,10 +20,10 @@ labels, independently of their physical `local/data/pdf/` layout.
   the copy is synthesized from current Army/rules data with external faction background used only
   as secondary context, and is kept separate from source-derived identity semantics.
   Current complete builds embed these summaries and the explicitly authored
-  `legacy-armies.json` identities in Army v31, retaining the Army v30 schema
+  `legacy-armies.json` identities in Army v34, retaining the Army v30 schema
   contract. Serving reads the selected SQLite projection; earlier schemas and
   source-only tools retain the JSON adapters. The
-  [data model](../../docs/data-model.md#army-overview-and-historical-identities-in-army-v30)
+  [data model](../../docs/data-model-army.md#army-overview-and-historical-identities-in-army-v30)
   owns identity, parentage and provenance safeguards.
 - `peripherals/` contains the separate reviewed Army-Peripheral identity/mapping contract.
 - `relationships/` contains snapshot-bound review evidence for source relationship
@@ -469,7 +469,7 @@ example `rules/n5-core-v5.3.json`. Each file contains:
 - `formatVersion`: `23`
 - `collection`: publication/source collection identity, scope, status, and authority
 - optional `scenarioCollection`: stable scenario-set identity, exact set revision, and ordered members
-- `sources`: source-specific PDF or wiki provenance. PDF sources may declare
+- `sources`: source-specific PDF, wiki or secondary web provenance. PDF sources may declare
   an optional 64-character hexadecimal `sha256`; malformed declarations fail
   validation. The source-evidence auditor verifies supplied bytes separately.
   Normal rules builds validate the declaration without opening or downloading
@@ -484,7 +484,9 @@ the exact timestamped ZIP path, SHA-256, acquisition timestamp, language,
 document count, and wiki base URL; citations use archive `member` names and may
 add a heading. Exact pinned wiki revisions remain URL-backed sources with a
 `retrievedDate`; their citations use the source URL directly and may add a
-heading.
+heading. Secondary community web sources (`kind: web`) require a URL,
+`retrievedDate`, version description and secondary authority. They can establish
+terminology usage but do not establish current game mechanics.
 
 `vocabularySources` follows the same locator rules instead of forcing wiki
 references to carry PDF page numbers.
@@ -516,11 +518,13 @@ become verified merely because an alternative root contains a matching file.
 
 Integrated readers include `verify_reinforcements_inputs` in the
 source-evidence auditor (optional `source_layout` API keyword) and
-`tools.audit_reinforcements_applicability` (`--source-layout legacy|local`).
+`tools.research.audit_reinforcements_applicability` (`--source-layout legacy|local`).
 The latter applies the selected layout to both historical annex PDFs and its
 current Core/ITS reference PDFs, preserving the same applicability report.
-`tools.report_reference_baseline` and `tools.audit_pdf_revision_deltas` also
-accept `--source-layout legacy|local` for PDF evidence. The reporter keeps
+`tools.research.report_reference_baseline` and `tools.research.audit_pdf_revision_deltas` also
+accept `--source-layout legacy|local` for PDF evidence. All three CLI
+commands default to `local`; the low-level pinned resolver's default remains
+`legacy` for programmatic compatibility. The reporter keeps
 its existing legacy-status semantics; when `local` is explicitly selected,
 its canonical PDF groups require one valid published SHA-256, reject conflicting
 or altered bytes, and mark absent selected PDFs missing rather than falling
@@ -897,7 +901,7 @@ Acceptance by the generic record envelope does not imply a published application
 scenario authoring uses `facts.definitionVersion: 2` and composes explicit references from the same
 collection. Inline v1 records remain supported; export resolves v2 into self-contained v1-shaped
 runtime records. The canonical component/data contract is documented in
-[the scenario model](../../docs/data-model.md#scenario-model-implemented-core-and-future-extensions).
+[the scenario model](../../docs/data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions).
 
 An optional `scenarioComponents` object has `formatVersion: 1` and a `definitions` array. Each
 definition has a typed `id`, `kind` (`setup`, `geometry`, `objective`, or `end-condition`), `payload`,
@@ -940,7 +944,7 @@ Restrictions and embedded deployed objects; obsolete v8/v9 CLI modes are retired
 Low-level base reference exports remain useful for controlled semantic fixtures,
 not complete runtime publication. Complete `build --db-dir` exports v11/13 with relational exact
 variant usage linked to the existing reviewed definitions; it does not change
-curated format v23. The [data model](../../docs/data-model.md#rule-variant-usage-api)
+curated format v23. The [data model](../../docs/data-model-rules.md#rule-variant-usage-api)
 owns that projection and its source safeguards. The prepared 1.0.1 tracked release uses v10/12, while the
 tagged 1.0.0 release used v9/11. Verify the matched tracked artifact rather
 than assuming a fresh base export has identical release bytes.
@@ -1197,7 +1201,7 @@ but arbitrary combinations and the unqualified SR
 remain unresolved. Raw `UPGRADE:` spellings, including
 nonbreaking spaces, remain source evidence rather than a
 generic parser contract. See
-[the source-parameter audit](../../docs/data-model.md#rule-variant-usage-index--implemented-release-artifact-gated).
+[the source-parameter audit](../../docs/data-model-rules.md#rule-variant-usage-index--implemented-release-artifact-gated).
 
 For Hacking Device `100` and Plus `101`, reviewed program-specific
 single extras may also use `program-burst-mod` with
@@ -1444,8 +1448,15 @@ with corresponding headings and MediaWiki revision IDs verified. Another 116
 URL-backed `oldid` references resolve to the exact historical payloads in
 the new archives. These captures do not establish a single publication date.
 
-Older archives are still available for migration validation; the remaining
-database publication and dependent-test updates must pass before retirement.
+The September/October Wiki archive retirement is complete in the Windows
+development checkout: the old ZIPs, manifests and extracted history mirror
+were already absent on 2026-11-27. The earlier retirement comparison found
+zero missing revision IDs or history page-name conflicts. A new read-only
+bilingual source audit verified all 109 current references and 116 historical
+references against the retained November captures; the focused source-reader
+and archive tests passed without skips. Preserve dated reports and their
+original source identities; future replacements use the parameterized
+migration/retirement comparison tools.
 Acquisition manifests and detailed inventories are ignored under
 `local/data/manifests/snapshots/`; curated rules retain the exact selected
 source identities.

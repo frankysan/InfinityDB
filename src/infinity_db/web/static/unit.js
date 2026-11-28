@@ -1,4 +1,5 @@
 import { getUnit, getUnitProfileHelp } from "./api.js";
+import { formatSkillDistanceExtra } from "./distance.js";
 import { maintainedTextFragment } from "./maintained-text.js";
 import { rulesCitationList } from "./rules-reference.js";
 import { silhouetteValuePreview } from "./silhouette-diagrams.js";
@@ -1322,6 +1323,125 @@ function compositeOptionTable(options, anchorScope) {
   );
 }
 
+function appendHistorySummary(disclosure, title, contexts) {
+  const summary = document.createElement("summary");
+  summary.textContent = title;
+  // Each context renders one post per revision date, even when several
+  // categories or scopes changed on that date.
+  const updates = contexts.reduce(
+    (total, changes) => total + new Set(changes.map((change) => change.date)).size, 0,
+  );
+  const count = contexts.reduce((total, changes) => total + changes.reduce(
+    (sum, change) => sum + change.actions.length, 0,
+  ), 0);
+  const countLabel = document.createElement("span");
+  countLabel.className = "unit-history-count";
+  countLabel.textContent = updates
+    ? ` · ${updates} ${updates === 1 ? "update" : "updates"} · ${count} ${count === 1 ? "change" : "changes"}`
+    : " · No confirmed updates";
+  disclosure.classList.toggle("unit-history--empty", !updates);
+  summary.append(countLabel);
+  disclosure.append(summary);
+}
+
+function historyChangeText(change) {
+  if (!Array.isArray(change.parts)) return change.text;
+  return change.parts.map((part) => {
+    if (typeof part === "string") return part;
+    if (part.kind === "distance") return formatSkillDistanceExtra(part.value, part);
+    if (part.kind === "movement") return formatMovement(...part.values, distanceUnit());
+    return "";
+  }).join("");
+}
+
+function historyDisclosure(changes, general = false) {
+  const disclosure = document.createElement("details");
+  disclosure.className = "unit-history";
+  appendHistorySummary(disclosure, "History", [changes]);
+  const populate = () => {
+    if (!disclosure.open) return;
+    disclosure.append(historyBody(changes, general));
+    disclosure.removeEventListener("toggle", populate);
+  };
+  disclosure.addEventListener("toggle", populate);
+  return disclosure;
+}
+
+function historyBody(changes, general) {
+  const body = document.createElement("div");
+  body.className = "unit-history-body";
+  const note = document.createElement("p");
+  note.className = "unit-history-note";
+  note.textContent = general
+    ? "Changes common to this General profile across all Armies and loadouts, including optional availability categories. See each Army's history for individual changes."
+    : "Changes to this Army's profiles and loadouts. Skills, Equipment and Weapons listed here belong to the profile or loadout itself, not to attached models.";
+  body.append(note);
+  const coverage = document.createElement("p");
+  coverage.className = "unit-history-note";
+  coverage.textContent = "Dates show when changes first appeared in the available Infinity Army updates. This history is incomplete.";
+  body.append(coverage);
+  if (!changes.length) {
+    const empty = document.createElement("p");
+    empty.textContent = general
+      ? "No changes to the shared General profile have been confirmed in the available history."
+      : "No changes have been confirmed in the available history for this Army.";
+    body.append(empty);
+  }
+  const dates = new Map();
+  for (const change of changes) {
+    if (!dates.has(change.date)) dates.set(change.date, new Map());
+    const scopes = dates.get(change.date);
+    if (!scopes.has(change.scope)) scopes.set(change.scope, new Map());
+    const categories = scopes.get(change.scope);
+    if (!categories.has(change.category)) categories.set(change.category, []);
+    categories.get(change.category).push(...change.actions);
+  }
+  const categoryOrder = ["Characteristics", "Skills", "Equipment", "Weapons", "Costs",
+    "Availability", "Loadout lifecycle", "Relationships", "Classification", "Other changes"];
+  for (const date of [...dates.keys()].sort().reverse()) {
+    const article = document.createElement("article");
+    article.className = "unit-history-date";
+    const heading = document.createElement("h3");
+    const time = document.createElement("time");
+    time.dateTime = date;
+    time.textContent = date;
+    heading.append(time);
+    article.append(heading);
+    for (const [scope, categories] of dates.get(date)) {
+      const group = document.createElement("section");
+      group.className = "unit-history-scope";
+      if (scope) {
+        const title = document.createElement("h4");
+        title.textContent = scope;
+        group.append(title);
+      }
+      for (const category of [...categoryOrder, ...[...categories.keys()].filter(
+        (category) => !categoryOrder.includes(category),
+      )]) {
+        if (!categories.has(category)) continue;
+        const label = document.createElement("h5");
+        label.className = "data-label";
+        label.textContent = category === "Loadout lifecycle" ? "Loadout changes" : category;
+        const list = document.createElement("ul");
+        for (const change of categories.get(category)) {
+          const item = document.createElement("li");
+          item.className = "unit-history-change";
+          item.dataset.action = change.action.toLowerCase();
+          const action = document.createElement("span");
+          action.className = "unit-history-action";
+          action.textContent = change.action;
+          item.append(action, document.createTextNode(" " + historyChangeText(change)));
+          list.append(item);
+        }
+        group.append(label, list);
+      }
+      article.append(group);
+    }
+    body.append(article);
+  }
+  return body;
+}
+
 function renderArmyProfile(army, generalByIdentity, expanded) {
   const section = document.createElement("details");
   const anchorScope = [army.id, ...(army.availability_flags || [])].join("-");
@@ -1345,6 +1465,30 @@ function renderArmyProfile(army, generalByIdentity, expanded) {
   }
   armyHeading.append(availabilityBadges(army.availability_badges));
   section.append(armyHeading);
+  if (army.official_army_links?.length) {
+    const links = document.createElement("div");
+    links.className = "official-army-links";
+    for (const target of army.official_army_links) {
+      const link = document.createElement("a");
+      link.href = target.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      const contextual = army.official_army_links.length > 1
+        || army.name !== target.army_name;
+      const sameArmy = army.official_army_links.filter(
+        (other) => other.army_name === target.army_name,
+      ).length > 1;
+      const destination = sameArmy
+        ? `${target.army_name} · ${target.unit_name}`
+        : target.army_name;
+      link.textContent = contextual
+        ? `Open in Infinity Army · ${destination}`
+        : "Open in Infinity Army";
+      link.setAttribute("aria-label", `Open in Infinity Army · ${destination} (new tab)`);
+      links.append(link);
+    }
+    section.append(links);
+  }
   if ((army.composite_options || []).length) {
     section.append(subheading("Composite options"));
     section.append(compositeOptionTable(army.composite_options, anchorScope));
@@ -1377,6 +1521,7 @@ function renderArmyProfile(army, generalByIdentity, expanded) {
       ));
     }
   }
+  if (Array.isArray(army.history)) section.append(historyDisclosure(army.history));
   return section;
 }
 
@@ -1425,6 +1570,11 @@ function render(unit, helpItems = [], attributeItems = []) {
   unitIds.textContent = `${unitMetadata.length ? " · " : ""}Unit ${unit.source_ids.map((sourceId) => `#${sourceId}`).join(" / ")}`;
   meta.append(unitIds);
   status.hidden = true;
+  const compare = document.getElementById("unit-compare-link");
+  compare.href = shareStateHref("/unit-compare", "comparison", {
+    left: unit.public_slug || unit.slug || unit.id,
+  });
+  compare.hidden = false;
   const requestedArmy = unit.armies.find((army) => army.presentation_requested);
   const armies = unit.armies.filter((army) => army.presentation_visible);
   const generalProfiles = unit.general_profiles || [];
@@ -1455,6 +1605,7 @@ function render(unit, helpItems = [], attributeItems = []) {
       "statline",
       `${profile.display_name || "Unit"} general profile`,
     ));
+    if (Array.isArray(profile.history)) generalProfile.append(historyDisclosure(profile.history, true));
     generalProfilesSection.append(generalProfile);
   }
   const profileHelp = renderProfileNotationHelp(helpItems);
@@ -1491,6 +1642,20 @@ function render(unit, helpItems = [], attributeItems = []) {
     }
     section.append(profiles);
     content.append(section);
+  }
+  if (unit.historical_contexts?.length) {
+    const historical = document.createElement("details");
+    historical.className = "surface content-frame unit-history";
+    appendHistorySummary(
+      historical, "Other historical contexts", unit.historical_contexts.map((context) => context.changes),
+    );
+    for (const context of unit.historical_contexts) {
+      const section = document.createElement("section");
+      section.className = "unit-history-body";
+      section.append(subheading(context.name), historyDisclosure(context.changes));
+      historical.append(section);
+    }
+    content.append(historical);
   }
   content.hidden = false;
   requestAnimationFrame(revealProfileGroupHash);
@@ -1545,7 +1710,14 @@ if (!unitIdentifier) {
     currentUnit = initialUnit.unit;
     render(currentUnit, helpItems, attributeItems);
     window.addEventListener("distanceunitchange", () => {
-      if (currentUnit) render(currentUnit, helpItems, attributeItems);
+      if (!currentUnit) return;
+      // The distance preference changes presentation, not disclosure state.
+      const openStates = [...content.querySelectorAll("details")].map((node) => node.open);
+      render(currentUnit, helpItems, attributeItems);
+      const disclosures = content.querySelectorAll("details");
+      if (disclosures.length === openStates.length) {
+        disclosures.forEach((node, index) => { node.open = openStates[index]; });
+      }
     }, { signal: pageController.signal });
     window.addEventListener("optionalunitschange", () => {
       fetchUnit().then(({ unit: updatedUnit, requestNumber }) => {

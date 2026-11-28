@@ -113,7 +113,7 @@ Skills appear once in catalog/Search while existing action URLs remain valid.
 Synthetic fixtures prove the generic reuse contract; ITS 17 now uses the
 pinned authoring library, without claiming unreviewed cross-season semantic
 equivalence. The
-[data-model decision](data-model.md#accepted-cross-season-scenario-and-skill-reuse)
+[data-model decision](data-model-scenarios.md#accepted-cross-season-scenario-and-skill-reuse)
 owns the complete contract.
 
 ## Cross-boundary ownership
@@ -156,6 +156,42 @@ owns the complete contract.
   `scenario_id` is given. Source dates, source selection, conflicts,
   supersession and source citations retain their existing constraints.
 
+## Season Rules on scenario pages
+
+ITS scenario detail responses include `season_rules`, a presentation projection
+of the selected season/revision's standalone Rules, Skills and States. The
+collapsed-by-default Season Rules disclosure uses the standard reference cards,
+retains their exact citations and resolves links between its local records
+within the selected season. General rules, optional Extra definitions and
+explicit tournament/Extra policies remain distinguishable; displaying them
+does not activate an Extra. Tournament/Extra policy requests start only on
+the first expansion of the disclosure for the current scenario setup.
+Core N5 scenario details do not include this
+disclosure. Tactical Support remains a separate mission-dependent card.
+
+The reviewed gameplay and event-format references cover Civilians, Designated
+Target, Classified Objectives (including INTELCOM), HVTs (including Secure HVT),
+CivEvac, Casevac and Casevac State, and Long Service for both seasons.
+Official-tournament references cover Army List selection, format, scoring,
+pairings and byes. The optional Extras cover Escalation Tournament, Free Game,
+Soldiers of Fortune, Direct Action, Reinforcements and Resilience Operations in
+both seasons, plus Spec-Ops and Treasure Hunters (a general season rule) in
+ITS 17 and Team-Ops/Tacball in ITS 18. The existing ITS 18 event policies remain
+separate. General rules appear before tournament and Extra references.
+Resilience Operations exposes its typed scoring, game sizes, Tactical Elements
+and glossary using the standard card. Its ITS 18 Objective placement and HVT
+profile conflicts remain unresolved; neither is converted into a definitive
+geometry/profile. Each record retains exact revision applicability and
+bilingual source notes; displaying it does not activate the Extra. Direct
+Action uses neither Classified Objectives nor HVTs. The ITS 18 Civilian VITA
+profile discrepancy also remains explicitly unresolved.
+
+This is not a complete event handbook: organizational advice, rankings,
+external card-deck contents and the Team-Ops/Tacball customization charts
+not printed in the pinned ITS PDFs are outside this reference coverage.
+Existing scenario setup, marker dimensions and Specialist Troop definitions
+remain authoritative for those facts.
+
 ## Stable selection and identity contract
 
 - **Core default:** No season selection continues to mean the N5 core
@@ -163,13 +199,13 @@ owns the complete contract.
   from the current date.
 - **Explicit season:** Resolve using the tuple
   `(scenario_collection_id, collection_revision, scenario_id)`, for example
-  `(its-18, 2026.09.01, scenario:battleground)`. Preserve the associated
+  `(its-18, 2026.09.11, scenario:battleground)`. Preserve the associated
   authored `publication_collection_id` and content digest, not merely
   `scenario:battleground` or route slug `battleground`.
 - **Cross-domain references:** Conceptually reference an owning domain and
   typed ID: `(rules-n5, skill:...)`,
   `(rules-n5, faq-ruling:...)`, or
-  `(its-18, 2026.09.01, scenario:...)`. Expose stable typed references in
+  `(its-18, 2026.09.11, scenario:...)`. Expose stable typed references in
   the backend registry; physical database paths and SQLite `ATTACH`
   mechanics must not leak into UI or HTTP contracts.
 - **Compatibility:** ITS data declares its supported N5 rules/source
@@ -191,8 +227,8 @@ owns the complete contract.
 
 Additional actual ITS seasons require independently reviewed source
 publications, an explicit registry entry and matched build/package inputs.
-Season 18 is the current content priority; Seasons 16 and 17 remain future
-coverage, not a precondition for the existing runtime contract. The
-synthetic multi-season test proves isolation only, not the correctness
-of any uncurated season. See the [ITS database](its-season-database.md)
+Seasons 17 and 18 are already published; Season 16 Part II and other archived
+seasons remain future coverage, not a precondition for the existing runtime
+contract. The synthetic multi-season test proves isolation only, not the
+correctness of any uncurated season. See the [ITS database](its-season-database.md)
 for the maintained storage and selection contract.

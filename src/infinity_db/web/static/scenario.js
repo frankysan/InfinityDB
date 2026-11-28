@@ -112,11 +112,18 @@ function refreshScenarioDistances() {
     const height = Number(table.dataset.heightInches);
     table.textContent = `${scenarioDistance(width)} × ${scenarioDistance(height)}`;
   }
+  for (const li of elements.content.querySelectorAll("[data-resilience-size]")) {
+    const size = JSON.parse(li.dataset.resilienceSize);
+    li.textContent = `${size.armyPoints} Army Points / ${size.swc} SWC: ${scenarioDistance(size.tableWidthIn)} × ${scenarioDistance(size.tableHeightIn)}; Deployment Zone depth ${scenarioDistance(size.deploymentDepthIn)}.`;
+  }
   const image = elements.content.querySelector("img.scenario-map");
   if (!image) return;
   const url = new URL(image.src);
   url.searchParams.set("distance_unit", distanceUnit());
   url.searchParams.set("theme", document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+  const palette = document.documentElement.dataset.themePalette;
+  if (palette && palette !== "infinitydb") url.searchParams.set("palette", palette);
+  else url.searchParams.delete("palette");
   if (image.src !== url.href) image.src = url.href;
 }
 
@@ -226,6 +233,8 @@ function mapCard(item) {
     army_points: String(item.selected_army_points), distance_unit: distanceUnit(),
     theme: document.documentElement.dataset.theme === "dark" ? "dark" : "light",
   });
+  const palette = document.documentElement.dataset.themePalette;
+  if (palette && palette !== "infinitydb") params.set("palette", palette);
   if (selectedPublication.collection) params.set("collection", selectedPublication.collection);
   if (selectedPublication.revision) params.set("revision", selectedPublication.revision);
   image.src = `/api/scenarios/${encodeURIComponent(item.slug)}/map.svg?${params}`;
@@ -482,6 +491,7 @@ function inlineScenarioRuleArticle(inclusion) {
   for (const [index, paragraph] of (inclusion.paragraphs || []).entries()) {
     const text = document.createElement("p");
     text.className = "detail-copy";
+    text.setAttribute("data-provenance", "maintained-rule");
     appendMaintainedText(text, inclusion.paragraph_tokens?.[index], paragraph);
     article.append(text);
   }
@@ -533,12 +543,13 @@ function issuesSection(item) {
   if (!(item.source_issues || []).length) return null;
   const cards = item.source_issues.map((issue) => {
     const card = document.createElement("article");
-    card.className = "surface surface--highlighted scenario-source-issue";
+    card.className = "surface surface--subtle scenario-source-issue";
     card.id = `scenario-source-issue-${issue.id}`;
     const heading = document.createElement("div");
     heading.className = "scenario-source-issue-heading";
     const title = document.createElement("h3");
     const reviewed = issue.status === "reviewed-resolution";
+    card.setAttribute("data-provenance", reviewed ? "reviewed-interpretation" : "source-uncertainty");
     title.textContent = reviewed ? "Reviewed interpretation" : "Needs verification";
     const badge = document.createElement("span");
     badge.className = "detail-badge";
@@ -722,6 +733,109 @@ function seasonPolicySection(item, controller) {
   return wrapper;
 }
 
+function resilienceReferenceDetails(rule) {
+  if (rule.id !== "rule:resilience-operations") return [];
+  const facts = rule.facts;
+  const groups = [];
+  function group(title, entries) {
+    const node = document.createElement("div");
+    node.className = "detail-fact-group";
+    const heading = document.createElement("h4");
+    heading.className = "detail-fact-heading";
+    heading.textContent = title;
+    const list = document.createElement("ul");
+    list.className = "detail-list";
+    for (const entry of entries) {
+      const li = document.createElement("li");
+      li.textContent = entry;
+      list.append(li);
+    }
+    node.append(heading, list);
+    groups.push(node);
+  }
+  const objectives = facts.tacticalObjectives;
+  group("Tactical Objective scoring", [
+    `Each card awards at most ${objectives.maxPointsPerCard} Objective Points, once per game.`,
+    `A card counts as completed with at least ${objectives.completionMinimum} Objective Point.`,
+    `Award ${objectives.moreCompletedBonus} extra Objective Point for completing more cards than the opponent.`,
+  ]);
+  const sizes = facts.gameSizes.map((size) => (
+    `${size.armyPoints} Army Points / ${size.swc} SWC: ${scenarioDistance(size.tableWidthIn)} × ${scenarioDistance(size.tableHeightIn)}; Deployment Zone depth ${scenarioDistance(size.deploymentDepthIn)}.`
+  ));
+  group("Game sizes", sizes);
+  const sizeList = groups.at(-1).querySelector("ul");
+  for (const [index, size] of facts.gameSizes.entries()) {
+    const li = sizeList.children[index];
+    li.dataset.resilienceSize = JSON.stringify(size);
+  }
+  const names = {
+    beacons: "Beacons", hvts: "HVTs", beepers: "Beepers",
+    objectives: "Objectives", "f13-defensive-turrets": "F-13 Defensive Turrets",
+  };
+  for (const element of facts.tacticalElements) {
+    group(names[element.id] || element.id, [
+      element.quantity, element.placement, ...element.rules,
+    ]);
+  }
+  group("Resilience Operations glossary", facts.glossary.map(
+    (entry) => `${entry.id.replaceAll("-", " ")}: ${entry.text}`,
+  ));
+  return groups;
+}
+
+function seasonRulesSection(item, controller) {
+  const publication = item.publication;
+  if (!publication?.collection_id?.startsWith("its-")) return null;
+  const disclosure = document.createElement("details");
+  disclosure.id = "scenario-season-rules";
+  disclosure.className = "surface surface--subtle surface--clipped scenario-section season-rules";
+  const summary = document.createElement("summary");
+  const title = document.createElement("h2");
+  title.textContent = "Season Rules";
+  summary.append(title);
+  disclosure.append(summary);
+  const body = document.createElement("div");
+  body.className = "surface-body rules-card-stack";
+  const note = document.createElement("p");
+  note.className = "detail-copy";
+  note.textContent = "Rules for this ITS season. Mission-specific rules still apply. Tournament restrictions and optional Extras apply only where specified.";
+  body.append(note);
+  const contexts = new Map();
+  for (const rule of item.season_rules || []) {
+    const context = rule.facts.applicability.context;
+    if (!contexts.has(context)) contexts.set(context, []);
+    contexts.get(context).push(rule);
+  }
+  const contextOrder = ["season", "official-tournament"];
+  const orderedContexts = [...contexts].sort(([a], [b]) => (
+    (contextOrder.includes(a) ? contextOrder.indexOf(a) : contextOrder.length)
+    - (contextOrder.includes(b) ? contextOrder.indexOf(b) : contextOrder.length)
+  ));
+  for (const [context, rules] of orderedContexts) {
+    const label = context === "season" ? "General season rules"
+      : context === "team-ops-extra" ? "TEAM-OPS Extra"
+      : context.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    const group = document.createElement("section");
+    group.className = "rules-card-stack";
+    const heading = document.createElement("h3");
+    heading.className = "detail-heading";
+    heading.textContent = label;
+    group.append(heading, ...rules.map((rule) => rulesReferenceArticle(rule, {
+      beforeRelations: resilienceReferenceDetails(rule),
+    })));
+    body.append(group);
+  }
+  let policiesRequested = false;
+  disclosure.addEventListener("toggle", () => {
+    if (!disclosure.open || policiesRequested || controller.signal.aborted) return;
+    policiesRequested = true;
+    const policies = seasonPolicySection(item, controller);
+    if (policies) body.append(policies);
+  }, { signal: controller.signal });
+  disclosure.append(body);
+  return disclosure;
+}
+
 function render(item, faqItems, controller) {
   updateDocumentIdentity(item);
   const placement = document.createElement("div");
@@ -732,7 +846,7 @@ function render(item, faqItems, controller) {
     tacticalSupportSection(item),
     objectivesSection(item),
     rulesSection(item),
-    seasonPolicySection(item, controller),
+    seasonRulesSection(item, controller),
     faqRulingsSection(faqItems),
     endSection(item),
     issuesSection(item),

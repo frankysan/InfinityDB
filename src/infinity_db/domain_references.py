@@ -19,6 +19,7 @@ from infinity_db.equipment_config import CURATED_ONLY_EQUIPMENT_SLUGS
 
 if TYPE_CHECKING:
     from infinity_db.database.repository import Database
+    from infinity_db.rules_database import RulesDatabase
 
 
 def public_slug_for_reference(
@@ -39,6 +40,7 @@ def rule_record_public_reference(
     record: dict[str, Any],
     *,
     validate_army_links: bool = False,
+    rules_database: RulesDatabase | None = None,
     additional_route_slugs: frozenset[str] = frozenset(),
 ) -> dict[str, str] | None:
     """Return the player-facing reference for one rules-relation endpoint.
@@ -137,6 +139,35 @@ def rule_record_public_reference(
                 return {"href": f"/{catalog}/{quote(slug, safe='')}#rule-{fragment}"}
             return {"catalog": catalog, "id": slug}
 
+        # An absent Army Equipment variant may still have an exact rule card
+        # on its published family page. Never manufacture a standalone route.
+        if kind == "equipment" and database is not None and rules_database is not None:
+            record_id = record.get("id")
+            if isinstance(record_id, str):
+                variant = rules_database.composed_record(record_id, include_army_links=True)
+                if variant and (variant.get("variant_semantics") or {}).get(
+                    "inheritance"
+                ) == "source":
+                    parents = {
+                        relation["record_id"]
+                        for relation in variant.get("relations", [])
+                        if relation["type"] == "variant-of"
+                    }
+                    if len(parents) == 1:
+                        parent = rules_database.composed_record(
+                            next(iter(parents)), include_army_links=True,
+                        )
+                        if parent and parent["kind"] == "equipment":
+                            reference = rule_record_public_reference(
+                                database, parent, validate_army_links=True,
+                            )
+                            if reference and reference.get("catalog") == "equipment":
+                                slug = reference["id"]
+                                fragment = record_id.replace(":", "-")
+                                return {
+                                    "href": f"/equipment/{quote(slug, safe='')}#rule-{fragment}"
+                                }
+
         if has_army_link or kind not in {"skill", "equipment"}:
             # The Skill catalog also serves canonical Common/Special definitions
             # by semantic slug when a given Army snapshot has no matching skill.
@@ -186,6 +217,7 @@ def enrich_rule_relation_references(
     value: dict[str, Any],
     *,
     local_rule_ids: frozenset[str] = frozenset(),
+    rules_database: RulesDatabase | None = None,
     in_place: bool = False,
 ) -> dict[str, Any]:
     """Attach browser-routable references to structured rules relations.
@@ -210,7 +242,9 @@ def enrich_rule_relation_references(
                         continue
                     reference = local_rule_public_reference(
                         record.get("id"), local_rule_ids
-                    ) or rule_record_public_reference(database, record)
+                    ) or rule_record_public_reference(
+                        database, record, rules_database=rules_database,
+                    )
                     if reference is not None:
                         record["public_reference"] = reference
             for child in node.values():

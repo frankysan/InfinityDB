@@ -13,6 +13,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 .infinity-db-deploy.env
+/.env
 *.egg-info/
 dist/
 build/

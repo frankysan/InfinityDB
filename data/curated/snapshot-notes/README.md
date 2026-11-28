@@ -4,8 +4,10 @@
 
 `data/curated/snapshot-notes/` is the source-controlled home for human-reviewed
 annotations about immutable acquisition snapshots. These files are deliberately
-separate from downloader-generated provenance under `data/manifests/snapshots/`.
-Acquisition tooling must never create, rewrite, or delete snapshot-note files.
+separate from downloader-generated provenance under `local/data/manifests/snapshots/`
+and [generated Army snapshot diff reports](../../README.md#army-snapshot-diff-reports).
+Acquisition and comparison tooling must never create, rewrite, or delete
+snapshot-note files.
 
 Snapshot notes use the versioned `InfinityDB snapshot note` format. Maintained note files use the
 `.json` extension; `README.md` is the only non-JSON file allowed in this directory. Routine project

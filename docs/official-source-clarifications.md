@@ -175,7 +175,7 @@ This register collects questions that may eventually be sent to Corvus Belli for
 ### SRC-022 — Domination 350-point SWC: English 6 versus Spanish 7
 
 - **Status:** open — ruling needed / correction requested.
-- **Evidence:** English N5.3 p. 151, N5.2 p. 150 and archived English Wiki print **6 SWC** at 350 points; official Spanish N5.3 p. 155 prints **7 CAP/SWC** for the identical Domination size. [Scenario model](data-model.md#scenario-model-implemented-core-and-future-extensions).
+- **Evidence:** English N5.3 p. 151, N5.2 p. 150 and archived English Wiki print **6 SWC** at 350 points; official Spanish N5.3 p. 155 prints **7 CAP/SWC** for the identical Domination size. [Scenario model](data-model-scenarios.md#scenario-model-implemented-core-and-future-extensions).
 - **Question:** For a 350-point Core Domination game, is the intended SWC allowance 6 or 7? Which language/source should be corrected?
 - **InfinityDB:** Retains 6 from the English source, with a visible `needs-verification` issue rather than silently selecting an erratum.
 

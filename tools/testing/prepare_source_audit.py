@@ -5,20 +5,60 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
+import sqlite3
 import tempfile
+from contextlib import closing
 from pathlib import Path
 
-from infinity_db.army_reference_storage import publish_army_reference_data
 from infinity_db.build_provenance import build_record, build_set_id, validate_set_provenance
 from infinity_db.cli import _build_army, _export
-from infinity_db.database.publication import validate_database_pair
+from infinity_db.database import Database
+from infinity_db.database.normalized_source import verified_normalized_generation
+from infinity_db.database.publication import (
+    PUBLISHED_CONTENT_SHA256_KEY,
+    _database_metadata,
+    validate_database_pair,
+)
+from infinity_db.database.schema import DATABASE_COMPATIBILITY_KEY, METADATA_TABLE
 from infinity_db.database_set_builder import collect_build_manifest
-from infinity_db.equipment_presentation_storage import publish_equipment_encodings
-from infinity_db.skill_classification_storage import publish_skill_classifications
-from infinity_db.symbol_path_storage import publish_symbol_paths
-from infinity_db.unit_filter_storage import publish_unit_filter_semantics
+from infinity_db.sqlite_determinism import normalize_sqlite_header, vacuum_deterministic_sqlite
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def bind_staged_pair(army: Path, raw: Path, normalized: Path, published: Path) -> str:
+    """Bind a newly exported audit pair to the independently verified release."""
+    generation = validate_database_pair(army, raw_path=raw)
+    Database(published).validate()
+    if generation is None or verified_normalized_generation(published, normalized) != generation:
+        raise ValueError("Raw export does not match the published Army generation")
+
+    # Post-export overlays change only the application compatibility revision and
+    # published relational checksum. The raw archive still contains the same
+    # source rows. Never relabel an unrelated source or rewrite an existing archive.
+    base = _database_metadata(raw)
+    target = _database_metadata(published)
+    allowed = {DATABASE_COMPATIBILITY_KEY, PUBLISHED_CONTENT_SHA256_KEY}
+    if base.keys() != target.keys() or any(
+        base[key] != target[key] for key in base.keys() - allowed
+    ):
+        raise ValueError("Raw export has unexpected shared metadata differences")
+    with closing(sqlite3.connect(published.resolve().as_uri() + "?mode=ro", uri=True)) as db:
+        revision = db.execute("PRAGMA user_version").fetchone()[0]
+    with closing(sqlite3.connect(raw)) as db:
+        with db:
+            db.executemany(
+                f"UPDATE {METADATA_TABLE} SET value=? WHERE key=?",
+                [(target[key], key) for key in sorted(allowed)],
+            )
+            db.execute(f"PRAGMA user_version={revision}")
+        vacuum_deterministic_sqlite(db)
+    normalize_sqlite_header(raw)
+    shutil.copyfile(published, army)
+    if validate_database_pair(army, raw_path=raw) != generation:
+        raise ValueError("Audit pair failed final generation validation")
+    return generation
 
 
 def prepare(root: Path = ROOT) -> str:
@@ -32,7 +72,10 @@ def prepare(root: Path = ROOT) -> str:
     source = root / "local/data/raw/army" / source_name
     snapshot_manifest = root / "local/data/manifests/snapshots" / f"{source.stem}.json"
     provenance = validate_set_provenance(release / "army.db", release / "rules_n5.db")
-    manifest = collect_build_manifest(root, source, None, snapshot_manifest=snapshot_manifest)
+    manifest = collect_build_manifest(
+        root, source, None, snapshot_manifest=snapshot_manifest,
+        history_root=root / "local/data/history" if "history" in provenance else None,
+    )
     if build_set_id(manifest) != provenance.get("buildSetId"):
         raise ValueError("Source or checkout inputs do not match the tracked runtime build")
     work = root / "local/work/build"
@@ -47,24 +90,25 @@ def prepare(root: Path = ROOT) -> str:
             raise ValueError("Army source build failed")
         army, raw = stage / "army.db", stage / "army.raw.db"
         _export(stage / "normalized.json", army, include_raw=True)
-        publish_equipment_encodings(
-            army, raw, root / "config/catalogs/equipment-presentation-encodings.json",
+        generation = bind_staged_pair(
+            army, raw, stage / "normalized.json", release / "army.db",
         )
-        publish_skill_classifications(
-            army, raw, root / "config/catalogs/skill-source-classifications.json",
-        )
-        publish_unit_filter_semantics(
-            army, raw, root / "config/catalogs/unit-filter-semantics.json",
-        )
-        publish_army_reference_data(
-            army, raw, root / "data/curated/identities/army-overview.json",
-            root / "data/curated/identities/legacy-armies.json",
-        )
-        publish_symbol_paths(army, raw, symbols, root / "src/infinity_db/web/static")
-        generation = validate_database_pair(release / "army.db", raw_path=raw)
-        if generation != provenance.get("armyExportPairSha256") or generation is None:
+        if generation != provenance.get("armyExportPairSha256"):
             raise ValueError("Raw export does not match the published Army generation")
         destination = work / "army"
+        # Preserve existing evidence if its generation cannot be verified against
+        # the release. A failed or stale pair is not grounds for deleting it.
+        if destination.exists():
+            try:
+                existing = validate_database_pair(
+                    release / "army.db", raw_path=destination / "army.raw.db",
+                )
+            except (OSError, ValueError, sqlite3.Error):
+                existing = None
+            if existing != generation:
+                retained = Path(tempfile.mkdtemp(prefix="retained-army-audit-", dir=work))
+                os.replace(destination, retained / "army")
+                print(f"Retained previous audit inputs: {retained / 'army'}", flush=True)
         destination.mkdir(exist_ok=True)
         for name in ("master.json", "normalized.json", "normalized-validation.json",
                      "army.db", "army.raw.db"):

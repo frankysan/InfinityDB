@@ -2,10 +2,20 @@
 
 **Project domain:** Data processing
 
-This is a **discovery index and reconciliation procedure** for InfinityDB 1.0 source
-research, not a claim that each historical change has been incorporated or verified.
-The currently selected, versioned sources remain the primary evidence for current
-rules and profile values. Never turn a dated announcement into a silent rules override.
+This is a **discovery index and reconciliation procedure** for N5 source research,
+not a claim that each historical change has been incorporated or verified.
+The selected, versioned sources remain the primary evidence for current rules and
+profile values. Consult the [data lifecycle](../data/README.md) and tracked symbol
+publication manifest for the selected Army input, and the [season ownership contract](season-publication-ownership.md)
+for the selected Rules/FAQ/ITS publications. Never turn a dated announcement into a
+silent rules override.
+
+Dated V1S sections below preserve historical 1.0 review evidence, including the
+paths, artifacts and acceptance obligations as they existed at the recorded
+revision. Their then-current selections, pending V1S/VR checks and test counts
+are not current branch status. The [active backlog](TODO.md),
+[validation queue](validation-queue.md) and [release checklist](releasing.md)
+own current work and acceptance.
 
 ## Local PDF revision inventory (2026-11-06)
 
@@ -262,7 +272,7 @@ gameplay data by this review.
 
 ## Selected Army input for 1.0 (V1S-001; 2026-11-03)
 
-The intended Army input for the current 1.0 completeness review is the
+The Army input selected for the 2026-11-03 1.0 completeness review was the
 **English September 29, 2026 snapshot**:
 `data/raw/JSON 20260929-114335.zip` (59 JSON documents: `metadata.json` and
 58 faction documents). Its generated version-3 provenance manifest is
@@ -271,7 +281,7 @@ SHA-256 is
 `f103a7afd02e68d845cc9ce38b1948f46914676bbc6a5e6b790d0a04148b6c75`;
 the separately calculated logical content SHA-256 is
 `cc2212506489d4c9cc88936219131c6c645c20362219f6751fe1e0d3ef3102b3`.
-This selection is also the Army archive identity in the tracked
+At that checkpoint, this selection was also the Army archive identity in the tracked
 `data/manifests/symbol-publication.json`.
 
 The manifest records acquisition at **2026-09-29T11:43:35+02:00** from
@@ -287,18 +297,17 @@ The selected ZIP's SHA-256 was verified from the staged bytes on
 at `dd071c4d` (job `linux-dev:81e892a77b864c298b6603bff55344a6`).
 The source ZIP and acquisition manifest remain ignored external inputs.
 
-This is the **selected review baseline**, not final frozen-release acceptance
-or proof that the source has not changed upstream since acquisition.
-Do not silently fetch or swap in a newer snapshot. A deliberately approved
-source change must reopen affected coverage and rebuild the matched Army/rules
-artifacts. The current database/publication identity checkpoint is below;
-frozen-candidate rechecks remain in V1S-081 and V1S-084. Source-wide and
-browser acceptance remain open.
+This was the **selected 1.0 review baseline**, not final frozen-release acceptance
+or proof that the source remained unchanged upstream. The following artifact
+checkpoint records the development state at that time; the November 25 snapshot
+subsequently entered the current publication and historical corpus. For new
+source changes, reopen affected coverage and rebuild the matched runtime set;
+follow the current [release checklist](releasing.md).
 
 ### Current matched artifacts (V1S-003; 2026-11-03)
 
 At Windows development HEAD `e74b5cb148312e26acf0892d15502ecfd337459e`,
-the existing selected Army archive above is paired with these **current
+the selected Army archive above was paired with these **historical
 development** identities (SHA-256 of exact local bytes):
 
 - Tracked `data/generated/infinity.db`: `8a5840d1ff632e89de26210ee7bcb47e54c6579c15b5c3436e226702e872d7c8`
@@ -606,7 +615,7 @@ a second current source selection.
 
 ### Selected rules, FAQ, Wiki and annex evidence (V1S-002; 2026-11-03)
 
-The 1.0 current-reference review selects these **existing local inputs**;
+The 2026-11-03 reference review selected these **then-existing local inputs**;
 no source was downloaded or silently updated in this pass:
 
 - **Core rules (primary):** English `data/pdf/rules/n5-rules-v5.3-en.pdf`
@@ -697,6 +706,120 @@ actual JSON bytes, and the commit's date. **Do not** infer a publication date fr
 the version string, a Git commit timestamp, or the mutable `<faction>.json` alias
 alone. Do not assume the archive captures every intervening Army state.
 
+### Pinned historical Army research baseline
+
+The v1.3.0 research baseline was produced by the separate
+`InfinityDB-army-acquisition` repository. Its archive build revision is
+`8f14ca64c2bcd2ecee5e61a06f155792b5d873d4`; the producer handoff contract
+(`docs/HISTORY_HANDOFF.md`) was reviewed at
+`ae841c1dbf5c28df29c377de35fac9df4f1caaa0`.
+The consumer research implementation was integrated into InfinityDB at
+`32868779074d5af2b4241c2438c5f0562aa81de0`.
+
+The selected English-language archive combines the community backup ZIP
+(unverified commit/coherence), the backup's first-parent Army path history at
+`0b402cf1bb8aaabe594c67da93bb4e59b049cfbc` on `refs/heads/main`, and the
+direct N5 API snapshot `JSON 20261125-162328.zip`, acquired
+2026-11-25T16:23:28+01:00. The producer receipt pins those inputs and the
+embedded evidence reports. It is producer-side acceptance; the independent
+consumer reader separately verified receipt parity and archive integrity.
+
+Private input files under `local/data/history/archive/`:
+
+| File | SHA-256 |
+| --- | --- |
+| `army-history-v1.zip` | `08978b9bbf3fffa3184f6153fa4dd05a1931482742f08ee5de7a6df4f4a3c5c5` |
+| `army-history-v1.acceptance.json` | `da15fe82f910228ebd43b12eb74c47a365346fb9c4070b9768e0ed1cb59089d3` |
+
+Both have format version 1. The archive contains 1,406 unique objects
+(1,370 faction and 36 metadata objects), 2,841 observations, 119 assigned
+edition/faction sequences and 15 unresolved edition/content combinations.
+Coverage is incomplete or unknown. Source characterization spans N4, N5
+and CodeOne; the semantic comparison and subsequent reconciliation are
+**N5-only**, using 505 unambiguous adjacent-date pairs and explicitly
+excluding 180 ambiguous endpoint pairs. No cross-edition Unit continuity
+or upstream publication chronology is established.
+
+The selected full reports under `local/data/history/reports/` are:
+
+| Report | Format version | SHA-256 |
+| --- | --- | --- |
+| `characterization-v1.json` | 1 | `4477dac7daa81f8b4580f8db3a9fedb9cb1bb27a7d9ced9c04296fa017ce5bfc` |
+| `n5-identity-review-v1.json` | Not versioned | `953d39efc8a1804803932f6845b4c0912e4a5f13ebeb31da15a583ef680d350b` |
+| `n5-semantic-pilot-v3.json` | 1 | `168c4a06243b04a7097861464823150257344a6dafffd0eebbe377cd838cb8a3` |
+| `n5-consolidation-v3.json` | 3 | `2694ab280e386558347cbf580ff553b426a750723efed0345a96f7010b4c0b74` |
+| `n5-membership-v2.json` | 2 | `e740eec0460fd50747a18a467f46ab9efc88c8f607852769ebf05b829187ad10` |
+| `n5-loadouts-v2.json` | 2 | `998ef8c5f82157d545cbf9446d6a316f8b0a7cbec1cb0f6e0f71cc40beb2f926` |
+| `n5-catalogs-v1.json` | 1 | `d8ab56be3db436afaa7f40d344617c7c745b62828fe92d481e2fbac9ca875fb1` |
+
+Filename suffixes identify report runs, not necessarily format versions.
+The corresponding condensed reports are pinned for inspection, not as
+substitutes for full evidence:
+
+| Summary | SHA-256 |
+| --- | --- |
+| `n5-semantic-pilot-v3.summary.json` | `076ca7aec7236ebb2f011cb9d3d87eee8198ef2a8b9a53312b39ca26fd202838` |
+| `n5-consolidation-v3.summary.json` | `760c2c3187f156338f95d728217052eedd0c5c63cd6632d1612072ea5b84d948` |
+| `n5-membership-v2.summary.json` | `ce904fb526d9d93899016310db4198bdf9ead3d610a76d23e74383ea4dd48ea9` |
+| `n5-loadouts-v2.summary.json` | `165f11b25f918142d6b4d5630d03cb5d87addb835160e2936314b4bbd4526e72` |
+| `n5-catalogs-v1.summary.json` | `dfef659fb24e89286a09e754c7ee62677f2f3e147db2a9aed8b206bb115b4829` |
+
+To reproduce the baseline, use the pinned consumer implementation and the
+offline commands documented in [data paths and behavior](../data/README.md#current-paths-and-behavior).
+All commands require the selected archive and receipt pins. Characterization,
+identity review (Unit IDs 1635, 1691, 1718, 1800 and 1852) and semantic pilot
+read the archive independently. Consolidation, membership and catalog
+comparison additionally require the full semantic pilot and its hash;
+loadout reconciliation requires the full membership report and its hash.
+Use new output paths; never overwrite the accepted evidence.
+
+The 14 pinned files were hash-verified in both the original research
+worktree and the primary development checkout after transfer. They remain
+private research inputs, not runtime dependencies or public artifacts.
+For the remaining database and player-facing work, see the
+[history backlog](TODO.md#per-reference-change-history). Any new acquisition
+or regeneration requires explicit selection and validation; do not silently
+replace this baseline.
+
+### Direct snapshot intake review
+
+On 2026-11-26 the accepted corpus was independently reverified against the six
+locally available manifest-backed English Army archives. The November 25
+snapshot is already a direct observation in the corpus. The five additional
+September acquisitions contain identical source states for all 58 Armies:
+36 documents at revision `7.26246.158` and 22 at `7.26246.159`. The September
+25 morning/evening and September 29 ZIPs have identical SHA-256; the September
+29 manifest is v3, while the two September 18 manifests are v1 and the two
+September 25 manifests are v2.
+
+All 290 September faction documents match existing N5 comparison keys
+(edition, Army ID, encoded revision date and exact document SHA-256).
+The September metadata bytes are not already present, but their parsed
+contents match existing metadata associated with each of those 58 comparison
+keys. No new dates, distinct same-day contents or missing metadata contexts
+were found. Adding these acquisitions would add direct corroboration, not
+new source states. The existing accepted archive, reports, research database
+and published history remain unchanged. The September 10 archive has no
+matching manifest and was excluded. This review does not establish exhaustive
+history coverage or rule out future useful provenance reconciliation.
+
+Use the read-only intake diagnostic before rebuilding the corpus for a
+new snapshot. It verifies the accepted archive and receipt, each explicitly
+selected ZIP and its matching manifest, and reports new Army/date keys,
+same-day alternatives (including parsed-equivalent contents) and contextual
+metadata differences. Legacy manifests may be inspected by this diagnostic;
+the producer's stricter acceptance contract is unchanged.
+
+```powershell
+python -m tools.research.audit_army_history_intake "local/data/raw/army/JSON 20260929-114335.zip"
+```
+
+A material new source state or context triggers the existing producer/consumer
+regeneration and acceptance workflow, not automatic publication. A newly
+selected current Army archive must also be accepted as a direct endpoint
+before a normal history-enabled build, even when its source states are
+already represented in the corpus.
+
 ## Cross-source reconciliation procedure
 
 For each suspected discrepancy or missing rule:
@@ -744,7 +867,7 @@ The pin identifies the local review input; source-section coverage and the
 final 1.0 input freeze remain separate gates. Publication-date metadata and
 gameplay content retain their previous values. The tracked v9 rules database
 and paired deployed-object publication were refreshed together; see
-[the artifact contract](data-model.md#restriction-persistence-and-version-aware-api).
+[the artifact contract](data-model-rules.md#restrictions-chart-and-typed-constraints).
 
 ## Remaining reviewed PDF identities
 
@@ -830,7 +953,7 @@ Its version-3 report distinguishes verified historical bytes, missing ignored
 files and unresolved N5 authority. A mismatch fails rather than assigning the
 reviewed edition to changed bytes. This verifies availability/identity only;
 it neither refreshes official online authority nor adopts N4 procedures in N5.
-Publication dates remain unestablished. See [validation](testing.md#10-source-evidence-baseline).
+Publication dates remain unestablished. See [validation](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#10-source-evidence-baseline).
 
 **ITS Season 18 applicability check, 2026-10-28:** The locally archived official
 `data/pdf/its/its-18-rules-v2026.09.01-en.pdf` identifies itself as version

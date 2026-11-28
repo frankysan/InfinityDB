@@ -8,9 +8,11 @@ requiring a durable raw SQLite sibling.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 from contextlib import closing
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -29,17 +31,34 @@ from .schema import (
 )
 
 
-def verified_normalized_document(
-    application_path: Path, normalized_path: Path,
-) -> tuple[dict[str, Any], dict[str, tuple[str, ...]], list[tuple[str, str]], str]:
-    """Return the validated source, its columns, metadata and pinned generation."""
-    with normalized_path.open(encoding="utf-8") as handle:
-        document = json.load(handle)
-    # Keep build-time normalization imports out of runtime database/web startup.
-    from .importer import validate_input
+@dataclass(frozen=True, slots=True)
+class VerifiedNormalizedSource:
+    """Build-local receipt for an already validated normalized export.
 
-    table_columns = validate_input(document)
+    Every reuse still verifies the exact source bytes, base database content
+    and shared metadata. No mutable document or global cache is retained.
+    """
 
+    path: Path
+    source_sha256: str
+    metadata_sha256: str
+    generation: str
+
+    def verify(self, application_path: Path) -> str:
+        if hashlib.sha256(self.path.read_bytes()).hexdigest() != self.source_sha256:
+            raise ValueError("Verified normalized source bytes changed during build")
+        _, base_metadata, generation = _base_export_metadata(application_path)
+        if (
+            generation != self.generation
+            or export_pair_sha256({}, base_metadata) != self.metadata_sha256
+        ):
+            raise ValueError("Verified normalized source export generation changed during build")
+        return generation
+
+
+def _base_export_metadata(
+    application_path: Path,
+) -> tuple[list[tuple[str, str]], dict[str, Any], str]:
     with closing(sqlite3.connect(
         application_path.resolve().as_uri() + "?mode=ro", uri=True,
     )) as app:
@@ -65,20 +84,61 @@ def verified_normalized_document(
             DATABASE_COMPATIBILITY_KEY: DATABASE_COMPATIBILITY_VERSION,
             PUBLISHED_CONTENT_SHA256_KEY: published_content_sha256(app),
         }
-        if export_pair_sha256(document, base_metadata) != generation:
-            raise ValueError(
-                "Normalized source does not match the published Army export generation"
-            )
-    return document, table_columns, rows, generation
+    return rows, base_metadata, generation
 
 
-def verified_normalized_generation(application_path: Path, normalized_path: Path) -> str:
-    """Verify full normalized source provenance without materializing SQLite rows."""
+def _verify_document(
+    application_path: Path, source_bytes: bytes,
+) -> tuple[dict[str, Any], dict[str, tuple[str, ...]], list[tuple[str, str]], str, dict[str, Any]]:
+    document = json.loads(source_bytes.decode("utf-8"))
+    # Keep build-time normalization imports out of runtime database/web startup.
+    from .importer import validate_input
+
+    table_columns = validate_input(document)
+    rows, base_metadata, generation = _base_export_metadata(application_path)
+    if export_pair_sha256(document, base_metadata) != generation:
+        raise ValueError(
+            "Normalized source does not match the published Army export generation"
+        )
+    return document, table_columns, rows, generation, base_metadata
+
+
+def verified_normalized_document(
+    application_path: Path, normalized_path: Path,
+) -> tuple[dict[str, Any], dict[str, tuple[str, ...]], list[tuple[str, str]], str]:
+    """Return the validated source, its columns, metadata and pinned generation."""
+    document, columns, rows, generation, _ = _verify_document(
+        application_path, normalized_path.read_bytes(),
+    )
+    return document, columns, rows, generation
+
+
+def attest_normalized_source(
+    application_path: Path, normalized_path: Path,
+) -> VerifiedNormalizedSource:
+    """Validate once for sequential generation-only consumers in a staged build."""
+    source_bytes = normalized_path.read_bytes()
+    _, _, _, generation, base_metadata = _verify_document(application_path, source_bytes)
+    return VerifiedNormalizedSource(
+        normalized_path.resolve(),
+        hashlib.sha256(source_bytes).hexdigest(),
+        export_pair_sha256({}, base_metadata),
+        generation,
+    )
+
+
+def verified_normalized_generation(
+    application_path: Path, normalized_path: Path | VerifiedNormalizedSource,
+) -> str:
+    """Verify normalized source provenance without materializing SQLite rows."""
+    if isinstance(normalized_path, VerifiedNormalizedSource):
+        return normalized_path.verify(application_path)
     return verified_normalized_document(application_path, normalized_path)[3]
 
 
 def verified_army_export_generation(
-    application_path: Path, raw_path: Path | None, normalized_path: Path | None,
+    application_path: Path, raw_path: Path | None,
+    normalized_path: Path | VerifiedNormalizedSource | None,
 ) -> str:
     """Accept exactly one explicit and verified Army source representation."""
     if (raw_path is None) == (normalized_path is None):

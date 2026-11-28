@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from urllib.request import Request
 
 import pytest
 
@@ -57,6 +58,33 @@ def test_running_deployment_checks_both_listeners(monkeypatch) -> None:
         "version": "1.2.0", "snapshot_revision": "snapshot", "static_revision": "static",
     }
     assert set(visited) == set(responses)
+
+
+def test_public_host_override_applies_only_to_public_listener(monkeypatch, capsys) -> None:
+    responses = _responses()
+    visited = []
+
+    def fake_urlopen(request, *, timeout):
+        assert timeout > 0
+        if isinstance(request, Request):
+            url = request.full_url
+            assert url.startswith("http://localhost:8080/")
+            assert request.get_header("Host") == "infinitydb.example"
+        else:
+            url = request
+            assert url.startswith("http://127.0.0.1:8081/")
+        visited.append(url)
+        return _Response(responses[url])
+
+    monkeypatch.setattr(smoke, "urlopen", fake_urlopen)
+    assert smoke.main([
+        "--public-base", "http://localhost:8080",
+        "--public-host", "infinitydb.example",
+        "--metrics-base", "http://127.0.0.1:8081",
+        "--expected-version", "1.2.0",
+    ]) == 0
+    assert set(visited) == set(responses)
+    assert "Deployment smoke: PASS" in capsys.readouterr().out
 
 
 def test_release_smoke_rejects_development_footer(monkeypatch) -> None:

@@ -12,9 +12,19 @@ Use these documents when deciding how the project works now:
 
 - `architecture.md` — system boundaries, engineering principles, ownership between subsystems,
   runtime/browser/deployment architecture, and accepted design direction.
-- `data-model.md` — current source/application identities, semantic provenance, persistence,
-  query semantics, and generated-database contracts.
-- [its-season-database.md](its-season-database.md) — ITS Season 18 schema,
+- [data-model.md](data-model.md) — shared provenance, runtime schemas, storage
+  and cross-domain identity; entry point for the focused model contracts.
+- [data-model-army.md](data-model-army.md) — Army, Unit, profile/loadout,
+  availability, contextual filtering, Peripherals and Fireteams.
+- [data-model-history.md](data-model-history.md) — historical Army evidence,
+  identity continuity and public Unit history.
+- [data-model-rules.md](data-model-rules.md) — canonical Rules, exact variants,
+  FAQ, restrictions and derived reference projections.
+- [data-model-weapons.md](data-model-weapons.md) — exact Weapon profiles,
+  source citations, Ammunition, Properties and deployed objects.
+- [data-model-scenarios.md](data-model-scenarios.md) — shared Core/ITS scenario
+  definition, configuration, scoring, geometry and authoring boundaries.
+- [its-season-database.md](its-season-database.md) — ITS Season 17/18 schema,
   season-source binding, builder and selected publication contract.
 - [season-publication-ownership.md](season-publication-ownership.md) — current
   N5/FAQ/ITS authority boundary, cross-domain references and version selection.
@@ -23,12 +33,19 @@ Use these documents when deciding how the project works now:
   surfaces, tables, controls, responsive behavior, typography, accessibility, and theming. It states
   requirements and design direction rather than claiming every current surface already complies.
 - `project-domains.md` — engineering ownership labels used by planning and release notes.
-- `data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
+- `../data/README.md` — external inputs, generated artifacts, snapshot provenance, and publication
   lifecycle.
-- `data/curated/README.md` — authored/curated data schemas and review contracts.
-- `testing.md` — local validation commands, test selectors, worker and asset
-  policies, plus explicitly dated development and release-candidate evidence.
-  Historical runs validate their recorded revisions, not a later release.
+- `../data/curated/README.md` — authored/curated data schemas and review contracts.
+- [testing.md](testing.md) — local validation workflow, check runner, test
+  selection, host and asset policies, and index/preflight checks.
+- [testing-data.md](testing-data.md) — runtime database and source validation,
+  publication audits, and the release-tracked FAQ parity procedure.
+- [testing-browser.md](testing-browser.md) — focused browser verification,
+  manual visual and accessibility checks, and served-candidate acceptance.
+- [testing-performance.md](testing-performance.md) — runtime benchmarks,
+  test concurrency and host-capacity measurements supporting current decisions.
+  Historical results validate only their recorded revisions; superseded runs
+  remain in [Git history](testing.md#historical-validation-evidence).
 - [multi-agent-workspaces.md](multi-agent-workspaces.md) — legacy optional coordination
   contract, currently branch-pinned to `dev/v1.0.0` in its implementing tools.
   It must be adapted before use on the current branch; ordinary work does not
@@ -161,6 +178,8 @@ and the [data lifecycle](../data/README.md#accepted-ignored-artifact-policy-pros
 - `CHANGELOG.md` — concise release outcomes and upgrade consequences.
 - `AI_CONTEXT.md` — compact agent-oriented index of non-obvious current invariants and pointers to
   canonical documentation. It is not a second architecture or data-model specification.
+- [AGENT_IMPROVEMENTS.md](AGENT_IMPROVEMENTS.md) — open inbox of actionable agent
+  improvements; retire entries when resolved, declined or transferred to TODO.
 
 ### Backlog completion and retirement
 

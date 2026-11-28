@@ -51,8 +51,8 @@ const ALL_AND_FILTERS = UNIT_EXPLORER_DEFAULT_AND_FILTERS;
 const MATCHING_SCOPE_DESCRIPTIONS = {
   profile: "All AND selections must occur on one Trooper profile and its compatible loadout.",
   loadout: "Selections may occur on different profiles in one loadout or an explicitly included model. Alternate states need not be active together.",
-  unit: "Selections may occur across the logical Unit’s alternative configurations. Eligible but unselected Peripherals do not contribute.",
-  "": "This shared link retains the previous matching behavior. Choose a scope to use the new semantics.",
+  unit: "Selections may match different profiles or loadouts of the same Unit. Peripherals count only when included in a matching configuration.",
+  "": "This shared link uses the previous matching behavior. Choose a matching option to update it.",
 };
 function renderMatchingScope() {
   const legacy = elements.matchingScope.querySelector('option[value=""]');
@@ -487,10 +487,10 @@ function normalizeArmyFilterState(armies) {
 let availabilityArmies = [];
 
 function populateArmies(armies) {
-  availabilityArmies = armies.filter((army) => army.playable !== false || army.unit_count > 0);
+  availabilityArmies = armies.filter((army) => army.playable !== false);
   // Keep source strings out of HTML so upstream data is always treated as text.
   elements.army.replaceChildren(new Option("All armies", ""));
-  const playableArmies = armies.filter((army) => army.playable !== false);
+  const playableArmies = availabilityArmies;
   const normalizedArmyFilter = normalizeArmyFilterState(playableArmies);
   const shownGroups = new Set();
 
@@ -517,7 +517,7 @@ function populateArmies(armies) {
 
 function renderArmyCounts(counts) {
   const roles = new Map([
-    ["main", { label: "Main armies", count: 0 }],
+    ["main", { label: "Generic Armies", count: 0 }],
     ["sectorial", { label: "Sectorials", count: 0 }],
     ["non_aligned", { label: "Non-Aligned Armies", count: 0 }],
     ["reinforcement", { label: "Reinforcements", count: 0 }],
@@ -527,15 +527,14 @@ function renderArmyCounts(counts) {
     const count = counts === undefined ? "—" : number.format(counts[option.dataset.armyId] || 0);
     option.textContent = `${option.dataset.armyLabel} (${count})`;
   }
-  // Grouping identities can have source-backed availability without being selectable.
-  const other = { label: "Other Army availability", count: 0 };
+  const other = { label: "Unclassified Armies", count: 0 };
   for (const army of availabilityArmies) {
     if (!counts?.[army.id]) continue;
     (roles.get(army.role) || other).count++;
   }
   if (other.count) roles.set("other", other);
   elements.armyCount.textContent = counts === undefined
-    ? "—" : `${number.format(Object.keys(counts).length)} / ${number.format(availabilityArmies.length)}`;
+    ? "—" : `${number.format([...roles.values()].reduce((total, role) => total + role.count, 0))} / ${number.format(availabilityArmies.length)}`;
   elements.armyCountShown.replaceChildren();
   if (counts === undefined) return;
   for (const { label, count } of roles.values()) {

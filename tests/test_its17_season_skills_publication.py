@@ -34,6 +34,13 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
     assert {record["id"] for record in document["records"]} == {
         "skill:civevac", "skill:casevac", "state:casevac",
         "rule:resilience-operations", "rule:tactical-support",
+        "rule:civilians", "rule:designated-target", "rule:classified-objectives",
+        "rule:high-value-target", "rule:tournament-army-lists",
+        "rule:long-service", "rule:treasure-hunters",
+        "rule:tournament-format", "rule:tournament-scoring", "rule:tournament-pairings",
+        "rule:escalation-tournament", "rule:free-game", "rule:soldiers-of-fortune",
+        "rule:direct-action", "rule:reinforcements-extra",
+        "rule:spec-ops-extra",
     }
     assert "short-movement-skill" in {
         item["id"] for item in document["skillTypes"]
@@ -42,8 +49,8 @@ def test_all_original_its17_scenarios_are_present_without_resilience_extra() -> 
 
 def test_original_casevac_and_civevac_types_have_bilingual_citations() -> None:
     records = historical_records()
-    # Season Skills, State, Extra and Tactical Support.
-    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 5
+    # Season Skills, State, Extra, Tactical Support and general/event Rules.
+    assert len(records) == len(EXPECTED_ITS17_SCENARIO_IDS) + 21
     expected = {
         "skill:civevac": [(EN, 17), (EN, 18), (ES, 18), (ES, 19)],
         "skill:casevac": [(EN, 19), (EN, 20), (ES, 20), (ES, 21)],
@@ -111,6 +118,49 @@ def test_historical_skills_and_state_build_in_isolated_database(tmp_path: Path) 
     assert all(new[identifier]["scope"]["seasons"] == ["its-18"] for identifier in (
         "skill:casevac", "skill:civevac", "state:casevac",
     ))
+
+
+@pytest.mark.parametrize(("change", "message"), [
+    ("revision", "exact season-local reviewed applicability"),
+    ("context", "exact season-local reviewed applicability"),
+    ("effects", "invalid effects"),
+    ("sourceNotes", "sourceNotes.*non-empty strings"),
+])
+def test_common_season_rule_validation(tmp_path: Path, change: str, message: str) -> None:
+    document = json.loads(SEASON17.read_text(encoding="utf-8"))
+    record = next(r for r in document["records"] if r["id"] == "rule:civilians")
+    if change == "revision":
+        record["facts"]["applicability"]["revision"] = "0.1"
+    elif change == "context":
+        record["facts"]["applicability"]["context"] = "free-play"
+    elif change == "effects":
+        record["facts"]["effects"] = []
+    else:
+        record["facts"]["sourceNotes"] = [" "]
+    modified = tmp_path / "bad.json"
+    modified.write_text(json.dumps(document, ensure_ascii=False) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        build_its_database(modified, tmp_path / "bad.db", shared_library=SHARED)
+
+
+@pytest.mark.parametrize(("identifier", "field", "value"), [
+    ("rule:free-game", "category", "basic-rule"),
+    ("rule:free-game", "context", "season"),
+    ("rule:spec-ops-extra", "context", "team-ops-extra"),
+])
+def test_optional_extra_cannot_acquire_general_or_other_extra_context(
+    tmp_path: Path, identifier: str, field: str, value: str,
+) -> None:
+    document = json.loads(SEASON17.read_text(encoding="utf-8"))
+    record = next(r for r in document["records"] if r["id"] == identifier)
+    if field == "context":
+        record["facts"]["applicability"][field] = value
+    else:
+        record["facts"][field] = value
+    modified = tmp_path / "bad.json"
+    modified.write_text(json.dumps(document, ensure_ascii=False) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="exact season-local reviewed applicability"):
+        build_its_database(modified, tmp_path / "bad.db", shared_library=SHARED)
 
 
 @pytest.mark.parametrize("identifier", [

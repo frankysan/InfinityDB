@@ -62,6 +62,169 @@ the retired source roots.
 
 - `local/data/raw/army/` — immutable Corvus Belli Army snapshot ZIPs.
   Older raw-symbol ZIPs reside under `local/data/raw/symbols/`.
+- `local/data/history/archive/` — separately selected private historical Army
+  archives and producer acceptance receipts. The offline
+  `infinity_db.army_history_source` reader verifies format v1 using an explicit
+  archive and SHA-256; its CLI also requires an explicit receipt and SHA-256.
+  It preserves source observations, same-day alternatives, unresolved faction
+  identities and contextual metadata references. It does not establish
+  upstream publication order or canonical Unit identity. Never route this
+  input through live snapshot discovery or public assets. The default
+  `infinity-db build` selects only the accepted archive and
+  generated research database under this history root, verifies both pins,
+  and materializes player-facing history in Army v35 before Rules publication.
+  The selected current Army snapshot must be a direct endpoint in that corpus.
+  Neither the archive nor the research database is a runtime dependency.
+  The offline `python -m tools.research.characterize_army_history` command
+  (also available as `infinity_db.army_history_characterization`) accepts the
+  same archive/receipt pins plus an explicit `--output` JSON path under
+  `local/data/history/reports/`. Its report separates edition-specific
+  record shapes, scoped numeric-key and label overlap, contextual metadata
+  ID membership, unordered same-day alternatives, and adjacent observed
+  date comparisons. Parsed JSON equality ignores object key order only;
+  revision-field-only differences are identified separately, and all other
+  differences require semantic review. Metadata ID membership is not proof
+  of meaning (weapon IDs can have several modes); neither numeric-key overlap
+  nor label overlap establishes canonical identity. Coverage gaps are
+  observation gaps, not evidence of missing releases or Unit removal.
+  The private N5 pilot (`python -m tools.research.compare_army_history`)
+  accepts the same explicit archive and receipt pins, an exclusive
+  `--output` path, and an optional `--summary-output` path under the
+  history reports directory. Each directional comparison uses adjacent
+  distinct encoded revision dates with exactly one assigned content at
+  both endpoints. Ambiguous endpoint pairs remain explicit omissions.
+  Changes retain typed before/after source values, presence, nested
+  source IDs, label-change flags and endpoint observation/metadata
+  references. Record appearances/disappearances are not canonical Unit
+  events. Reference order-only changes require identical multisets after
+  removing the display-order field; quantities, extras and duplicates
+  are retained. Peripheral IDs are army-local: changed references with the
+  same unique local definition (apart from ID) and identical remaining
+  reference fields/order are classified as equivalent-definition rekeys.
+  Other changes remain review candidates. This does not establish canonical
+  identity or resolve changed definitions behind unchanged references.
+  Shared referenced catalog IDs are compared across all available
+  contextual metadata objects without selecting a preferred context;
+  missing metadata entries are checked against faction filter membership
+  without claiming the filter establishes full rule semantics. The pilot
+  does not publish gameplay events or introduce a runtime history database.
+  The private N5 consolidation report
+  (`python -m tools.research.consolidate_army_history`) additionally pins the
+  accepted pilot report by SHA-256 and checks its directional pair coverage,
+  endpoint observation references and eligible typed field values against the
+  archive. Its identity inventory covers all assigned N5 contents, including
+  unordered alternatives. Consistent numeric Unit IDs and unique slugs form
+  provisional identity keys. Reviewed N5 exceptions retain distinct army-scoped
+  IDs for Reinforcements Wardrivers and Rui Shi and retain ID 1852 across the
+  Zaybak/Zeybek spelling revision. The dispositions require the exact observed
+  slug sets and army scopes; the alias also requires nonoverlapping ordered
+  observations. Source review is reproducible with
+  `python -m tools.research.review_army_history_identities` and explicit
+  Unit IDs, archive/receipt pins and private output path.
+  Scalar/stat changes first consolidate by identical date bounds, nested
+  source keys, before/after values and target-record fingerprints (including
+  parent labels and locally resolved Peripheral definitions). Format v2 then
+  consolidates identical transitions across overlapping observation windows
+  only if the complete overlap component has a common intersection, contains
+  no repeated army, and has no competing eligible transition at that path
+  overlapping the intersection. The resulting bounds are a common observation
+  window, not a proven release date. Format v3 also consolidates changed
+  Skill, Equipment and Weapon occurrence multisets using each endpoint's
+  unique named faction filter definitions and all available contextual
+  metadata record fingerprints (including multiple weapon modes).
+  Quantities, extra definitions, unknown occurrence fields and duplicates
+  are retained; display ordering and known army-list filter flags are
+  excluded from these signatures. Missing metadata entries are explicitly
+  filter-only evidence; ambiguous contexts, absent/duplicate filter IDs
+  and unresolved extra definitions remain outside candidate grouping.
+  IDs remain in the signatures: same-name references with different IDs
+  are not presumed equivalent. Army-specific availability and
+  nested record lifecycle are handled by the private
+  `python -m tools.research.compare_army_history_membership` report.
+  It uses the same archive/receipt and pilot pins, validates each selected
+  source field and record against its endpoints, and retains army-scoped
+  list appearances/disappearances, AVA/disabled changes and declared
+  faction membership claims separately. Declared claims are grouped by
+  exact window and corroborated against overlapping actual list changes;
+  absent corroboration is not a negative availability finding. Positive
+  observations in other armies distinguish some list changes from global
+  Unit lifecycle changes. Nested records can be grouped only when their
+  parent labels, source keys, record signatures and observation windows
+  agree; potential sibling replacements remain review evidence. A unique
+  mutual match of the full sibling payload apart from its ID (with resolved
+  local Peripheral IDs) is an exact-record replacement candidate, not proof
+  that all referenced rules remained unchanged.
+  The private `python -m tools.research.reconcile_army_history_loadouts`
+  report additionally pins the membership report by SHA-256. It compares
+  complete sibling collections at each endpoint, with resolved historical
+  reference multisets and Peripheral definitions. Composition excludes only
+  source ID, name and costs; null extra fields are equivalent to absent extras.
+  Unresolved siblings or nonempty includes prevent continuity inference.
+  Same-composition replacements require a unique match across all siblings
+  at both endpoints and retain the original records and changed costs/labels.
+  Possible modifications require a distinctive shared reference occurrence
+  and mutual uniqueness; identical review questions are bundled without
+  merging observation windows. Other key changes remain separate, including
+  one-sided changes with no opposing key. These are provisional source
+  continuity findings, not proof of canonical loadout identity.
+  The private `python -m tools.research.compare_army_history_catalogs`
+  report uses the archive/receipt and pilot pins to compare definitions
+  behind persistent reference occurrences. It requires matching nested
+  record keys and labels and typed reference occurrences (excluding display
+  order); modifiers retain their source reference evidence. Faction-filter
+  definitions remain army-scoped and exclude known army-list context flags.
+  Contextual metadata must agree across all associated contexts at each
+  endpoint; Weapon modes and duplicate rows are preserved as multisets.
+  Changed columns are compared without assigning a mode pairing. Link-only,
+  identity/type, mechanics and other definition differences remain distinct.
+  Identical metadata before/after transitions share an evidence group,
+  not a common publication date or necessarily a single historical event.
+  Missing or ambiguous definitions are coverage/review findings, not changes.
+  Catalog differences are not changes to Unit reference composition, and
+  contextual metadata alone does not establish historical rules validity.
+  Every included occurrence retains its faction, endpoint and pilot location;
+  excluded categories remain available in the pinned pilot. These are candidate
+  groups, not canonical events or a claim of exact publication dates.
+  The private `python -m tools.research.build_army_history_database --output
+  local/data/history/generated/army_history_n5.db` command imports the
+  explicitly pinned full research corpus into a queryable SQLite evidence
+  index. It verifies the archive and receipt, report hashes and dependency
+  pins, all comparison endpoints and evidence links, and SQLite integrity.
+  Use a new output path for each rebuild; existing files are not overwritten.
+  The database remains outside the tracked generated runtime set and is not
+  a build, serving, packaging or deployment input. Its persistence model is
+  described in the [data model](../docs/data-model-history.md#private-army-history-research-database).
+  Run `python -m tools.research.project_army_history --history-sha256 HASH
+  --output local/data/history/generated/unit_history_preview.json` with the
+  exact SHA-256 of the generated history database to prepare a private Unit
+  history read model. It uses the tracked Army database and the pinned source
+  archive, records both database hashes, and refuses a different current
+  source snapshot. The output remains private and requires no runtime change.
+  Render the preview for local browser review with
+  `python -m tools.research.render_army_history --preview
+  local/data/history/generated/unit_history_preview.json --preview-sha256 HASH
+  --output local/data/history/generated/unit_history_review.html`. Use the
+  exact preview SHA-256; the renderer also verifies both linked database
+  hashes. The standalone searchable HTML requires no web server or network.
+  It is an ignored private review artifact, not a player-facing publication.
+  The private effective-loadout pilot is generated with
+  `python -m tools.research.summarize_army_history --preview
+  local/data/history/generated/unit_history_preview.json --preview-sha256 HASH
+  --output local/data/history/generated/effective_history_pilot.json`.
+  The tool pins the preview and linked databases, reads accepted evidence
+  and archive endpoints, and records both summaries and excluded/review
+  outcomes. No runtime publication is created.
+  Generate the separate private player-facing timeline with
+  `python -m tools.research.render_player_army_history --preview
+  local/data/history/generated/unit_history_preview.json --preview-sha256 HASH
+  --semantic local/data/history/generated/effective_history_pilot.json
+  --semantic-sha256 HASH --output local/data/history/generated/unit_history_player.html`.
+  Both input hashes and the linked databases/archive are verified. Optional
+  repeatable `--inspect-unit ID` emits representative timelines for review.
+  The output is standalone HTML, remains ignored and must not be published.
+  Optional `--browser-review` verifies navigation and evidence disclosure in
+  desktop and mobile Chromium viewports and saves private screenshots. Use
+  `--inspect-unit ID` to select representative Units for this review.
 - `local/data/wiki/` — immutable English/Spanish Infinity Wiki and
   Human Sphere snapshot ZIPs, including history variants. The three expanded
   research mirrors live under `local/data/wiki-extracted/`, which is not
@@ -168,10 +331,10 @@ the retired source roots.
   comparison targets, and notable-change notes bound to immutable snapshots by
   SHA-256. Acquisition tools never modify this subtree.
 - `generated/` — four tracked runtime databases: `army.db`
-  (Army v31/compatibility 40), `rules_n5.db` (Rules v17),
+  (Army v35/compatibility 44), `rules_n5.db` (Rules v24/compatibility 26),
   `its_17.db` (16 missions, V0.2) and `its_18.db` (20 missions, 2026.09.11).
   Exact variants, reviewed Weapon citations, deployed objects, Restrictions,
-  and symbol mappings remain embedded in Army/Rules. The ITS databases
+  symbol mappings, General profiles and Unit history remain embedded in Army/Rules. The ITS databases
   publish season-specific missions and applicable tournament/Extra policies.
   Superseded ITS 18 Battleground facts and source identity remain in
   `curated/its/n5-its-season-18.json`, not a selectable older revision.
@@ -189,7 +352,12 @@ build inputs (such as a version bump), run
 `python -m tools.data.rebuild_runtime_set --use-recorded-source`.
 This selects the exact Army ZIP/manifest pair recorded by the current
 `data/generated/army.db`, verifies the archive hash, and refuses missing
-sources instead of silently selecting a newer snapshot.
+sources instead of silently selecting a newer snapshot. Both build entry points
+include Unit history by default. Missing or mismatched history inputs, or an
+Army snapshot not represented by the accepted corpus, block publication rather
+than falling back to a history-free set. Use `--no-unit-history` explicitly
+for development-only builds (prefer a separate `--db-dir`); the previous
+`--with-unit-history` flag remains accepted.
 
 For an R1 source-pinned build, supply **both** the exact ZIP and its
 version-3 provenance manifest, optionally choosing a separate complete
@@ -226,13 +394,20 @@ complete alternate destination and is independent of the serving-only
 retired from the integrated build. Lossless verification is mandatory.
 
 Disposable files under ignored `local/work/build/` hold normalization, the
-matched Army/raw pair, Rules and ITS construction. The variant-usage publication
+Army export, Rules and ITS construction. The variant-usage publication
 takes its source-only relationships from `normalized.json`, reconstructs
 the necessary source tables in memory, and verifies the complete normalized
 model against the selected Army database's export-generation fingerprint.
-Army v27–v31 overlays use the same verified normalized source without opening
-or updating the temporary raw SQLite sibling. The standalone export and
-raw-pair inspection interfaces remain supported.
+Army v27–v31 overlays reuse one build-local normalized-source receipt instead
+of repeatedly parsing and validating the full JSON document. Each reuse
+checks the exact source bytes, base Army table content, shared metadata and
+export generation. The receipt is neither persisted nor accepted as a CLI
+input; standalone source verification and export retain full validation.
+No raw SQLite sibling is required. The General-profile projection composes
+General profiles from the v31 Army and temporary core Rules model, before
+final Rules publications bind the resulting Army bytes. The standalone CLI
+exports application-only SQLite; legacy paired inspection remains a research
+interface with explicit inputs.
 The builder validates all
 four runtime databases, cross-domain references and source/build provenance,
 checks that its inputs remain unchanged, then replaces the selected set and
@@ -250,8 +425,8 @@ four-file set into its image. The cache revision hashes sorted active filenames 
 their exact file hashes.
 
 `infinity-army build --output-dir PATH` retains the source JSON pipeline;
-`infinity-db export NORMALIZED.json OUTPUT.db` explicitly creates an Army/raw
-development pair. Their work outputs are not complete serving sets.
+`infinity-db export NORMALIZED.json OUTPUT.db` creates only an Army database.
+Their work outputs are not complete serving sets.
 `build-rules` retains a narrow standalone v10 export in ignored
 `local/work/build/rules-standalone.db`, without runtime assembly or promotion.
 Research tools receive an explicit raw archive path; normal serving never opens it.
@@ -266,7 +441,7 @@ exist for independent development commands; they are not serving dependencies.
 validates exactly the selected directory through the shared
 `infinity_db.database_set` validator. Startup and directory health require
 `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db`,
-Army v31 / Rules v17 / ITS v2, with matched provenance
+Army v34/v35 / Rules v24 / ITS v2, with matched provenance
 and compatible source and core revisions.
 Low-level fixture APIs retain explicit older-model injection for semantic tests;
 they do not establish an operator-facing alternate selection contract.
@@ -292,6 +467,12 @@ v17 validates the 12 authored Weapon Property definitions, ordered
 origins, source-profile/mode and Trait lists against current canonical
 N5 records and the selected Army. Their source-authority and content
 fingerprints are checked without creating official rules records.
+Rules v18 adds composed records; v19 validates the compact global search
+projection and its binding to the selected Army and ordered ITS publications.
+Rules v20 adds scope-bound catalog summaries and deduplicated detail usage;
+v21 adds the four bounded Specialist candidate sets; v22 adds compact
+maintained-text reference target descriptors; v23 adds raw Glossary entries
+and bounded Orders/AROs projections.
 It reports final file SHA-256 hashes and returns a nonzero status for an
 incomplete, corrupt or mismatched set. It never creates missing files,
 selects another directory, rebuilds curation or reads the raw archive.
@@ -302,14 +483,16 @@ all apply this complete-set contract. The low-level validator can inspect
 transitional fixtures when explicitly requested by development code.
 
 `infinity_db.web.create_app_from_database_set(PATH)` validates and opens exactly
-the selected three-database set, without selecting environment paths or discovering
+the selected four-database set, without selecting environment paths or discovering
 another directory. The semantic-baseline tool's `--db-dir` exercises this factory.
 
-The current four-file runtime layout embeds Army v31 Equipment presentation
+The current four-file runtime layout embeds Army Equipment presentation
 encodings, reviewed Skill source classifications, Unit filter semantics,
-Army overview text, legacy identities and symbol mappings/hashes,
-plus Rules v17 Weapon Properties, variant/Weapon/Restrictions, Trait Wiki, Combined Saving Roll
-and Ammunition publications. P2.4 materialization is complete for the normal runtime.
+Army overview text, legacy identities, symbol mappings/hashes, General profiles,
+Unit history, and the Rules projections described above. See the
+[data model](../docs/data-model.md) for the current schemas and projection contracts.
+The following schema milestones describe transitional compatibility, not the
+required current serving versions.
 Older v10–v16 Rules layouts
 remain transitional compatibility. The browser
 fetches `/api/restrictions/chart`; for a pre-v13 release the endpoint
@@ -336,16 +519,19 @@ v31 symbol lookups and cache identity use embedded maps/hashes plus actual
 packaged SVG/static bytes, without reading the publication manifest. The
 builder and application startup verify published SVG hashes; selected-set
 database health checks validate the stored projection without opening assets.
-For a standalone raw-pair publication, the two siblings retain matching
-export metadata. In complete runtime builds, Army v27–v31 overlays instead
+v33 General-profile payloads and the 16-mask selection matrix are generated
+during the complete build and validated by the Army content checksum.
+Extended Explorer and Unit details consume the same stored rows, with
+runtime composition for requested-Army selections that add excluded occurrences.
+In complete runtime builds, Army v27–v31 overlays
 recheck the complete normalized source model against the pinned base export
 generation; the complete builder does not create a raw SQLite sibling.
 Each extended schema's checksum includes its published relational rows.
 This alone does not verify working-tree curation/config freshness or graphical
 assets; release/source and graphical-publication checks still own those
 obligations. `--db-dir` is explicit and cannot be combined with an individual
-database argument or `--require-raw`. The existing individual Army/raw health
-command remains available. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
+database argument or `--normalized`. Individual Army health can verify the
+complete normalized source generation. The [data model](../docs/data-model.md#shared-metadata-and-integrity)
 owns the embedded build-provenance fields.
 The P2.6 filename, default selection and shared serving-directory contract
 are implemented. Current file placement follows the
@@ -359,9 +545,10 @@ defines the separate source staging and explicit, verified checkout activation p
 The tracked `army.db`, `rules_n5.db`, `its_17.db` and `its_18.db` are release artifacts:
 a tagged checkout includes exactly what production serves. Their embedded
 projections bind reviewed source relationships and common build provenance;
-runtime JSON sidecars are not release inputs. Rebuild the complete set from pinned source
-inputs when maintained code or curation changes, then validate its source
-freshness and published symbols before commit or deployment. Never rebuild on
+runtime JSON sidecars are not release inputs. Rebuild the complete set when inputs in the
+[build-input envelope](../docs/data-model.md#shared-runtime-build-input-provenance)
+change, then validate its source freshness and published symbols before commit or deployment.
+Presentation-only changes outside that envelope do not require a database rebuild. Never rebuild on
 the deployment host or rewrite binary artifacts during packaging. Ignored
 build/acquisition manifests remain local provenance records.
 
@@ -370,25 +557,28 @@ validates the entire normalized source and its relational staging database,
 publishes only a temporary application database, and uses the deterministic
 `export_pair_sha256` generation fingerprint to bind source-only rows and
 shared metadata to its subsequent Army overlays and Rules publication.
-It creates no `army.raw.db`. Only the three selected runtime databases are
+It creates no `army.raw.db`. Only the four selected runtime databases are
 installed into the target directory, after complete-set validation.
 
-The standalone `infinity-db export` command now defaults to **application-only**
+The standalone `infinity-db export` command publishes **application-only**
 SQLite output, matching the complete-build pipeline. The export retains full
 normalized input checks, source-to-canonical staging validation, deterministic
 finalization and the complete `export_pair_sha256` source-generation fingerprint.
-Use `--with-raw` only when a standalone research or compatibility consumer
-explicitly needs the lossless, queryable `army.raw.db` sibling. Paired output
-still validates both siblings and produces byte-identical `army.db` output
-from the same source. The former `--no-raw` switch remains accepted as a
-deprecated alias for the default mode. The Python
-`infinity_db.database.export_database(...)` API also defaults to
-application-only output. Direct research callers requiring legacy paired
-SQLite evidence must select `include_raw=True` explicitly.
-The `tools.audit_source_variant_inputs` CLI expects an optional paired archive
-at `local/work/build/army/army.raw.db` unless `--raw` or `--normalized` is
-supplied. This path is a local research input, not a publication artifact;
-the application's source generation must match the selected raw archive.
+The former `--with-raw` and `database-health --require-raw` options are retired;
+`--no-raw` remains an accepted hidden compatibility alias. Use verified
+normalized JSON for current source inspection and health checks.
+The Python `infinity_db.database.export_database(..., include_raw=True)`
+and programmatic pair-health interfaces remain for independent legacy
+source-audit and determinism parity consumers. Paired output still validates
+both siblings and produces byte-identical `army.db` output from the same source.
+`tools.testing.prepare_source_audit` prepares the release-matched legacy
+test inputs in `local/work/build/army/`; these are not runtime artifacts.
+Retain existing private audit copies; do not silently delete them.
+For new `tools.data.audit_source_variant_inputs` runs, select verified source
+JSON with `--normalized PATH`. The legacy default paired archive remains
+`local/work/build/army/army.raw.db`; `--raw PATH` selects another legacy pair.
+Neither source is a runtime input, and either must match the application's
+source generation.
 
 Application-only export **refuses** a destination with an existing raw
 sibling, rather than silently deleting or leaving stale private source
@@ -400,8 +590,8 @@ evidence. Select an isolated destination instead. For example:
 ```
 
 The example paths must identify a destination without a raw sibling and the
-**exact same normalized source generation**. `--normalized` is mutually
-exclusive with `--require-raw` and unavailable for `database-health --db-dir`,
+**exact same normalized source generation**. `--normalized` is unavailable
+for `database-health --db-dir`,
 which validates only the published runtime set. Explicit normalized health
 verifies all source rows and metadata against the selected application's
 export-generation fingerprint; it fails on changed/missing source data even
@@ -412,7 +602,7 @@ health reports remain unchanged; an explicit normalized check adds
 The cross-platform determinism manifest now defaults to **format v2**:
 it hashes the application-only export plus the same normalized, Rules/ITS,
 archive, symbol and reviewed-citation artifacts as before. Explicit
-`tools.build_determinism_manifest --legacy-paired` recreates **format v1**
+`tools.ci.build_determinism_manifest --legacy-paired` recreates **format v1**
 with an additional temporary `army.raw.db` hash. Each manifest version
 can be compared across machines, but the comparison tool intentionally
 rejects mixed v1/v2 inputs rather than silently dropping old evidence.
@@ -426,8 +616,8 @@ working Linux engine. From either checkout (the commands below work in
 PowerShell as well as Linux shells):
 
 ```powershell
-python -m tools.run_pinned_determinism --probe
-python -m tools.run_pinned_determinism --output local/reports/determinism-v2-container.json
+python -m tools.ci.run_pinned_determinism --probe
+python -m tools.ci.run_pinned_determinism --output local/reports/determinism-v2-container.json
 ```
 
 Use the selected project virtual environment on each host.
@@ -442,7 +632,7 @@ The probe pulls and prints the exact pinned image digest and toolchain
 versions. Compare the Windows and Linux manifest files with:
 
 ```powershell
-python -m tools.compare_determinism_manifests local/reports/determinism-v2-windows.json local/reports/determinism-v2-linux.json
+python -m tools.ci.compare_determinism_manifests local/reports/determinism-v2-windows.json local/reports/determinism-v2-linux.json
 ```
 
 A v2 comparison across the two development hosts at the same commit
@@ -461,8 +651,8 @@ matrix reported a separate stale tracked runtime-database input. A
 fully green hosted run remains a separate acceptance gate.
 
 The two legacy paired destination files cannot be replaced as one filesystem
-transaction, so explicit `--with-raw` export retains its established commit
-order and recovery policy:
+transaction, so the retained explicit programmatic paired export uses its
+established commit order and recovery policy:
 
 1. replace `army.raw.db` first;
 2. replace `army.db` last; the application replacement is the commit point.
@@ -479,9 +669,10 @@ both destination siblings already belong to the new generation.
 
 Older pairs created before `export_pair_sha256` remain acceptable when their full
 shared metadata dictionaries match. New exports always carry the stronger pair
-fingerprint. `infinity-db database-health data/generated/army.db --require-raw` is the
-operator-facing validation command for this pair contract; omitting `--require-raw` validates only
-the published application database.
+fingerprint. Verify an existing legacy pair with
+`python -m tools.data.inspect_raw_archive --application PATH --raw PATH verify`.
+The installed health command validates the application and optionally its
+normalized source, not a raw sibling.
 
 For local source inspection, `tools.data.inspect_raw_archive` supports either
 an explicit `--normalized` source JSON file verified against the application's
@@ -494,21 +685,19 @@ rows preserve their exact source JSON (including absent versus null fields).
 From the repository root, for a matched local Army export:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json verify
-.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/data/build/army.db --normalized local/data/build/normalized.json rows skills --start 0 --limit 20
+.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/work/build/army/army.db --normalized local/work/build/army/normalized.json verify
+.venv\Scripts\python.exe -m tools.data.inspect_raw_archive --application local/work/build/army/army.db --normalized local/work/build/army/normalized.json rows skills --start 0 --limit 20
 ```
 
-The `local/data/build/` paths above are illustrative: select the actual
-verified outputs of the same source generation. The legacy command still
-accepts `--application` and `--raw`, and defaults to the sibling
-`army.raw.db` when `--normalized` is omitted; standalone export creates
-that pair, but complete runtime builds do not. A stale or mismatched pair
-fails closed. Bounded listings accept at most 100 entries. This tool is
+The `local/work/build/army/` paths above are illustrative: select the actual
+verified outputs of the same source generation. The inspection CLI requires
+an explicit `--normalized` or `--raw` selection; it no longer automatically
+opens the sibling. A stale or mismatched pair fails closed. Bounded listings accept at most 100 entries. This tool is
 read-only, does not change imported, curated or published data, and is not
 part of the runtime API.
 
-The optional `tools.audit_normalization_links`,
-`tools.audit_peripheral_semantics` and `tools.audit_relationship_semantics`
+The optional `tools.data.audit_normalization_links`,
+`tools.data.audit_peripheral_semantics` and `tools.data.audit_relationship_semantics`
 commands also accept `--normalized PATH` with the selected application
 database. They verify the complete normalized document against the Army
 export-generation fingerprint, then materialize only the required missing
@@ -518,13 +707,13 @@ validated raw-sibling behavior remains the default; an explicit normalized
 path never silently falls back to a sibling archive. For example:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_relationship_semantics local/data/build/army.db --normalized local/data/build/normalized.json --current-only
+.venv\Scripts\python.exe -m tools.data.audit_relationship_semantics local/work/build/army/army.db --normalized local/work/build/army/normalized.json --current-only
 ```
 
 The example paths identify a matched local source generation, not a
 persistent runtime artifact.
 
-The read-only `tools.audit_source_variant_inputs` CLI likewise accepts an
+The read-only `tools.data.audit_source_variant_inputs` CLI likewise accepts an
 explicit `--normalized PATH` bound to the selected Army application database.
 It inventories exact Skill and Equipment source occurrences, ordered Extra
 signatures and the optional `--owner-extra-id` context without a raw SQLite
@@ -535,7 +724,7 @@ single-source research, without claiming it matches an application database.
 For a matched local generation:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_source_variant_inputs --application local/data/build/army.db --normalized local/data/build/normalized.json --rules data/generated/rules_n5.db --catalog skills --source-id 11
+.venv\Scripts\python.exe -m tools.data.audit_source_variant_inputs --application local/data/build/army.db --normalized local/data/build/normalized.json --rules data/generated/rules_n5.db --catalog skills --source-id 11
 ```
 
 The selected Rules database supplies reviewed semantics independently; choose
@@ -543,8 +732,8 @@ the applicable Rules revision when interpreting the source rows. Raw and
 normalized inputs are mutually exclusive, and an explicit normalized source
 never falls back to an available raw archive.
 
-The read-only `tools.audit_army_faction_semantics` and
-`tools.audit_source_presentation` commands also support explicit
+The read-only `tools.data.audit_army_faction_semantics` and
+`tools.data.audit_source_presentation` commands also support explicit
 `--normalized PATH` to audit a matched Army application database without
 retaining raw SQLite. The faction audit still re-derives application Army
 identities from independent source relationships and fails on disagreement.
@@ -555,15 +744,15 @@ JSON key is retained for report compatibility even when that evidence
 originates from verified normalized JSON. For example:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.audit_army_faction_semantics local/data/build/army.db --normalized local/data/build/normalized.json
-.venv\Scripts\python.exe -m tools.audit_source_presentation local/data/build/army.db --normalized local/data/build/normalized.json --require-no-occupied-gaps
+.venv\Scripts\python.exe -m tools.data.audit_army_faction_semantics local/data/build/army.db --normalized local/data/build/normalized.json
+.venv\Scripts\python.exe -m tools.data.audit_source_presentation local/data/build/army.db --normalized local/data/build/normalized.json --require-no-occupied-gaps
 ```
 
 As above, these are example paths for a matched source generation. Omitting
 `--normalized` retains the existing matched raw-sibling behavior; a
 supplied but mismatched normalized source is rejected rather than falling back.
 
-The read-only `tools.report_reference_baseline` source-ZIP audit can
+The read-only `tools.research.report_reference_baseline` source-ZIP audit can
 verify a pinned Army archive with either a matching standalone
 `army.raw.db` sibling (legacy default), or an explicit `--normalized PATH`
 file. The normalized route requires `--army-archive` and a matching Army
@@ -575,18 +764,17 @@ relationships. It will not silently fall back to a raw sibling. For example,
 using **the same source generation** for all inputs:
 
 ```powershell
-.venv\Scripts\python.exe -m tools.report_reference_baseline --army-db local/data/build/army.db --rules-db local/data/build/rules_n5.db --army-archive local/data/snapshots/army-source.zip --normalized local/data/build/normalized.json --json-output local/reports/reference-baseline.json
+.venv\Scripts\python.exe -m tools.research.report_reference_baseline --army-db local/data/build/army.db --rules-db local/data/build/rules_n5.db --army-archive local/data/snapshots/army-source.zip --normalized local/data/build/normalized.json --json-output local/reports/reference-baseline.json
 ```
 
 These paths are illustrative, not implicit build inputs. The selected Rules
 database must itself match the reviewed Army publication for the independent
 Weapon citation check; source verification is not a substitute for that gate.
 
-`tools.build_determinism_manifest` separately hashes a **temporary**
-`army.raw.db` produced by the standalone paired-export command. That entry
-tests cross-platform determinism of the standalone format; it neither makes
-a raw database a runtime artifact nor requires retaining any previously
-generated raw sibling in `data/generated/`.
+The legacy format v1 determinism comparison explicitly generates a temporary
+`army.raw.db` through the programmatic paired-export interface. See the
+[format v2 contract above](#current-paths-and-behavior); the normal current
+manifest and runtime set do not require or retain a raw sibling.
 
 PDFs and wiki snapshots are research sources, not Army-pipeline inputs. The
 curated rules contract records the local reviewed artifact plus its upstream source URL;
@@ -701,7 +889,8 @@ its runtime publication**. This is part of normal Army integration, not a
 separate exhaustive review of every unchanged rule or profile.
 
 1. Pin the previously published and incoming ZIP/manifest pairs by archive
-   SHA-256 and source revisions. Compare the semantic contents of Army lists
+   SHA-256 and source revisions. Generate the [structured snapshot diff](#army-snapshot-diff-reports)
+   for these explicit endpoints and review the semantic contents of Army lists
    and shared metadata, ignoring JSON object-property ordering.
 2. Recheck Army-dependent entries in the
    [official source clarification register](../docs/official-source-clarifications.md)
@@ -729,6 +918,64 @@ Follow the [source-reconciliation workflow](../.agents/skills/infinity-source-re
 for evidence and interpretation. Keep substantive findings in their existing
 canonical owners; do not create a second discrepancy register or a recurring
 release audit diary.
+
+### Army snapshot diff reports
+
+Generate a private, deterministic, version-1 `InfinityDB Army snapshot diff`
+JSON report using the previously published and incoming Army ZIP/manifest pairs:
+
+```powershell
+.venv\Scripts\python.exe -m tools.data.compare_army_snapshots "local/data/raw/army/JSON OLD.zip" "local/data/raw/army/JSON NEW.zip" --before-manifest "local/data/manifests/snapshots/JSON OLD.json" --after-manifest "local/data/manifests/snapshots/JSON NEW.json"
+```
+
+The labels above are placeholders for explicit retained archives. The command
+verifies both manifests and archives offline, requires matching source languages,
+and writes under ignored `local/data/reports/army-snapshot-diffs/`. The default
+filename is the ordered pair of exact archive SHA-256 values. Use `--output`
+within that directory to retain another run; existing files are never overwritten.
+The console prints the report identity, counts and SHA-256.
+
+Reports retain both archive and logical content identities (when present), exact
+manifest and member hashes, source revisions and member coordinates. They reuse
+the historical comparison and effective reference projections:
+
+- `comparisons` retains observed source-field changes with typed before/after
+  values, classifications and record-key paths. Army documents are matched by
+  exact member name; member appearance or disappearance is not a canonical
+  Unit addition or removal.
+- `metadataChanges` preserves shared catalog record differences and unknown
+  fields without guessing weapon-mode identities. Shared reference metadata
+  findings and reference-shape issues retain uncertainty in Army contexts.
+- `effectiveReferences` compares changed reference fields across stable
+  single-profile groups and same-key loadouts; it distinguishes lost/gained
+  effective occurrences from equivalent occurrences and explicit review cases.
+  A profile-to-loadout move is not automatically neutral. Catalog definition
+  changes are separate, and ambiguous relationships, rekeys and unsupported
+  contexts are not promoted into confirmed gameplay changes.
+
+Reports compare the selected endpoint observations, not all intermediate source
+states or official publication dates. They are review evidence, not a curated
+changelog, and do not replace the remaining reconciliation steps. Curated
+[snapshot notes](curated/snapshot-notes/README.md) remain the human interpretation;
+neither reports nor notes become runtime inputs.
+
+To review a selected pair in the browser, enable Developer mode and open
+**Army snapshot comparison** (`/snapshot-compare`). Choose the generated
+version-1 JSON report using the local file picker. The screen shows both
+endpoint identities, recorded provenance, scope limitations, appeared,
+disappeared and updated source records, effective occurrence changes and
+unresolved reference evidence. Filter by source member, change kind,
+classification or source-coordinate text; expand an entry for exact before
+and after values (including missing versus null) and the original report
+record.
+
+The browser reads only the explicitly selected report (up to 64 MiB)
+in memory. It does not read the source ZIPs, access a server-side report
+directory, upload or persist report contents, or independently verify
+the source hashes. Report generation and verification remain the offline
+command above; the browser renders its existing semantics rather than
+implementing another comparison engine. Developer mode controls discoverability,
+not access to any private server-side data.
 
 ### Cross-repository acquisition handoff (P5.3)
 
@@ -778,7 +1025,7 @@ The current producer contracts are:
   semantic/browser identity mappings, final static asset placement
   and `symbol-publication.json`. Browser UI font packaging
   (`prepare_web_fonts.py`) is separate from SVG font substitution.
-  As preparation, `tools.export_symbol_source_plan` can explicitly
+  As preparation, `tools.symbols.export_symbol_source_plan` can explicitly
   generate a **read-only** v1 request plan from a verified Army ZIP,
   the pinned static declarations and legacy identity configuration.
   It records only sorted approved URLs, selected archive paths and
@@ -790,16 +1037,16 @@ The current producer contracts are:
   snapshot provenance and a separate `.raw-report.json` of acquired
   and HTTP-404-unavailable source URLs. The request plan is **not**
   snapshot provenance and does not confer source authority by itself.
-  Use `tools.verify_raw_symbol_handoff` in InfinityDB to verify the
+  Use `tools.symbols.verify_raw_symbol_handoff` in InfinityDB to verify the
   complete external ZIP/manifest/report against the pinned Army ZIP
   and source plan. The former in-tree acquisition, override and processing
   commands have been retired. Normal database builds do not acquire assets.
-  For separate override processing, `tools.export_symbol_override_lookups`
+  For separate override processing, `tools.symbols.export_symbol_override_lookups`
   generates a SHA-pinned URL-to-override-path plan. The standalone
   `infinity-symbol-overrides` command can then create an intermediate
   `EFFECTIVE-SYMBOLS ...zip`, its v3 Army-bound provenance and a
   version-1 effective report recording raw/upstream, override and
-  effective SVG identities. `tools.verify_effective_symbol_handoff`
+  effective SVG identities. `tools.symbols.verify_effective_symbol_handoff`
   checks that chain independently, optionally against local reviewed
   override files. The standalone `infinity-symbol-preflight` and
   `infinity-symbol-font-audit` commands now produce matching legacy
@@ -811,14 +1058,14 @@ The current producer contracts are:
   exact/visual duplicate CSVs and a hash-pinned stage receipt
   containing renderer/version/settings. Render failures remain
   visible and fail the receipt instead of claiming visual coverage.
-  `tools.verify_symbol_duplicate_handoff` verifies its byte, path,
+  `tools.symbols.verify_symbol_duplicate_handoff` verifies its byte, path,
   summary and receipt evidence independently, but cannot establish
   visual equivalence without rerendering. External text-to-path conversion
   and render-validated compression now provide immutable canonical ZIPs,
-  reports and receipts. The [matched-input processor comparison](../docs/testing.md#p57-matched-input-symbol-processor-parity)
+  reports and receipts. The [matched-input processor comparison](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-matched-input-symbol-processor-parity)
   passed; [candidate preparation](#external-processed-symbol-publication-candidates)
   consumes that handoff without running graphical processors. The
-  [accepted cutover](../docs/testing.md#p57-accepted-symbol-publication-cutover)
+  [accepted cutover](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-accepted-symbol-publication-cutover)
   completed artwork, browser and hosting review.
 
 The *format* and verification contract stay owned by InfinityDB's
@@ -841,7 +1088,7 @@ Implementation details remain in the symbol tooling, and unfinished lifecycle wo
 
 **Project domain:** Data processing
 
-`python -m tools.prepare_symbol_publication` prepares an offline candidate from
+`python -m tools.symbols.prepare_symbol_publication` prepares an offline candidate from
 the external producer's v1 processing handoff. It uses InfinityDB's semantic mapper,
 rederiving authoritative Army references and approved
 source/override lookups from the selected Army snapshot and maintained inputs.
@@ -849,7 +1096,7 @@ It requires neither the external Python package nor installed renderers,
 converters or fonts.
 
 ```powershell
-python -m tools.prepare_symbol_publication --source-plan SOURCE_PLAN.json --override-lookups LOOKUPS.json --army "JSON YYYYMMDD-HHMMSS.zip" --army-manifest ARMY_MANIFEST.json --raw-archive "SYMBOLS YYYYMMDD-HHMMSS.zip" --effective-archive "EFFECTIVE-SYMBOLS YYYYMMDD-HHMMSS.zip" --stage-reports STAGE_REPORTS --processed-root PROCESSED_OUTPUT --font-aliases font-aliases.json --output local/symbol-candidate
+python -m tools.symbols.prepare_symbol_publication --source-plan SOURCE_PLAN.json --override-lookups LOOKUPS.json --army "JSON YYYYMMDD-HHMMSS.zip" --army-manifest ARMY_MANIFEST.json --raw-archive "SYMBOLS YYYYMMDD-HHMMSS.zip" --effective-archive "EFFECTIVE-SYMBOLS YYYYMMDD-HHMMSS.zip" --stage-reports STAGE_REPORTS --processed-root PROCESSED_OUTPUT --font-aliases font-aliases.json --output local/symbol-candidate
 ```
 
 Select actual immutable paths. Each raw/effective ZIP's same-directory `.json`
@@ -863,7 +1110,7 @@ pinned by the producer, even when another JSON file has equivalent content.
 For a standalone check of the processed handoff, select its seven actual files:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.verify_processed_symbol_handoff `
+.\.venv\Scripts\python.exe -m tools.symbols.verify_processed_symbol_handoff `
   --canonical-archive CANONICAL.zip --conversion-receipt CONVERSION-STATE.json `
   --compressed-archive COMPRESSED.zip --compression-receipt COMPRESSION-STATE.json `
   --compression-report COMPRESSION-REPORT.csv --candidates-report CANDIDATES.csv `
@@ -897,7 +1144,7 @@ The normal build/serve/Docker path continues using the tracked publication.
 
 **Project domains:** Data processing, Project infrastructure
 
-`tools.build_symbol_artwork_review` compares explicitly selected current and
+`tools.symbols.build_symbol_artwork_review` compares explicitly selected current and
 candidate publications without processing or promoting assets. First record
 the expected SHA-256 values of the two selected v2 manifests from trusted
 evidence. Computing a hash alone does not establish approval or provenance.
@@ -905,12 +1152,12 @@ Replace the placeholders below with the selected paths and hashes; use a fresh
 run directory under ignored `local/`:
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review --write-comparison `
+.\.venv\Scripts\python.exe -m tools.symbols.build_symbol_artwork_review --write-comparison `
   --comparison local\validation\symbols\publication\RUN-ID\comparison.json `
   --current-manifest CURRENT-MANIFEST.json --manifest CANDIDATE-MANIFEST.json `
   --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
 
-.\.venv\Scripts\python.exe -m tools.build_symbol_artwork_review `
+.\.venv\Scripts\python.exe -m tools.symbols.build_symbol_artwork_review `
   --comparison local\validation\symbols\publication\RUN-ID\comparison.json `
   --current CURRENT-STATIC --current-manifest CURRENT-MANIFEST.json `
   --candidate CANDIDATE-STATIC --manifest CANDIDATE-MANIFEST.json `
@@ -942,14 +1189,14 @@ reviewer annotations, not established causes. The review does not accept
 artwork, verify all unchanged/added asset bytes or approve semantic mappings;
 use the candidate, compatibility and publication checks separately.
 Retain the comparison, page, decision export and selected evidence for the
-review's lifetime. The [P5 classification evidence](../docs/testing.md#p57-override-provenance-classification)
+review's lifetime. The [P5 classification evidence](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-override-provenance-classification)
 describes the older, legacy-input-specific audit and its limitations.
 
 ### Accepted external symbol publication promotion
 
 **Project domains:** Data processing, Project infrastructure
 
-`python -m tools.promote_symbol_publication` consumes an explicitly accepted
+`python -m tools.symbols.promote_symbol_publication` consumes an explicitly accepted
 candidate and the same `SymbolPublicationHandoff` file selections used to prepare
 it. The promotion input JSON uses
 `format: "InfinityDB symbol publication promotion inputs"`, `formatVersion: 1`,
@@ -988,7 +1235,7 @@ evidence, not a runtime input. A completed transaction is not an implicit rollba
 request.
 
 ```powershell
-.\.venv\Scripts\python.exe -m tools.promote_symbol_publication `
+.\.venv\Scripts\python.exe -m tools.symbols.promote_symbol_publication `
   --candidate CANDIDATE-DIRECTORY --inputs PROMOTION-INPUTS.json `
   --transaction local\operations\symbols\RUN-ID `
   --expected-current-sha256 CURRENT_SHA256 --expected-candidate-sha256 CANDIDATE_SHA256
@@ -998,7 +1245,7 @@ Promotion replaces graphical publication only. Rebuild the **complete four-file*
 Army/Rules/ITS set using the accepted manifest, validate embedded hashes/mappings
 and deployment assets, then resume serving. Do not patch only the Army SQLite
 rows or serve a mixed database/publication set. The
-[P5 cutover evidence](../docs/testing.md#p57-accepted-symbol-publication-cutover)
+[P5 cutover evidence](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#p57-accepted-symbol-publication-cutover)
 records the dated acceptance; hosted/release gates remain separate.
 Acquisition, overrides, font conversion, duplicate detection and compression
 are producer-owned; InfinityDB retains source planning, independent handoff

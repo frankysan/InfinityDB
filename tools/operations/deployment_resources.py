@@ -662,6 +662,7 @@ def capture_resources(
     interval_seconds: float,
     services: Sequence[str] = DEFAULT_SERVICES,
     command: Sequence[str] | None = None,
+    container_ids: Sequence[str] | None = None,
     sleep: Callable[[float], None] = time.sleep,
     now: Callable[[], datetime] = _utc_now,
 ) -> tuple[dict[str, Any], int]:
@@ -669,7 +670,10 @@ def capture_resources(
 
     if sys.platform != "linux":
         raise ResourceCaptureError("deployment resource capture must run on the Linux host")
-    container_ids = discover_containers(repo_root, services)
+    if container_ids is None:
+        container_ids = discover_containers(repo_root, services)
+    if not container_ids:
+        raise ResourceCaptureError("No containers selected for resource capture")
     started_at = now()
     start_state, container_configuration = inspect_container_metadata(repo_root, container_ids)
     host_samples = [capture_host_snapshot(filesystem_path=repo_root)]

@@ -389,7 +389,8 @@ def test_every_current_state_reaches_published_api_and_player_template() -> None
     )
     assert "rulesReferenceSection(rules)" in script
     assert "content.hidden = false;" in script
-    assert "if (catalog === \"states\") return null;" in script
+    assert 'let visibility = catalog === "states" ? { ids: null } : null;' in script
+    assert 'if (catalog === "states") renderVisibleItem();' in script
 
 
 def test_state_catalog_caches_composed_records_and_isolates_detail_results(

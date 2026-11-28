@@ -96,8 +96,16 @@ def test_release_collector_source_contract_matches_workflow() -> None:
         for os in pinned_match.group(1).split(",")
     }
 
+    fast = workflow.split("\n  fast-validation:\n", 1)[1].split(
+        "\n  source-checks:\n", 1
+    )[0]
     assert release_ci.SOURCE_FAST_JOB == "Fast validation and scope"
-    assert "name: Fast validation and scope" in workflow
+    assert "name: Fast validation and scope" in fast
+    for step in (
+        "Check out exact candidate", "Verify identical merged PR evidence",
+        "Run changed tests with verified baseline",
+    ):
+        assert f"- name: {step}" in fast
     assert "name: ${{ matrix.os }} / Python ${{ matrix.label }}" in source
     assert "name: Pinned determinism / ${{ matrix.os }}" in pinned
     assert "name: Cross-platform deterministic outputs" in deterministic
@@ -133,6 +141,70 @@ def test_core_workflows_reuse_only_on_main_push(filename) -> None:
         assert "steps.merge.outputs.reuse == 'true' && 'false'" in workflow
     else:
         assert "if: steps.merge.outputs.reuse != 'true'" in workflow
+
+
+@pytest.mark.parametrize(("requirement", "build_steps"), [
+    (release_ci.REQUIRED_WORKFLOWS[1], (
+        "Build wheel", "Validate installed wheel outside checkout",
+    )),
+    (release_ci.REQUIRED_WORKFLOWS[2], (
+        "Verify embedded deployed objects in the tracked database set",
+        "Validate pinned exact-variant release publication",
+        "Build application image from verified tracked databases",
+        "Validate image and production startup",
+    )),
+])
+def test_release_collector_smoke_contract_matches_workflow(requirement, build_steps) -> None:
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github/workflows" / requirement.filename
+    ).read_text(encoding="utf-8")
+    assert workflow.startswith(f"name: {requirement.name}\n")
+    job_ids = re.findall(r"^  ([a-z][a-z0-9-]+):$", workflow.split("\njobs:\n", 1)[1],
+                         flags=re.MULTILINE)
+    assert len(job_ids) == 1
+    steps = dict(re.findall(
+        r"^      - name: ([^\n]+)\n(.*?)(?=^      - name: |\Z)",
+        workflow, flags=re.MULTILINE | re.DOTALL,
+    ))
+    assert "Check out exact candidate" in steps
+    assert "id: merge" in steps["Verify identical merged PR evidence"]
+    for step in build_steps:
+        assert "if: steps.merge.outputs.reuse != 'true'" in steps[step]
+
+    evidence = release_ci.select_latest_run(
+        {"workflow_runs": [_run(requirement)]}, requirement=requirement, commit_sha=COMMIT,
+    )
+    job = {
+        "name": job_ids[0], "run_id": evidence.run_id,
+        "status": "completed", "conclusion": "success",
+        "steps": [
+            {"name": step, "conclusion": "success"}
+            for step in ("Check out exact candidate", *build_steps)
+        ],
+    }
+    release_ci.verify_smoke_job(
+        {"jobs": [job], "total_count": 1}, evidence, require_pr_candidate=True,
+    )
+    job["steps"] = [{"name": "Verify identical merged PR evidence", "conclusion": "success"}]
+    with pytest.raises(release_ci.ReusedReleaseEvidence):
+        release_ci.verify_smoke_job(
+            {"jobs": [job], "total_count": 1}, evidence, require_pr_candidate=False,
+        )
+
+
+def test_release_collector_browser_contract_matches_workflow() -> None:
+    requirement = release_ci.CROSS_BROWSER_WORKFLOW
+    workflow = (
+        Path(__file__).resolve().parents[1] / ".github/workflows" / requirement.filename
+    ).read_text(encoding="utf-8")
+    assert workflow.startswith(f"name: {requirement.name}\n")
+    assert "name: ${{ matrix.os }} / ${{ matrix.engine }}" in workflow
+    rows = re.findall(r"^\s+- os: ([\w.-]+)\n\s+engine: ([\w.-]+)", workflow,
+                      flags=re.MULTILINE)
+    assert rows
+    assert tuple(f"{os} / {engine}" for os, engine in rows) == release_ci.CROSS_BROWSER_JOBS
+    assert "- name: Validate selected runtime database set" in workflow
+    assert "- name: Run selected critical journeys" in workflow
 
 
 def test_workflow_runs_url_uses_exact_workflow_file_and_commit() -> None:
@@ -780,12 +852,29 @@ def _mock_merge_api(monkeypatch, *, problem: str = "") -> None:
         pr["head"]["repo"]["full_name"] = "other/InfinityDB"
     elif problem == "unmerged":
         pr["merged_at"] = None
+    elif problem == "wrong-base":
+        pr["base"]["ref"] = "other"
 
     def fake_payload(url, *, token):
         assert url.endswith(f"/commits/{FINAL}/pulls?per_page=100")
-        return [pr, pr] if problem == "ambiguous" else [pr]
+        # Regression: API 2026-03-10 can omit the merge SHA in this response.
+        association = {"number": 42, "merge_commit_sha": None}
+        if problem == "missing-number":
+            return [{}]
+        if problem == "invalid-number":
+            return [{"number": 0}]
+        if problem == "duplicate-association":
+            return [association, association]
+        if problem == "ambiguous":
+            return [association, {"number": 43}]
+        return [association]
 
-    def fake_json(url, *, token):
+    def fake_json(url, *, token, api_version=release_ci.GITHUB_API_VERSION):
+        if "/pulls/" in url:
+            assert api_version == "2022-11-28"
+            number = int(url.rsplit("/", 1)[-1])
+            assert number in (42, 43)
+            return dict(pr, number=99 if problem == "wrong-detail-number" else number)
         if "/git/commits/" in url:
             sha = url.rsplit("/", 1)[-1]
             return {"sha": sha, "tree": {
@@ -838,8 +927,9 @@ def test_identical_merge_records_actual_candidate_workflow_shas(monkeypatch) -> 
 
 
 @pytest.mark.parametrize("problem", [
-    "different-pr", "fork", "unmerged", "ambiguous", "tree", "missing", "failed",
-    "wrong-event", "checkout", "smoke-reused",
+    "different-pr", "fork", "unmerged", "wrong-base", "ambiguous", "tree",
+    "missing-number", "invalid-number", "duplicate-association", "wrong-detail-number",
+    "missing", "failed", "wrong-event", "checkout", "smoke-reused",
 ])
 def test_identical_merge_rejects_unverified_evidence(monkeypatch, problem) -> None:
     _mock_merge_api(monkeypatch, problem=problem)

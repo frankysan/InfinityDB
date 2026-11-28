@@ -11,6 +11,14 @@ const reference = (id, label) => {
     public_reference: { catalog: catalogs[kind], id: slug },
   };
 };
+const exampleEvidence = new Set([
+  "explicit-pinned-wiki-example",
+  "explicit-n5.3-pdf-p96-example-1", "explicit-n5.3-pdf-p96-example-2",
+  "explicit-n5.3-pdf-p96-example-3", "explicit-n5.3-pdf-p96-example-4",
+]);
+const provenance = (value) => value === "derived-from-pinned-general-rules"
+  ? "reviewed-interpretation"
+  : exampleEvidence.has(value) ? "source-example" : "reviewed-explanation";
 const evidence = (value) => value === "derived-from-pinned-general-rules"
   ? "Derived from reviewed general rules"
   : value === "explicit-pinned-wiki-example" ? "Explicit source example"
@@ -58,6 +66,7 @@ export function immunityCaseRows(facts = {}) {
           text(" Trait exceptions still apply (non-Comms attacks)."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.weaponId === "weapon:e-mitter") {
       rows.push({
@@ -71,10 +80,11 @@ export function immunityCaseRows(facts = {}) {
           text("; its Isolated/Immobilized-B effects are ignored. The "),
           reference("trait:non-lethal", "Non-Lethal"),
           text(" Trait still applies, so this weapon inflicts no Wounds. "),
-          text("Only the source Weapon 25 non-Comms profile is reviewed; "),
+          text("This example applies only to the standalone E/Mitter's non-Comms profile; "),
           text("the Armed Turret E/Mitter discrepancy is not adjudicated."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.weaponId === "weapon:missile-launcher") {
       const original = item.sourceProfile;
@@ -97,6 +107,7 @@ export function immunityCaseRows(facts = {}) {
           text("Hit Mode uses AP+EXP with ARM/2 instead and is not this printed example."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.weaponId === "weapon:monofilament-cc-weapon") {
       const profile = item.sourceProfile;
@@ -118,6 +129,7 @@ export function immunityCaseRows(facts = {}) {
           text(" from that Trait. Ordinary failed Normal Ammunition Saving Rolls are not cancelled. This is the exact printed non-Comms example, not a general Weapon Trait calculator."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.weaponId === "weapon:e-m-grenade-launcher") {
       rows.push({
@@ -136,6 +148,7 @@ export function immunityCaseRows(facts = {}) {
           text(" are separate Weapon Traits; this example does not adjudicate template or attack mechanics. Only the exact non-Comms E/M Grenade Launcher is reviewed, not Comms Attacks or arbitrary E/M weapons."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     }
   }
@@ -160,6 +173,7 @@ export function immunityCaseRows(facts = {}) {
         text(" counts attack dice, not Saving Rolls. This applies only to the reviewed Oblivion program, not all hacking or Comms effects."),
       ],
       evidence: evidence(item.evidence),
+      provenance: provenance(item.evidence),
     });
   }
   for (const item of cases.reviewedVulnerabilityCases || []) {
@@ -169,6 +183,7 @@ export function immunityCaseRows(facts = {}) {
       detail: [text(`Immunity cannot apply against a weapon with “${item.when.weaponNameContains}” `),
         text("in its name. This is a weapon-name example, not a rule for individual Ammunition components.")],
       evidence: evidence(item.evidence),
+      provenance: provenance(item.evidence),
     });
   }
   for (const item of cases.reviewedSavingRollCases || []) {
@@ -188,6 +203,7 @@ export function immunityCaseRows(facts = {}) {
           text(" is not a combined Ammunition type; treating it as Normal does not eliminate either Saving Roll Attribute. This is the exact printed example, not a general immunity calculation."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.immunity === "Critical") {
       rows.push({
@@ -202,6 +218,7 @@ export function immunityCaseRows(facts = {}) {
           text(" still uses a Combined Saving Roll, not Combined Ammunition. Applies only to the reviewed non-Comms Plasma Rifle profile; this is derived from N5.3 pp. 67 and 95, not a printed Immunity example or an attack calculator."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     }
   }
@@ -230,6 +247,7 @@ export function immunityCaseRows(facts = {}) {
           text(" remains a separate Weapon Trait. Applies to the exact non-Comms AP+T2 CC Weapon only; this is a derived reference, not an attack calculator."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (["weapon:ap-da-cc-weapon", "weapon:ap-exp-cc-weapon"].includes(item.when.weaponId)) {
       const exp = item.when.weaponId === "weapon:ap-exp-cc-weapon";
@@ -249,6 +267,7 @@ export function immunityCaseRows(facts = {}) {
           text(` remains a separate Weapon Trait. This is the exact non-Comms AP+${exp ? "EXP" : "DA"} CC Weapon profile, not a general attack calculator.`),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.weaponId === "weapon:silenced-pistol") {
       rows.push({
@@ -267,6 +286,7 @@ export function immunityCaseRows(facts = {}) {
           text(" is a separate reaction mechanic, not adjudicated by this Saving Roll example. Applies to the exact non-Comms Silenced Pistol only; this is a derived reference, not an attack calculator."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     } else if (item.when.weaponId === "weapon:e-m-cc-weapon") {
       rows.push({
@@ -285,6 +305,7 @@ export function immunityCaseRows(facts = {}) {
           text(" for HI, TAG, REM or VH targets. There is no additional ARM Saving Roll. Applies to the exact non-Comms N+E/M CC Weapon only; this is a derived reference, not an attack calculator."),
         ],
         evidence: evidence(item.evidence),
+        provenance: provenance(item.evidence),
       });
     }
   }
@@ -356,6 +377,7 @@ export function immunityCaseRows(facts = {}) {
         text(" Applies to the reviewed non-Comms attack only."),
       ],
       evidence: evidence(item.evidence),
+      provenance: provenance(item.evidence),
     });
   }
   return rows;

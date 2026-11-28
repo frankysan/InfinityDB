@@ -37,6 +37,7 @@ from infinity_db.legacy_armies import load_legacy_armies
 from infinity_db.rules_database import RulesDatabase, export_rules_database
 from infinity_db.symbol_catalog import SymbolCatalog
 from infinity_db.web import create_app, create_app_from_database_set
+from infinity_db.web.app import Application
 from infinity_db.web.presentation import static_asset_revision
 from tools.browser.verify_general_rules_browser import source_rules
 
@@ -674,8 +675,8 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert status == 200
     assert headers["content-type"].startswith("text/html")
     assert b"Army lists" in body
-    assert b"Main armies and Sectorials" in body
-    assert b"Generic Army Lists" in body
+    assert b"Generic Armies and Sectorials" in body
+    assert b"<strong>Vanilla</strong>" in body
     assert b'richer <a href="/fireteams">Fireteam</a> charts' in body
     assert b"see which forces are out of catalog" in body
     assert b"Loading Army information." in body
@@ -691,7 +692,7 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'from "./unit-symbols.js"' in script
     assert b"getArmies" in script
     assert b"army.overview_description" in script
-    assert b'if (army.role === "main") return "Main army";' in script
+    assert b'if (army.role === "main") return "Generic Army";' in script
     assert b"staticSymbolPath(army.symbol_path)" in script
     assert b"article.id = `army-${armyValue(army)}`;" in script
     assert b"requestAnimationFrame(revealHashTarget);" in script
@@ -701,10 +702,13 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
     assert b'matching_scope: "profile"' in script
     assert b"and_filters: UNIT_EXPLORER_DEFAULT_AND_FILTERS" in script
     assert b"army.overview_group" in script
-    assert b"reinforcementRelationships(army, visibleArmies)" in script
-    assert b"army.parent_armies" in script
-    assert b"army.reinforcement_sections" in script
-    assert b'link.href = `#army-${armyValue(target)}`;' in script
+    assert b"reinforcementRelationships" not in script
+    assert b'article.dataset.armyKind = army.legacy ? "legacy" : army.out_of_catalog' in script
+    assert (
+        b'? "out-of-catalog" : army.role === "reinforcement" ? "reinforcement" : "default"'
+        in script
+    )
+    assert b'filters.reinforcement = "1"' in script
     assert b"Out of catalog" in script
     assert b"Not playable in N5" in script
     assert b'identity.className = "army-overview-card-identity"' in script
@@ -713,6 +717,9 @@ def test_army_overview_page_uses_canonical_armies_and_unit_links(app: Callable) 
 
     status, _, styles = request(app, "/static/styles.css")
     assert status == 200
+    for kind in ("reinforcement", "out-of-catalog", "legacy"):
+        assert f'.army-overview-card[data-army-kind="{kind}"]'.encode() in styles
+
     assert_css_rule(styles, ".army-overview", {"width": "min(1040px, 100%)"})
     assert_css_rule(
         styles,
@@ -1749,7 +1756,7 @@ def test_unit_filter_catalogs_match_public_catalog_identities(monkeypatch) -> No
         ]
 
 
-def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -> None:
+def test_materialized_extended_profiles_preserve_detail_and_availability(monkeypatch) -> None:
     from infinity_db.unit_presentation import extended_general_profiles
 
     application = create_app(
@@ -1763,11 +1770,12 @@ def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -
     )
     original = application.api._present_unit
     calls = []
+    detail_projections = []
 
     def present(*args, **kwargs):
         calls.append(kwargs.get("general_only", False))
+        detail_projections.append(kwargs.get("materialized_general_profiles"))
         return original(*args, **kwargs)
-
     monkeypatch.setattr(application.api, "_present_unit", present)
     for settings in flags:
         query = f"limit=10&extended=1&matching_scope=profile&{settings}"
@@ -1776,7 +1784,7 @@ def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -
         first = json.loads(body)
         assert first["items"]
         calls_after_first = len(calls)
-        # A different page size reuses the projection, not a cached list response.
+        # A different page size uses the stored projection, not a cached list response.
         status, _, body = request(
             application, "/api/units", query=query.replace("limit=10", "limit=5"),
         )
@@ -1787,38 +1795,48 @@ def test_extended_profile_cache_preserves_detail_and_availability(monkeypatch) -
         for item in first["items"]:
             status, _, body = request(application, f"/api/units/{item['id']}", query=settings)
             assert status == 200
-            assert item["general_profiles"] == extended_general_profiles(json.loads(body))
-    assert calls.count(True) == 20
+            detail = json.loads(body)
+            # History belongs to the detail cards, not the current Explorer projection.
+            assert all("history" not in profile for profile in item["general_profiles"])
+            for profile in detail["general_profiles"]:
+                profile.pop("history", None)
+            assert item["general_profiles"] == extended_general_profiles(detail)
+    assert calls.count(True) == 0
+    assert calls.count(False) == 20
+    assert all(profiles is not None for profiles in detail_projections)
 
 
-@pytest.mark.parametrize("enabled", [False, True])
-def test_extended_general_projection_matches_all_current_units(enabled: bool) -> None:
-    from infinity_db.unit_presentation import (
-        OPTIONAL_AVAILABILITY_FLAGS,
-        extended_general_profiles,
-    )
+@pytest.mark.parametrize("mask", range(16))
+def test_extended_general_projection_matches_all_current_units(mask: int) -> None:
+    from infinity_db.general_profile_storage import flags_for_mask
+    from infinity_db.unit_presentation import extended_general_profiles
 
     application = create_app(
         Path("data/generated/army.db"),
         rules_database_path=Path("data/generated/rules_n5.db"),
     )
     api = application.api
-    flags = {flag: enabled for flag in OPTIONAL_AVAILABILITY_FLAGS}
+    flags = flags_for_mask(mask)
     units = api.database.list_units(
-        limit=10_000, _unbounded=True, mercs=enabled, specops=enabled,
-        teamops=enabled, reinforcement=enabled,
+        limit=10_000, _unbounded=True, mercs=flags["mercs"], specops=flags["specops"],
+        teamops=flags["teamops"], reinforcement=flags["reinforcement"],
     )["items"]
     assert units
+    ids = [item["id"] for item in units]
+    selected_flags = frozenset(flag for flag, value in flags.items() if value)
+    published = api.database.general_profiles(ids, selected_flags, for_detail=True)
+    explorer = api.database.general_profiles(ids, selected_flags)
+    assert published is not None and explorer is not None
     for item in units:
         detail = api.database.get_unit(item["id"])
         assert detail is not None
-        expected = extended_general_profiles(api._present_unit(
+        expected = api._present_unit(detail, optional_filters=flags)
+        actual = api._present_unit(
             detail, optional_filters=flags,
-        ))
-        actual = extended_general_profiles(api._present_unit(
-            detail, optional_filters=flags, general_only=True,
-        ))
-        assert actual == expected, item["name"]
+            materialized_general_profiles=published[item["id"]],
+        )
+        assert actual == expected, (mask, item["name"])
+        assert explorer[item["id"]] == extended_general_profiles(expected), (mask, item["name"])
 
 
 def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
@@ -1866,6 +1884,240 @@ def test_optional_unit_modes_are_excluded_until_selected(app: Callable) -> None:
     status, _, body = request(app, "/api/units", query="army_id=198&reinforcement=1")
     assert status == 200
     assert {item["id"] for item in json.loads(body)["items"]} == {6}
+
+
+def test_unit_history_is_optional_and_snapshot_bound(
+    app_database_template: Path, tmp_path: Path,
+) -> None:
+    from hashlib import sha256
+
+    database = app_database_template
+    projection = tmp_path / "history.json"
+    change = {
+        "date": "2025-10-15", "scope": "", "category": "Characteristics",
+        "actions": [{"action": "Changed", "text": "BS: 11 → 12"}],
+    }
+    document = {
+        "formatVersion": 1,
+        "armyDatabaseSha256": sha256(database.read_bytes()).hexdigest(),
+        "units": {"1": {
+            "general": {"profile ranger": [change]},
+            "armies": {"101": [], "201": [change]},
+            "unmatched": [{"name": "Former Army", "changes": [change]}],
+        }},
+    }
+    projection.write_text(json.dumps(document), encoding="utf-8")
+    ordinary = create_app(database)
+    status, _, body = request(ordinary, "/api/units/1")
+    assert status == 200
+    assert "historical_contexts" not in json.loads(body)
+    selected = create_app(database, history_path=projection)
+    status, headers, body = request(selected, "/api/units/1")
+    assert status == 200
+    assert headers["cache-control"] == "no-store"
+    assert "etag" not in headers
+    unit = json.loads(body)
+    assert unit["general_profiles"][0]["history"] == [change]
+    assert {army["id"]: army["history"] for army in unit["armies"]} == {
+        101: [], 201: [change],
+    }
+    assert unit["historical_contexts"] == document["units"]["1"]["unmatched"]
+    status, _, explicit = request(selected, "/api/units/1", query="history=1")
+    assert status == 200 and json.loads(explicit) == unit
+    status, headers, omitted = request(selected, "/api/units/1", query="history=0")
+    assert status == 200 and headers["cache-control"] == "no-store"
+    assert json.loads(omitted) == json.loads(request(ordinary, "/api/units/1")[2])
+    assert json.loads(request(selected, "/api/units/1")[2]) == unit
+    for query in ("history=", "history=true", "history=2", "history=0&history=1"):
+        assert request(selected, "/api/units/1", query=query)[0] == 400
+    assert request(selected, "/api/units/no-such-unit", query="history=0")[0] == 404
+    document["armyDatabaseSha256"] = "wrong"
+    projection.write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match"):
+        create_app(database, history_path=projection)
+
+
+def test_unit_history_disclosures_on_real_page(app_database_template: Path, tmp_path: Path) -> None:
+    from hashlib import sha256
+
+    from tools.browser_wsgi_transport import route_browser_page
+
+    api = pytest.importorskip("playwright.sync_api")
+    change = {
+        "date": "2025-10-15", "scope": "", "category": "Characteristics",
+        "actions": [{"action": "Changed", "text": "BS: 11 → 12"}],
+    }
+    same_date = {
+        **change, "category": "Skills",
+        "actions": [
+            {"action": "Gained", "text": "Dodge"},
+            {"action": "Lost", "text": "Berserk"},
+        ],
+    }
+    later = {**change, "date": "2025-11-15"}
+    projection = tmp_path / "history.json"
+    projection.write_text(json.dumps({
+        "formatVersion": 1,
+        "armyDatabaseSha256": sha256(app_database_template.read_bytes()).hexdigest(),
+        "units": {"1": {
+            "general": {"profile ranger": [change, same_date, later]},
+            "armies": {"101": [], "201": [{**change, "scope": "Loadout A",
+                                         "category": "Costs"}]},
+            "unmatched": [
+                {"name": "Former Army", "changes": [change, same_date]},
+                {"name": "Another Former Army", "changes": [change]},
+            ],
+        }},
+    }), encoding="utf-8")
+    app = create_app(app_database_template, history_path=projection)
+    with api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch()
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc):
+                pytest.skip(f"Chromium unavailable: {exc}")
+            raise
+        try:
+            for width, theme in ((1280, "light"), (390, "dark")):
+                page = browser.new_page(viewport={"width": width, "height": 900})
+                route_browser_page(page, app, "http://infinitydb-browser.test")
+                page.goto("http://infinitydb-browser.test/units/ranger-prototype")
+                general = page.locator(".general-profile .unit-history").first
+                general.wait_for()
+                assert general.get_attribute("open") is None
+                assert page.locator(".army-profile .unit-history").count() == 2
+                assert page.locator(".unit-history[open]").count() == 0
+                assert page.locator(".unit-history-change").count() == 0
+                assert page.locator(".unit-history > div.unit-history-body").count() == 0
+                page.evaluate("(theme) => document.documentElement.dataset.theme = theme", theme)
+                assert general.locator(":scope > summary").inner_text() == (
+                    "History · 2 updates · 4 changes"
+                )
+                empty = page.locator(".army-profile .unit-history--empty")
+                empty.locator("xpath=..").evaluate("(army) => army.open = true")
+                empty_summary = empty.locator(":scope > summary")
+                assert empty_summary.inner_text() == "History · No confirmed updates"
+                assert empty_summary.evaluate("""element => {
+                    const style = getComputedStyle(element);
+                    const label = element.querySelector(".unit-history-count");
+                    return style.color === getComputedStyle(label).color
+                        && style.fontWeight === "400";
+                }""")
+                empty_summary.focus()
+                empty_summary.press("Enter")
+                empty.get_by_text(
+                    "No changes have been confirmed in the available history for this Army."
+                ).wait_for(state="visible")
+                empty_summary.press("Enter")
+                assert empty.get_attribute("open") is None
+
+                army_history = page.locator(".army-profile .unit-history:not(.unit-history--empty)")
+                army_history.locator("xpath=..").evaluate("(army) => army.open = true")
+                assert army_history.locator(":scope > summary").inner_text() == (
+                    "History · 1 update · 1 change"
+                )
+                other = page.locator(".unit-history").filter(
+                    has=page.locator(":scope > summary", has_text="Other historical contexts"),
+                )
+                assert other.locator(":scope > summary").inner_text() == (
+                    "Other historical contexts · 2 updates · 4 changes"
+                )
+                other.locator(":scope > summary").click()
+                assert other.locator("section > .unit-history > summary").all_inner_texts() == [
+                    "History · 1 update · 3 changes", "History · 1 update · 1 change",
+                ]
+                former = other.locator("section > .unit-history").first
+                former.locator(":scope > summary").click()
+                former.locator(".unit-history-change").first.wait_for(state="visible")
+                general.locator(":scope > summary").click()
+                general.locator(".unit-history-date").first.wait_for(state="visible")
+                assert general.locator(".unit-history-date").count() == 2
+                assert general.locator(".unit-history-change").count() == 4
+                assert general.get_by_text("BS: 11 → 12").first.is_visible()
+                assert general.get_by_text("2025-10-15").is_visible()
+                assert page.locator(".unit-history-change").count() == 7
+                general.locator(":scope > summary").click()
+                general.locator(":scope > summary").click()
+                assert general.locator(".unit-history-change").count() == 4
+                page.evaluate("""() => {
+                    const toggle = document.querySelector('#distance-unit-toggle');
+                    toggle.checked = !toggle.checked;
+                    toggle.dispatchEvent(new Event('change', {bubbles: true}));
+                }""")
+                general.locator(".unit-history-change").first.wait_for(state="visible")
+                former.locator(".unit-history-change").first.wait_for(state="visible")
+                assert page.locator(".unit-history[open]").count() == 3
+                assert page.locator(".unit-history-change").count() == 7
+                assert army_history.locator(".unit-history-body").count() == 0
+                assert empty.locator(".unit-history-body").count() == 0
+                assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+                page.close()
+        finally:
+            browser.close()
+
+
+def test_published_go_pod_history_distances():
+    from tools.browser_wsgi_transport import route_browser_page
+
+    generated = Path(__file__).resolve().parents[1] / "data/generated"
+    database = Database(generated / "army.db")
+    with database._connect() as connection:
+        candidates = connection.execute(
+            "SELECT unit_id, body FROM unit_history_payloads "
+            "WHERE body LIKE '%Super-Jump%' AND body LIKE '%7.5%' AND body LIKE '%20%'"
+        ).fetchall()
+    units = [(database.get_unit(row[0]), json.loads(row[1])) for row in candidates]
+    matches = [(unit, body) for unit, body in units if unit is not None
+               and ("go-pod" in unit["name"].casefold()
+                    or "go-pod" in json.dumps(body).casefold())]
+    assert len(matches) == 1, [unit["name"] for unit, _ in units if unit]
+    unit, body = matches[0]
+    assert unit is not None
+    changes = [
+        *[change for rows in body["general"].values() for change in rows],
+        *[change for rows in body["armies"].values() for change in rows],
+        *[change for context in body["unmatched"] for change in context["changes"]],
+    ]
+    parts = [part for change in changes for action in change["actions"]
+             for part in action.get("parts", []) if isinstance(part, dict)]
+    for value in (7.5, 20):
+        assert any(p["kind"] == "distance" and float(p["value"]) == value
+                   for p in parts), parts
+    api = pytest.importorskip("playwright.sync_api")
+    app = create_app_from_database_set(generated)
+    with api.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch()
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc):
+                pytest.skip(f"Chromium unavailable: {exc}")
+            raise
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        origin = "http://infinitydb-history.test"
+        route_browser_page(page, app, origin)
+        try:
+            page.goto(f"{origin}/units/{unit['slug']}")
+            page.locator(".unit-history").first.wait_for()
+            page.locator("main details").evaluate_all(
+                "(nodes) => nodes.forEach(n => n.open = true)"
+            )
+            history = page.locator(".unit-history-change")
+            for inches, expected in (
+                (False, ["Super-Jump (7.5 cm)", "Jump (20 cm)"]),
+                (True, ['Super-Jump (3")', 'Jump (8")']),
+            ):
+                page.evaluate("""inches => {
+                    const toggle = document.querySelector('#distance-unit-toggle');
+                    toggle.checked = inches;
+                    toggle.dispatchEvent(new Event('change', {bubbles: true}));
+                }""", inches)
+                for label in expected:
+                    history.filter(has_text=label).first.wait_for(state="visible")
+                    assert any(label in value for value in history.all_inner_texts()), label
+                    assert history.filter(has_text=label).first.is_visible()
+        finally:
+            page.close()
+            browser.close()
 
 
 def test_unit_details_are_available_by_id(app: Callable) -> None:
@@ -2421,7 +2673,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     )
     assert_css_rule(
         styles,
-        ".extended-results-control input",
+        ".extended-results-control input, .feedback-page-control input",
         {"width": "16px", "height": "16px", "min-height": "0"},
     )
 
@@ -2476,12 +2728,14 @@ def test_browser_json_access_is_routed_through_api_and_transport_modules(app: Ca
     assert b"preferences.js" not in api
     assert b"fetch(" not in api
     assert b"visibleUnitIds(optionalFilters, signal)" in api
+    assert b"observeVisibleUnitIds(getFilters, signal, onChange)" in api
+    assert b"visibleUnitIds(getFilters(), signal)" in api
 
     for asset in ("catalog-detail.js", "skill.js"):
         status, _, body = request(app, f"/static/{asset}")
         assert status == 200
         assert b"optionalUnitFilters" in body
-        assert b"visibleUnitIds(optionalUnitFilters(), pageController.signal)" in body
+        assert b"observeVisibleUnitIds(optionalUnitFilters, pageController.signal," in body
 
     status, _, transport = request(app, "/static/api-transport.js")
     assert status == 200
@@ -3075,6 +3329,12 @@ def test_project_favicon_is_shared_versioned_brand_asset(app: Callable) -> None:
         assert int.from_bytes(png[16:20], "big") == size
         assert int.from_bytes(png[20:24], "big") == size
 
+    status, headers, fallback = request(app, "/favicon.ico")
+    assert status == 200
+    assert headers["content-type"] == "image/png"
+    assert headers["cache-control"] == "public, max-age=300, stale-while-revalidate=600"
+    assert fallback == request(app, "/static/favicon-32.png")[2]
+
 
 def test_landing_hero_keeps_its_logo_with_the_heading_on_mobile(app: Callable) -> None:
     status, _, body = request(app, "/")
@@ -3499,7 +3759,11 @@ def test_developer_mode_controls_database_id_visibility_in_settings_menu(
     assert b"function initializeSettings()" in settings
     assert b"function initializeThemeSelector()" in settings
     assert b'document.getElementById("theme-selector")' in settings
-    assert b"themeOptions().map" in settings
+    assert b"populateSelector(selector, themeOptions())" in settings
+    assert b"function initializePaletteSelector()" in settings
+    assert b'document.getElementById("theme-palette-selector")' in settings
+    assert b"populateSelector(selector, paletteOptions())" in settings
+    assert b"savePaletteSelection(selector.value)" in settings
     assert b'saveThemeSelection(selector.value)' in settings
     assert b'new CustomEvent("themechange"' in settings
     assert b"function initializeDistanceUnitToggle()" in settings
@@ -3551,12 +3815,13 @@ def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable)
     assert status == 200
     assert headers["content-type"].startswith("text/javascript")
     assert b'const THEME_PREFERENCE_KEY = "infinity-db-theme";' in startup
-    assert b'{ value: "system", label: "System" }' in startup
+    assert b'{ value: "system", label: "Auto" }' in startup
     assert b'{ value: "light", label: "Light" }' in startup
     assert b'{ value: "dark", label: "Dark" }' in startup
     assert b'window.matchMedia?.("(prefers-color-scheme: dark)")' in startup
     assert b'document.documentElement.dataset.theme = resolved' in startup
     assert b"applySelection(savedThemeSelection())" in startup
+    assert b"applyPalette(savedPreference(PALETTE_PREFERENCE_KEY))" in startup
 
     status, _, theme = request(app, "/static/theme.js")
     assert status == 200
@@ -3574,6 +3839,8 @@ def test_theme_selection_uses_prepaint_shared_preference_contract(app: Callable)
 
 
 def test_theme_runtime_initialization_switching_and_persistence() -> None:
+    from infinity_db.theme_palette import palette_options
+
     root = Path(__file__).resolve().parents[1]
     harness = root / "tests" / "theme_runtime_harness.cjs"
     startup = root / "src" / "infinity_db" / "web" / "static" / "theme-startup.js"
@@ -3590,7 +3857,7 @@ def test_theme_runtime_initialization_switching_and_persistence() -> None:
         command = [sys.executable, "-m", "nodejs_wheel"]
 
     completed = subprocess.run(
-        [*command, str(harness), str(startup), str(preferences)],
+        [*command, str(harness), str(startup), str(preferences), json.dumps(palette_options())],
         check=True,
         capture_output=True,
         text=True,
@@ -3598,6 +3865,18 @@ def test_theme_runtime_initialization_switching_and_persistence() -> None:
     runtime = json.loads(completed.stdout)
 
     assert runtime["options"] == ["system", "light", "dark"]
+    assert runtime["palettes"] == [option["value"] for option in palette_options()]
+    assert runtime["paletteStartup"] == {
+        "selected": {"themePalette": "panoceania", "themePreference": "system", "theme": "dark"},
+        "remembered": {"themePalette": "nomads", "themePreference": "system", "theme": "light"},
+        "switched": "nomads", "afterModeChange": "nomads", "invalid": "infinitydb",
+    }
+    assert runtime["palettePersistence"] == {
+        "paletteTransient": ["panoceania", "panoceania", None],
+        "paletteRemembered": ["nomads", "nomads", "nomads"],
+        "paletteForgotten": ["nomads", "nomads", None],
+    }
+    assert all(state.pop("themePalette") == "infinitydb" for state in runtime["startup"].values())
     assert runtime["startup"] == {
         "defaultLight": {"themePreference": "system", "theme": "light"},
         "defaultDark": {"themePreference": "system", "theme": "dark"},
@@ -3641,6 +3920,7 @@ def test_representative_pages_share_theme_runtime_contract(app: Callable) -> Non
         "/fireteams",
         "/glossary",
         "/changes",
+        "/snapshot-compare",
         "/about",
     )
 
@@ -3649,6 +3929,8 @@ def test_representative_pages_share_theme_runtime_contract(app: Callable) -> Non
         assert status == 200
         assert b'<meta name="color-scheme" content="light dark">' in body
         assert b'id="theme-selector" class="setting-select"' in body
+        assert b'id="theme-palette-selector" class="setting-select"' in body
+        assert b"data-theme-options=" in body
         assert startup_src in body
         assert settings_src in body
         assert stylesheet_href in body
@@ -3682,6 +3964,7 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         "/hacking-programs/carbonite",
         "/fireteams",
         "/glossary",
+        "/snapshot-compare",
         "/about",
     )
     expected_csp = (
@@ -3706,6 +3989,97 @@ def test_browser_pages_require_external_same_origin_scripts(app: Callable) -> No
         for script in scripts:
             assert re.search(rb"\bsrc\s*=", script.group("attrs"), flags=re.IGNORECASE)
             assert not script.group("body").strip()
+
+
+@pytest.mark.full_assets
+@pytest.mark.parametrize("engine", ("chromium", "firefox"))
+def test_standalone_svg_styles_match_saved_files(tmp_path: Path, engine: str) -> None:
+    """Use real HTTP headers; the in-process Playwright transport bypasses CSP."""
+    from threading import Thread
+    from wsgiref.simple_server import make_server
+
+    api = pytest.importorskip("playwright.sync_api")
+    generated = Path(__file__).resolve().parents[1] / "data/generated"
+    app = create_app_from_database_set(generated)
+    paths = (
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18&theme=dark",
+        "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18&theme=dark&palette=nomads",
+        "/static/armies/aleph/701-aleph.svg",
+        "/static/units/aleph/1128-shukra-consultants.svg",
+        "/static/silhouettes/silhouette-1.svg",
+        "/static/infinitydb-logo.svg",
+    )
+    styles = """() => [...document.querySelectorAll(
+      'svg rect, svg path, svg circle, svg line, svg text, svg stop, svg polygon, svg ellipse'
+    )].map(node => {
+      const s = getComputedStyle(node);
+      return [s.fill, s.stroke, s.strokeWidth, s.fillOpacity, s.stopColor,
+        s.fontSize, s.fontWeight].map(value =>
+          value.startsWith('url(') && value.includes('#') ? value.split('#').pop() : value);
+    })"""
+    with make_server("127.0.0.1", 0, app) as server:
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        origin = f"http://127.0.0.1:{server.server_port}"
+        try:
+            with api.sync_playwright() as driver:
+                try:
+                    browser = getattr(driver, engine).launch()
+                except Exception as exc:
+                    if "Executable doesn't exist" in str(exc):
+                        pytest.skip(f"{engine} unavailable: {exc}")
+                    raise
+                page = browser.new_page()
+                try:
+                    svg_policy = (
+                        "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; "
+                        "object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+                    )
+                    for index, path in enumerate(paths):
+                        response = page.request.get(origin + path)
+                        assert response.status == 200, path
+                        assert response.headers["content-security-policy"] == svg_policy
+                        head = page.request.head(origin + path)
+                        assert head.status == 200
+                        assert head.headers["content-security-policy"] == svg_policy
+                        assert not head.body()
+                        if etag := response.headers.get("etag"):
+                            cached = page.request.get(
+                                origin + path, headers={"If-None-Match": etag},
+                            )
+                            assert cached.status == 304
+                            assert cached.headers["content-security-policy"] == svg_policy
+                            assert not cached.body()
+                        saved = tmp_path / f"asset-{index}.svg"
+                        saved.write_bytes(response.body())
+                        page.goto(saved.as_uri())
+                        expected = page.evaluate(styles)
+                        assert expected, path
+                        page.goto(origin + path)
+                        actual = page.evaluate(styles)
+                        assert actual == expected, f"{engine}: {path}"
+                        page.goto(origin + "/")
+                        assert page.evaluate("""async path => {
+                          const img = new Image();
+                          img.src = path;
+                          document.body.append(img);
+                          await img.decode();
+                          return img.naturalWidth > 0 && img.naturalHeight > 0;
+                        }""", path), path
+                    logo = page.locator("img.landing-logo")
+                    logo.wait_for(state="visible")
+                    assert logo.evaluate(
+                        "node => node.complete && node.naturalWidth > 0"
+                    )
+                    assert page.locator("img.brand-mark").evaluate(
+                        "node => node.complete && node.naturalWidth > 0"
+                    )
+                finally:
+                    browser.close()
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
 
 
 def test_compact_navigation_is_closed_when_a_page_is_restored(app: Callable) -> None:
@@ -3969,6 +4343,7 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
         "/static/foundation.css",
         "/static/themes/light.css",
         "/static/themes/dark.css",
+        "/static/themes/army.css",
         "/static/components.css",
         "/static/page-overrides.css",
     )
@@ -3991,6 +4366,7 @@ def test_stylesheet_entrypoint_composes_owned_sources_in_order(app: Callable) ->
     assert b':root[data-theme="dark"]' in sources["/static/themes/dark.css"]
     assert b':root[data-theme="light"]' not in sources["/static/themes/dark.css"]
     assert b"--color-surface-page:" in sources["/static/themes/dark.css"]
+    assert b'[data-theme-palette="nomads"]' in sources["/static/themes/army.css"]
     assert b".surface {" in sources["/static/components.css"]
     assert b".army-overview {" in sources["/static/page-overrides.css"]
     assert b".fireteam-explorer {" in sources["/static/page-overrides.css"]
@@ -4465,7 +4841,12 @@ def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable)
 
     light_tokens = set(re.findall(r"--([\w-]+):", light_theme.group(0)))
     dark_tokens = set(re.findall(r"--([\w-]+):", dark_theme.group(0)))
-    assert dark_tokens == light_tokens
+    assert dark_tokens == {name for name in light_tokens if not name.startswith("appearance-")}
+
+    status, _, generated = request(app, "/static/themes/army.css")
+    assert status == 200
+    generated_css = generated.decode("utf-8")
+    assert set(re.findall(r"--([\w-]+):", generated_css)) <= dark_tokens
 
     component_css = (
         css[: root.start()]
@@ -4473,6 +4854,10 @@ def test_presentation_colors_are_owned_by_semantic_theme_contract(app: Callable)
         + css[light_theme.end() : dark_theme.start()]
         + css[dark_theme.end() :]
     )
+    # The generated faction overrides are another owned palette source,
+    # not component-level color literals.
+    assert component_css.count(generated_css) == 1
+    component_css = component_css.replace(generated_css, "", 1)
     color_literals = re.findall(
         r"#[0-9a-fA-F]{3,8}\b|(?:rgb|rgba)\([^)]*\)",
         component_css,
@@ -5905,6 +6290,20 @@ def test_global_search_routes_to_domain_specific_surfaces(app: Callable) -> None
     assert json.loads(body)["error"] == "Provide q exactly once"
 
 
+def test_global_search_limit_preserves_ranked_results(app: Callable) -> None:
+    status, _, body = request(app, "/api/search", query="q=a")
+    assert status == 200
+    items = json.loads(body)["items"]
+    assert len(items) > 1
+    status, _, body = request(app, "/api/search", query="q=a&limit=1")
+    assert status == 200
+    assert json.loads(body) == {"items": items[:1]}
+    for limit in ("", "0", "51", "-1", "1.5", "x", "1&limit=2", "999999999"):
+        status, _, body = request(app, "/api/search", query=f"q=a&limit={limit}")
+        assert status == 400
+        assert "limit" in json.loads(body)["error"]
+
+
 def test_game_modes_recommended_setup_is_public_and_searchable(
     app: Callable, tmp_path: Path,
 ) -> None:
@@ -6196,7 +6595,12 @@ def test_glossary_projects_canonical_rules_and_embedded_attributes(
     assert status == 200
     assert b'from "./share-state.js"' in glossary_script
     assert b'readShareState("glossary").params.get("q")' in glossary_script
-    assert b'shareStateHref("/glossary", "glossary"' in glossary_script
+    assert (
+        b'writeShareState("glossary", query ? { q: query } : {}, { replace: true })'
+        in glossary_script
+    )
+    assert b"setTimeout(applySearch, 150)" in glossary_script
+    assert b"if (items) render();" in glossary_script
 
     status, _, body = request(rules_app, "/api/glossary")
     assert status == 200
@@ -8081,15 +8485,51 @@ def test_local_app_without_rules_database_keeps_army_data_available(
     assert json.loads(body)["items"] == []
 
 
-def test_wsgi_uses_explicit_complete_directory_from_environment(monkeypatch) -> None:
+@pytest.mark.parametrize("lazy_indexes", [False, True])
+def test_wsgi_uses_explicit_complete_directory_from_environment(
+    monkeypatch, lazy_indexes: bool,
+) -> None:
     directory = Path(__file__).parents[1] / "data/generated"
     monkeypatch.delenv("INFINITY_DB_DATABASE", raising=False)
     monkeypatch.delenv("INFINITY_DB_RULES_DATABASE", raising=False)
     monkeypatch.setenv("INFINITY_DB_DB_DIR", str(directory))
+    monkeypatch.delenv("INFINITY_DB_PRELOAD_INDEXES", raising=False)
+    if lazy_indexes:
+        monkeypatch.setenv("INFINITY_DB_PRELOAD_INDEXES", "0")
     sys.modules.pop("infinity_db.web.wsgi", None)
-    module = importlib.import_module("infinity_db.web.wsgi")
+    with patch.object(
+        Application, "preload_runtime_indexes", autospec=True,
+        side_effect=Application.preload_runtime_indexes,
+    ) as preload:
+        module = importlib.import_module("infinity_db.web.wsgi")
     assert module.app.database.path == directory / "army.db"
     assert module.app.rules_database.path == directory / "rules_n5.db"
+    if lazy_indexes:
+        preload.assert_not_called()
+    else:
+        preload.assert_called_once_with(module.app)
+        with patch.object(
+            module.app.database, "_connect",
+            side_effect=AssertionError("Preloaded indexes must not reopen SQLite"),
+        ):
+            assert module.app.database._unit_graph()["groups"]
+            assert module.app.database._official_army_unit_links()
+
+
+def test_preloaded_runtime_indexes_preserve_reference_responses() -> None:
+    directory = Path(__file__).parents[1] / "data/generated"
+    lazy = create_app_from_database_set(directory)
+    warm = create_app_from_database_set(directory)
+    warm.preload_runtime_indexes()
+    for path in (
+        "/api/units/minutemen",
+        "/api/units?limit=50&matching_scope=profile&counts=prospective",
+        "/api/skills/mimetism",
+    ):
+        expected = request(lazy, path)
+        assert expected[0] == 200
+        assert request(warm, path) == expected
+        assert request(warm, path) == expected
 
 
 def test_wsgi_rejects_retired_individual_database_environment(monkeypatch) -> None:
@@ -8098,6 +8538,87 @@ def test_wsgi_rejects_retired_individual_database_environment(monkeypatch) -> No
     sys.modules.pop("infinity_db.web.wsgi", None)
     with pytest.raises(ValueError, match="settings are retired"):
         importlib.import_module("infinity_db.web.wsgi")
+
+
+@pytest.mark.parametrize("catalog,slug", [("skills", "stealth"), ("equipment", "medikit")])
+def test_catalog_visibility_filtered_first_and_latest_request_wins(
+    app: Callable, catalog: str, slug: str,
+) -> None:
+    from tools.browser_wsgi_transport import route_browser_page
+
+    origin = "http://catalog-visibility.test"
+    path = f"/{catalog}/{slug}"
+    status, _, body = request(app, "/api" + path)
+    assert status == 200
+    ids = sorted({unit["id"] for variant in json.loads(body)["variants"]
+                  for unit in variant["units"]})
+    assert ids
+    playwright = pytest.importorskip("playwright.sync_api")
+    with playwright.sync_playwright() as driver:
+        try:
+            browser = driver.chromium.launch(channel="chrome")
+        except Exception as exc:
+            if "Executable doesn't exist" in str(exc) or "not found" in str(exc):
+                pytest.skip(f"Chrome unavailable: {exc}")
+            raise
+        page = browser.new_page()
+        try:
+            route_browser_page(page, app, origin)
+            pending = []
+            page.route("**/api/visible-unit-ids*", lambda route: pending.append(route))
+            errors = []
+            page.on("pageerror", lambda error: errors.append(str(error)))
+            selector = "#skill-content" if catalog == "skills" else "#item-content"
+            content = page.locator(selector)
+            ready = page.locator(selector + ":not([hidden])")
+            variants = content.locator("details.army-profile")
+            with page.expect_request("**/api/visible-unit-ids*"):
+                page.goto(origin + path, wait_until="domcontentloaded")
+            page.wait_for_function("() => true")
+            assert len(pending) == 1
+            assert content.get_attribute("hidden") is not None
+
+            def respond(route, visible, *, status=200):
+                route.fulfill(status=status, content_type="application/json",
+                              body=json.dumps({"ids": visible}))
+
+            respond(pending.pop(0), [])
+            ready.wait_for(state="attached")
+            assert variants.count() == 0
+            page.evaluate("window.dispatchEvent(new Event('distanceunitchange'))")
+            assert variants.count() == 0
+
+            def refresh():
+                with page.expect_request("**/api/visible-unit-ids*"):
+                    page.evaluate("window.dispatchEvent(new Event('optionalunitschange'))")
+                # Dispatch route callbacks before accessing retained Route objects.
+                page.wait_for_function("() => true")
+
+            refresh()
+            refresh()
+            assert len(pending) == 2
+            respond(pending.pop(1), ids)
+            variants.first.wait_for(state="visible")
+            respond(pending.pop(0), [])
+            page.wait_for_load_state("networkidle")
+            assert variants.count() > 0
+
+            refresh()
+            respond(pending.pop(0), [], status=503)
+            ready.wait_for(state="detached")
+            assert page.get_by_text(
+                "Could not load Unit availability. Please try again.", exact=True
+            ).is_visible()
+            refresh()
+            respond(pending.pop(0), [])
+            ready.wait_for(state="attached")
+            assert variants.count() == 0
+            page.evaluate("window.dispatchEvent(new Event('distanceunitchange'))")
+            assert variants.count() == 0
+            assert not errors, errors
+        finally:
+            page.close()
+            browser.close()
 
 
 def test_catalog_detail_reveals_async_rule_fragment_after_render(app: Callable) -> None:

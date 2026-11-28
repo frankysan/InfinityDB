@@ -5,6 +5,7 @@ import {
   fireteamsIncludeWildcards,
   forgetRememberedSettings,
   optionalUnitFilters,
+  paletteSelection,
   rememberCurrentSettings,
   rememberSettingsEnabled,
   saveDeveloperModeEnabled,
@@ -12,11 +13,12 @@ import {
   saveDistanceUnit,
   saveFireteamsIncludeWildcards,
   saveOptionalUnitFilter,
+  savePaletteSelection,
   saveUnitAdvancedFiltersOpen,
   saveThemeSelection,
   themeSelection,
 } from "./preferences.js";
-import { applyThemeSelection, themeOptions } from "./theme.js";
+import { applyPaletteSelection, applyThemeSelection, paletteOptions, themeOptions } from "./theme.js";
 
 const OPTIONAL_UNIT_CONTROLS = [
   { id: "mercs-filter", name: "mercs" },
@@ -31,31 +33,54 @@ function syncDocumentPreferenceState() {
   document.documentElement.dataset.disableCache = String(disableCacheEnabled());
 }
 
-function initializeThemeSelector() {
-  const selector = document.getElementById("theme-selector");
-  if (!selector || selector.dataset.initialized === "true") return;
-
-  selector.dataset.initialized = "true";
-  selector.replaceChildren(...themeOptions().map(({ value, label }) => {
+function populateSelector(selector, options) {
+  selector.replaceChildren(...options.map(({ value, label }) => {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = label;
     return option;
   }));
+}
+
+function announceThemeChange(state) {
+  window.dispatchEvent(new CustomEvent("themechange", {
+    detail: { ...state, palette: paletteSelection() },
+  }));
+}
+
+function initializePaletteSelector() {
+  const selector = document.getElementById("theme-palette-selector");
+  if (!selector || selector.dataset.initialized === "true") return;
+  selector.dataset.initialized = "true";
+  populateSelector(selector, paletteOptions());
+  selector.value = paletteSelection();
+  selector.addEventListener("change", () => {
+    savePaletteSelection(selector.value);
+    selector.value = applyPaletteSelection(paletteSelection());
+    announceThemeChange(applyThemeSelection(themeSelection()));
+  });
+}
+
+function initializeThemeSelector() {
+  const selector = document.getElementById("theme-selector");
+  if (!selector || selector.dataset.initialized === "true") return;
+
+  selector.dataset.initialized = "true";
+  populateSelector(selector, themeOptions());
   selector.value = themeSelection();
 
   selector.addEventListener("change", () => {
     saveThemeSelection(selector.value);
     const state = applyThemeSelection(themeSelection());
     selector.value = state.selection;
-    window.dispatchEvent(new CustomEvent("themechange", { detail: state }));
+    announceThemeChange(state);
   });
 
   const colorScheme = window.matchMedia?.("(prefers-color-scheme: dark)");
   colorScheme?.addEventListener("change", () => {
     if (themeSelection() !== "system") return;
     const state = applyThemeSelection("system");
-    window.dispatchEvent(new CustomEvent("themechange", { detail: state }));
+    announceThemeChange(state);
   });
 }
 
@@ -175,6 +200,7 @@ function initializeRememberSettingsToggle() {
 
 export function initializeSettings() {
   syncDocumentPreferenceState();
+  initializePaletteSelector();
   initializeThemeSelector();
   initializeRememberSettingsToggle();
   initializeDeveloperModeToggle();

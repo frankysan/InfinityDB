@@ -13,7 +13,7 @@ import pytest
 import infinity_db.cli as app_cli
 from infinity_army_data.merge import reconstruct_source
 from infinity_db.cli import build_parser, main
-from infinity_db.database import SCHEMA_VERSION, raw_database_path
+from infinity_db.database import SCHEMA_VERSION, database_health_report, raw_database_path
 from infinity_db.display_identities import (
     DISPLAY_IDENTITY_METADATA_KEY,
     DISPLAY_IDENTITY_SHA256_METADATA_KEY,
@@ -161,14 +161,10 @@ def test_separate_merge_normalize_export_commands(
     assert default_database.is_file()
     assert not raw_database_path(default_database).exists()
     custom_database = tmp_path / "custom.db"
-    assert main([
-        "export", str(normalized_path), str(custom_database), "--with-raw",
-    ]) == 0
-    assert raw_database_path(custom_database).is_file()
+    assert main(["export", str(normalized_path), str(custom_database)]) == 0
+    assert not raw_database_path(custom_database).exists()
     with sqlite3.connect(custom_database) as connection:
         assert connection.execute("SELECT COUNT(*) FROM units").fetchone()[0] == 1
-    with sqlite3.connect(raw_database_path(custom_database)) as raw_connection:
-        assert raw_connection.execute("SELECT COUNT(*) FROM profiles").fetchone()[0] > 0
 
 
 def test_standalone_cli_application_only_export_and_normalized_health(
@@ -181,7 +177,7 @@ def test_standalone_cli_application_only_export_and_normalized_health(
     normalized = generated / "normalized.json"
     paired = tmp_path / "paired" / "army.db"
     application_only = tmp_path / "application-only" / "army.db"
-    assert main(["export", str(normalized), str(paired), "--with-raw"]) == 0
+    app_cli._export(normalized, paired, include_raw=True)
     assert main(["export", str(normalized), str(application_only)]) == 0
     alias_destination = tmp_path / "no-raw-alias" / "army.db"
     assert main(["export", str(normalized), str(alias_destination), "--no-raw"]) == 0
@@ -209,10 +205,11 @@ def test_standalone_cli_application_only_export_and_normalized_health(
     ]) == 0
     assert f"Export generation SHA-256: {generation}" in capsys.readouterr().out
 
-    assert main([
-        "database-health", str(application_only), "--require-raw", "--json",
-    ]) == 1
-    assert json.loads(capsys.readouterr().out)["rawArchive"]["status"] == "invalid"
+    with pytest.raises(SystemExit) as exc:
+        build_parser().parse_args([
+            "database-health", str(application_only), "--require-raw", "--json",
+        ])
+    assert exc.value.code == 2
 
 
 def test_standalone_cli_application_only_export_refuses_existing_raw(
@@ -224,7 +221,7 @@ def test_standalone_cli_application_only_export_refuses_existing_raw(
     ]) == 0
     normalized = generated / "normalized.json"
     destination = tmp_path / "army.db"
-    assert main(["export", str(normalized), str(destination), "--with-raw"]) == 0
+    app_cli._export(normalized, destination, include_raw=True)
     original = destination.read_bytes()
     raw = raw_database_path(destination)
     original_raw = raw.read_bytes()
@@ -245,7 +242,7 @@ def test_normalized_health_rejects_mismatch_and_never_falls_back(
     ]) == 0
     normalized = generated / "normalized.json"
     destination = tmp_path / "army.db"
-    assert main(["export", str(normalized), str(destination), "--with-raw"]) == 0
+    app_cli._export(normalized, destination, include_raw=True)
     before = destination.read_bytes()
     raw_before = raw_database_path(destination).read_bytes()
 
@@ -281,11 +278,8 @@ def test_normalized_health_selection_is_explicit_and_local_to_army(
         "database-health", "army.db", "--normalized", "normalized.json",
     ])
     assert selected.normalized == Path("normalized.json")
-    assert selected.require_raw is False
     with pytest.raises(SystemExit) as exc:
-        parser.parse_args([
-            "export", "normalized.json", "army.db", "--with-raw", "--no-raw",
-        ])
+        parser.parse_args(["export", "normalized.json", "army.db", "--with-raw"])
     assert exc.value.code == 2
     with pytest.raises(SystemExit) as exc:
         parser.parse_args([
@@ -433,12 +427,14 @@ def test_database_health_command_defaults_and_options() -> None:
     defaults = parser.parse_args(["database-health"])
     assert defaults.database is None
     assert defaults.db_dir is None
-    assert defaults.require_raw is False
+    assert defaults.normalized is None
     assert defaults.json is False
 
-    configured = parser.parse_args(["database-health", "custom.db", "--require-raw", "--json"])
+    configured = parser.parse_args([
+        "database-health", "custom.db", "--normalized", "normalized.json", "--json",
+    ])
     assert configured.database == Path("custom.db")
-    assert configured.require_raw is True
+    assert configured.normalized == Path("normalized.json")
     assert configured.json is True
 
 
@@ -462,26 +458,21 @@ def test_database_health_command_reports_and_validates_pair(
     assert "Database health: healthy" in output
     assert f"Schema revision: {SCHEMA_VERSION} (expected {SCHEMA_VERSION})" in output
     assert "Compatibility revision:" in output
-    assert "Raw archive: not checked" in output
+    assert "Raw archive" not in output
 
-    # Complete-build Army output is valid without a raw archive; requesting
-    # paired audit health must fail rather than silently fabricate a sibling.
-    assert main(["database-health", str(database), "--require-raw", "--json"]) == 1
-    missing_raw = json.loads(capsys.readouterr().out)
+    # The explicit legacy library contract still rejects a missing archive.
+    missing_raw = database_health_report(database, require_raw=True)
     assert missing_raw["status"] == "unhealthy"
     assert missing_raw["application"]["status"] == "valid"
     assert missing_raw["rawArchive"]["status"] == "invalid"
     assert "does not exist" in missing_raw["rawArchive"]["error"]
 
-    # Standalone export retains its independent queryable raw-pair contract.
+    # Legacy parity consumers can still explicitly create and validate a pair.
     paired = output_dir / "standalone" / "army.db"
-    assert main([
-        "export", str(output_dir / "normalized.json"), str(paired), "--with-raw",
-    ]) == 0
+    app_cli._export(output_dir / "normalized.json", paired, include_raw=True)
     capsys.readouterr()
     database = paired
-    assert main(["database-health", str(database), "--require-raw", "--json"]) == 0
-    report = json.loads(capsys.readouterr().out)
+    report = database_health_report(database, require_raw=True)
     assert report["status"] == "healthy"
     assert report["application"]["status"] == "valid"
     assert "normalizedSource" not in report  # Existing paired-health JSON is unchanged.
@@ -508,8 +499,7 @@ def test_database_health_command_reports_and_validates_pair(
         connection.commit()
     finally:
         connection.close()
-    assert main(["database-health", str(database), "--require-raw", "--json"]) == 1
-    mismatched_pair = json.loads(capsys.readouterr().out)
+    mismatched_pair = database_health_report(database, require_raw=True)
     assert mismatched_pair["status"] == "unhealthy"
     assert mismatched_pair["rawArchive"]["status"] == "invalid"
     assert "different exports" in mismatched_pair["rawArchive"]["error"]
@@ -518,14 +508,13 @@ def test_database_health_command_reports_and_validates_pair(
     raw_database.unlink()
     assert main(["database-health", str(database)]) == 0
     capsys.readouterr()
-    assert main(["database-health", str(database), "--require-raw", "--json"]) == 1
-    missing_raw = json.loads(capsys.readouterr().out)
+    missing_raw = database_health_report(database, require_raw=True)
     assert missing_raw["status"] == "unhealthy"
     assert missing_raw["application"]["status"] == "valid"
     assert missing_raw["rawArchive"]["status"] == "invalid"
     assert "does not exist" in missing_raw["rawArchive"]["error"]
 
-    # v27–v31 are supported opt-in layouts; test an unknown schema instead.
+    # v27–v33 are supported opt-in layouts; test an unknown schema instead.
     unsupported = SCHEMA_VERSION + 100
     with sqlite3.connect(database) as connection:
         connection.execute(f"PRAGMA user_version = {unsupported}")

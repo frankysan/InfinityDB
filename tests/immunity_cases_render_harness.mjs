@@ -22,7 +22,7 @@ class Node {
     return this.tag === "#text" ? this.value
       : this.children.map((child) => child.textContent).join("");
   }
-  setAttribute() {}
+  setAttribute(name, value) { this[name] = value; }
   addEventListener() {}
 }
 globalThis.window = {
@@ -109,6 +109,9 @@ assert.deepEqual(labels, [
   "Derived from reviewed general rules", "Derived from reviewed general rules",
   "Derived from reviewed general rules",
 ]);
+assert.deepEqual(cases.map((item) => item["data-provenance"]), labels.map((label) =>
+  label.startsWith("Explicit") ? "source-example" : "reviewed-interpretation"
+));
 assert.match(cases[0].textContent, /non-Comms attacks/);
 for (const item of cases.slice(12)) {
   assert.match(item.textContent, /Applies to the reviewed non-Comms attack only/);

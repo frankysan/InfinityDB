@@ -247,6 +247,15 @@
     ],
     "sources": [
         {
+            "id": "community-acronym-glossary-2017",
+            "kind": "web",
+            "title": "Infinity Acronym Glossary For Newbies (community forum)",
+            "version": "Post 1, edited 2021-07-31",
+            "url": "https://forum.corvusbelli.com/threads/infinity-acronym-glossary-for-newbies.285/",
+            "authority": "secondary",
+            "retrievedDate": "2026-11-28"
+        },
+        {
             "id": "n5-core-v5.3-pdf",
             "kind": "pdf",
             "title": "N5 Core Rules",
@@ -2455,6 +2464,357 @@
             "review": {
                 "status": "reviewed",
                 "reviewedOn": "2026-10-10"
+            }
+        },
+        {
+            "id": "term:generic-army",
+            "kind": "term",
+            "name": "Generic Army",
+            "aliases": [
+                "Generic Army List",
+                "Generic Armies"
+            ],
+            "summary": "A faction's non-Sectorial Army List. Use its own available Troopers and Availability values, not those of a Sectorial. Players commonly call it Vanilla.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "army-building"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Sectorial Army Lists"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:sectorial-army",
+            "kind": "term",
+            "name": "Sectorial Army",
+            "aliases": [
+                "Sectorial",
+                "Sectorial Army List",
+                "Sectorial Armies"
+            ],
+            "summary": "A specific force within a faction with its own roster and Availability values. A player uses the Troopers and options available to that Sectorial, not the entire Generic Army roster.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "army-building"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Sectorial Army Lists"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:army-list",
+            "kind": "term",
+            "name": "Army List",
+            "summary": "The selected Troopers and options that a player brings to a game. The total Cost must fit the agreed Army Points, and the list must satisfy its Army's availability and applicable composition restrictions.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "army-building"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Army Points and Value"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:army-points",
+            "kind": "term",
+            "name": "Army Points",
+            "aliases": [
+                "Points limit"
+            ],
+            "summary": "The agreed points budget for each player's Army List. Add the Cost of its selected Troopers and options; the total cannot exceed this budget.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "army-building"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Army Points and Value"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:faction",
+            "kind": "term",
+            "name": "Faction",
+            "summary": "An overarching force in Infinity, such as PanOceania or Yu Jing, which may have its own Generic Army and one or more Sectorial Armies. Army List availability is specific to the selected Army.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "army-building"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Sectorial Army Lists"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:unit",
+            "kind": "term",
+            "name": "Unit",
+            "summary": "A group of Troopers represented by a Unit Profile. Its available profile options can have different Skills, Equipment and Weapons; check the selected Army for actual availability.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "profile"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 8,
+                    "section": "Unit Profile"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:open-information",
+            "kind": "term",
+            "name": "Open Information",
+            "summary": "Army List information not explicitly designated Private. Players disclose it when deploying their game elements and when their opponent requests it during play.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "information"
+            },
+            "citations": [
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 7,
+                    "section": "Open and Private Information"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:vanilla",
+            "kind": "term",
+            "name": "Vanilla",
+            "aliases": [
+                "Vanilla Army"
+            ],
+            "summary": "Community shorthand for a [[term:generic-army|Generic Army]], rather than a Sectorial. It is not a separate Army type or rules mechanic.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "community-terminology"
+            },
+            "citations": [
+                {
+                    "sourceId": "community-acronym-glossary-2017",
+                    "heading": "Infinity Acronym Glossary For Newbies",
+                    "section": "Vanilla"
+                },
+                {
+                    "sourceId": "n5-core-v5.3-pdf",
+                    "page": 10,
+                    "section": "Sectorial Army Lists"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:cheerleader",
+            "kind": "term",
+            "name": "Cheerleader",
+            "aliases": [
+                "Order bot",
+                "Orderbot",
+                "Order monkey",
+                "Order-monkey"
+            ],
+            "summary": "Community shorthand for a Trooper selected mainly to contribute Orders for use by other Troopers. This is a tactical role, not an official Trooper Classification or Skill.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "community-terminology"
+            },
+            "citations": [
+                {
+                    "sourceId": "community-acronym-glossary-2017",
+                    "heading": "Infinity Acronym Glossary For Newbies",
+                    "section": "Cheerleader"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:rambo",
+            "kind": "term",
+            "name": "Rambo",
+            "aliases": [
+                "Ramboing"
+            ],
+            "summary": "Community shorthand for concentrating a large share of a player's available Orders on one Trooper during a turn. It is a tactical description, not an official rule.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "community-terminology"
+            },
+            "citations": [
+                {
+                    "sourceId": "community-acronym-glossary-2017",
+                    "heading": "Infinity Acronym Glossary For Newbies",
+                    "section": "Rambo/ramboing"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
+            }
+        },
+        {
+            "id": "term:wysiwyg",
+            "kind": "term",
+            "name": "WYSIWYG",
+            "aliases": [
+                "What you see is what you get"
+            ],
+            "summary": "Community miniature-modeling shorthand for representing the chosen profile and equipment visibly on the miniature. It does not by itself establish the current event's proxy or representation requirements.",
+            "composition": {
+                "role": "definition"
+            },
+            "scope": {
+                "game": "N5",
+                "seasons": [
+                    "current"
+                ]
+            },
+            "facts": {
+                "scope": "community-terminology"
+            },
+            "citations": [
+                {
+                    "sourceId": "community-acronym-glossary-2017",
+                    "heading": "Infinity Acronym Glossary For Newbies",
+                    "section": "WYSIWYG"
+                }
+            ],
+            "review": {
+                "status": "reviewed",
+                "reviewedOn": "2026-11-28"
             }
         },
         {
@@ -12901,6 +13261,9 @@
             "id": "equipment:multispectral-visor",
             "kind": "equipment",
             "name": "Multispectral Visor",
+            "aliases": [
+                "MSV"
+            ],
             "labelIds": [
                 "obligatory"
             ],
@@ -28222,7 +28585,9 @@
             "kind": "rule",
             "name": "Face to Face Rolls",
             "aliases": [
-                "Face to Face Roll"
+                "Face to Face Roll",
+                "F2F",
+                "FtF"
             ],
             "summary": "When opposing actions directly affect each other's outcome, compare their successful dice in a Face to Face Roll. Unsuccessful dice are discarded; each remaining die must be judged against the other player's successful results.",
             "composition": {

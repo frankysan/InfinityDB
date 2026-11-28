@@ -43,6 +43,22 @@
   scroll-margin-block: var(--space-4);
 }
 
+.army-overview-card[data-army-kind="reinforcement"] {
+  background: color-mix(in srgb, var(--color-surface-default) 50%, var(--color-availability-reinforcement-surface));
+}
+
+.army-overview-card[data-army-kind="out-of-catalog"] {
+  background: color-mix(in srgb, var(--color-surface-default) 50%, var(--color-status-warning-surface));
+}
+
+.army-overview-card[data-army-kind="legacy"] {
+  background: var(--color-surface-page);
+}
+
+.army-overview-card[data-army-kind="legacy"] .detail-source {
+  color: var(--color-text-secondary);
+}
+
 .army-overview-card:target {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 3px;
@@ -88,11 +104,6 @@
 .army-overview-description {
   flex: 1 1 auto;
   margin: 14px 0 16px;
-}
-
-.army-overview-relationships {
-  margin: 0 0 16px;
-  overflow-wrap: anywhere;
 }
 
 .army-overview-card-footer {
@@ -690,16 +701,21 @@ html:not([data-developer-mode="true"])
   gap: var(--space-2);
 }
 
+/* Fireteam FAQ is directly inside an otherwise unpadded surface. */
+.fireteam-faq {
+  padding-inline: var(--space-2);
+}
+
 /* Dated FAQ clarifications are source publications, not generic "new" rules. */
 .faq-dated-clarification {
   display: grid;
   gap: 12px;
   padding: var(--space-2) 18px;
-  border-inline-start: 3px solid var(--color-border-strong);
 }
 
 .faq-dated-clarification > .surface-titlebar {
   padding: 0;
+  background: transparent;
 }
 
 .faq-dated-clarification > p {
@@ -717,10 +733,7 @@ html:not([data-developer-mode="true"])
 
 .faq-source-discrepancy {
   margin-top: 12px;
-  border-inline-start: 3px solid var(--color-status-warning-indicator);
   padding: var(--space-2) var(--space-3);
-  background: var(--color-status-warning-surface);
-  color: var(--color-status-warning-text);
   font-size: var(--font-size-sm);
 }
 
@@ -913,6 +926,21 @@ html:not([data-developer-mode="true"])
   width: min(1040px, 100%);
 }
 
+.season-rules>summary {
+  cursor: pointer;
+  padding: 14px 16px;
+  color: var(--color-text-primary);
+}
+
+.season-rules>summary>h2 {
+  display: inline;
+  font-size: var(--font-size-md);
+}
+
+.season-rules[open]>summary {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
 .scenario-setup-grid {
   display: grid;
   grid-template-columns: minmax(240px, .72fr) minmax(360px, 1.28fr);
@@ -986,6 +1014,18 @@ html:not([data-developer-mode="true"])
 
 .scenario-source-issue[id] {
   scroll-margin-top: 100px;
+}
+
+#scenario-tactical-support .surface-body {
+  gap: var(--space-2);
+}
+
+#scenario-tactical-support .surface-body > :is(p, ul) {
+  margin-block: 0;
+}
+
+#scenario-tactical-support .rules-source-note {
+  margin-block-start: var(--space-1);
 }
 
 .scenario-map-card {
@@ -1230,7 +1270,153 @@ svg.scenario-map .label {
   }
 }
 
+.comparison-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.comparison-selector {
+  min-width: 0;
+}
+
+.comparison-selector .surface-body {
+  display: grid;
+  gap: 12px;
+}
+
+.comparison-selector form {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+
+.comparison-selector form .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.comparison-selector select,
+.comparison-selector input {
+  width: 100%;
+  min-width: 0;
+}
+
+.comparison-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.comparison-table th:first-child {
+  width: 28%;
+}
+
+.comparison-table th,
+.comparison-table td {
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.comparison-difference-label {
+  display: block;
+  font-weight: normal;
+  font-size: var(--font-size-xs);
+}
+
+.comparison-different > th {
+  font-weight: 700;
+}
+
+.comparison-items {
+  margin: 0;
+  padding-inline-start: 1em;
+}
+
+@media (max-width: 760px) {
+  .comparison-selectors {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-table {
+    min-width: 520px;
+  }
+}
+
 /* Keep linked rule cards visible below the sticky navigation bar. */
 .rules-reference .detail-section[id] {
   scroll-margin-top: 6rem;
+}
+
+.snapshot-comparison .content-frame {
+  margin-bottom: 16px;
+}
+
+.snapshot-pair,
+.snapshot-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.snapshot-pair > div,
+.snapshot-filters > label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.snapshot-filters > label {
+  display: grid;
+  gap: 6px;
+}
+
+.snapshot-filters input,
+.snapshot-filters select,
+#snapshot-report {
+  max-width: 100%;
+  min-width: 0;
+}
+
+#snapshot-report {
+  display: block;
+  margin-block: 8px;
+}
+
+.snapshot-change {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border-default);
+  overflow-wrap: anywhere;
+}
+
+.snapshot-change summary,
+.snapshot-comparison details summary {
+  cursor: pointer;
+}
+
+.snapshot-change-meta {
+  display: block;
+  margin-top: 4px;
+}
+
+.snapshot-comparison pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 24rem;
+  overflow: auto;
+  font-size: var(--font-size-xs);
+  padding: 8px;
+}
+
+.snapshot-pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 760px) {
+  .snapshot-pair,
+  .snapshot-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

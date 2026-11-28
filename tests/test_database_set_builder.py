@@ -24,6 +24,7 @@ from infinity_db.build_provenance import (
     build_set_id,
     canonical_bytes,
     file_sha256,
+    validate_build_input_freshness,
     validate_set_provenance,
 )
 from infinity_db.cli import build_parser
@@ -61,6 +62,11 @@ def project(
         "tools/data/build_weapon_profile_publication.py",
         "tools/data/audit_enrichment_coverage.py",
         "tools/research/audit_weapon_definition_gaps.py",
+        "tools/research/build_army_history_database.py",
+        "tools/research/project_army_history.py",
+        "tools/research/summarize_army_history.py",
+        "tools/research/render_player_army_history.py",
+        "tools/research/render_army_history.py",
     ):
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -108,10 +114,13 @@ def project(
         target = root / "src/infinity_db/web/static" / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(RELEASE.parent.parent / "src/infinity_db/web/static" / relative, target)
-    args = build_parser().parse_args(["build", str(source), "--db-dir", str(root / "output")])
+    args = build_parser().parse_args([
+        "build", str(source), "--db-dir", str(root / "output"), "--no-unit-history",
+    ])
     # This synthetic builder fixture deliberately writes "build-only" instead
     # of a real normalized document. Keep its existing raw-pair overlay path;
     # real normalized-source acceptance is covered by the pinned ZIP rebuild.
+    monkeypatch.setattr(builder, "attest_normalized_source", lambda _army, path: path)
     for name in (
         "publish_equipment_encodings", "publish_skill_classifications",
         "publish_unit_filter_semantics", "publish_army_reference_data",
@@ -127,6 +136,28 @@ def project(
             _publisher(army, army.with_name("army.raw.db"), *sources)
 
         monkeypatch.setattr(builder, name, legacy_source)
+    # The synthetic source changes provenance only, not Unit or Rules semantics.
+    # Reuse the shipped projection in failure-isolation tests. The real
+    # pinned-source build exercises actual composition.
+    def copied_general_profiles(stage: Path, _root: Path) -> None:
+        from infinity_db.general_profile_storage import (
+            MASK_COUNT,
+            availability_mask,
+            read_general_profiles,
+            write_general_profiles,
+        )
+
+        with closing(sqlite3.connect(RELEASE / "army.db")) as connection:
+            ids = [row[0] for row in connection.execute("SELECT id FROM logical_units")]
+            selections = {
+                mask: read_general_profiles(connection, ids, mask)
+                for mask in range(MASK_COUNT)
+            }
+        write_general_profiles(stage / "army.db", lambda unit_id, flags: selections[
+            availability_mask(frozenset(flag for flag, enabled in flags.items() if enabled))
+        ][unit_id])
+
+    monkeypatch.setattr(builder, "_build_general_profiles", copied_general_profiles)
     return root, args
 
 
@@ -166,6 +197,10 @@ def _fake_army(args: argparse.Namespace, record: dict[str, Any]) -> int:
             "symbol_path_metadata",
             "published_symbol_assets",
             "published_symbol_paths",
+            "unit_history_payloads",
+            "unit_filter_contexts",
+            "general_profile_selections",
+            "general_profile_payloads",
         ):
             db.execute(f"DROP TABLE IF EXISTS {name}")
         db.execute("PRAGMA user_version=26")
@@ -218,6 +253,24 @@ def _fake_rules(stage: Path, root: Path, manifest: dict[str, Any]) -> None:
         exportPairSha256=generation,
     )
     with closing(sqlite3.connect(rules)) as connection, connection:
+        connection.execute("DROP TABLE IF EXISTS reference_pages")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='referencePagesSha256'")
+        connection.execute("DROP TABLE IF EXISTS maintained_reference_targets")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='referenceTargetsSha256'")
+        connection.execute("DROP TABLE IF EXISTS specialist_candidates")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='specialistProjectionSha256'")
+        connection.execute("DROP TABLE IF EXISTS catalog_details")
+        connection.execute("DROP TABLE IF EXISTS catalog_usage_units")
+        connection.execute("DROP TABLE IF EXISTS catalog_summaries")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='catalogProjectionSha256'")
+        connection.execute("DROP TABLE IF EXISTS search_index_terms")
+        connection.execute("DROP TABLE IF EXISTS search_index")
+        connection.execute("DELETE FROM __rules_metadata WHERE key='searchIndex'")
+        connection.execute("PRAGMA user_version=18")
+        connection.execute("UPDATE __rules_metadata SET value='18' WHERE key='formatVersion'")
+        connection.execute(
+            "UPDATE __rules_metadata SET value='20' WHERE key='databaseCompatibilityVersion'"
+        )
         connection.execute(
             "UPDATE deployed_object_metadata SET value=? WHERE key='armyDatabaseSha256'",
             (json.dumps(file_sha256(army)),),
@@ -309,6 +362,42 @@ def test_builder_code_and_selected_metadata_are_inputs(project) -> None:
     assert selected["source"]["metadataSha256"] != code_change["source"]["metadataSha256"]
 
 
+def test_presentation_sources_do_not_invalidate_recorded_build(project) -> None:
+    root, args = project
+    package = root / "src/infinity_db"
+    package.mkdir(parents=True, exist_ok=True)
+    presentation = (
+        package / "theme_palette.py",
+        package / "scenario_map_svg.py",
+        package / "web/static/themes/light.css",
+    )
+    geometry = package / "scenario_geometry.py"
+    geometry.write_text("# build geometry\n", encoding="utf-8")
+    for path in presentation:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("# original\n", encoding="utf-8")
+    manifest = builder.collect_build_manifest(root, args.source, None)
+    army = root / "recorded.db"
+    with closing(sqlite3.connect(army)) as connection, connection:
+        connection.execute("CREATE TABLE __infinity_metadata (key TEXT PRIMARY KEY, value TEXT)")
+        connection.execute(
+            "INSERT INTO __infinity_metadata VALUES (?,?)",
+            (BUILD_PROVENANCE_KEY, canonical_bytes(build_record(manifest, "army")).decode()),
+        )
+    validate_build_input_freshness(army, root)
+    for path in presentation:
+        assert path.relative_to(root).as_posix() not in manifest["inputs"]
+        path.write_text("# changed\n", encoding="utf-8")
+    assert builder.collect_build_manifest(root, args.source, None) == manifest
+    validate_build_input_freshness(army, root)
+    geometry.write_text("# changed geometry\n", encoding="utf-8")
+    assert builder.collect_build_manifest(root, args.source, None)["builderRevision"] != (
+        manifest["builderRevision"]
+    )
+    with pytest.raises(ValueError, match="scenario_geometry.py"):
+        validate_build_input_freshness(army, root)
+
+
 def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     project,
     monkeypatch: pytest.MonkeyPatch,
@@ -322,7 +411,7 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     (args.db_dir / "weapon-profile-sources.json").write_bytes(b"obsolete publication")
     first = builder.build_database_set(args, _fake_army, root=root)
     assert first["buildProvenance"]["status"] == "matched"
-    assert first["layout"] == "v17-four-file"
+    assert first["layout"] == "v24-four-file"
     assert first["seasons"]["its-17"]["revision"] == "0.2"
     assert first["seasons"]["its-18"]["revision"] == "2026.09.11"
     assert first["restrictionChartRows"] == 6
@@ -355,6 +444,92 @@ def test_complete_build_publishes_only_selected_files_and_is_repeatable(
     assert second == first
 
 
+@pytest.mark.parametrize("mismatched", [False, True])
+def test_default_build_rejects_missing_or_mismatched_history_before_publication(
+    project, mismatched: bool,
+) -> None:
+    root, args = project
+    args = build_parser().parse_args(["build", str(args.source), "--db-dir", str(args.db_dir)])
+    args.db_dir.mkdir()
+    for name in COMPLETE_RUNTIME_FILES:
+        (args.db_dir / name).write_bytes(name.encode())
+    original = _digests(args.db_dir)
+    if mismatched:
+        archive, history = builder.history_inputs(root / "local/data/history")
+        for path in (archive, history):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"wrong history input")
+
+    def unexpected_build(*_args: Any) -> int:
+        pytest.fail("History validation must precede the Army build")
+
+    message = "history inputs differ" if mismatched else "history input is missing"
+    with pytest.raises(ValueError, match=message):
+        builder.build_database_set(args, unexpected_build, root=root)
+    assert _digests(args.db_dir) == original
+
+
+def test_history_build_embeds_payload_and_serves_without_sidecar(
+    project, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from infinity_db.database.repository import Database
+    from infinity_db.unit_history_storage import write_unit_history
+
+    root, args = project
+    args = build_parser().parse_args(["build", str(args.source), "--db-dir", str(args.db_dir)])
+    assert args.with_unit_history
+    pins = {"archiveSha256": "a" * 64, "databaseSha256": "b" * 64}
+    monkeypatch.setattr(builder, "history_input_identity", lambda _: pins)
+    change = {"date": "2025-10-15", "scope": "", "category": "Skills",
+              "actions": [{"action": "Gained", "text": "Dodge"}]}
+    selected: dict[str, Any] = {}
+
+    def publish(army: Path, history_root: Path, *, rules_directory: Path) -> None:
+        assert rules_directory == root / "data/curated/rules"
+        assert history_root == root / "local/data/history"
+        database = Database(army)
+        with database._connect() as connection:
+            unit_id = connection.execute(
+                "SELECT id FROM logical_units ORDER BY id LIMIT 1"
+            ).fetchone()[0]
+        unit = database.get_unit(unit_id)
+        assert unit is not None
+        profiles = database.general_profiles(
+            [unit_id], frozenset({"mercs", "specops", "teamops", "reinforcement"}),
+        )
+        assert profiles is not None
+        identity = profiles[unit_id][0]["profile_identity"]
+        body = {"general": {identity: [change]}, "armies": {}, "unmatched": []}
+        selected.update(id=unit_id, body=body)
+        projection = {"formatVersion": 1, "armyDatabaseSha256": file_sha256(army),
+                      "units": {str(unit_id): body}}
+        with pytest.raises(ValueError, match="does not match"):
+            write_unit_history(army, {**projection, "armyDatabaseSha256": "wrong"})
+        write_unit_history(army, projection)
+
+    monkeypatch.setattr(builder, "publish_unit_history", publish)
+    monkeypatch.setattr(builder, "_build_rules_and_publications", _fake_rules)
+    report = builder.build_database_set(args, _fake_army, root=root)
+    assert report["buildProvenance"]["history"] == pins
+    assert set(_digests(args.db_dir)) == COMPLETE_RUNTIME_FILES
+    army = args.db_dir / "army.db"
+    database = Database(army)
+    assert database.unit_history(selected["id"]) == selected["body"]
+    app = create_app_from_database_set(args.db_dir)
+    status, headers, body = wsgi_response(
+        app, f"http://local.test/api/units/{selected['id']}",
+    )
+    assert status == 200
+    assert any(profile.get("history") == [change]
+               for profile in json.loads(body)["general_profiles"])
+    assert any(name.lower() == "etag" for name, _ in headers)
+    with closing(sqlite3.connect(army)) as db, db:
+        db.execute("UPDATE unit_history_payloads SET body=?",
+                   (json.dumps({"general": {}, "armies": {}, "unmatched": []}),))
+    with pytest.raises(ValueError, match="checksum"):
+        Database(army).validate()
+
+
 def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     project,
     monkeypatch: pytest.MonkeyPatch,
@@ -365,8 +540,8 @@ def test_complete_startup_rejects_partial_formats_and_unrecorded_provenance(
     army, rules = args.db_dir / "army.db", args.db_dir / "rules_n5.db"
     original = {path: path.read_bytes() for path in (army, rules, args.db_dir / "its_18.db")}
     for case, message in (
-        ("army", "require Army schema v31"),
-        ("rules", "require Rules schema v17"),
+        ("army", "require Army schema v34"),
+        ("rules", "require Rules schema v24"),
         ("provenance", "require recorded matched build provenance"),
     ):
         if case == "provenance":
@@ -543,6 +718,7 @@ def test_pinned_army_build_selection_preserves_legacy_cli_contract() -> None:
     app = build_parser().parse_args(["build"])
     assert app.source is None and app.snapshot_manifest is None
     assert app.db_dir == Path("data/generated")
+    assert app.with_unit_history
     pinned = build_parser().parse_args([
         "build", "local/data/raw/army/source.zip",
         "--snapshot-manifest", "local/data/manifests/snapshots/source.json",
@@ -553,6 +729,13 @@ def test_pinned_army_build_selection_preserves_legacy_cli_contract() -> None:
         "local/data/manifests/snapshots/source.json"
     )
     assert pinned.db_dir == Path("local/work/test-databases")
+    assert pinned.with_unit_history
+    assert build_parser().parse_args(["build", "--with-unit-history"]).with_unit_history
+    assert not build_parser().parse_args(["build", "--no-unit-history"]).with_unit_history
+    with pytest.raises(SystemExit):
+        build_parser().parse_args(["build", "--with-unit-history", "--no-unit-history"])
+    with pytest.raises(SystemExit):
+        army_parser().parse_args(["build", "--no-unit-history"])
     with pytest.raises(SystemExit):
         army_parser().parse_args(["build", "--snapshot-manifest", "a.json"])
 

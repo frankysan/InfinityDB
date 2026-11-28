@@ -5,8 +5,8 @@ Equipment, Skills, Weapons, Core and ITS Scenarios, and relationships across Arm
 Infinity Army data with reviewed rules references, bringing information from
 individual Army Lists into one game-wide browser.
 
-Current release: **1.2.2** (2026-11-26). See the
-[release notes](docs/CHANGELOG.md#122---2026-11-26)
+Current release: **1.3.0** (2026-11-28). See the
+[release notes](docs/CHANGELOG.md#130---2026-11-28)
 for changes and upgrade considerations, and the
 [deployment guide](docs/deployment.md) for updates.
 
@@ -39,6 +39,11 @@ identifiers, or use advertising trackers, fingerprinting, or per-user analytics.
   bookmarkable or shareable may be encoded in the URL, so it can also appear in your
   browser history or in a link you choose to share. InfinityDB does not retain those
   query/search values in its aggregate metrics.
+- **Error reports are voluntary.** The shared form sends only the chosen category,
+  your message, the optional visible page path (without query or fragment), and
+  the running version. No account or contact details are requested. Do not
+  include personal information. Reports are emailed to the maintainer rather
+  than stored by InfinityDB; email is retained only as needed to resolve the issue.
 
 This policy describes InfinityDB's application-level collection and retention. Hosting
 and network infrastructure necessarily processes connection metadata to deliver HTTP
@@ -49,7 +54,10 @@ its application metrics.
 ## Current features
 
 - Imports validated Infinity Army snapshots into a local SQLite database and
-  serves a read-only browser and HTTP API.
+  serves a read-only reference browser and HTTP API.
+- Shows reviewed N5 Unit history in General-profile and Army-specific sections,
+  with incomplete historical coverage explicitly disclosed.
+- Accepts voluntary error reports through a shared anonymous form.
 - Browses Units across Armies with name search, pagination, six categorical
   multi-select filters, independent AND/OR choices, and a matching scope:
   **Same profile**, **Same loadout** or **Anywhere in Unit**. Prospective
@@ -60,12 +68,17 @@ its application metrics.
   Extended results show only the General profiles, with shared Skills,
   Equipment and Weapons as plain text.
 - Shows a consolidated **General profile** alongside faction- and army-specific
-  profiles, loadouts, availability, skills, equipment, and weapons.
+  profiles, loadouts, availability, skills, equipment, and weapons, with direct
+  links to supported Unit destinations in official Infinity Army.
+- Compares two current Army profiles and optional loadouts side by side, including
+  variants of the same Unit, with live Unit lookups, differences-only display and
+  shareable selections.
 - Groups equivalent standard, reinforcement, and optional-mercenary source
   records into coherent unit views while preserving their distinct availability
   and army contexts.
-- Includes an Army overview with symbols, concise role/context summaries, catalog-status labels,
-  legacy Army references, and direct links into pre-filtered Unit Explorer rosters.
+- Includes a Generic Army and Sectorial overview with symbols, concise role/context summaries, catalog-status labels,
+  legacy Army references, theme-aware role/status shading, and direct links into
+  pre-filtered Unit Explorer rosters.
 - Includes a Skill Modifiers view and searchable Skills, Equipment, Weapons,
   Ammunition, Traits, Labels, States, Hacking Programs, and General Rules reference
   catalogs, including reviewed current weapons not yet used by an Army Unit,
@@ -82,7 +95,8 @@ its application metrics.
   All twenty Season 18 and sixteen Season 17 missions are represented;
   earlier revisions remain preserved as research evidence, and known source
   discrepancies are disclosed on the relevant scenario pages.
-- Includes global search and a federated Glossary across player-facing reference domains, with
+- Includes global search with live navigation suggestions and live full results, plus a
+  live-filtering federated Glossary across player-facing reference domains, with
   canonical Equipment, embedded Attributes, scoped Game terms and searchable Weapon Properties
   (such as Viral, Plasma and combined Ammunition). Weapon Properties link to their underlying
   canonical rules and reviewed, source-cited Weapon examples instead of redefining the effects.
@@ -101,7 +115,9 @@ its application metrics.
   surfaces, visibility, Cover, zones, Coherency and replacement positioning, with
   Move's declaration requirements and Silhouette diagrams.
 - Presents dated N5 FAQ clarifications alongside the affected rules and scenarios,
-  with concise citations and disclosed source disagreements. The **Deployed objects**
+  with concise citations and disclosed source disagreements. Distinct visual
+  treatments identify reviewed interpretations and explicitly sourced examples.
+  The **Deployed objects**
   reference presents 17 reviewed objects in individual cards, retaining disputed
   or unknown attributes and verified delivery/Unit-use context.
 - Includes a browsable **Scenarios** reference with four N5.3 Core missions
@@ -110,13 +126,15 @@ its application metrics.
   and Skills, source-verification notes and deterministic maps all derive
   from maintained scenario definitions. Maps can be saved as standalone SVGs
   using the browser's image context menu, with the selected theme and units.
-  The ITS Season 18 scenario also offers optional tournament and Extra
-  context selection; event-only restrictions appear only when explicitly
-  selected.
+  ITS scenarios include a collapsed Season Rules reference for season-wide
+  rules and tournament/Extra policies. ITS Season 18 also offers optional
+  tournament and Extra context selection; event-only restrictions apply in
+  the reference only when explicitly selected.
 - Shows S1–S8 Silhouette templates at a shared scale in the Glossary and Unit statline previews,
   with an S2 reference alongside other supported Silhouettes.
-- Supports System, Light, and Dark themes from Settings; System follows the operating-system
-  preference, while an explicit choice can be remembered with the other browser settings.
+- Supports InfinityDB and eleven faction-inspired themes from Settings, with independent
+  Auto, Light, and Dark modes. Auto follows the operating-system preference;
+  both selections can be remembered with the other browser settings.
 - Uses `/fireteams` as a general Fireteam-rules landing page and switches to Army-scoped charts when
   an Army is selected, with limits, member requirements, Wildcards, FTO loadouts, parenthetical
   chart terms, original chart notes, and N5 rules/bonus context. Parentheses alone do not imply
@@ -134,10 +152,13 @@ its application metrics.
   the current Army data and identify family-source citation scope. Reviewed
   Weapon profiles without a separate rules
   card show their corresponding N5 Weapon Chart page when the matching
-  source publication is available.
+  source publication is available. Reviewed Weapon and Equipment Chart footnotes
+  link to applicable rules; unresolved source markers remain visible.
 - Supports centimetre/inch display preferences and a Developer mode for
   inspecting database IDs, exact reviewed Skill/Equipment source occurrences,
-  and source-scoped Restrictions links. The complete Restrictions chart has
+  source-scoped Restrictions links and locally opened Army snapshot comparison
+  reports without uploading their source evidence.
+  The complete Restrictions chart has
   its own public reference page at `/rules/restrictions`.
 - Supports published Army, Unit, Peripheral, Order, and Characteristic SVG symbols. Corvus
   Belli has explicitly permitted InfinityDB to use and redistribute the graphical
@@ -161,22 +182,9 @@ Engineering changes are classified by the six ownership areas defined in
 
 ## Release progression
 
-InfinityDB **1.0.0** is the N5.3 current-reference release, following the
-0.6–0.10 series. It includes current-source rules citations, four core
-scenarios, reviewed FAQ and deployed objects, and exact-variant usage
-references. See the [changelog](docs/CHANGELOG.md) for the complete version
-history and the [active backlog](docs/TODO.md#active-development)
-for unfinished development work.
-
-Version **1.0.1** delivered improved scenario maps, reference-page spacing,
-version-specific release notes and safer local-build/deployment workflows.
-Its Rules database embeds reviewed deployed objects while retaining the reference baseline.
-Version **1.1.0** extends Unit Explorer discovery with searchable multi-selection,
-AND/OR combinations, three matching scopes, and prospective option counts;
-adds reviewed KISS! (Repeater) loadout equipment, ITS Season 18 play-context
-selection, a matched Army/Rules/ITS runtime set, and consolidated developer
-tooling and local workspace organization. The [backlog](docs/TODO.md) tracks future work;
-the [changelog](docs/CHANGELOG.md#110---2026-11-15) documents upgrade implications.
+See the [changelog](docs/CHANGELOG.md) for released versions and the pending
+release, and the [active backlog](docs/TODO.md) for unfinished development.
+The feature list describes this checkout, which may include unreleased changes.
 
 ## Requirements and setup
 
@@ -276,7 +284,7 @@ and promotes accepted artwork with compatibility aliases and recoverable backups
 [publication lifecycle](data/README.md#accepted-external-symbol-publication-promotion).
 
 An external processed-SVG handoff is prepared as an isolated semantic
-publication candidate using `python -m tools.prepare_symbol_publication`.
+publication candidate using `python -m tools.symbols.prepare_symbol_publication`.
 That offline command verifies the source/stage evidence and needs no graphical
 processing tools. It leaves the tracked publication unchanged; see the
 [candidate inputs and review boundary](data/README.md#external-processed-symbol-publication-candidates).
@@ -308,9 +316,9 @@ immutable Army ZIP you intend to process.
 
 ```powershell
 # Run individual source-development stages into ignored work files
-infinity-db merge "data/raw/JSON YYYYMMDD-HHMMSS.zip" data/work/build/master.json --compact
-infinity-db normalize data/work/build/master.json data/work/build/normalized.json --compact
-infinity-db export data/work/build/normalized.json data/work/build/army.db
+infinity-db merge "local/data/raw/army/JSON YYYYMMDD-HHMMSS.zip" local/work/build/army/master.json --compact
+infinity-db normalize local/work/build/army/master.json local/work/build/army/normalized.json --compact
+infinity-db export local/work/build/army/normalized.json local/work/build/army/army.db
 
 # Build and serve a complete alternate set
 infinity-db build --db-dir local/alternate-dbs --compact
@@ -319,8 +327,8 @@ infinity-db serve --db-dir local/alternate-dbs --port 8001
 # Validate the complete serving set without raw inputs
 infinity-db database-health --db-dir data/generated --json
 
-# Inspect a development Army export and its raw sibling
-infinity-db database-health data/work/build/army.db --require-raw
+# Verify a development Army export against its normalized source
+infinity-db database-health local/work/build/army/army.db --normalized local/work/build/army/normalized.json --json
 
 # Validate a curated rules file
 infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
@@ -328,9 +336,10 @@ infinity-db validate-curated data/curated/rules/n5-core-v5.3.json
 
 `infinity-army` and `python -m infinity_army_data` retain the JSON source
 pipeline with explicit `--output-dir` support; their default is ignored
-`data/work/build/`. `infinity-db export` requires an explicit output path for
-narrow Army development. Normal complete builds discard their intermediate
-JSON and raw archive after validation. Source archives remain untouched.
+`local/work/build/army/`. `infinity-db export` requires an explicit output path for
+narrow Army development and produces application-only SQLite. Normal complete
+builds discard intermediate work files after validation. Source archives remain untouched.
+See the [data lifecycle](data/README.md#current-paths-and-behavior) for source inspection.
 
 ## Linux deployment
 
@@ -352,7 +361,6 @@ artifacts before activation. For prerequisites, rollback, the special
 
 ```text
 docs/                       # Tracked project documentation
-local/                      # Private untracked workspace, excluded from Docker builds
 src/
   infinity_army_data/       # Army merge, normalization, metadata, and validation
   infinity_db/              # SQLite storage, application services, API, and browser
@@ -363,7 +371,7 @@ data/
   curated/                  # Tracked reviewed rules, identities and annotations
   manifests/                # Tracked symbol publication manifest
   generated/                # Tracked Army, Rules and ITS runtime databases
-local/                      # Ignored source, build, research and archive workspace
+local/                      # Private ignored workspace, excluded from Docker builds
   data/                     # Local Army, Wiki, PDFs and symbol-source evidence
   work/                     # Replaceable build outputs
   audits/                   # Run-scoped audit evidence

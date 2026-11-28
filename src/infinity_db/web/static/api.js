@@ -10,6 +10,24 @@ export async function visibleUnitIds(optionalFilters, signal) {
   return new Set(payload.ids);
 }
 
+/** Refresh catalog visibility on preference changes; ignore superseded requests. */
+export function observeVisibleUnitIds(getFilters, signal, onChange) {
+  let generation = 0;
+  function refresh() {
+    const request = ++generation;
+    onChange(null);
+    visibleUnitIds(getFilters(), signal).then((ids) => {
+      if (!signal.aborted && request === generation) onChange({ ids });
+    }).catch((error) => {
+      if (!signal.aborted && request === generation && error.name !== "AbortError") {
+        onChange({ error });
+      }
+    });
+  }
+  window.addEventListener("optionalunitschange", refresh, { signal });
+  refresh();
+}
+
 export function getArmies(signal) {
   return getJson("/api/armies", signal);
 }
@@ -89,8 +107,10 @@ export function getVersion(signal) {
   return getJson("/api/version", signal);
 }
 
-export function getSearchResults(query, signal) {
-  return getJson(`/api/search?${new URLSearchParams({ q: query })}`, signal);
+export function getSearchResults(query, signal, { limit } = {}) {
+  const params = new URLSearchParams({ q: query });
+  if (limit !== undefined) params.set("limit", String(limit));
+  return getJson(`/api/search?${params}`, signal);
 }
 
 export function getGlossary(signal) {
@@ -146,13 +166,16 @@ export function getUnits({ armyId, declaredFactionId, search, skillId, specialis
   if (teamops) params.set("teamops", "1");
   if (reinforcement) params.set("reinforcement", "1");
   if (descending) params.set("order", "desc");
-  if (extended) params.set("extended", "1");
+  if (extended) {
+    params.set("extended", "1");
+    params.set("view", "explorer");
+  }
   return getJson(`/api/units?${params}`, signal);
 }
 
 export function getUnit(
   unitIdentifier,
-  { optionalFilters = {}, armyId = "" } = {},
+  { optionalFilters = {}, armyId = "", includeHistory = true, view = "detail" } = {},
   signal,
 ) {
   const params = new URLSearchParams();
@@ -160,6 +183,8 @@ export function getUnit(
     params.set(key, optionalFilters[key] === false ? "0" : "1");
   }
   if (armyId) params.set("army_id", armyId);
+  if (!includeHistory) params.set("history", "0");
+  if (view !== "detail") params.set("view", view);
   const query = params.toString();
   return getJson(`/api/units/${encodeURIComponent(unitIdentifier)}${query ? `?${query}` : ""}`, signal);
 }

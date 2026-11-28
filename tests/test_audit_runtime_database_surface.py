@@ -141,16 +141,16 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
     report = audit_database(_runtime_database(tmp_path), project_root=ROOT)
 
     assert report["summary"] == {
-        "surfaceCount": 49,
+        "surfaceCount": 53,
         "runtimeTableCount": 83,
-        "runtimeFieldCount": 394,
+        "runtimeFieldCount": 396,
         "tableWithOpenIssueCount": 0,
         "replaceableSourceTableCount": 0,
         "semanticOverlapTableCount": 0,
-        "issue:none:fieldCount": 394,
+        "issue:none:fieldCount": 396,
         "role:canonical_application:fieldCount": 151,
         "role:contextual_application:fieldCount": 206,
-        "role:intentional_source_representation:fieldCount": 37,
+        "role:intentional_source_representation:fieldCount": 39,
     }
     assert report["openIssues"]["replaceableSourceTables"] == []
     assert report["openIssues"]["semanticOverlapTables"] == []
@@ -222,7 +222,9 @@ def test_runtime_surface_audit_covers_current_player_serving_paths(tmp_path: Pat
         ]
         == CONTEXTUAL
     )
-    assert _field(report, "army_lists", "kind")["role"] == SOURCE
+    for name in ("kind", "resume", "reinforcement_id", "id"):
+        assert _field(report, "army_lists", name)["role"] == SOURCE
+        assert _field(report, "army_lists", name)["issue"] == NO_ISSUE
     assert "metadata_factions" not in observed_tables
     assert _field(report, "unit_options", "name")["role"] == SOURCE
     assert _field(report, "unit_options", "name")["issue"] == NO_ISSUE
@@ -253,11 +255,15 @@ def test_runtime_surface_audit_is_deterministic_and_read_only(tmp_path: Path) ->
 
 def test_runtime_method_discovery_matches_current_runtime_helpers() -> None:
     assert discover_runtime_database_methods(ROOT) == {
+        "_official_army_unit_links",
+        "_unit_graph",
         "symbol_publication",
         "army_reference_data",
         "application_catalog_id",
         "application_domain_id",
         "application_slug",
+        "general_profiles",
+        "unit_history",
         "get_catalog_item",
         "get_skill",
         "get_trait",

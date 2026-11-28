@@ -80,6 +80,13 @@ and manual dispatches do not use this shortcut. Required status job names remain
 unchanged; the Source matrix emits reuse acknowledgments rather than rerunning
 builds. No external branch-protection configuration changes are needed.
 
+The commit-to-PR association endpoint is used only to discover PR numbers.
+The collector retrieves each individual PR before verifying merge identity;
+the newer API version can omit the merge SHA. Individual PR metadata uses
+the compatible API version `2022-11-28`; other requests retain
+`2026-03-10`. Incomplete or ambiguous authoritative metadata still fails
+closed and triggers fresh validation.
+
 The release collector does not count those acknowledgments as fresh execution.
 Use the explicit approved candidate SHA for identical-tree release evidence;
 see [the release checklist](releasing.md#reuse-ci-for-identical-merge-trees-v122).
@@ -321,7 +328,7 @@ jobs were skipped. The baseline and release-browser checks calculated only
 the database pair, while the runtime also fingerprints its Weapon-profile
 publication. The failures reproduced locally on Windows at `9e7d9f92` before
 repair. The shared identity repair passed its
-[28-test Windows batch](testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
+[28-test Windows batch](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#v1s-082-runtime-snapshot-identity-repair-vr-0136)
 at `1d1ec4a1aea3e0987e9f54e0ff65780b780da421`. Replacement revision
 `0c5b4dc1a05626d1003f78bcfacf6cd32f922314` passed
 [Source run 42325818212](https://github.com/frankysan/InfinityDB/actions/runs/42325818212),
@@ -345,7 +352,7 @@ and [deployment run 42358423951](https://github.com/frankysan/InfinityDB/actions
 passed, but the Ubuntu/Python 3.14 leg of
 [Source run 42358423894](https://github.com/frankysan/InfinityDB/actions/runs/42358423894)
 reported 15 failures in stale record-evidence fingerprints and test expectations.
-The [117-test focused consumer repair](testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
+The [117-test focused consumer repair](https://github.com/frankysan/InfinityDB/blob/4774abde079a0e91ea87c9ee417c4ca1e2429403/docs/testing.md#known-source-disclosure-acceptance-v1s-083--vr-0137)
 passed on Windows, retaining the evidence guards and previously tested rules
 artifacts. Replacement-SHA hosted Source/deterministic acceptance remains open;
 the earlier focused passes do not certify the full suite or final candidate.
@@ -549,6 +556,14 @@ overlay served by the current application.
 uses the latest completed run for that workflow/commit, and fails if that run is not successful. An
 older successful run therefore cannot hide a later failed rerun for the same candidate.
 It checks actual Source matrix and installed-wheel/Docker smoke job execution.
+The maintained `tests/test_release_ci_evidence.py` verifies the Source and
+cross-browser job matrices against the workflow definitions and checks the
+wheel/Docker build, smoke and merge-reuse steps. The 2026-11-27 focused Windows
+batch (including release-scope and Wiki source tests) passed 126 tests with
+no skips. The Linux POSIX pruning regression passed separately at `e8f7035e`,
+using a simulated Docker CLI to verify stopped-container references and
+nonfatal removal failures without touching real images. Normal exact-SHA
+release acceptance remains separate.
 With `--candidate`, it separately verifies the approved candidate and final
 merge tree; the final release SHA is still the tag target.
 

@@ -16,11 +16,21 @@ def test_checked_in_changelog_parses_current_and_historical_releases() -> None:
     all_releases = load_release_notes()
     releases = tuple(release for release in all_releases if release.released_on is not None)
 
-    assert releases[0].version == "1.2.2"
-    assert releases[0].released_on == date(2026, 11, 26)
+    assert releases[0].version == "1.3.0"
+    assert releases[0].released_on == date(2026, 11, 28)
     assert releases[0].sections[0].heading == "Player summary"
-    assert any("General profiles" in item for item in releases[0].player_summary)
+    assert any(
+        "side-by-side Unit comparison" in item
+        for group in releases[0].sections[0].children for item in group
+    )
     assert [section.heading for section in releases[0].detail_sections] == [
+        "Added", "Changed", "Fixed", "Upgrade notes",
+    ]
+
+    release_122 = next(release for release in releases if release.version == "1.2.2")
+    assert release_122.released_on == date(2026, 11, 26)
+    assert any("General profiles" in item for item in release_122.player_summary)
+    assert [section.heading for section in release_122.detail_sections] == [
         "Added", "Changed", "Fixed",
     ]
 
@@ -243,6 +253,57 @@ def test_release_notes_renderer_escapes_text_and_preserves_supported_inline_mark
     assert '<details class="changes-details">' in rendered
     assert "<strong>Web frontend:</strong> Detailed note." in rendered
     assert 'datetime="2026-10-05">October 5, 2026</time>' in rendered
+
+
+def test_release_notes_support_one_level_of_nested_bullets() -> None:
+    releases = parse_release_notes(
+        "# Changelog\n\n## [Unreleased]\n\n"
+        "### Player summary\n\n"
+        "- New feature.\n"
+        "- **Performance improvements:**\n"
+        "  - Faster search.\n"
+        "  - Faster `catalog` loading.\n"
+        "    Escaped <detail>.\n"
+        "- Fixed a bug.\n\n"
+        "### Changed\n\n"
+        "- **Performance improvements:**\n"
+        "  - **Web backend:** Prebuilt indexes.\n"
+    )
+    summary = releases[0].sections[0]
+    assert summary.items == ("New feature.", "**Performance improvements:**", "Fixed a bug.")
+    assert summary.children == (
+        (), ("Faster search.", "Faster `catalog` loading. Escaped <detail>."), (),
+    )
+    rendered = render_release_notes_html(releases)
+    assert (
+        "<li><strong>Performance improvements:</strong><ul>"
+        "<li>Faster search.</li>"
+        "<li>Faster <code>catalog</code> loading. Escaped &lt;detail&gt;.</li>"
+        "</ul></li><li>Fixed a bug.</li>"
+    ) in rendered
+    assert (
+        "<li><strong>Performance improvements:</strong><ul>"
+        "<li><strong>Web backend:</strong> Prebuilt indexes.</li></ul></li>"
+    ) in rendered
+
+
+@pytest.mark.parametrize("items", [
+    "  - Orphaned child.",
+    "- Parent.\n  - Child.\n    - Unsupported deeper list.",
+])
+def test_release_notes_parser_rejects_unsupported_nested_bullets(items: str) -> None:
+    with pytest.raises(ReleaseNotesError, match="Unsupported changelog structure"):
+        parse_release_notes(
+            f"# Changelog\n\n## [Unreleased]\n\n### Player summary\n\n{items}\n"
+        )
+
+
+def test_release_notes_parser_rejects_duplicate_nested_bullets() -> None:
+    with pytest.raises(ReleaseNotesError, match="contains duplicate items"):
+        parse_release_notes(
+            "# Changelog\n\n## [Unreleased]\n\n### Player summary\n\n"
+            "- Parent.\n  - Same child.\n  - Same child.\n"
+        )
 
 
 def test_release_notes_parser_requires_player_summary_first() -> None:

@@ -1,4 +1,6 @@
-import { THEME_PREFERENCE_KEY, normalizeThemeSelection } from "./theme.js";
+import {
+  PALETTE_PREFERENCE_KEY, THEME_PREFERENCE_KEY, normalizePaletteSelection, normalizeThemeSelection,
+} from "./theme.js";
 
 const REMEMBER_SETTINGS_KEY = "infinity-db-remember-settings";
 const DISTANCE_UNIT_KEY = "infinity-db-distance-unit";
@@ -87,6 +89,14 @@ export function saveThemeSelection(selection) {
   saveSetting(THEME_PREFERENCE_KEY, normalizeThemeSelection(selection));
 }
 
+export function paletteSelection() {
+  return normalizePaletteSelection(savedSetting(PALETTE_PREFERENCE_KEY));
+}
+
+export function savePaletteSelection(palette) {
+  saveSetting(PALETTE_PREFERENCE_KEY, normalizePaletteSelection(palette));
+}
+
 export function distanceUnit() {
   return savedSetting(DISTANCE_UNIT_KEY) === "cm" ? "cm" : "in";
 }
@@ -151,6 +161,7 @@ export function saveFireteamsIncludeWildcards(included) {
 function rememberedSettingValues() {
   const values = [
     [THEME_PREFERENCE_KEY, themeSelection()],
+    [PALETTE_PREFERENCE_KEY, paletteSelection()],
     [DISTANCE_UNIT_KEY, distanceUnit()],
     [DEVELOPER_MODE_KEY, String(developerModeEnabled())],
     [DISABLE_CACHE_KEY, String(disableCacheEnabled())],
@@ -177,6 +188,7 @@ export function forgetRememberedSettings() {
   removeCookie(REMEMBER_SETTINGS_KEY);
   for (const name of [
     THEME_PREFERENCE_KEY,
+    PALETTE_PREFERENCE_KEY,
     DISTANCE_UNIT_KEY,
     DEVELOPER_MODE_KEY,
     DISABLE_CACHE_KEY,

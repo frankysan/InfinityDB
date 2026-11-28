@@ -207,7 +207,10 @@ def test_v122_baseline_changes_only_reviewed_routes() -> None:
         (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.1.json")
         .read_text(encoding="utf-8")
     )
-    current = json.loads(DEFAULT_CHECKOUT_BASELINE.read_text(encoding="utf-8"))
+    current = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.2.json")
+        .read_text(encoding="utf-8")
+    )
     old_rows = {row["path"]: row for row in earlier["probes"]}
     new_rows = {row["path"]: row for row in current["probes"]}
     assert old_rows.keys() == new_rows.keys()
@@ -215,6 +218,52 @@ def test_v122_baseline_changes_only_reviewed_routes() -> None:
         "/api/scenarios/battleground/map.svg?army_points=300&collection=its-18",
         "/api/units?limit=5&extended=1",
         "/api/skills",
+    }
+
+
+def test_v130_unit_detail_preserves_v122_current_semantics() -> None:
+    from tools.runtime_semantic_baseline import _digest, _json
+
+    earlier = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.2.2.json")
+        .read_text(encoding="utf-8")
+    )
+    path = "/api/units/112-emergency-service"
+    pinned = next(row for row in earlier["probes"] if row["path"] == path)
+    app = create_app_from_database_set(ROOT / "data/generated")
+    detail = _json(app, path)
+    assert "historical_contexts" in detail
+    assert all("official_army_links" in army for army in detail["armies"])
+    assert any(army["official_army_links"] for army in detail["armies"])
+    observed = _digest(semantic_payload(detail))
+    detail.pop("historical_contexts")
+    for profile in detail["general_profiles"]:
+        profile.pop("history", None)
+    for army in detail["armies"]:
+        army.pop("history", None)
+        army.pop("official_army_links")
+    assert _digest(semantic_payload(detail)) == pinned["semanticSha256"]
+    current = json.loads(
+        (ROOT / "tests/fixtures/runtime-semantic-baseline-v1.3.0.json")
+        .read_text(encoding="utf-8")
+    )
+    old_rows = {row["path"]: row for row in earlier["probes"]}
+    new_rows = {row["path"]: row for row in current["probes"]}
+    assert old_rows.keys() == new_rows.keys()
+    scenario_path = "/api/scenarios/battleground?army_points=300&collection=its-18"
+    scenario = _json(app, scenario_path)
+    scenario_digest = _digest(semantic_payload(scenario))
+    assert scenario.pop("season_rules")
+    assert _digest(semantic_payload(scenario)) == old_rows[scenario_path]["semanticSha256"]
+    assert observed == new_rows[path]["semanticSha256"]
+    assert scenario_digest == new_rows[scenario_path]["semanticSha256"]
+    assert {key for key in old_rows if old_rows[key] != new_rows[key]} == {
+        path, scenario_path,
+        # Manual acceptance: scenario usage counts, reference-only Equipment
+        # ownership/aliases, and official/community glossary definitions.
+        "/api/skills",
+        "/api/equipment",
+        "/api/glossary",
     }
 
 

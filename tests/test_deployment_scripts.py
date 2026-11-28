@@ -38,8 +38,9 @@ def test_preview_rejects_unavailable_engine_before_staging(
         preview.preview_image(tmp_path, "infinity-db:preview-test")
 
 
+@pytest.mark.parametrize("lazy_indexes", [False, True])
 def test_preview_waits_for_health_and_cleans_only_owned_resources(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, lazy_indexes: bool,
 ) -> None:
     from types import SimpleNamespace
 
@@ -71,8 +72,9 @@ def test_preview_waits_for_health_and_cleans_only_owned_resources(
     monkeypatch.setattr(preview.time, "sleep", lambda _: None)
     monkeypatch.setattr(preview, "capture", lambda *a, **kw: {})
     monkeypatch.setattr(preview, "check", lambda *a: 41)
-    preview.preview_image(tmp_path, "infinity-db:preview-test")
+    preview.preview_image(tmp_path, "infinity-db:preview-test", lazy_indexes=lazy_indexes)
     start = next(c for c in calls if c[:3] == ("docker", "run", "-d"))
+    assert ("INFINITY_DB_PRELOAD_INDEXES=0" in start) == lazy_indexes
     assert "--read-only" in start
     assert "-p" not in start and "--publish" not in start
     assert probes == 3
@@ -106,6 +108,87 @@ def test_preview_capacity_uses_loopback_and_retains_report(
     with pytest.raises(ValueError, match="loopback"):
         preview._measure_capacity("preview-test", tmp_path / "unsafe.json")
     assert len(seen) == 1
+
+
+def test_preview_first_access_reuses_resource_sampler(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tools import preview_runtime_image as preview
+
+    output = tmp_path / "capacity.json"
+    resources = tmp_path / "resources.json"
+    summary = {"memory": {"maxUsedBytes": 123}}
+    monkeypatch.setattr(preview.subprocess, "check_output", lambda *a, **kw: "127.0.0.1:12345")
+    monkeypatch.setattr(preview, "capacity_test", lambda *a, **kw: pytest.fail("Use sampler"))
+
+    def capture(_root, **kwargs):
+        assert kwargs["container_ids"] == ["preview-test"]
+        command = kwargs["command"]
+        assert command[command.index("--first-access-case") + 1] == "unit-detail"
+        assert command[command.index("--steady-seconds") + 1] == "5"
+        assert command[command.index("--output") + 1] == str(output)
+        return {"containers": {"preview-test": summary}}, 0
+
+    monkeypatch.setattr(preview, "capture_resources", capture)
+    preview._measure_capacity(
+        "preview-test", output, case="unit-detail", resources=resources,
+        steady_seconds=5, burst_seconds=2,
+    )
+    assert json.loads(resources.read_text()) == {"containers": {"preview-test": summary}}
+
+
+@pytest.mark.parametrize("fail_measurement", [False, True])
+def test_compose_capacity_uses_owned_stack_and_cleans_up(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fail_measurement: bool,
+) -> None:
+    from unittest.mock import MagicMock
+
+    from tools import preview_runtime_image as preview
+
+    calls = []
+    monkeypatch.setenv("COMPOSE_PROJECT_NAME", "existing-production")
+    monkeypatch.setenv("HTTP_PORT", "80")
+
+    def run(args, **kwargs):
+        calls.append(args)
+        if args[:2] == ["docker", "compose"]:
+            assert args[3].startswith("infinitydb-preview-")
+            env = kwargs["env"]
+            assert "COMPOSE_PROJECT_NAME" not in env
+            assert env["BIND_ADDRESS"] == env["METRICS_BIND_ADDRESS"] == "127.0.0.1"
+            assert env["HTTP_PORT"] == env["METRICS_PORT"] == "0"
+            assert env["IMAGE_TAG"] == env["METRICS_HISTORY_IMAGE_TAG"] == args[3]
+
+    def check_output(args, **kwargs):
+        assert args[2:4] == ["--project-name", calls[0][3]]
+        return args[-1] + "-id\n"
+
+    def measure(container, output, **kwargs):
+        assert container == "caddy-id"
+        assert kwargs["container_port"] == 80
+        assert kwargs["container_ids"] == ["app-id", "caddy-id", "metrics-history-id"]
+        if fail_measurement:
+            raise ValueError("workload failed")
+
+    health = MagicMock()
+    health.__enter__.return_value.status = 200
+    monkeypatch.setattr(preview, "urlopen", lambda *a, **kw: health)
+    monkeypatch.setattr(preview, "_loopback_url", lambda *a: "http://127.0.0.1:12345")
+    monkeypatch.setattr(preview.subprocess, "run", run)
+    monkeypatch.setattr(preview.subprocess, "check_output", check_output)
+    monkeypatch.setattr(preview, "_measure_capacity", measure)
+    args = (tmp_path, tmp_path / "capacity.json", tmp_path / "resources.json")
+    kwargs = {"case": "general", "steady_seconds": 60, "burst_seconds": 10}
+    if fail_measurement:
+        with pytest.raises(ValueError, match="workload failed"):
+            preview._compose_capacity(*args, **kwargs)
+    else:
+        preview._compose_capacity(*args, **kwargs)
+    assert calls[1][-2:] == ["down", "--volumes"]
+    assert calls[2:] == [
+        ["docker", "image", "rm", f"infinity-db:{calls[0][3]}"],
+        ["docker", "image", "rm", f"infinity-db-metrics-history:{calls[0][3]}"],
+    ]
 
 
 def test_compose_supports_explicit_bind_address_and_host_port() -> None:
@@ -450,6 +533,10 @@ def test_local_test_deployment_is_loopback_only_and_isolated() -> None:
     assert 'METRICS_PORT="$metrics_port"' in script
     assert "DOMAIN=localhost" in script
     assert "PRUNE_APP_IMAGES=0" in script
+    assert 'METRICS_HISTORY_IMAGE_TAG="$image_tag"' in script
+    assert 'case "${INFINITYDB_TEST_ENABLE_FEEDBACK:-0}" in' in script
+    assert "export INFINITYDB_FEEDBACK_SMTP_HOST=" in script
+    assert '1) echo "Feedback email delivery explicitly enabled' in script
     assert "sh ./scripts/deploy.sh" in script
     assert "isolated infinitydb-test volume" in script
 
