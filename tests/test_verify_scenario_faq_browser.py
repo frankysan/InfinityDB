@@ -3051,10 +3051,10 @@ def test_sacha_numeric_ava_is_visible_in_its_army_context(
             if army_slug and slug != army_slug:
                 continue
             army = page.locator(".army-profile").filter(
-                has=page.locator("summary").filter(has_text=label),
+                has=page.locator("summary.army-profile-title").filter(has_text=label),
             )
             assert army.count() == 1, (slug, width)
-            summary = army.locator("summary")
+            summary = army.locator(":scope > summary")
             if army_slug:
                 assert army.get_attribute("open") is not None, (slug, width)
             elif army.get_attribute("open") is None:
@@ -3137,14 +3137,14 @@ def test_army_update_native_profiles_costs_and_ava_in_browser(
                     badge["label"] for badge in army.get("availability_badges") or []
                 )
                 section = page.locator(".army-profile").filter(
-                    has=page.locator("summary").filter(
+                    has=page.locator("summary.army-profile-title").filter(
                         has_text=re.compile(f"^{re.escape(expected_heading)}$"),
                     ),
                 )
                 assert section.count() == 1, (slug, army["name"])
                 if section.get_attribute("open") is None:
-                    section.locator("summary").focus()
-                    section.locator("summary").press("Enter")
+                    section.locator(":scope > summary").focus()
+                    section.locator(":scope > summary").press("Enter")
                 assert section.locator(
                     ".profile-details-table tr.profile-summary th",
                 ).all_text_contents() == [profile["name"] for profile in army["profiles"]]

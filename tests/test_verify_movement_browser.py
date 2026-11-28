@@ -111,18 +111,26 @@ def test_suggested_terrain_table_and_gate_label_discovery(chrome: Any, width: in
         viewport = table.locator("..")
         assert viewport.get_attribute("role") == "region"
         assert viewport.get_attribute("tabindex") == "0"
-        if width < 400:
+        page.evaluate("() => document.fonts.ready")
+        geometry = viewport.evaluate(
+            "node => ({clientWidth: node.clientWidth, scrollWidth: node.scrollWidth})"
+        )
+        overflow = geometry["scrollWidth"] > geometry["clientWidth"]
+        if width == 320:
+            assert overflow, geometry
+        if overflow:
             viewport.focus()
+            assert viewport.evaluate("node => document.activeElement === node"), geometry
             viewport.press("ArrowRight")
             page.wait_for_function(
                 "() => document.querySelector('.terrain-examples-reference .table-viewport')"
                 ".scrollLeft > 0"
             )
             viewport.evaluate("node => { node.scrollLeft = node.scrollWidth; }")
-            assert viewport.evaluate(
-                "node => node.querySelector('thead th:last-child').getBoundingClientRect().right"
-                " <= node.getBoundingClientRect().right + 1"
-            )
+        assert viewport.evaluate(
+            "node => node.querySelector('thead th:last-child').getBoundingClientRect().right"
+            " <= node.getBoundingClientRect().right + 1"
+        ), geometry
         card = page.locator("#rule-rule-special-terrain")
         assert "not additional Terrain Types or mandatory scenery" in card.inner_text()
         assert "p. 145" in card.locator(".rules-source-citations").inner_text()

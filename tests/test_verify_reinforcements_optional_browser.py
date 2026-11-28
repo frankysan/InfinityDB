@@ -323,7 +323,7 @@ def test_real_shared_unit_opens_only_the_explicit_army_context(
             page.locator("#unit-content").wait_for(state="visible", timeout=20000)
             expanded = page.locator("details.army-profile[open]")
             assert expanded.count() == 1, (slug, chosen, width)
-            assert target["name"] in expanded.locator("summary").inner_text()
+            assert target["name"] in expanded.locator(":scope > summary").inner_text()
             profile_names = {profile["name"] for profile in target["profiles"]}
             rendered_names = set(
                 expanded.locator(".profile-name-with-division").all_text_contents()

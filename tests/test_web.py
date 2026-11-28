@@ -2673,7 +2673,7 @@ def test_homepage_and_referenced_static_assets_are_served(app: Callable) -> None
     )
     assert_css_rule(
         styles,
-        ".extended-results-control input",
+        ".extended-results-control input, .feedback-page-control input",
         {"width": "16px", "height": "16px", "min-height": "0"},
     )
 
